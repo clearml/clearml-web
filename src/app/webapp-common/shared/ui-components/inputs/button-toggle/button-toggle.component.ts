@@ -16,20 +16,19 @@ export interface Option<D> {
 
 
 @Component({
-  selector: 'sm-button-toggle',
-  templateUrl: './button-toggle.component.html',
-  styleUrls: ['./button-toggle.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatButtonToggleModule,
-    TooltipDirective,
-    ReactiveFormsModule,
-    AppendComponentOnTopElementDirective,
-    MatIcon
-  ]
+    selector: 'sm-button-toggle',
+    templateUrl: './button-toggle.component.html',
+    styleUrls: ['./button-toggle.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatButtonToggleModule,
+        TooltipDirective,
+        ReactiveFormsModule,
+        AppendComponentOnTopElementDirective,
+        MatIcon
+    ]
 })
-export class ButtonToggleComponent<D extends any> {
+export class ButtonToggleComponent<D> {
 
   public rippleComponent = RippleButtonComponent;
   public formControl = new FormControl();
@@ -43,7 +42,7 @@ export class ButtonToggleComponent<D extends any> {
 
   constructor() {
     effect(() => {
-      this.formControl.setValue(this.value());
+      this.formControl.patchValue(this.value(), {emitEvent: false});
     });
   }
 }

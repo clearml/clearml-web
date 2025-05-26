@@ -22,18 +22,17 @@ import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-profile-preferences',
-  templateUrl: './profile-preferences.component.html',
-  styleUrls: ['./profile-preferences.component.scss'],
-  standalone: true,
-  imports: [
-    MatSlideToggle,
-    TooltipDirective,
-    UsageStatsComponent,
-    MatButton,
-    MatIcon
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-profile-preferences',
+    templateUrl: './profile-preferences.component.html',
+    styleUrls: ['./profile-preferences.component.scss'],
+    imports: [
+        MatSlideToggle,
+        TooltipDirective,
+        UsageStatsComponent,
+        MatButton,
+        MatIcon
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfilePreferencesComponent {
 

@@ -15,6 +15,7 @@
       (cancelClicked)="cancelModelChange()"
       (activateEditClicked)="activateEditChanged()">
       <sm-experiment-models-form-view
+        [style.margin-right.px]="editable ? 90 : null"
         #experimentModelForm
         [editable]="editable && modelSection.inEditMode()"
         [model]="model"

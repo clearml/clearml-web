@@ -9,9 +9,10 @@ import {Observable, Subscription} from 'rxjs';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 @Component({
-  selector   : 'sm-queue-create-dialog',
-  templateUrl: './queue-create-dialog.component.html',
-  styleUrls  : ['./queue-create-dialog.component.scss']
+    selector: 'sm-queue-create-dialog',
+    templateUrl: './queue-create-dialog.component.html',
+    styleUrls: ['./queue-create-dialog.component.scss'],
+    standalone: false
 })
 export class QueueCreateDialogComponent implements OnInit, OnDestroy {
   public queues$: Observable<any>;

@@ -1,4 +1,4 @@
-<div class="h-100">
+<div>
   <mat-tab-group
     [selectedIndex]="activeIndex()"
     (selectedTabChange)="activeLinkChanged.emit(activeLinksList[$event.index].name)"
@@ -11,6 +11,9 @@
     }
   </mat-tab-group>
   <div class="page-container">
+    @if (getResults()?.length === 0) {
+      <span class="no-data">No data to show</span>
+    } @else if(getResults()){
     <sm-virtual-grid
       [cardTemplate]="
         activeLink() === searchPages.projects ? ProjectTemplate :
@@ -27,6 +30,7 @@
       (loadMoreClicked)="loadMoreClicked.emit()"
     >
     </sm-virtual-grid>
+    }
   </div>
 
   <ng-template #ProjectTemplate let-project>

@@ -17,16 +17,15 @@ export interface DonutChartData {
 }
 
 @Component({
-  selector: 'sm-donut',
-  templateUrl: './donut.component.html',
-  styleUrls: ['./donut.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    BaseChartDirective,
-    ChooseColorModule,
-    PushPipe
-  ],
+    selector: 'sm-donut',
+    templateUrl: './donut.component.html',
+    styleUrls: ['./donut.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        BaseChartDirective,
+        ChooseColorModule,
+        PushPipe
+    ]
 })
 export class DonutComponent {
   public doughnutChartType: ChartType = 'doughnut';

@@ -1,9 +1,9 @@
 <sm-menu iconClass="al-ico-bars-menu">
-  <sm-menu-item itemLabel="Edit"
+  <sm-menu-item itemLabel="Project Settings"
                 data-id="Edit"
-                iconClass="al-ico-edit"
+                iconClass="al-ico-settings"
                 [disabled]="!project().company?.id"
-                (itemClicked)="projectEditClicked.emit(project())"></sm-menu-item>
+                (itemClicked)="projectSettingsClicked.emit(project())"></sm-menu-item>
   <sm-menu-item itemLabel="New Project"
                 data-id="New Project"
                 iconClass="al-ico-add"

@@ -30,7 +30,10 @@ export const routes: Routes = [
         path: ':modelId', component: ModelInfoComponent,
         children: [
           {path: '', redirectTo: 'general', pathMatch: 'full', data: {minimized: true}},
-          {path: 'general', component: ModelInfoGeneralComponent, data: {minimized: true}},
+          {path: 'general',
+            component: ModelInfoGeneralComponent,
+            canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)],
+            data: {minimized: true}},
           {
             path: 'network',
             component: ModelInfoNetworkComponent,

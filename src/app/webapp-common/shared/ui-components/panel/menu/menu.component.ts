@@ -3,7 +3,8 @@ import {
   Component,
   ElementRef,
   HostListener,
-  Renderer2, input, output, viewChild, effect, model, inject } from '@angular/core';
+  Renderer2, input, output, viewChild, effect, model, inject
+} from '@angular/core';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatInputModule} from '@angular/material/input';
@@ -16,29 +17,27 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatMenuModule,
-    TooltipDirective,
-    MatInputModule,
-    FormsModule,
-    MatListModule,
-    ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective,
-    MatIcon,
-    MatIconButton,
-    MatButton
-  ]
+    selector: 'sm-menu',
+    templateUrl: './menu.component.html',
+    styleUrls: ['./menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatMenuModule,
+        TooltipDirective,
+        MatInputModule,
+        FormsModule,
+        MatListModule,
+        ClickStopPropagationDirective,
+        ShowTooltipIfEllipsisDirective,
+        MatIcon,
+        MatIconButton,
+        MatButton
+    ]
 })
 export class MenuComponent {
   private renderer = inject(Renderer2);
   private elRef = inject(ElementRef);
   protected eRef = inject(ElementRef);
-  private isMenuOpen = false;
 
   searchPlaceholder = input<string>('');
   header = input<string>();
@@ -63,8 +62,7 @@ export class MenuComponent {
 
   @HostListener('document:click', ['$event'])
   clickOut(event: MouseEvent) {
-    if (this.isMenuOpen && !this.showOverlay() && !this.eRef.nativeElement.contains(event.target)) {
-      this.isMenuOpen = false;
+    if (this.trigger()?.menuOpen && !this.showOverlay() && !this.eRef.nativeElement.contains(event.target)) {
       this.trigger().closeMenu();
     }
   }
@@ -78,13 +76,12 @@ export class MenuComponent {
 
     effect(() => {
       if (this.openOnInit() && this.trigger()) {
-        this.openMenu();
+        window.setTimeout(() => this.openMenu(), 50);
       }
     });
   }
 
   public openMenu() {
-    this.isMenuOpen = true;
     this.trigger().openMenu();
   }
 

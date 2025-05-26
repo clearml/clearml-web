@@ -35,7 +35,10 @@ import {MatTab, MatTabGroup} from '@angular/material/tabs';
     MatTabGroup,
     MatTab,
   ],
-  declarations:[
+  exports: [
+    DashboardSearchComponent
+  ],
+  declarations: [
     SearchResultsPageComponent, DashboardSearchComponent
   ]
 })

@@ -2,9 +2,10 @@ import {Component, input, output, computed} from '@angular/core';
 import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
-  selector: 'sm-projects-header',
-  templateUrl: './projects-header.component.html',
-  styleUrls: ['./projects-header.component.scss']
+    selector: 'sm-projects-header',
+    templateUrl: './projects-header.component.html',
+    styleUrls: ['./projects-header.component.scss'],
+    standalone: false
 })
 export class ProjectsHeaderComponent {
   searchQuery = input<string>();

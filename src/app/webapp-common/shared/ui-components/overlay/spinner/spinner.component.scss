@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 .loader-container {
   position: fixed;
@@ -7,6 +7,6 @@
   align-items: center;
   z-index: 9999999;
   top: 50%;
-  left: calc(50% + #{$side-bar-close-width * 0.5});
+  left: calc(50% + #{variables.$side-bar-close-width * 0.5});
   transform: translate(-50%);
 }

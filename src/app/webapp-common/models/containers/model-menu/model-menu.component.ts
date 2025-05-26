@@ -37,9 +37,10 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 
 @Component({
-  selector: 'sm-model-menu',
-  templateUrl: './model-menu.component.html',
-  styleUrls: ['./model-menu.component.scss']
+    selector: 'sm-model-menu',
+    templateUrl: './model-menu.component.html',
+    styleUrls: ['./model-menu.component.scss'],
+    standalone: false
 })
 export class ModelMenuComponent extends BaseContextMenuComponent {
   protected dialog = inject(MatDialog);

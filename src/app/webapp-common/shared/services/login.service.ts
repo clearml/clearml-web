@@ -13,7 +13,6 @@ import {clone} from 'lodash-es';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {ConfigurationService} from './configuration.service';
 import {USER_PREFERENCES_KEY, UserPreferences} from '@common/user-preferences';
-import {setUserLoginState} from '@common/login/login.actions';
 import {fetchCurrentUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
@@ -21,14 +20,16 @@ import {Router} from '@angular/router';
 import {LocationStrategy} from '@angular/common';
 import {selectDarkTheme} from '@common/core/reducers/view.reducer';
 import {environment} from '../../../../environments/environment';
+import {TIME_IN_MILLI} from '@common/shared/utils/time-util';
 
-export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error';
+export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error' | 'tenant';
 
 export const loginModes = {
   error: 'error' as LoginMode,
   simple: 'simple' as LoginMode,
   password: 'password' as LoginMode,
-  ssoOnly: 'ssoOnly' as LoginMode
+  ssoOnly: 'ssoOnly' as LoginMode,
+  tenantInput: 'tenant' as LoginMode
 };
 
 @Injectable({
@@ -44,14 +45,14 @@ export class BaseLoginService {
   protected userPreferences = inject(UserPreferences);
   protected locationStrategy = inject(LocationStrategy);
 
-  onlyPasswordLogin: boolean;
   loginMode = signal<LoginMode>(null);
   protected basePath = HTTP.API_BASE_URL;
   private userKey: string;
   private userSecret: string;
   private companyID: string;
+  private _loginModeTTL = 0;
   private _loginMode: LoginMode;
-  private _guestUser: { enabled: boolean; username: string; password: string };
+  private _guestUser: LoginModeResponse['basic']['guest'];
   protected environment = this.configService.configuration;
   protected darkTheme = this.store.selectSignal(selectDarkTheme);
   private state = computed(() => ({
@@ -104,7 +105,7 @@ export class BaseLoginService {
   }
 
   getLoginMode(force = false): Observable<LoginMode> {
-    if (this._loginMode !== undefined && !force) {
+    if (this._loginMode !== undefined && !force && this._loginModeTTL > new Date().getTime()) {
       return of(this._loginMode);
     } else {
       return this.getLoginSupportedModes()
@@ -114,20 +115,32 @@ export class BaseLoginService {
           filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
             this._authenticated = res.authenticated;
-            this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : this.onlyPasswordLogin ? loginModes.error : loginModes.simple;
             this._guestUser = res.basic.guest;
+            this._loginMode = this.calcLoginMode(res);
+            this._loginModeTTL = new Date().getTime() + TIME_IN_MILLI.ONE_MIN * 10;
           }),
           map(() => {
             this.loginMode.set(this._loginMode);
             return this._loginMode;
           }),
           catchError(() => {
-            this.loginMode.set(this.configService.configuration().onlyPasswordLogin ? loginModes.error : loginModes.simple);
-            return EMPTY;
+            const fallback = this.configService.configuration().loginFallback;
+            this._loginMode = fallback === 'error' ? loginModes.error : loginModes.simple;
+            this.loginMode.set(this._loginMode);
+            return of(this._loginMode);
           }),
 
         );
     }
+  }
+
+  protected calcLoginMode(res: LoginModeResponse) {
+    const fallback = this.configService.configuration().loginFallback;
+    return  res.basic.enabled ?
+      loginModes.password :
+        fallback === 'error' ?
+          loginModes.error :
+          loginModes.simple;
   }
 
   public getLoginSupportedModes(): Observable<LoginModeResponse> {
@@ -135,9 +148,9 @@ export class BaseLoginService {
   }
 
   getUsers() {
-    return this.httpClient.post<UsersGetAllResponse>(`${this.basePath}/users.get_all`, null, {headers: this.getHeaders()})
+    return this.httpClient.post<{data: UsersGetAllResponse}>(`${this.basePath}/users.get_all`, null, {headers: this.getHeaders()})
       .pipe(
-        map((x: any) => x.data.users)
+        map(x => x.data.users)
       );
   }
 
@@ -167,8 +180,8 @@ export class BaseLoginService {
       family_name: name.split(' ')[1] ? name.split(' ')[1] : name.split(' ')[0]
 
     };
-    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.create_user`, data, {headers})
-      .pipe(map((x: any) => x.data.id));
+    return this.httpClient.post<{data: AuthCreateUserResponse}>(`${this.basePath}/auth.create_user`, data, {headers})
+      .pipe(map(x => x.data.id));
   }
 
   autoLogin(name: string) {
@@ -245,12 +258,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     this._loginMode = undefined;
   }
 
-  loginFlow(resolve, skipInvite = false) {
-    if (location.search.includes('invite') && !skipInvite) {
-      const currentURL = new URL(location.href);
-      const inviteId = currentURL.searchParams.get('invite');
-      this.store.dispatch(setUserLoginState({user: null, inviteId, crmForm: null}));
-    }
+  loginFlow(resolve: (unknow) => void) {
     const redirectToLogin = (status) => {
       if (status === 401) {
         let pathname = window.location.pathname;
@@ -315,7 +323,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getInviteInfo(inviteId: string): Observable<any> {
+  getInviteInfo(inviteId: string): Observable<unknown> {
     return EMPTY;
   }
 }

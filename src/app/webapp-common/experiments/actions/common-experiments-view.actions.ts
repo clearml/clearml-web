@@ -198,7 +198,7 @@ export const resetExperiments = createAction(
   props<{skipResetMetric?: boolean}>());
 export const getCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [get custom metrics]',
-  props<{hideLoader?: boolean}>()
+  props<{hideLoader?: boolean; projectId?: string}>()
 );
 export const getCustomMetricsPerType = createAction(
   EXPERIMENTS_PREFIX + ' [get custom metrics per type]',

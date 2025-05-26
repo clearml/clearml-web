@@ -5,9 +5,10 @@ import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/exper
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
-  selector: 'sm-open-dataset-version-details',
-  templateUrl: './open-dataset-version-details.component.html',
-  styleUrls: ['./open-dataset-version-details.component.scss', '../../pipelines-controller/pipeline-details/pipeline-info.component.scss']
+    selector: 'sm-open-dataset-version-details',
+    templateUrl: './open-dataset-version-details.component.html',
+    styleUrls: ['./open-dataset-version-details.component.scss', '../../pipelines-controller/pipeline-details/pipeline-info.component.scss'],
+    standalone: false
 })
 export class OpenDatasetVersionDetailsComponent extends PipelineInfoComponent {
   public override fileSizeConfigStorage = fileSizeConfigStorage;

@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import { AsyncPipe } from '@angular/common';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {
@@ -28,20 +27,18 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-nested-open-datasets-page',
-  templateUrl: './nested-open-datasets-page.component.html',
-  styleUrls: ['../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
-  imports: [
-    ProjectsSharedModule,
-    AsyncPipe,
-    CircleCounterComponent,
-    ClickStopPropagationDirective,
-    TagListComponent,
-    PushPipe,
-    MatIcon,
-    MatButton
-  ],
-  standalone: true
+    selector: 'sm-nested-open-datasets-page',
+    templateUrl: './nested-open-datasets-page.component.html',
+    styleUrls: ['../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
+    imports: [
+        ProjectsSharedModule,
+        CircleCounterComponent,
+        ClickStopPropagationDirective,
+        TagListComponent,
+        PushPipe,
+        MatIcon,
+        MatButton
+    ]
 })
 export class NestedOpenDatasetsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   entityTypeEnum = ProjectTypeEnum;

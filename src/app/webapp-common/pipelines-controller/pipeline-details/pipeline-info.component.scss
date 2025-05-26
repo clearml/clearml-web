@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 :host {
   width: 260px;
@@ -39,7 +39,7 @@
 
     .header {
       color: var(--color-primary);
-      font-size: $font-size-small;
+      font-size: variables.$font-size-small;
       font-weight: 500;
       display: flex;
       justify-content: space-between;
@@ -110,7 +110,7 @@
   .empty-msg {
     text-align: center;
     padding-top: 12px;
-    font-size: $font-size-small;
+    font-size: variables.$font-size-small;
   }
 
   footer {

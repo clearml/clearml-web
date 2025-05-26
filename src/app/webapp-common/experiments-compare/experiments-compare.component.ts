@@ -22,7 +22,6 @@ import {
   SelectExperimentsForCompareComponent
 } from '@common/experiments-compare/containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {MatDialog} from '@angular/material/dialog';
-import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {
   EXPERIMENTS_COMPARE_ROUTES,
   MODELS_COMPARE_ROUTES
@@ -37,10 +36,11 @@ const toCompareEntityType = {
 };
 
 @Component({
-  selector: 'sm-experiments-compare',
-  templateUrl: './experiments-compare.component.html',
-  styleUrls: ['./experiments-compare.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiments-compare',
+    templateUrl: './experiments-compare.component.html',
+    styleUrls: ['./experiments-compare.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   protected readonly trackById = trackById;
@@ -69,7 +69,6 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
               private colorHash: ColorHashService,
               private dialog: MatDialog,
               private cdr: ChangeDetectorRef,
-              private contextMenuService: HeaderMenuService
   ) {
     // updating URL with store query params
     this.selectedProject$ = this.store.select(selectSelectedProject);
@@ -87,7 +86,6 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     this.store.dispatch(resetSelectCompareHeader({fullReset: true}));
     this.store.dispatch(setGlobalLegendData({data: null}));
-    this.store.dispatch(headerActions.reset());
     this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
 
@@ -169,7 +167,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
               ...(selectedProject && {
                 selectedProjectBreadcrumb: {
                   name: selectedProject?.id === '*' ? `All ${this.titleCasePipe.transform(this.entityType)}s` : selectedProject?.basename,
-                  url: `${projectTypeBasePath[projectType]}/${selectedProject?.id}/${this.entityType === 'model' ? 'model' : 'experiment'}s`
+                  url: `${projectTypeBasePath[projectType]}/${selectedProject?.id}/${this.entityType === 'model' ? 'model' : 'task'}s`
                 }
               })
             }

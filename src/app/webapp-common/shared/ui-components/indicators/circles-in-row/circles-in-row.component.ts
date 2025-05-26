@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, Input} from '@angular/core';
 import {SlicePipe} from '@angular/common';
 import {slice} from 'lodash-es';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -16,7 +16,6 @@ export interface CirclesInRowInterface {
   templateUrl: './circles-in-row.component.html',
   styleUrls: ['./circles-in-row.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     TooltipDirective,
     InitialsPipe,
@@ -25,15 +24,19 @@ export interface CirclesInRowInterface {
 })
 export class CirclesInRowComponent {
 
-  @Input() data: CirclesInRowInterface[] = [];
-  @Input() stagger: string | number;
-  @Input() isStagger: boolean;
+  data = input<CirclesInRowInterface[]>([]);
+  stagger = input<string | number>();
+  isStagger = input<boolean>();
 
   @Input() set staggerAmount(staggerAmount: number) {
     this._staggerAmount = new Array(staggerAmount).map((x, index) => index);
   }
 
-  @Input() limit;
+
+  limit = input<number>();
+  restTooltip= computed(() => {
+    return this.data().slice(this.limit()).map((x) => x.name).join(', ');
+  });
 
   get staggerArray() {
     return this._staggerAmount;

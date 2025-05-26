@@ -2,10 +2,11 @@ import {ChangeDetectionStrategy, Component, input, output, computed} from '@angu
 import {Params} from '@angular/router';
 
 @Component({
-  selector   : 'sm-experiment-hyper-params-navbar',
-  templateUrl: './experiment-hyper-params-navbar.component.html',
-  styleUrls  : ['./experiment-hyper-params-navbar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiment-hyper-params-navbar',
+    templateUrl: './experiment-hyper-params-navbar.component.html',
+    styleUrls: ['./experiment-hyper-params-navbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentHyperParamsNavbarComponent {
   sectionReplaceMap= {

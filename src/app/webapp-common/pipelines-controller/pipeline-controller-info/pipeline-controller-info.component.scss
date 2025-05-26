@@ -4,7 +4,7 @@ $log-header-height: 48px;
 :host {
   .stage-title {
     position: absolute;
-    z-index: 10;
+    z-index: 3;
     padding: 6px 24px 6px 0;
     gap: 12px;
     background: var(--color-primary-container);
@@ -91,6 +91,11 @@ $log-header-height: 48px;
 
       &.toggle {
         grid-template-columns: 1fr auto 1fr;
+      }
+
+      .t-btns {
+        border-radius: 36px;
+        background-color: var(--color-surface-container-low);
       }
     }
 
@@ -205,14 +210,10 @@ sm-pipeline-controller-step {
   left: 50%;
   transform: translateY(-50%) translateX(-50%);
   text-align: center;
+  color: var(--color-empty-state);
 
-  h3 {
+  h4 {
     font-weight: 500;
-    font-size: 14px;
-  }
-
-  .icon {
-    width: 100px;
-    height: 100px;
+    font-size: 16px;
   }
 }

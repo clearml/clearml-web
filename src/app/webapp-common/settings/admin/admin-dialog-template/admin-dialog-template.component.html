@@ -18,7 +18,7 @@
   </div>
   <div [class.mt-4]="serviceUserMode">
     @if (!serviceUserMode) {
-      <mat-tab-group [(selectedIndex)]="selectedIndex" >
+      <mat-tab-group [(selectedIndex)]="selectedIndex" mat-stretch-tabs="false" mat-align-tabs="center">
         <mat-tab label="LOCAL PYTHON" ></mat-tab>
         <mat-tab label="JUPYTER NOTEBOOK" ></mat-tab>
       </mat-tab-group>
@@ -58,10 +58,10 @@
               <span class="variable">credentials</span> &#123;
             </div>
             <div class="ms-4">
-              <span class="string">"access_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.access_key}}"</span>
+              <span class="variable">"access_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.access_key}}"</span>
             </div>
               <div class="ms-4">
-              <span class="string">"secret_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.secret_key}}"</span>
+              <span class="variable">"secret_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.secret_key}}"</span>
             </div>
             <div class="ms-2">
               &#125;
@@ -107,7 +107,7 @@
   }
 </div>
 <ng-template #jupyter>
-  <div class="instructions mt-2 mb-2">Add the below to your notebook to configure ClearML</div>
+  <div class="instructions">Add the below to your notebook to configure ClearML</div>
   <div class="code">
     <div class="content" #jupyterCodeEl>{{jupyterCode}}</div>
     <sm-copy-clipboard

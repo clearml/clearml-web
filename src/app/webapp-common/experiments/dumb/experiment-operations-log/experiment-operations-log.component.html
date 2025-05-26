@@ -4,21 +4,37 @@
   [resizableColumns]="false"
   [scrollable]="true"
   [simple]="true"
-  [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: lines(), itemSize: 32}"
+  [virtualScrollOptions]="{ trackBy: trackById, appendOnly: true, delay: 0, orientation: 'vertical', items: lines(), itemSize: 36}"
   [virtualScroll]="true"
   [rowHeight]="36"
   [selectionMode]="null"
   [columnResizeMode]="'fit'"
+  [expandableRows]="true"
+  [expandedRowKeys]="expandedRowKeys"
   >
-  <ng-template let-col let-row="rowData" pTemplate="body">
+  <ng-template let-col let-row="rowData" let-expanded="expanded" pTemplate="body">
     @switch (col.id) {
+      @case ('icon') {
+        @if (row.summary) {
+          <div>
+            <i class="d-flex al-icon al-ico-next sm-md"
+               [class.expanded]="expanded" data-id="expandButton">
+            </i>
+          </div>
+        }
+      }
       @case ('created') {
         <div>
           {{ row?.[col.id] | date:'MMM d yyyy H:mm' }}
         </div>
       }
       @case ('operation') {
-        <div>{{OPERATIONS[row.operation]?? (row.operation | titlecase)}}</div>
+        <div>
+          {{OPERATIONS[row.operation]?? (row.operation | titlecase)}}
+          @if (row.summary && !expanded) {
+            ({{row.summary.length}})
+          }
+        </div>
       }
       @case ('user') {
         <div>{{ row.user?.name }}</div>
@@ -26,6 +42,32 @@
       @default {
         <span class="ellipsis" [matTooltipShowDelay]="500" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</span>
       }
+    }
+  </ng-template>
+  <ng-template pTemplate="rowexpansion" let-groupedEvents>
+    @for (event of groupedEvents.summary?.slice(1); track event.id) {
+      <tr class="expanded-row">
+        @for (col of columns | filterOut: 'hidden': true ; track col.id) {
+        <td class="expanded-cell" [class.frozen-column]="col.frozen">
+          @switch (col.id) {
+            @case ('created') {
+              <div>
+                {{ event?.[col.id] | date:'MMM d yyyy H:mm' }}
+              </div>
+            }
+            @case ('operation') {
+              <div>{{OPERATIONS[event.operation]?? (event.operation | titlecase)}}</div>
+            }
+            @case ('user') {
+              <div>{{ event.user?.name }}</div>
+            }
+            @default {
+              <span class="ellipsis" [matTooltipShowDelay]="500" [smTooltip]="event?.[col.id]" smShowTooltipIfEllipsis>{{ event?.[col.id] }}</span>
+            }
+          }
+        </td>
+        }
+      </tr>
     }
   </ng-template>
 </sm-table>

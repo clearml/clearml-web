@@ -61,12 +61,13 @@ export class AppEffects {
       {headers: this.getHeaders(action.company)}
     )),
     mergeMap((res) => [
-      setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse}),
       setTaskData({
         sourceProject: (res.data.tasks[0]?.project as any).id,
         sourceTasks: res.data.tasks.map(t => t.id),
         appId: (res.data.tasks[0] as any)?.application?.app_id?.id
-      })]),
+      }),
+      setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse})
+    ]),
     catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
   ));
 

@@ -1,9 +1,8 @@
-@import "mixins/link";
-@import "../../../layout/layout";
+@use "../../../layout/layout";
 
 :host{
   display: block;
-  height: $graph-height;
+  height: layout.$graph-height;
   background-color: var(--color-surface-container-low);
 
   .header {
@@ -31,6 +30,7 @@
   }
 
   .overview-placeholder {
+    color: var(--color-empty-state);
     .no-data-title {
       margin: 24px 0;
     }

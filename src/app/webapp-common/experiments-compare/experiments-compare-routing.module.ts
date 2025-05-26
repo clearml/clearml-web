@@ -10,12 +10,14 @@ import {ExperimentCompareHyperParamsGraphComponent} from './containers/experimen
 import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
 import {compareNavigationGuard} from '@common/experiments-compare/compare-navigation.guard';
+import {resetContextMenuGuard} from '@common/shared/guards/resetContextMenuGuard.guard';
 
 
 export const routes: Routes = [
   {
     path: '',
     component: ExperimentsCompareComponent,
+    canDeactivate: [resetContextMenuGuard],
     data: {search: false},
     children: [
       {path: '', redirectTo: 'details', pathMatch: 'full'},

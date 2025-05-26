@@ -10,9 +10,10 @@ import {updateModelDetails} from '../../actions/models-info.actions';
 
 
 @Component({
-  selector: 'sm-model-info-general',
-  templateUrl: './model-info-general.component.html',
-  styleUrls: ['./model-info-general.component.scss']
+    selector: 'sm-model-info-general',
+    templateUrl: './model-info-general.component.html',
+    styleUrls: ['./model-info-general.component.scss'],
+    standalone: false
 })
 export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
 

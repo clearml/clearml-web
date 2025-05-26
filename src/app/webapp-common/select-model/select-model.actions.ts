@@ -28,7 +28,7 @@ export const setTableSort = createAction(`${SELECT_MODEL_PREFIX} 'set table sort
 
 export const showArchive = createAction(`${SELECT_MODEL_PREFIX} show archive`, props<{showArchive: boolean}>());
 export const clearTableFilter = createAction(`${SELECT_MODEL_PREFIX} table filter clear`);
-export const tableFilterChanged = createAction(`${SELECT_MODEL_PREFIX} table filter changed`, props<{ col: ISmCol; value: any }>());
+export const tableFilterChanged = createAction(`${SELECT_MODEL_PREFIX} table filter changed`, props<{ col: ISmCol; value: any; andFilter?: boolean}>());
 export const globalFilterChanged = createAction(`${SELECT_MODEL_PREFIX} global filter changed`, props<{ filter: string }>());
 
 export const setCurrentScrollId = createAction(SELECT_MODEL_PREFIX + 'set current scrollId', props<{ scrollId: string }>());

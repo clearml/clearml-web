@@ -1,10 +1,9 @@
-@import "variables";
-
 :host {
   display: flex;
   position: relative;
   flex-direction: column;
   height: 100%;
+  background-color: var(--row-default-color);
 
   .worker-info-container {
     display: grid;
@@ -20,22 +19,22 @@
 
   ::ng-deep .table-row {
     height: 40px;
-    border-bottom: 1px solid var(--color-outline-variant);
     padding: 0 !important;
     display: flex;
     &:last-of-type {
-      border-bottom-color: var(--color-outline-variant) !important
-    };
+      border-bottom-color: var(--color-surface-container-high) !important;
+    }
   }
 
   ::ng-deep {
-    .headers {
-      height: 39px;
-      align-items: center;
-      line-height: normal !important;
-      border-bottom: 1px solid var(--color-outline-variant) !important;
+    .mat-mdc-tab-header {
+      background-color: var(--row-header-color);
+      border-bottom: 1px solid var(--row-border-color);
     }
-  }
+    .mat-mdc-tab {
+      --mdc-secondary-navigation-tab-container-height: 39px;
+    }
+  } 
 
   sm-simple-table-2 ::ng-deep .headers, .body {
     width: 100%;
@@ -49,7 +48,7 @@
   .close {
     position: absolute;
     right: 12px;
-    top: 6px;
+    top: 8px;
     z-index: 5;
   }
 

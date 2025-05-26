@@ -14,7 +14,7 @@ import {SelectedModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS} from '../models/models.consts';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
-import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/models';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {isEqual, unionBy} from 'lodash-es';
@@ -32,10 +32,11 @@ export interface SelectModelData {
 
 
 @Component({
-  selector: 'sm-select-model',
-  templateUrl: './select-model.component.html',
-  styleUrls: ['./select-model.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-select-model',
+    templateUrl: './select-model.component.html',
+    styleUrls: ['./select-model.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SelectModelComponent implements OnInit, OnDestroy {
   private store = inject(Store);
@@ -76,7 +77,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.select(selectSelectedProject)
       .pipe(
         takeUntilDestroyed(),
-        debounceTime(100)
+        filter(selectedProject => !!selectedProject?.id)
       )
       .subscribe(selectedProject => {
         this.selectedProject = selectedProject;
@@ -141,8 +142,8 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(actions.tableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
 
-  filterChanged(filter: { col: ISmCol; value: string }) {
-    this.store.dispatch(actions.tableFilterChanged({col: filter.col, value: filter.value}));
+  filterChanged(filter: { col: ISmCol; value: string; andFilter?: boolean}) {
+    this.store.dispatch(actions.tableFilterChanged({col: filter.col, value: filter.value, andFilter: filter.andFilter}));
   }
 
   onSearchValueChanged(value: string) {

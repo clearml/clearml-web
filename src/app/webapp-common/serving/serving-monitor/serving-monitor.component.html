@@ -4,22 +4,19 @@
       <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
     </button>
     <div class="list-container">
-      <sm-selectable-filter-list
-        checkAllIcon="al-ico-show"
-        placeholder="Find plots"
+      <sm-selectable-grouped-filter-list
         [list]="chartsList"
         [checkedList]="selectedCharts()"
         [searchTerm]="searchTerm()"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="selectedMetricListChanged($event)"
         (searchTermChanged)="searchTermChanged($event)"
-      >
-      </sm-selectable-filter-list>
+      ></sm-selectable-grouped-filter-list>
     </div>
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
     <div class="header">
-      <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs">
+      <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs" data-id="eyeIcon">
         <mat-icon fontSet="al" fontIcon="al-ico-eye-outline"></mat-icon>
       </button>
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="time-selector">
@@ -34,15 +31,15 @@
     </div>
     <div #charts class="charts-container">
       @for (params of chartParamOptions; track params.label) {
-        @if (!hiddenCharts().includes(params.label)) {
+<!--        @if (!hiddenCharts().includes(params.label)) {  CHANE TO HIDDEN TO PRESERVE LEGEND (CHART) STATE-->
           @defer (on viewport) {
-            <sm-serving-stats class="overflow-hidden" [class]="params.label"
+            <sm-serving-stats class="overflow-hidden" [class]="params.label" [class.d-none]="hiddenCharts().includes(params.label)"
                               [metricType]="params" [currentTimeFrame]="currentTimeFrame()"
             ></sm-serving-stats>
           } @placeholder {
             <div style="height: 364px; width: 100%" class="chart-placeholder" [class]="params.label" ></div>
           }
-        }
+<!--        }-->
       }
     </div>
   </mat-drawer-content>

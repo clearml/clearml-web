@@ -2,9 +2,8 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable, of} from 'rxjs';
-import {SortMeta} from 'primeng/api';
 import {ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
-import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
+import {selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {distinctUntilChanged, filter, skip} from 'rxjs/operators';
@@ -22,9 +21,10 @@ import {headerActions} from '@common/core/actions/router.actions';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 
 @Component({
-  selector: 'sm-serving-loading',
-  templateUrl: './serving.component.html',
-  styleUrl: './serving.component.scss'
+    selector: 'sm-serving-loading',
+    templateUrl: './serving.component.html',
+    styleUrl: './serving.component.scss',
+    standalone: false
 })
 export class ServingLoadingComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
   public readonly originalTableColumns = servingLoadingTableCols;
@@ -32,60 +32,47 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   protected override entityType = EntityTypeEnum.endpointsContainer;
   protected override inEditMode$: Observable<boolean> = of(false);
   public override showAllSelectedIsActive$: Observable<boolean> = of(false);
-  public endpoints$: Observable<EndpointStats[]>;
-  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
-  public selectedEndpoints$: Observable<EndpointStats[]>;
-  public selectedEndpoint$: Observable<EndpointStats>;
-  public searchValue$: Observable<SearchState['searchQuery']>;
-  public tableFilters$: Observable<Record<string, FilterMetadata>>;
-  public tableColsOrder$: Observable<string[]>;
   public tags$: Observable<string[]>;
-  public tableMode$: Observable<'table' | 'info'>;
   public systemTags$: Observable<string[]>;
-  public tableCols$: Observable<ISmCol[]>;
-  public filteredTableCols$: Observable<ISmCol[]>;
-  public firstEndpoint: EndpointStats;
-  public metricVariants$: Observable<MetricVariantResult[]>;
+  protected firstEndpoint: EndpointStats;
+  protected metricVariants$: Observable<MetricVariantResult[]>;
   protected override setSplitSizeAction = ServingActions.setSplitSize;
   protected setTableModeAction = ServingActions.setTableViewMode;
   private selectedEndpoints: EndpointStats[];
-  private searchQuery$: Observable<SearchState['searchQuery']>;
   private readonly tagsFilter$: Observable<boolean>;
   private readonly companyTags$: Observable<string[]>;
+  protected selectedEndpoints$: Observable<EndpointStats[]>;
+  protected selectedEndpoint$: Observable<EndpointStats>;
   modelNamesOptions$ = this.store.select(servingFeature.modelLoadingNamesOptions);
   inputTypesOptions$ = this.store.select(servingFeature.inputTypesOptions);
   preprocessArtifactOptions$ = this.store.select(servingFeature.preprocessArtifactOptions);
+  protected override selectSplitSize$ = this.store.select(servingFeature.selectSplitSize);
+  protected tableSortFields$ = this.store.select(servingFeature.selectLoadingTableSortFields);
+  protected tableFilters$ = this.store.select(servingFeature.selectLoadingColumnFilters);
+  protected searchValue$ = this.store.select(servingFeature.selectGlobalFilter);
+  protected searchQuery$ = this.store.select(selectSearchQuery);
+  protected tableColsOrder$ = this.store.select(servingFeature.selectLoadingColsOrder);
+  protected tableMode$ = this.store.select(servingFeature.selectTableMode);
+  protected filteredTableCols$ = this.store.select(servingFeature.selectLoadingServingTableColumns);
+  protected tableCols$ = this.filteredTableCols$.pipe(
+    distinctUntilChanged(isEqual)
+  );
+  protected endpoints$ = this.store.select(servingFeature.selectLoadingSortedFilteredEndpoints).pipe(
+    filter(endpoints => endpoints !== null)) as Observable<EndpointStats[]>;
 
   @ViewChild('endpointsTable') private table: ServingTableComponent;
   viewMode = this.route.snapshot.url[0].path;
 
   constructor() {
     super();
-    this.selectSplitSize$ = this.store.select(servingFeature.selectSplitSize);
-    this.tableSortFields$ = this.store.select(servingFeature.selectLoadingTableSortFields);
-    this.tableFilters$ = this.store.select(servingFeature.selectLoadingColumnFilters);
-    this.searchValue$ = this.store.select(servingFeature.selectGlobalFilter);
-
-    this.searchQuery$ = this.store.select(selectSearchQuery);
-    this.tableColsOrder$ = this.store.select(servingFeature.selectLoadingColsOrder);
-    this.tableMode$ = this.store.select(servingFeature.selectTableMode);
-    this.filteredTableCols$ = this.store.select(servingFeature.selectLoadingServingTableColumns);
-
-    this.tableCols$ = this.filteredTableCols$.pipe(
-      distinctUntilChanged(isEqual)
-    );
-
-    this.endpoints$ = this.store.select(servingFeature.selectLoadingSortedFilteredEndpoints).pipe(
-      filter(endpoints => endpoints !== null)) as Observable<EndpointStats[]>;
     this.syncAppSearch();
-
     this.setContextMenu();
   }
 
   override ngOnInit() {
     super.ngOnInit();
-    this.store.dispatch(ServingActions.fetchServingLoadingEndpoints());
+    this.store.dispatch(ServingActions.fetchLoadingEndpoints());
     let prevQueryParams: Params;
 
     this.sub.add(this.route.queryParams
@@ -146,13 +133,8 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for endpoints'}));
-    this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.store.dispatch(ServingActions.globalFilterChanged(query))));
+    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => this.store.dispatch(ServingActions.globalFilterChanged(query))));
   }
-
-  getNextEndpoints() {
-    this.store.dispatch(ServingActions.getNextServingEndpoints());
-  }
-
 
   endpointsSelectionChanged(endpoints: EndpointStats[]) {
     this.store.dispatch(ServingActions.setSelectedServingEndpoint({endpoint: endpoints[0]}));

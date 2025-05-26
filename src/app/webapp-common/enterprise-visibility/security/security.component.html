@@ -8,57 +8,60 @@
     <h2>Configuration Vaults</h2>
     Admin set values can extend or override user configurations making it easy to propagate required configuration as well as controlling security sensitive keys.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/admin-vaults-fhd-' + theme() + '.png'"
-    #image1
-    (click)="imageClicked(image1)"
-    width="640"
-    height="360"
-    alt="vaults"
-  >
+  <div class="image" (click)="imageClicked(image1)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/admin-vaults-fhd-' + theme() + '.png'"
+      #image1
+      width="640"
+      height="360"
+      alt="vaults"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/service-accounts-fhd-' + theme() + '.png'"
-    #image2
-    (click)="imageClicked(image2)"
-    width="640"
-    height="360"
-    alt="Service accounts"
-  >
+  <div class="image" (click)="imageClicked(image2)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/service-accounts-fhd-' + theme() + '.png'"
+      #image2
+      width="640"
+      height="360"
+      alt="Service accounts"
+    >
+  </div>
   <div class="details">
-    <h2>Service accounts</h2>
+    <h2>Service Accounts</h2>
     Streamline automation by providing automated processes and applications with secure and manageable ClearML API access without requiring individual user credentials.
   </div>
 </div>
-
 <div class="section">
   <div class="details">
-    <h2>Access controls</h2>
+    <h2>Access Controls</h2>
     Set granular access permission to any ClearML resource, ensuring collaborative data security by defining who can access projects your organization, datasets, models and execution queues.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/rbac-fhd-' + theme() + '.png'"
-    #image3
-    (click)="imageClicked(image3)"
-    width="640"
-    height="360"
-    alt="RBAC"
-  >
+  <div class="image" (click)="imageClicked(image3)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/rbac-fhd-' + theme() + '.png'"
+      #image3
+      width="640"
+      height="360"
+      alt="RBAC"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/idp-fhd-' + theme() + '.png'"
-    #image4
-    (click)="imageClicked(image4)"
-    width="640"
-    height="360"
-    alt="Idp sso"
-  >
+  <div class="image" (click)="imageClicked(image4)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/idp-fhd-' + theme() + '.png'"
+      #image4
+      width="640"
+      height="360"
+      alt="Idp sso"
+    >
+  </div>
   <div class="details">
-    <h2>Identity providers</h2>
+    <h2>Identity Providers</h2>
     Integrate with your organization’s SAML/OIDC identity provider for streamlined user authentication and access control.
   </div>
 </div>

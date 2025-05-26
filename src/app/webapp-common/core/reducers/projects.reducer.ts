@@ -49,11 +49,11 @@ export interface RootProjects {
   projectTags: string[];
   companyTags: string[];
   systemTags: string[];
-  tagsColors: { [tag: string]: TagColor };
+  tagsColors: Record<string, TagColor>;
   tagsFilterByProject: boolean;
-  graphVariant: { [project: string]: ISmCol[] };
+  graphVariant: Record<string, ISmCol[]>;
   graphData: ScatterPlotPoint[];
-  hiddenStates: { [state: string]: boolean };
+  hiddenStates: Record<string, boolean>;
   lastUpdate: string;
   users: User[];
   allUsers: User[];
@@ -61,9 +61,9 @@ export interface RootProjects {
   showHidden: boolean;
   hideExamples: boolean;
   blockUserScript: boolean;
-  mainPageTagsFilter: { [Feature: string]: { tags: string[]; filterMatchMode: string } };
+  mainPageTagsFilter: Record<string, { tags: string[]; filterMatchMode: string }>;
   mainPageTagsFilterMatchMode: string;
-  defaultNestedModeForFeature: { [feature: string]: boolean };
+  defaultNestedModeForFeature: Record<string, boolean>;
   selectedSubFeature: IBreadcrumbsLink;
   tablesFilterProjectsOptions: Partial<ProjectsGetAllResponseSingle>[];
   projectsOptionsScrollId: string;
@@ -116,7 +116,7 @@ export const selectProjectTags = createSelector(projects, state => state.project
 export const selectMainPageTagsFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageTagsFilter[projectType]?.tags : []);
 export const selectMainPageTagsFilterMatchMode = createSelector(projects, selectProjectType, (state, projectType) => projectType? state.mainPageTagsFilter[projectType]?.filterMatchMode : null);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state?.tagsColors);
 export const selectLastUpdate = createSelector(projects, state => state.lastUpdate);
@@ -138,7 +138,7 @@ export const selectSelectedProjectUsers = createSelector(selectSelectedProjectId
   (projectId, projectUsers, allUsers) => projectId === '*' ? allUsers : projectUsers);
 export const selectTablesFilterProjectsOptions = createSelector(projects, state => state.tablesFilterProjectsOptions);
 export const selectMyProjects = createSelector(selectTablesFilterProjectsOptions,
-  projects => projects?.filter(project => project?.company?.id)
+  projects => projects?  projects?.filter(project => project?.company?.id): null
 );
 
 export const selectReadOnlyProjects = createSelector(selectTablesFilterProjectsOptions,
@@ -161,6 +161,10 @@ export const projectsReducer = createReducer(
     ...state,
     selectedProject: action.project,
     extraUsers: []
+  })),
+  on(projectsActions.setSelectedProjectSimple, (state, action): RootProjects => ({
+    ...state,
+    selectedProject: action.project
   })),
   on(projectsActions.setProjectAncestors, (state, action): RootProjects => ({
     ...state,
@@ -256,7 +260,7 @@ export const projectsReducer = createReducer(
   on(projectsActions.setTablesFilterProjectsOptions, (state, action): RootProjects => ({
     ...state,
     tablesFilterProjectsOptions: action.loadMore ? uniqBy((state.tablesFilterProjectsOptions || []).concat(action.projects), 'id') : uniqBy(action.projects, 'id'),
-    projectsOptionsScrollId: action.scrollId
+projectsOptionsScrollId: action.scrollId
   })),
   on(projectsActions.getTablesFilterProjectsOptions, (state, action): RootProjects => ({...state, ...(!action.loadMore && {tablesFilterProjectsOptions: null, projectsOptionsScrollId: null})})),
 );

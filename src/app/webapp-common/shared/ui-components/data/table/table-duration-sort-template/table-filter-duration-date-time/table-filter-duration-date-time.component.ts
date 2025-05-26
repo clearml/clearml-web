@@ -76,31 +76,30 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
 };
 
 @Component({
-  selector: 'sm-table-filter-duration-date-time',
-  templateUrl: './table-filter-duration-date-time.component.html',
-  styleUrls: ['./table-filter-duration-date-time.component.scss'],
-  providers: [
-    {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
-    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS},
-    provideNativeDateAdapter()
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    FormsModule,
-    ClickStopPropagationDirective,
-    KeydownStopPropagationDirective,
-    DurationInputListComponent,
-    TooltipDirective,
-    TableFilterDurationErrorComponent,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatDatepicker,
-    MatInput,
-    MatFormField,
-    MatIconButton,
-    MatIcon
-  ]
+    selector: 'sm-table-filter-duration-date-time',
+    templateUrl: './table-filter-duration-date-time.component.html',
+    styleUrls: ['./table-filter-duration-date-time.component.scss'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+        provideNativeDateAdapter()
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule,
+        ClickStopPropagationDirective,
+        KeydownStopPropagationDirective,
+        DurationInputListComponent,
+        TooltipDirective,
+        TableFilterDurationErrorComponent,
+        MatDatepickerInput,
+        MatDatepickerToggle,
+        MatDatepicker,
+        MatInput,
+        MatFormField,
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
   _lessThan = {

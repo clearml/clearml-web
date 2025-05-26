@@ -13,8 +13,9 @@ import {ModelDetail} from '@common/experiments-compare/shared/experiments-compar
 @Component({
   selector: 'sm-model-compare-details',
   templateUrl: './model-compare-details.component.html',
-  styleUrls: ['./model-compare-details.component.scss', '../../cdk-drag.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['../experiment-compare-base.component.scss', './model-compare-details.component.scss', '../../cdk-drag.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ModelCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   public showEllipsis = true;
@@ -42,7 +43,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
       this.originalExperiments = models.reduce((acc, exp) => {
         acc[exp.id] = isDetailsConverted(exp) ? this.originalExperiments[exp.id] : exp;
         return acc;
-      }, {} as { [id: string]: ConfigurationItem });
+      }, {} as Record<string, ConfigurationItem>);
       models = Object.values(this.originalExperiments).map(experiment => convertmodelsArrays(experiment, this.originalExperiments[models[0].id], models));
 
       this.resetComponentState(models);
@@ -51,7 +52,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
     });
   }
 
-  buildCompareTree(experiments: Array<ModelDetail>): ExperimentCompareTree {
+  buildCompareTree(experiments: ModelDetail[]): ExperimentCompareTree {
     const mergedExperiment = getAllKeysEmptyObject(experiments);
     return experiments
       .reduce((acc, cur) => {

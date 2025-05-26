@@ -62,6 +62,7 @@ import {
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
 
 
 const reportsSyncedKeys = ['orderBy', 'sortOrder'];
@@ -123,6 +124,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     MatIconButton,
     ReportDialogComponent,
     CreateNewReportFormComponent,
+    CommonSearchComponent,
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportComponent],
   providers: [

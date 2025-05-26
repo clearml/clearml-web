@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, viewChild} from '@angular/core';
 import {get} from 'lodash-es';
 import {SelectedModel} from '../../shared/models.model';
 import {NA} from '~/app.constants';
@@ -11,25 +11,31 @@ import {AdminService} from '~/shared/services/admin.service';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {filter, map, take} from 'rxjs/operators';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
 
 @Component({
   selector: 'sm-model-general-info',
   templateUrl: './model-general-info.component.html',
   styleUrls: ['./model-general-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ModelGeneralInfoComponent {
   constructor(private datePipe: DatePipe, private store: Store, private adminService: AdminService) {
   }
 
-  public kpis: {label: string; value: string; downloadable?: boolean; href?: string; task?: string}[];
+  public kpis: { label: string; value: string; downloadable?: boolean; href?: string; task?: string }[];
   private _model: SelectedModel;
   public isLocalFile: boolean;
+  protected description = viewChild(InlineEditComponent);
 
   @Input() editable: boolean;
   @Input() projectId: string;
 
   @Input() set model(model: SelectedModel) {
+    if (this._model?.id !== model?.id) {
+      this.description().inlineCanceled();
+    }
     this._model = model;
     if (model) {
       this.isLocalFile = this.adminService.isLocalFile(model.uri);
@@ -52,7 +58,7 @@ export class ModelGeneralInfoComponent {
         {label: 'MODEL URL', value: '-'},
         {label: 'USER', value: '-'},
         {label: 'ARCHIVED', value: '-'},
-        {label: 'PROJECT',value: '-'},
+        {label: 'PROJECT', value: '-'},
       ];
     }
   }

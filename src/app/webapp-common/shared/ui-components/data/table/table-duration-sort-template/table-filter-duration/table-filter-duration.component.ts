@@ -16,20 +16,18 @@ import {
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-table-filter-duration',
-  templateUrl: './table-filter-duration.component.html',
-  styleUrls: ['./table-filter-duration.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-
-  imports: [
-    DurationInputListComponent,
-    TableFilterDurationErrorComponent,
-    FormsModule,
-    DividerComponent,
-    ClickStopPropagationDirective,
-    KeydownStopPropagationDirective
-]
+    selector: 'sm-table-filter-duration',
+    templateUrl: './table-filter-duration.component.html',
+    styleUrls: ['./table-filter-duration.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DurationInputListComponent,
+        TableFilterDurationErrorComponent,
+        FormsModule,
+        DividerComponent,
+        ClickStopPropagationDirective,
+        KeydownStopPropagationDirective
+    ]
 })
 export class TableFilterDurationComponent extends TableDurationSortBaseComponent {
 

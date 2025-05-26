@@ -38,9 +38,10 @@ import {MatButton} from '@angular/material/button';
     ShowTooltipIfEllipsisDirective,
     PushPipe,
     MatButton,
+    SelectQueueComponent
   ],
   providers      : [],
-  declarations   : [SelectQueueComponent],
+  declarations   : [],
   exports        : [SelectQueueComponent]
 })
 export class SelectQueueModule {

@@ -1,9 +1,9 @@
-@import "../../layout/layout";
+@use "../../layout/layout";
 
 :host {
   display: block;
-  height: $graph-height;
-  min-height: $graph-height;
+  height: layout.$graph-height;
+  min-height: layout.$graph-height;
   padding: 20px 20px 0;
   border-bottom: 1px solid var(--color-surface-container-high);
 
@@ -25,7 +25,7 @@
       position: relative;
     }
 
-    .warnning {
+    .warning {
       margin-left: 10px;
       line-height: 20px;
       color: var(--color-warning);

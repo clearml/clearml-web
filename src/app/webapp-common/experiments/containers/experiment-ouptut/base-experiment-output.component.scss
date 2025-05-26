@@ -1,18 +1,17 @@
-@import "variables";
-@import "../../../layout/layout.scss";
+@use "../../../layout/layout.scss";
 
 $output-tabs-height: 64px;
-
 :host {
+  --mat-sidenav-container-width: 361px;
   display: block;
   height: 100%;
   background-color: var(--color-surface-container-lowest);
 
   .experiment-output-container {
-    height: 100%;
+    height: calc(100% - 32px);
 
     &.minimized {
-      height: calc(100% - 41px);
+      height: calc(100% - 38px);
     }
   }
 
@@ -44,6 +43,12 @@ $output-tabs-height: 64px;
     margin-left: auto;
   }
 
+  .close-button-fake {
+    margin-right: 24px;
+    margin-left: auto;
+    width: 84px;
+  }
+
   .scalar-buttons {
     gap: 12px;
     display: flex;
@@ -66,10 +71,10 @@ $output-tabs-height: 64px;
 
   .output-body {
     position: relative;
-    height: calc(100% - #{$output-tabs-height + $experiment-info-header-height + 32px});
+    height: calc(100% - #{$output-tabs-height + layout.$experiment-info-header-height + 10px});
 
     &.minimized {
-      height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height + 3px});
+      height: calc(100% - #{layout.$experiment-info-header-height + layout.$experiment-info-tabs-height + 3px});
     }
   }
 }

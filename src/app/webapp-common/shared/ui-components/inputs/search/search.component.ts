@@ -1,31 +1,33 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnChanges, OnDestroy,
-  OnInit, SimpleChanges,
-  ViewChild, input, output, effect, signal
+  effect, ElementRef,
+  input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  output,
+  signal,
+  SimpleChanges,
+  viewChild
 } from '@angular/core';
 import {Subject, Subscription, timer} from 'rxjs';
 import {debounce, distinctUntilChanged, filter, tap} from 'rxjs/operators';
-import {NgTemplateOutlet} from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 
 
-
 @Component({
-  selector: 'sm-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    NgTemplateOutlet,
-    MatIcon,
-    MatIconButton,
-    HesitateDirective
-  ]
+    selector: 'sm-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatIcon,
+        MatIconButton,
+        HesitateDirective
+    ]
 })
 export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -46,11 +48,11 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   value = input<string>('');
 
   valueChanged = output<string>();
-  @ViewChild('searchBar', {static: true}) searchBarInput;
+  searchBarInput = viewChild<ElementRef>('searchBar');
 
   constructor() {
     effect(() => {
-      this.searchBarInput.nativeElement.value = this.value() || '';
+      this.searchBarInput().nativeElement.value = this.value() || '';
     });
   }
 
@@ -82,21 +84,21 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       this.clear();
     } else if (event.key === 'Enter' &&
       (!this.enableNavigation() || (this.searchCounterIndex() + 1 < this.searchResultsCount())) &&
-      this.searchBarInput.nativeElement.value.length > 0
+      this.searchBarInput().nativeElement.value.length > 0
     ) {
-      this.valueChanged.emit(this.searchBarInput.nativeElement.value);
+      this.valueChanged.emit(this.searchBarInput().nativeElement.value);
     }
   }
 
   onValueChange() {
-    this.value$.next(this.searchBarInput.nativeElement.value);
+    this.value$.next(this.searchBarInput().nativeElement.value);
   }
 
   clear(focus = true) {
     this.value$.next('');
-    this.searchBarInput.nativeElement.value = '';
+    this.searchBarInput().nativeElement.value = '';
     if (focus) {
-      this.searchBarInput.nativeElement.focus();
+      this.searchBarInput().nativeElement.focus();
     }
   }
 
@@ -104,7 +106,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
     if (this.expandOnHover()) {
       if (this.empty()) {
         this.active = active;
-        this.searchBarInput.nativeElement.focus();
+        this.searchBarInput().nativeElement.focus();
       } else {
         this.active = true;
       }
@@ -112,7 +114,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   findNext(backward?: boolean) {
-    this.valueChanged.emit(backward ? null : this.searchBarInput.nativeElement.value);
+    this.valueChanged.emit(backward ? null : this.searchBarInput().nativeElement.value);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -126,6 +128,6 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getFocus() {
-    this.searchBarInput.nativeElement.focus();
+    this.searchBarInput().nativeElement.focus();
   }
 }

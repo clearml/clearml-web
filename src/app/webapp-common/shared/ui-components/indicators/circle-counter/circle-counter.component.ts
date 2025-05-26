@@ -6,13 +6,12 @@ import {fileSizeConfigCount, FileSizePipe} from '@common/shared/pipes/filesize.p
 
 
 @Component({
-  selector: 'sm-circle-counter',
-  templateUrl: './circle-counter.component.html',
-  styleUrls: ['./circle-counter.component.scss'],
-  standalone: true,
-  imports: [
-    FileSizePipe
-]
+    selector: 'sm-circle-counter',
+    templateUrl: './circle-counter.component.html',
+    styleUrls: ['./circle-counter.component.scss'],
+    imports: [
+        FileSizePipe
+    ]
 })
 export class CircleCounterComponent {
   public valType: 'array' | 'number' | 'tags' | 'string';

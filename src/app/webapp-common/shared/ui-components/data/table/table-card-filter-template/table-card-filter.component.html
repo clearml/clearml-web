@@ -38,10 +38,14 @@
           }
           @if (col?.andFilter) {
             <div class="filter-type" smClickStopPropagation>
-              <span class="link me-3" [class.selected]="filterMatch()[option.key] !== 'AND'"
-                    (click)="toggleCombination(option.key)">Any</span>
-              <span class="link" [class.selected]="filterMatch()[option.key] === 'AND'"
-                    (click)="toggleCombination(option.key)">All</span>
+              <button mat-button data-id="AnyTagOption" class="link"
+                      [class.selected]="filterMatch()[option.key] !== 'AND'"
+                      (click)="toggleCombination(option.key)"
+              >Any</button>
+              <button mat-button data-id="allTagOption" class="link"
+                      [class.selected]="filterMatch()[option.key] === 'AND'"
+                      (click)="toggleCombination(option.key)"
+              >All</button>
             </div>
           }
           <div #container class="results" [class.scroll]="col.searchableFilter" smClickStopPropagation>

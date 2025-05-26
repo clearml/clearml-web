@@ -1,0 +1,67 @@
+:host {
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .data-project {
+    margin-top: 12px;
+    display: block;
+  }
+
+  .list {
+    padding-top: 24px;
+    border-top: 1px solid var(--color-surface-container-high);
+  }
+
+  sm-edit-project-form {
+    display: block;
+  }
+
+  sm-graph-settings-bar {
+    padding: 16px 0;
+  }
+
+  sm-selectable-grouped-filter-list {
+    max-height: 350px;
+    min-height: 200px;
+  }
+
+  ::ng-deep sm-selectable-grouped-filter-list sm-search {
+    padding-top: 0;
+  }
+
+
+  ////// Setting vertical mode 2 //////
+  ::ng-deep sm-graph-settings-bar.graph-settings-menu {
+    width: 100%;
+
+    .vertical-layout.x-axis-options {
+      flex-direction: unset;
+      .divider{
+        border-top: unset;
+        padding-top: unset;
+      }
+    }
+    .width-100 {
+      width: unset;
+    }
+    .label-text {
+      min-width: 80px;
+    }
+    .field.last-elm {
+      margin-left: auto;
+    }
+
+  }
+
+  ::ng-deep sm-selectable-grouped-filter-list{
+    sm-search,
+    sm-grouped-selectable-list {
+      padding: 0;
+    }
+  }
+}

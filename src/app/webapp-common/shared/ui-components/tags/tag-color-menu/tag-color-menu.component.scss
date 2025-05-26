@@ -1,5 +1,3 @@
-@import "variables";
-
 .color-picker-wrapper {
   position: absolute;
   top: calc(50% - 200px);
@@ -12,7 +10,7 @@
     border-radius: 4px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     border-color: var(--color-outline-variant);
-    background-color: var(--color-surface-container);
+    background-color: var(--color-surface-container-low);
 
     .saturation-lightness {
       border-radius: 3px 3px 0 0;
@@ -28,7 +26,7 @@
       }
       .preset-color {
         margin: 4px;
-        border-color: var(--color-surface-container-lowest);
+        border-color: var(--color-on-surface-container);
         box-shadow: 0 0 0 1px var(--color-outline-variant);
         &:hover {
           box-shadow: 0 0 0 1px var(--color-outline);

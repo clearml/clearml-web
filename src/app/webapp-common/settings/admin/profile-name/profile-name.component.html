@@ -24,7 +24,13 @@
       </div>
       @if (currentUser().company?.id){
       <div class="d-flex flex-column align-items-center">
-        <div class="profile-label">COMPANY</div>
+        <div class="profile-label">
+          @if (config.configuration().communityServer) {
+            WORKSPACE
+          } @else {
+            COMPANY
+          }
+        </div>
         <div class="d-flex align-items-center">
           <span class="me-2">{{ currentUser().company.name }}</span>
           <sm-id-badge caption="Copy company ID" [short]="true" [id]="currentUser().company.id" (copied)="copyToClipboard()"></sm-id-badge>

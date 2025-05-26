@@ -1,27 +1,11 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
-import {
-  addToProjectsList,
-  getAllProjectsPageProjects,
-  setCurrentScrollId,
-  setNoMoreProjects,
-  setProjectsOrderBy,
-  setProjectsSearchQuery,
-  showExampleDatasets,
-  showExamplePipelines,
-  updateProject,
-  updateProjectSuccess
-} from './common-projects.actions';
-import {
-  selectProjectsOrderBy,
-  selectProjectsScrollId,
-  selectProjectsSearchQuery,
-  selectProjectsSortOrder
-} from './common-projects.reducer';
+import {addToProjectsList, getAllProjectsPageProjects, setCurrentScrollId, setNoMoreProjects, setProjectsOrderBy, setProjectsSearchQuery, showExampleDatasets, showExamplePipelines, updateProject, updateProjectSuccess} from './common-projects.actions';
+import {selectProjectsOrderBy, selectProjectsScrollId, selectProjectsSearchQuery, selectProjectsSortOrder} from './common-projects.reducer';
 import {Store} from '@ngrx/store';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
@@ -31,14 +15,7 @@ import {pageSize} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {
-  selectHideExamples,
-  selectMainPageTagsFilter,
-  selectMainPageTagsFilterMatchMode,
-  selectSelectedProject,
-  selectSelectedProjectId,
-  selectShowHidden
-} from '../core/reducers/projects.reducer';
+import {selectHideExamples, selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode, selectSelectedProject, selectSelectedProjectId, selectShowHidden} from '../core/reducers/projects.reducer';
 import {forkJoin, of} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectStats} from '../core/actions/projects.actions';
@@ -47,23 +24,16 @@ import {ProjectsUpdateResponse} from '~/business-logic/model/projects/projectsUp
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {isPipelines, isReports} from './common-projects.utils';
-import {
-  getFeatureProjectRequest,
-  getSelfFeatureProjectRequest,
-  isDatasets
-} from '~/features/projects/projects-page.utils';
+import {getFeatureProjectRequest, getSelfFeatureProjectRequest, isDatasets} from '~/features/projects/projects-page.utils';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getTagsFilters} from '@common/shared/utils/tableParamEncode';
 
 @Injectable()
 export class CommonProjectsEffects {
-
-  constructor(
-    private actions: Actions,
-    public projectsApi: ApiProjectsService,
-    private store: Store, private route: ActivatedRoute,
-  ) {
-  }
+  private store = inject(Store);
+  private actions = inject(Actions);
+  private route = inject(ActivatedRoute);
+  private projectsApi = inject(ApiProjectsService);
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(updateProject, getAllProjectsPageProjects),

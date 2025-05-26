@@ -5,7 +5,6 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   GroupedCheckedFilterListComponent
 } from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
-import { AsyncPipe } from '@angular/common';
 import { trackByIndex } from '@common/shared/utils/forms-track-by';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {
@@ -13,19 +12,17 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
-  selector: 'sm-param-selector',
-  standalone: true,
-  imports: [
-    MenuComponent,
-    ExperimentSharedModule,
-    ClickStopPropagationDirective,
-    GroupedCheckedFilterListComponent,
-    AsyncPipe,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective
-],
-  templateUrl: './param-selector.component.html',
-  styleUrl: './param-selector.component.scss'
+    selector: 'sm-param-selector',
+    imports: [
+        MenuComponent,
+        ExperimentSharedModule,
+        ClickStopPropagationDirective,
+        GroupedCheckedFilterListComponent,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective
+    ],
+    templateUrl: './param-selector.component.html',
+    styleUrl: './param-selector.component.scss'
 })
 export class ParamSelectorComponent {
   public trackByIndex = trackByIndex;

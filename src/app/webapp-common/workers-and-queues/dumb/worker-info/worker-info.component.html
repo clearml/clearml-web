@@ -1,4 +1,4 @@
-<button mat-icon-button class="close" (click)="this.deselectWorker.emit()">
+<button mat-icon-button class="close sm" (click)="this.deselectWorker.emit()">
   <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
 </button>
 
@@ -36,9 +36,9 @@
                 <a class="value link ellipsis"
                    [routerLink]="['../queues']"
                    [queryParams]="{id: row.id}"
-                   [smTooltip]="row?.display_name ?? row?.name"
+                   [smTooltip]="row?.display_name || row.name"
                    [matTooltipShowDelay]="500"
-                   smShowTooltipIfEllipsis>{{row?.display_name ?? row?.name}}</a>
+                   smShowTooltipIfEllipsis>{{row?.display_name || row.name}}</a>
                 <sm-copy-clipboard
                   class="copy-btn"
                   [label]="''"

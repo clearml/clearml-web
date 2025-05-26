@@ -2,10 +2,11 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
 import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
-  selector: 'sm-reports-header',
-  templateUrl: './reports-header.component.html',
-  styleUrls: ['./reports-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-reports-header',
+    templateUrl: './reports-header.component.html',
+    styleUrls: ['./reports-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ReportsHeaderComponent {
 

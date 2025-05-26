@@ -52,7 +52,7 @@ export class ServingEffects {
   private tasksApi = inject(ApiTasksService);
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(ServingActions.getNextServingEndpoints, ServingActions.fetchServingEndpoints, ServingActions.fetchServingLoadingEndpoints),
+    ofType(ServingActions.getNextServingEndpoints, ServingActions.fetchServingEndpoints, ServingActions.fetchLoadingEndpoints),
     filter((action) => !(action as unknown as ReturnType<typeof ServingActions.refreshEndpoints>).hideLoader),
     map(() => activeLoader('Fetch Endpoint'))
   ));
@@ -87,7 +87,7 @@ export class ServingEffects {
 
   reFetchEndpoint = createEffect(() => this.actions$.pipe(
     ofType(
-      ServingActions.fetchServingEndpoints, ServingActions.getNextServingEndpoints, ServingActions.fetchServingLoadingEndpoints
+      ServingActions.fetchServingEndpoints, ServingActions.fetchLoadingEndpoints
     ),
     switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
       filter(ready => ready),
@@ -98,7 +98,7 @@ export class ServingEffects {
       .pipe(
         mergeMap(res => [
           action.type === ServingActions.fetchServingEndpoints.type ?
-            ServingActions.setServingEndpoints({servingEndpoints: res.endpoints}) : ServingActions.setLoadingServingEndpoints({servingEndpoints: res.endpoints}),
+            ServingActions.setServingEndpoints({servingEndpoints: res.endpoints}) : ServingActions.setLoadingEndpoints({servingEndpoints: res.endpoints}),
           deactivateLoader('Fetch Endpoint')
         ]),
         catchError(error => [
@@ -158,7 +158,7 @@ export class ServingEffects {
                 if (action.type === ServingActions.refreshEndpoints.type) {
                   resActions.push(ServingActions.setServingEndpoints({servingEndpoints: res.endpoints}));
                 } else {
-                  resActions.push(ServingActions.setLoadingServingEndpoints({servingEndpoints: res.endpoints}));
+                  resActions.push(ServingActions.setLoadingEndpoints({servingEndpoints: res.endpoints}));
                 }
               }
               return resActions;
@@ -416,13 +416,13 @@ export class ServingEffects {
           fromDate = now - range;
         }
         return this.servingApi.servingGetEndpointMetricsHistory({
-          /* eslint-disable @typescript-eslint/naming-convention */
+
           endpoint_url: endpoint.url,
           metric_type: action.metricType,
           from_date: fromDate,
           to_date: now,
           interval: granularity
-          /* eslint-enable @typescript-eslint/naming-convention */
+
         }).pipe(
           map((res: ServingGetEndpointMetricsHistoryResponse) => {
             let result = [];

@@ -21,16 +21,15 @@ export interface S3AccessDialogResult extends Credentials {
 }
 
 @Component({
-  selector: 'sm-s3-access-resolver',
-  templateUrl: './s3-access-resolver.component.html',
-  styleUrls: ['./s3-access-resolver.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    MatCheckboxModule,
-    FormsModule,
-    S3AccessDialogComponent
-  ]
+    selector: 'sm-s3-access-resolver',
+    templateUrl: './s3-access-resolver.component.html',
+    styleUrls: ['./s3-access-resolver.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        MatCheckboxModule,
+        FormsModule,
+        S3AccessDialogComponent
+    ]
 })
 export class S3AccessResolverComponent {
   show: Observable<boolean>;

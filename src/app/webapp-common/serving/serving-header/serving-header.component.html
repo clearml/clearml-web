@@ -8,7 +8,9 @@
         [rippleEffect]="rippleEffect()"
         (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
     }
+    <sm-common-search [class.ms-3]="!hideNavigation()"></sm-common-search>
   </div>
+
   <div class="d-flex justify-content-end align-items-center gap-3">
     @if (!minimizedView()) {
       <sm-clear-filters-button
@@ -16,9 +18,11 @@
         (clearTableFilters)="clearTableFilters.emit(tableFilters())"
       ></sm-clear-filters-button>
     }
-    <button mat-icon-button class="download-btn" [disabled]="noData()" (click)="!noData() && downloadTableAsCSV.emit()" data-id="downloadCSVButton" smTooltip="Download table as CSV">
-      <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
-    </button>
+    <div smTooltip="Download table as CSV">
+      <button mat-icon-button class="download-btn" [disabled]="noData()" (click)="!noData() && downloadTableAsCSV.emit()" data-id="downloadCSVButton">
+        <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+      </button>
+    </div>
     <sm-refresh-button (setAutoRefresh)="setAutoRefresh.emit($event)"></sm-refresh-button>
   </div>
 </div>

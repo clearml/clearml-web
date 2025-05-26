@@ -9,20 +9,19 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-custom-cols-menu',
-  templateUrl: './experiment-custom-cols-menu.component.html',
-  styleUrls: ['./experiment-custom-cols-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MenuComponent,
-    CustomColumnsListComponent,
-    NgTemplateOutlet,
-    UpperCasePipe,
-    MatProgressSpinner,
-    MatIcon,
-    MatButton
-  ],
-  standalone: true
+    selector: 'sm-custom-cols-menu',
+    templateUrl: './experiment-custom-cols-menu.component.html',
+    styleUrls: ['./experiment-custom-cols-menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MenuComponent,
+        CustomColumnsListComponent,
+        NgTemplateOutlet,
+        UpperCasePipe,
+        MatProgressSpinner,
+        MatIcon,
+        MatButton
+    ]
 })
 export class ExperimentCustomColsMenuComponent {
 

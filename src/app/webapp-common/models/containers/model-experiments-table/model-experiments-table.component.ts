@@ -53,7 +53,7 @@ export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     header: 'STATUS',
-    style: {width: '115px'},
+    style: {width: '130px', minWidth: '130px'},
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.ID,
@@ -64,30 +64,31 @@ export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
 ];
 
 @Component({
-  selector: 'sm-model-experiments-table',
-  templateUrl: './model-experiments-table.component.html',
-  styleUrls: ['./model-experiments-table.component.scss']
+    selector: 'sm-model-experiments-table',
+    templateUrl: './model-experiments-table.component.html',
+    styleUrls: ['./model-experiments-table.component.scss'],
+    standalone: false
 })
 export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   public tableCols = INITIAL_MODEL_EXPERIMENTS_TABLE_COLS;
   public entityTypes = EntityTypeEnum;
   private paramsSubscription: Subscription;
   public experiments$: Observable<IExperimentInfo[]>;
-  public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
+  public tableFilters$: Observable<Record<string, FilterMetadata>>;
   public tags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public noMoreExperiments$: Observable<boolean>;
   public tableSortFields$: Observable<SortMeta[]>;
   selectedExperiment: IExperimentInfo;
-  private _resizedCols = {} as { [colId: string]: string };
-  private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
+  private _resizedCols = {} as Record<string, string>;
+  private resizedCols$ = new BehaviorSubject<Record<string, string>>(this._resizedCols);
   @ViewChild('searchExperiments', {static: true}) searchExperiments: MatInput;
   @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
   private modelId: string;
   public tags: string[];
   private initTags: boolean;
   public searchTerm$: Observable<{ query: string; regExp?: boolean; original?: string }>;
-  public selectSplitSize$: Observable<number>;
+  protected splitSize = this.store.selectSignal(selectSplitSize);
 
   constructor(
     private store: Store,
@@ -95,7 +96,6 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
     this.resizedCols$.next(this._resizedCols);
     this.experiments$ = this.store.select(selectExperimentsList);
     this.searchTerm$ = this.store.select(selectGlobalFilter);
-    this.selectSplitSize$ = this.store.select(selectSplitSize);
 
     this.tableFilters$ = this.store.select(selectTableFilters)
       .pipe(map(filtersObj => Object.fromEntries(Object.entries(filtersObj).filter(([key]) => key !== 'models.input.model'))));
@@ -136,9 +136,15 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   }
 
 
-  experimentSelectionChanged({experiment}) {
-    const projectId = experiment?.project?.id ? experiment?.project?.id : '*';
-    window.open('projects/' + projectId + '/experiments/' + experiment?.id);
+  experimentSelectionChanged(event) {
+    const experiment = event?.experiment;
+    if (event.origin === 'row' && experiment) {
+      const projectId = experiment?.project?.id ? experiment?.project?.id : '*';
+      const a = document.createElement('a');
+      a.href = `projects/${projectId}/tasks/${experiment?.id}`;
+      a.target = '_blank';
+      a.click();
+    }
   }
 
   getNextExperiments() {

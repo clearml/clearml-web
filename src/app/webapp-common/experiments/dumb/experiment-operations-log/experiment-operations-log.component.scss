@@ -1,3 +1,30 @@
 :host {
-    --row-border-color: var(--color-surface-container-high);
+  --p-datatable-body-cell-border-color: var(--color-surface-container-high);
+
+  .al-ico-next {
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  .expanded-row {
+    position: relative;
+    vertical-align: middle;
+    color: var(--row-default-text-color);
+    background-color: var(--color-surface-container-lowest);
+    font-size: 1rem;
+    height: 36px;
+    border-bottom: 1px solid var(--p-datatable-body-cell-border-color);
+  }
+
+  .expanded-cell {
+    padding: 0 8px;
+
+    &:nth-of-type(2) {
+      padding-left: 18px;
+    }
+  }
+
 }

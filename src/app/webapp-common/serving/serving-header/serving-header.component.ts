@@ -8,9 +8,10 @@ import {
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 
 @Component({
-  selector   : 'sm-serving-header',
-  templateUrl: './serving-header.component.html',
-  styleUrls  : ['./serving-header.component.scss']
+    selector: 'sm-serving-header',
+    templateUrl: './serving-header.component.html',
+    styleUrls: ['./serving-header.component.scss'],
+    standalone: false
 })
 export class ServingHeaderComponent extends BaseEntityHeaderComponent {
 

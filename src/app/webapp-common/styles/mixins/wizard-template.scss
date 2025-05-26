@@ -1,9 +1,9 @@
-@import "variables";
+@use "variables";
 
 @mixin common-leaf() {
   border-radius: 0 0 6px 6px;
   height: 100%;
-  transition: border-bottom $transition-slow;
+  transition: border-bottom variables.$transition-slow;
 }
 
 @mixin choose-leaf() {
@@ -16,7 +16,7 @@
     }
   }
   &.open-code {
-    transition-delay: $transition-slow;
+    transition-delay: variables.$transition-slow;
     height: 75%;
   }
 }

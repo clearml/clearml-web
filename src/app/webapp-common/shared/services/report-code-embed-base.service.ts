@@ -19,7 +19,8 @@ export interface ReportCodeEmbedConfiguration {
   metrics?: string[];
   variants?: string[];
   valueType?: string;
-  seriesName?: string;
+  seriesName?: string[];
+  plotsNames?: string[];
   xaxis?: string;
   group?: boolean;
 }
@@ -58,7 +59,7 @@ export class ReportCodeEmbedBaseService {
     const url = this.getUrl();
     url.searchParams.set('type', conf.type);
     url.searchParams.set('objectType', conf.objectType);
-    conf.seriesName && url.searchParams.set('series', conf.seriesName);
+    conf.seriesName && conf.seriesName.forEach(seriesName => seriesName && url.searchParams.append('series', seriesName));
     conf.valueType && url.searchParams.set('value_type', conf.valueType);
     conf.xaxis && url.searchParams.set('xaxis', conf.xaxis);
     let urlStr = url.toString();
@@ -80,10 +81,10 @@ export class ReportCodeEmbedBaseService {
     const graphsUnmerged = conf.type === 'plot' && conf.variants.length > 1 && Array.from(new Set(conf.seriesName)).length < 2;
     if (conf.objects.length > 1 && graphsUnmerged) {
       return `<h2>${conf.metrics[0]}</h2>\n` + conf.objects.map((object, i) =>
-        this.generateEmbedSnippet({...conf, objects: [object], seriesName: conf.seriesName[i]})).join('\n');
+        this.generateEmbedSnippet({...conf, objects: [object], seriesName: [conf.seriesName[i]]})).join('\n');
     } else {
       return `<h2>${conf.metrics[0]}</h2>\n` + conf.variants.map((variant, i) =>
-        this.generateEmbedSnippet({...conf, variants: [variant], seriesName: conf.seriesName[i]})).join('\n');
+        this.generateEmbedSnippet({...conf, variants: [variant], seriesName: [conf.seriesName[i]]})).join('\n');
     }
   }
 

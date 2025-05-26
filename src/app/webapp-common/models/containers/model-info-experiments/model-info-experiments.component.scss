@@ -1,4 +1,4 @@
-@import "mixins/link";
+@use "mixins/link";
 
 :host{
   .lineage-container{
@@ -9,5 +9,5 @@
       margin-bottom: 12px;
     }
   }
-  @include link();
+  @include link.link();
 }

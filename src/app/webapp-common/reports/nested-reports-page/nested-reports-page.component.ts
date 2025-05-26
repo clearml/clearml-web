@@ -14,17 +14,16 @@ import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-nested-reports-page',
-  templateUrl: './nested-reports-page.component.html',
-  styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
-  imports: [
-    ProjectsSharedModule,
-    CircleCounterComponent,
-    PushPipe,
-    MatButton,
-    MatIcon
-],
-  standalone: true
+    selector: 'sm-nested-reports-page',
+    templateUrl: './nested-reports-page.component.html',
+    styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
+    imports: [
+        ProjectsSharedModule,
+        CircleCounterComponent,
+        PushPipe,
+        MatButton,
+        MatIcon
+    ]
 })
 export class NestedReportsPageComponent extends ReportsPageComponent implements OnInit, OnDestroy {
   entityTypeEnum = ProjectTypeEnum;

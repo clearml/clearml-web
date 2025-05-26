@@ -1,11 +1,10 @@
-@import "variables";
-@import "../../../../webapp-common/layout/layout.scss";
+@use "../../../../webapp-common/layout/layout.scss";
 
 :host {
   display: flex;
 
   > div {
-    height: $graph-height;
+    height: layout.$graph-height;
   }
 
   .chart-container {

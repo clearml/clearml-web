@@ -6,9 +6,10 @@ import {take} from 'rxjs/operators';
 import {logout} from '@common/core/actions/users.actions';
 
 @Component({
-  selector   : 'sm-logged-out-alert',
-  templateUrl: './logged-out-alert.component.html',
-  styleUrls  : ['./logged-out-alert.component.scss']
+    selector: 'sm-logged-out-alert',
+    templateUrl: './logged-out-alert.component.html',
+    styleUrls: ['./logged-out-alert.component.scss'],
+    standalone: false
 })
 export class LoggedOutAlertComponent {
 

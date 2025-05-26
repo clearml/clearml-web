@@ -14,17 +14,16 @@ interface Themes {
 }
 
 @Component({
-  selector: 'sm-appearance',
-  templateUrl: './appearance.component.html',
-  styleUrls: ['./appearance.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    NgOptimizedImage,
-    MatSelectionList,
-    MatListOption,
-    FormsModule,
-  ],
+    selector: 'sm-appearance',
+    templateUrl: './appearance.component.html',
+    styleUrls: ['./appearance.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        NgOptimizedImage,
+        MatSelectionList,
+        MatListOption,
+        FormsModule,
+    ]
 })
 export class AppearanceComponent {
   themes: Themes[] = [

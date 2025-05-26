@@ -1,4 +1,4 @@
-@import "mixins/common";
+@use "mixins/common";
 
 .view-all {
   margin-left: 12px;
@@ -18,5 +18,5 @@
   height: unset;
 }
 .recent-title {
-  @include recent-title();
+  @include common.recent-title();
 }

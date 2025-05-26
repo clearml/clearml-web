@@ -5,9 +5,10 @@ import {BaseClickableArtifactComponent} from '../base-clickable-artifact.compone
 
 
 @Component({
-  selector   : 'sm-experiment-output-model-view',
-  templateUrl: './experiment-output-model-view.component.html',
-  styleUrls  : ['./experiment-output-model-view.component.scss']
+    selector: 'sm-experiment-output-model-view',
+    templateUrl: './experiment-output-model-view.component.html',
+    styleUrls: ['./experiment-output-model-view.component.scss'],
+    standalone: false
 })
 export class ExperimentOutputModelViewComponent extends BaseClickableArtifactComponent {
 

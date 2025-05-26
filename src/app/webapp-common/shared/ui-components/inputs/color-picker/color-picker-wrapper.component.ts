@@ -7,7 +7,7 @@ import {
   viewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
+import {colorPickerHeight, colorPickerWidth, selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {TinyColor} from '@ctrl/tinycolor';
 import {ColorPickerDirective} from 'ngx-color-picker';
@@ -25,7 +25,7 @@ export const presetColors = [
   '#bcbd22',  // curry yellow-green
   '#17becf',   // blue-teal
   '#af1d41',
-  '#d5d728',
+  '#d5d728'
 ];
 
 export const presetColorsDark = [
@@ -40,14 +40,15 @@ export const presetColorsDark = [
   '#7f7f7f',  // middle gray
   '#17becf',   // blue-teal
   '#f44778',
-  '#cbcd24',
+  '#cbcd24'
 ];
 
 @Component({
-  selector: 'sm-color-picker-wrapper',
-  templateUrl: './color-picker-wrapper.component.html',
-  styleUrls: ['./color-picker-wrapper.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-color-picker-wrapper',
+    templateUrl: './color-picker-wrapper.component.html',
+    styleUrls: ['./color-picker-wrapper.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ColorPickerWrapperComponent {
   private store = inject(Store);
@@ -59,7 +60,13 @@ export class ColorPickerWrapperComponent {
   protected picker = viewChild(ColorPickerDirective);
   public props = this.store.selectSignal(selectColorPickerProps);
   protected state = computed(() => ({
-    props: this.props(),
+    props: {
+      ...this.props(),
+      left: this.props()?.left + colorPickerWidth >= (window.innerWidth || document.documentElement.clientWidth) ?
+        Math.max(this.props()?.left - colorPickerWidth, 15) : this.props()?.left,
+      top: this.props()?.top + colorPickerHeight >= (window.innerHeight || document.documentElement.clientHeight) ?
+        Math.max(this.props()?.top - colorPickerHeight, 15) : this.props()?.top,
+    },
     picker: this.picker(),
     color: signal(this.props()?.defaultColor)
   }));
@@ -76,9 +83,10 @@ export class ColorPickerWrapperComponent {
     this.store.dispatch(closeColorPicker());
     this.picker().closeDialog();
   }
+
   selectColor() {
     const {r, g, b, a} = new TinyColor(this.state().color()).toRgb();
-    const color = [r, g, b, (this.state().props.alpha && a === 1) ? 0.99999: a];
+    const color = [r, g, b, (this.state().props.alpha && a === 1) ? 0.99999 : a];
     this.colorHashService.setColorForString(this.props().cacheKey, color, true, this.state().props.alpha);
     this.closeColorPicker();
   }

@@ -75,7 +75,7 @@ export const systemThemeChanged = createAction(
 
 export const setForcedTheme = createAction(
   VIEW_PREFIX + '[set forced theme]',
-  props<{ theme: 'light' | 'dark'; default: 'light' | 'dark' }>()
+  props<{ theme: 'light' | 'dark'; default?: 'light' | 'dark' }>()
 );
 
 export const setThemeColors = createAction(

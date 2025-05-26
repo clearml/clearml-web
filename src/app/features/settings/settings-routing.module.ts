@@ -54,7 +54,7 @@ const routes: Routes = [
           workspaceNeutral: true,
           route: '/settings/storage-credentials',
           staticBreadcrumb: [[settingsBreadcrumb, {
-            name: 'Storage Credentials',
+            name: 'Storage Cleanup',
             type: CrumbTypeEnum.SubFeature
           }]]
         }

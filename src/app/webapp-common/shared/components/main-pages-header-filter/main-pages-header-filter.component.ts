@@ -15,7 +15,6 @@ import {
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {MatMenuModule} from '@angular/material/menu';
-import { AsyncPipe } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {
@@ -25,8 +24,7 @@ import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {FormsModule} from '@angular/forms';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
-import {PushPipe} from '@ngrx/component';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
@@ -34,18 +32,16 @@ import {MatIcon} from '@angular/material/icon';
   templateUrl: './main-pages-header-filter.component.html',
   styleUrls: ['./main-pages-header-filter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     MatMenuModule,
-    AsyncPipe,
     MatInputModule,
     ClickStopPropagationDirective,
     CheckboxThreeStateListComponent,
     FilterPipe,
     FormsModule,
-    PushPipe,
     MatIconButton,
-    MatIcon
+    MatIcon,
+    MatButton
   ]
 })
 export class MainPagesHeaderFilterComponent {

@@ -7,13 +7,12 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 
 
 @Component({
-  selector: 'sm-usage-stats',
-  templateUrl: './usage-stats.component.html',
-  styleUrls: ['./usage-stats.component.scss'],
-  imports: [
-    MatSlideToggle
-  ],
-  standalone: true
+    selector: 'sm-usage-stats',
+    templateUrl: './usage-stats.component.html',
+    styleUrls: ['./usage-stats.component.scss'],
+    imports: [
+        MatSlideToggle
+    ]
 })
 export class UsageStatsComponent {
   private store = inject(Store);

@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, inject, NgModule} from '@angular/core';
+import {APP_INITIALIZER, inject, NgModule, provideAppInitializer} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {PreloadAllModules, RouteReuseStrategy, RouterModule} from '@angular/router';
@@ -17,10 +17,8 @@ import {NotifierModule} from '@common/angular-notifier';
 import {LayoutModule} from './layout/layout.module';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {SharedModule} from './shared/shared.module';
-import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {ProjectsSharedModule} from './features/projects/shared/projects-shared.module';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
-import {LoginService} from '~/shared/services/login.service';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {loadUserAndPreferences} from '~/core/app-init';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
@@ -30,6 +28,8 @@ import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spi
 import {MatIconRegistry} from '@angular/material/icon';
 import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
 import {PushPipe} from '@ngrx/component';
+import { providePrimeNG } from 'primeng/config';
+import {cmlPreset} from '@common/styles/prime.preset';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -68,13 +68,8 @@ import {PushPipe} from '@ngrx/component';
   ],
   providers: [
     UserPreferences,
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {floatLabel: 'always'}},
-    {
-      provide   : APP_INITIALIZER,
-      deps: [LoginService, ConfigurationService],
-      useFactory: loadUserAndPreferences,
-      multi     : true,
-    },
+  {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {floatLabel: 'always',  appearance: 'outline'}},
+    provideAppInitializer(() => loadUserAndPreferences()),
     ColorHashService,
     {provide: HTTP_INTERCEPTORS, useClass: WebappInterceptor, multi: true},
     {provide: RouteReuseStrategy, useClass: CustomReuseStrategy},
@@ -83,6 +78,11 @@ import {PushPipe} from '@ngrx/component';
       useValue: {position: 'above'} as MatTooltipDefaultOptions
     },
     provideCharts(withDefaultRegisterables()),
+    providePrimeNG({
+      theme: {
+        preset: cmlPreset
+      }
+    })
   ],
   bootstrap      : [AppComponent],
   exports        : []

@@ -1,9 +1,18 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
   ElementRef,
-  viewChildren, inject, input, output, effect, computed, signal, untracked
+  inject,
+  input,
+  linkedSignal,
+  output,
+  signal,
+  untracked,
+  viewChildren
 } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -38,16 +47,17 @@ import {
 } from './debug-images-reducer';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DebugImagesViewComponent} from '@common/debug-images/debug-images-view/debug-images-view.component';
-import {selectSplitSize} from '@common/experiments/reducers';
 import {DebugImagesResponseIterations} from '~/business-logic/model/events/debugImagesResponseIterations';
 import {MetricsImageEvent} from '~/business-logic/model/events/metricsImageEvent';
 import {injectRouteData} from 'ngxtension/inject-route-data';
+import {selectSelectedExperimentFromRouter} from '@common/experiments/reducers';
 
 @Component({
-  selector: 'sm-debug-images',
-  templateUrl: './debug-images.component.html',
-  styleUrls: ['./debug-images.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-debug-images',
+    templateUrl: './debug-images.component.html',
+    styleUrls: ['./debug-images.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DebugImagesComponent {
   private store = inject(Store);
@@ -92,6 +102,7 @@ export class DebugImagesComponent {
 
 
   protected selectedExperiment = this.store.selectSignal(selectSelectedExperiment);
+  protected selectedExperimentFromRouter = this.store.selectSignal(selectSelectedExperimentFromRouter);
   protected tasks = this.store.selectSignal(selectTaskNames);
   protected timeIsNow = this.store.selectSignal(selectTimeIsNow);
   protected beginningOfTime = this.store.selectSignal(selectBeginningOfTime);
@@ -105,8 +116,8 @@ export class DebugImagesComponent {
 
   public selectedMetrics = signal<Record<string, string>>({});
   readonly allImages = ALL_IMAGES;
-  private selectedMetric = signal<string>(null);
-  protected optionalMetricsDic = computed<Record<string, string>>(() => this.optionalMetrics().reduce((acc, experimentMetrics) => {
+  protected selectedMetric = signal<string>(null);
+  protected optionalMetricsDic = linkedSignal<Record<string, string>>(() => this.optionalMetrics().reduce((acc, experimentMetrics) => {
     acc[experimentMetrics.task] = experimentMetrics.metrics;
     return acc;
   }, {}));
@@ -119,12 +130,18 @@ export class DebugImagesComponent {
     this.destroyRef.onDestroy(() => this.store.dispatch(resetDebugImages()));
 
     effect(() => {
+      if (this.selectedExperimentFromRouter()) {
+        this.optionalMetricsDic.set(null);
+      }
+    });
+
+    effect(() => {
       // open dataset case (selected as input)
       if (this.selected() && this.selected().id !== this.previousSelectedId) {
         this.previousSelectedId = this.selected().id;
         untracked(() => this.selectMetric({value: this.allImages}, this.selected().id))
       }
-    }, {allowSignalWrites: true});
+    });
 
     if (this.multipleExperiments()) {
       effect(() => {
@@ -142,25 +159,20 @@ export class DebugImagesComponent {
           this.store.dispatch(fetchExperiments({tasks: this.ids().slice(0, LIMITED_VIEW_LIMIT)}));
           this.previousIds = this.ids();
         }
-      }, {allowSignalWrites: true});
+      });
     } else {
       effect(() => {
         if (this.selectedExperiment() && (!this.disableStatusRefreshFilter() || this.previousExperimentId === undefined) && this.selectedExperiment()?.id !== this.previousExperimentId) {
           const id = this.selectedExperiment().id;
           this.previousExperimentId = id;
+          this.optionalMetricsDic.set(null);
           this.selectedMetric.set(null);
           if (this.metricForTask()) {
             this.selectedMetrics.update(metrics => ({...metrics, [id]: this.metricForTask()[id]}));
           }
           this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds()}));
         }
-      }, {allowSignalWrites: true});
-
-      if (this.minimized()) {
-        this.store.select(selectSplitSize)
-          .pipe(takeUntilDestroyed())
-          .subscribe(() => this.sampleViews().forEach(view => view.resize()));
-      }
+      });
     }
 
     combineLatest([
@@ -210,7 +222,7 @@ export class DebugImagesComponent {
             this.selectedMetrics.update(metrics => ({...metrics, [key]: debugImages[key]?.metric}));
           }
         });
-        this.changeDetection.markForCheck();
+        this.changeDetection.detectChanges();
       });
 
     this.refresh.tick
@@ -221,6 +233,7 @@ export class DebugImagesComponent {
       .subscribe(auto => {
         if (this.multipleExperiments()) {
           this.store.dispatch(debugActions.refreshDebugImagesMetrics({tasks: this.experimentIds(), autoRefresh: auto}));
+          this.store.dispatch(debugActions.fetchExperiments({tasks: this.ids().slice(0, LIMITED_VIEW_LIMIT)}));
         }
         this.store.dispatch(debugActions.getDebugImagesMetrics({tasks: this.experimentIds(), autoRefresh: true}));
         this.experimentIds().forEach(experimentId => {

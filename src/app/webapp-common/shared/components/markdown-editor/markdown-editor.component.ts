@@ -18,7 +18,6 @@ import {
 import {getBaseName} from '@common/shared/utils/shared-utils';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
-import { NgClass } from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {FormsModule} from '@angular/forms';
 import {MatMenuModule} from '@angular/material/menu';
@@ -34,21 +33,20 @@ const BREAK_POINT = 990;
 
 
 @Component({
-  selector: 'sm-markdown-editor',
-  templateUrl: './markdown-editor.component.html',
-  styleUrls: ['./markdown-editor.component.scss'],
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    LMarkdownEditorModule,
-    FormsModule,
-    MatMenuModule,
-    BaseNamePipe,
-    ClickStopPropagationDirective,
-    MatButton,
-    MatIcon,
-    MatIconButton
-  ]
+    selector: 'sm-markdown-editor',
+    templateUrl: './markdown-editor.component.html',
+    styleUrls: ['./markdown-editor.component.scss'],
+    imports: [
+        TooltipDirective,
+        LMarkdownEditorModule,
+        FormsModule,
+        MatMenuModule,
+        BaseNamePipe,
+        ClickStopPropagationDirective,
+        MatButton,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class MarkdownEditorComponent {
   private store = inject(Store);
@@ -232,7 +230,9 @@ export class MarkdownEditorComponent {
         preventScroll: true // do not change selection
       });
       const deltas = manager.getDeltas(null, null);
-      this.ace.session.replace(range, '```py');
+      if (range) {
+        this.ace.session.replace(range, '```py');
+      }
       manager['$undoStack'] = deltas;
     }
   }

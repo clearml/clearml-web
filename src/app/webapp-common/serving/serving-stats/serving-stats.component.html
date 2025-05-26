@@ -6,7 +6,7 @@
 <div #chart class="line-chart-container">
   <sm-line-chart
     class="h-100"
-    [colorScheme]="presetColors"
+    [colorScheme]="presetColors()"
     [showLoadingOverlay]="refreshChart()"
     [data]="chartData()"
     [yLabel]="yAxisLabel()"

@@ -41,37 +41,27 @@ import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/share
 import {animate, style, transition, trigger} from '@angular/animations';
 
 @Component({
-  selector: 'sm-experiments-table',
-  templateUrl: './experiments-table.component.html',
-  styleUrls: ['./experiments-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [{
-    provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
-    useValue: {showDelay: 500, position: 'above'} as MatTooltipDefaultOptions,
-  }],
-  animations: [
-    trigger(
-      'inOutAnimation',
-      [
-        transition(
-          ':enter',
-          [
-            style({opacity: 0 }),
-            animate('0.25s ease-in',
-              style({opacity: 1 }))
-          ]
-        ),
-        transition(
-          ':leave',
-          [
-            style({opacity: 1 }),
-            animate('0.2s ease-in',
-              style({opacity: 0 }))
-          ]
-        )
-      ]
-    )
-  ]
+    selector: 'sm-experiments-table',
+    templateUrl: './experiments-table.component.html',
+    styleUrls: ['./experiments-table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [{
+            provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+            useValue: { showDelay: 500, position: 'above' } as MatTooltipDefaultOptions,
+        }],
+    animations: [
+        trigger('inOutAnimation', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('0.25s ease-in', style({ opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ opacity: 1 }),
+                animate('0.2s ease-in', style({ opacity: 0 }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class ExperimentsTableComponent extends BaseTableView implements OnInit, OnDestroy {
   readonly experimentsTableColFields = EXPERIMENTS_TABLE_COL_FIELDS;

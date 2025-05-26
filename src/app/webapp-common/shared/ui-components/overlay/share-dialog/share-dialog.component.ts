@@ -14,19 +14,18 @@ import {MatButton} from '@angular/material/button';
 
 
 @Component({
-  selector: 'sm-share-dialog',
-  templateUrl: './share-dialog.component.html',
-  styleUrls: ['./share-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    ClipboardModule,
-    ClickStopPropagationDirective,
-    SaferPipe,
-    MatIcon,
-    MatButton,
-    MatDialogActions
-  ]
+    selector: 'sm-share-dialog',
+    templateUrl: './share-dialog.component.html',
+    styleUrls: ['./share-dialog.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        ClipboardModule,
+        ClickStopPropagationDirective,
+        SaferPipe,
+        MatIcon,
+        MatButton,
+        MatDialogActions
+    ]
 })
 export class ShareDialogComponent {
 

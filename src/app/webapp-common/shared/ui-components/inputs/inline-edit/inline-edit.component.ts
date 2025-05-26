@@ -10,19 +10,18 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-inline-edit',
-  templateUrl: './inline-edit.component.html',
-  styleUrls: ['./inline-edit.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    FormsModule,
-    UniqueNameValidatorDirective,
-    TooltipDirective,
-    ClickStopPropagationDirective,
-    MatIcon,
-    MatIconButton,
-  ]
+    selector: 'sm-inline-edit',
+    templateUrl: './inline-edit.component.html',
+    styleUrls: ['./inline-edit.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule,
+        UniqueNameValidatorDirective,
+        TooltipDirective,
+        ClickStopPropagationDirective,
+        MatIcon,
+        MatIconButton,
+    ]
 })
 export class InlineEditComponent implements OnDestroy {
   public readonly cancelButton = 'CANCEL_BUTTON';
@@ -54,7 +53,7 @@ export class InlineEditComponent implements OnDestroy {
   @Output() inlineActiveStateChanged = new EventEmitter<boolean>();
   @Output() textChanged = new EventEmitter<string>();
   @Output() inlineFocusOutEvent = new EventEmitter<boolean>();
-  @Output() cancel = new EventEmitter();
+  @Output() cancelEdit = new EventEmitter();
   @Output() cancelClick = new EventEmitter<Event>();
   @ViewChild('inlineInput') inlineInput: NgModel;
   @ViewChild('inlineInput', { read: ElementRef }) inlineInputRef: ElementRef;
@@ -63,7 +62,7 @@ export class InlineEditComponent implements OnDestroy {
 
   @HostListener('document:click', [])
   clickOut() {
-    if (this.active) {
+    if (this.active && !this.multiline) {
       this.inlineCanceled();
     }
   }
@@ -75,18 +74,21 @@ export class InlineEditComponent implements OnDestroy {
     this.inlineValue = this.originalText;
     this.active = false;
     this.inlineActiveStateChanged.emit(false);
-    this.cancel.emit();
+    this.cancelEdit.emit();
     this.cdr.detectChanges();
   }
 
   public inlineSaved() {
     this.inlineValue = this.inlineInput.value;
-    if (this.inlineValue != this.originalText) {
+    if (this.inlineValue !== this.originalText) {
       this.textChanged.emit(this.inlineValue);
+      this.active = false;
+      this.inlineActiveStateChanged.emit(false);
+      this.cdr.detectChanges();
+    } else {
+       this.inlineCanceled();
     }
-    this.active = false;
-    this.inlineActiveStateChanged.emit(false);
-    this.cdr.detectChanges();
+
   }
 
   public inlineActivated(event?: Event) {

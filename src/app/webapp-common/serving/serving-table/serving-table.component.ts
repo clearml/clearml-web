@@ -19,33 +19,23 @@ import { EntityTypeEnum } from '~/shared/constants/non-common-consts';
 import {fileSizeConfigCount, fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 
 @Component({
-  selector: 'sm-serving-table',
-  templateUrl: './serving-table.component.html',
-  styleUrl: './serving-table.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger(
-      'inOutAnimation',
-      [
-        transition(
-          ':enter',
-          [
-            style({opacity: 0}),
-            animate('0.25s ease-in',
-              style({opacity: 1}))
-          ]
-        ),
-        transition(
-          ':leave',
-          [
-            style({opacity: 1}),
-            animate('0.2s ease-in',
-              style({opacity: 0}))
-          ]
-        )
-      ]
-    )
-  ]
+    selector: 'sm-serving-table',
+    templateUrl: './serving-table.component.html',
+    styleUrl: './serving-table.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('inOutAnimation', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('0.25s ease-in', style({ opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ opacity: 1 }),
+                animate('0.2s ease-in', style({ opacity: 0 }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class ServingTableComponent extends BaseTableView implements OnChanges {
   readonly endpointsTableColFields = servingTableColFields;

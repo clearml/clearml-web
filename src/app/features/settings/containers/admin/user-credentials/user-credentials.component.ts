@@ -12,11 +12,12 @@ import {CreateCredentialDialogComponent} from '~/features/settings/containers/ad
 @Component({
   selector: 'sm-user-credentials',
   templateUrl: './user-credentials.component.html',
-  styleUrls: ['./user-credentials.component.scss']
+  styleUrls: ['./user-credentials.component.scss'],
+  standalone: false
 })
 export class UserCredentialsComponent implements OnInit, OnDestroy {
 
-  public credentials$: Observable<{ [workspaceId: string]: CredentialKeyExt[] }>;
+  public credentials$: Observable<Record<string, CredentialKeyExt[]>>;
   private newCredentialSub: Subscription;
   creatingCredentials = false;
   private user: GetCurrentUserResponseUserObject;

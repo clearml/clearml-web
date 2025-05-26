@@ -3,14 +3,13 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
-  selector: 'sm-vertical-labeled-row',
-  templateUrl: './vertical-labeled-row.component.html',
-  styleUrls: ['./vertical-labeled-row.component.scss'],
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective
-  ]
+    selector: 'sm-vertical-labeled-row',
+    templateUrl: './vertical-labeled-row.component.html',
+    styleUrls: ['./vertical-labeled-row.component.scss'],
+    imports: [
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective
+    ]
 })
 export class VerticalLabeledRowComponent {
   @Input() label: string;

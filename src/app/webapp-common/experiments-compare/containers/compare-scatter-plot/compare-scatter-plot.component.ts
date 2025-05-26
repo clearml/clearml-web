@@ -12,9 +12,10 @@ import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-pa
 
 
 @Component({
-  selector: 'sm-compare-scatter-plot',
-  templateUrl: './compare-scatter-plot.component.html',
-  styleUrls: ['./compare-scatter-plot.component.scss']
+    selector: 'sm-compare-scatter-plot',
+    templateUrl: './compare-scatter-plot.component.html',
+    styleUrls: ['./compare-scatter-plot.component.scss'],
+    standalone: false
 })
 export class CompareScatterPlotComponent implements OnChanges {
   public metricVariantToPathPipe = new MetricVariantToPathPipe;

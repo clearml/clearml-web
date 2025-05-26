@@ -14,9 +14,10 @@ import {withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 
 @Component({
-  selector: 'sm-open-datasets',
-  templateUrl: './open-datasets.component.html',
-  styleUrls: ['./open-datasets.component.scss']
+    selector: 'sm-open-datasets',
+    templateUrl: './open-datasets.component.html',
+    styleUrls: ['./open-datasets.component.scss'],
+    standalone: false
 })
 export class OpenDatasetsComponent extends PipelinesPageComponent implements OnInit {
 

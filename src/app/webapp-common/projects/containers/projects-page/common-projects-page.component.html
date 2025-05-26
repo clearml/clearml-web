@@ -9,6 +9,7 @@
   (createNewProjectClicked)="openProjectDialog('create', $event)"
   (projectEditClicked)="openProjectDialog('edit', $event)"
   (moveToClicked)="openProjectDialog('move', $event)"
+  (projectSettingsClicked)="openProjectSettings($event)"
 >
   <sm-projects-header
     (orderByChanged)="orderByChanged($event)"

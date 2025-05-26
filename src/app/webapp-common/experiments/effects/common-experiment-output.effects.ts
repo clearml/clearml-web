@@ -43,6 +43,7 @@ export class CommonExperimentOutputEffects {
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested, outputActions.experimentPlotsRequested),
+    filter(action => !action?.['refresh']),
     map(action => activeLoader(action.type))
   ));
 
@@ -61,7 +62,7 @@ export class CommonExperimentOutputEffects {
           this.store.select(selectSelectedExperiment),
           this.store.select(selectPipelineSelectedStep)),
         mergeMap(([res, selectedTask, pipeStep]: [EventsGetTaskLogResponse, IExperimentInfo, IExperimentInfo]) => [
-          ...([pipeStep?.id, selectedTask.id].includes(action.id) ?
+          ...([pipeStep?.id, selectedTask?.id].includes(action.id) || selectedTask === null ?
               [
                 outputActions.setExperimentLog({
                   events: res.events.map((e: Log) => ({...e, msg: e.msg?.replace(/\0/g, '')})),
@@ -84,7 +85,12 @@ export class CommonExperimentOutputEffects {
           deactivateLoader(refreshExperiments.type),
           ...(action.refresh || action.from || action.autoRefresh
             // hide weird missing id error
-          || error.error.meta.result_subcode === 101 ? [] : [setServerError(error, null, 'Failed to fetch log')]),
+          || error.error.meta.result_subcode === 101 ? (action.id === '*' ? [outputActions.setExperimentLog({
+            events: [],
+            total: 0,
+            direction: action.direction,
+            refresh: action.refresh
+          })] : []) : [setServerError(error, null, 'Failed to fetch log')]),
           outputActions.setExperimentLogLoading({loading: false})
         ])
       )
@@ -119,6 +125,7 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentScalarSingleValue$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested),
+    filter(action => !action.skipSingleValue),
     switchMap((action) => this.eventsApi.eventsGetTaskSingleValueMetrics({
       tasks: [action.experimentId],
       // eslint-disable-next-line @typescript-eslint/naming-convention

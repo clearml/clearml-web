@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, inject, input, OnInit, output} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormFieldModule, MatLabel} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {fromEvent} from 'rxjs';
@@ -22,23 +21,19 @@ type GoogleForm = FormGroup<{
 }>
 
 @Component({
-  selector: 'sm-google-storage-credentials',
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatFormFieldModule,
-    MatInputModule,
-    MatLabel,
-    ReactiveFormsModule,
-    MatButton,
-    MatIcon,
-    MatIconButton,
-  ],
-  templateUrl: './google-storage-credentials.component.html',
-  styleUrls: ['./google-storage-credentials.component.scss', '../storage-credentials.scss']
+    selector: 'sm-google-storage-credentials',
+    imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatLabel,
+        ReactiveFormsModule,
+        MatButton,
+        MatIcon,
+        MatIconButton,
+    ],
+    templateUrl: './google-storage-credentials.component.html',
+    styleUrls: ['./google-storage-credentials.component.scss', '../storage-credentials.scss']
 })
 export class GoogleStorageCredentialsComponent implements OnInit {
 

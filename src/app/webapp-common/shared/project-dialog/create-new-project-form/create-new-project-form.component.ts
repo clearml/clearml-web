@@ -1,14 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component, computed, effect, inject,
-  input, output } from '@angular/core';
+  input, output
+} from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {rootProjectsPageSize} from '@common/constants';
 import {MatInputModule} from '@angular/material/input';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {UniqueNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {
+  UniqueNameValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
 import {
   PaginatedEntitySelectorComponent
@@ -16,6 +19,7 @@ import {
 import {toSignal} from '@angular/core/rxjs-interop';
 import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.component';
 import {MatButton} from '@angular/material/button';
+import {minLengthNoSpaces} from '@common/shared/validators/minLengthNoSpaces';
 
 export interface NewProjectResults {
   name?: string;
@@ -30,7 +34,6 @@ export interface NewProjectResults {
   templateUrl: './create-new-project-form.component.html',
   styleUrls: ['./create-new-project-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     MatInputModule,
     StringIncludedInArrayPipe,
@@ -48,7 +51,7 @@ export class CreateNewProjectFormComponent {
   public readonly projectsRoot = 'Projects root';
 
   projectForm = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
+    name: ['', [Validators.required, minLengthNoSpaces(3)]],
     description: [''],
 
     default_output_destination: [null, [Validators.pattern(OutputDestPattern)]],
@@ -68,16 +71,19 @@ export class CreateNewProjectFormComponent {
   projects = input<Project[]>();
   protected rootFiltered = computed(() => !this.projectsRoot.includes(this.projectValue()) && this.projectsRoot === this.baseProject()?.name);
   protected allProjects = computed(() => ([
-    ...(!this.projects() || this.rootFiltered() || this.baseProject()?.id === null ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
+    ...(!this.projects() || this.rootFiltered() || this.baseProject()?.id === null ? [] : [{
+      name: this.projectsRoot,
+      id: '999999999999999'
+    }]),
     ...(this.baseProject() && !this.projectForm.controls.parent.value ? [this.baseProject()] : []),
     ...this.projects() ?? []
   ]));
-  protected projectsNames = computed(() => (this.allProjects().map(project => project.name)));
+  protected projectsNames = computed(() => [...this.allProjects().map(project => project.name), ...this.baseProject() ? [this.baseProject().name] : []]);
 
   filterSearchChanged = output<{
-        value: string;
-        loadMore?: boolean;
-    }>();
+    value: string;
+    loadMore?: boolean;
+  }>();
   projectCreated = output<NewProjectResults>();
 
 

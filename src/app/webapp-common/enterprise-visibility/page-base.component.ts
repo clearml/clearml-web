@@ -12,12 +12,12 @@ export abstract class PageBaseComponent {
   protected theme = this.store.selectSignal(selectThemeMode);
 
   imageClicked(image: HTMLImageElement) {
-    if (image.classList.contains('full-screen')) {
-      image.classList.remove('full-screen');
-      image.parentElement.classList.remove('full-screen')
+    if (image.closest('.image').classList.contains('full-screen')) {
+      image.closest('.image').classList.remove('full-screen');
+      image.closest('.mat-drawer-content').classList.remove('position-static');
     } else {
-      image.classList.add('full-screen');
-      image.parentElement.classList.add('full-screen');
+      image.closest('.image').classList.add('full-screen');
+      image.closest('.mat-drawer-content').classList.add('position-static');
     }
   }
 }

@@ -1,5 +1,5 @@
 @use '@angular/material' as mat;
-@import "variables";
+@use "variables";
 
 @mixin cards($theme) {
   @if mat.get-theme-type($theme) == light {
@@ -9,10 +9,10 @@
     --card-tab2-bg: var(--color-inverse-primary);
     --card-tab2-bg-hover: color-mix(in srgb, var(--color-inverse-primary), var(--color-on-surface) 5%);
   } @else {
-    --card-tab1-bg: #{$blue-500};
-    --card-tab1-hover-bg: #{$blue-400};
-    --card-footer-bg: #{$blue-600};
-    --card-tab2-bg: #{$blue-600};
-    --card-tab2-bg-hover: #{$blue-700};
+    --card-tab1-bg: #{variables.$blue-500};
+    --card-tab1-hover-bg: #{variables.$blue-400};
+    --card-footer-bg: #{variables.$blue-600};
+    --card-tab2-bg: #{variables.$blue-600};
+    --card-tab2-bg-hover: #{variables.$blue-700};
   }
 }

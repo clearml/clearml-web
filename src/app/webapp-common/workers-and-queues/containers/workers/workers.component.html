@@ -1,7 +1,8 @@
 <sm-workers-graph [activeWorker]="selectedWorker$ | ngrxPush" class="overflow-hidden"></sm-workers-graph>
-<as-split class="flex-grow-1" [gutterSize]=1 [useTransition]="true">
+<as-split class="flex-grow-1" [gutterSize]=1 [useTransition]="true" (transitionEnd)="table.table.resize(); table.afterTableInit()">
   <as-split-area [size]="50">
     <sm-workers-table
+      #table
       class="mt-2"
       [workers]="workers$ | ngrxPush"
       [selectedWorker]="selectedWorker$ | ngrxPush"

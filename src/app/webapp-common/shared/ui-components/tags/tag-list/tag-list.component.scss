@@ -1,4 +1,4 @@
-@import "mixins/system-tag";
+@use "mixins/system-tag";
 
 :host {
   display: flex;
@@ -12,7 +12,7 @@
     }
   }
   .tag-item {
-    @include shrinkable-tags();
+    @include system-tag.shrinkable-tags();
   }
 
   .add-button {
@@ -28,7 +28,7 @@
   }
 
   .sys-tag {
-    @include system-tag();
+    @include system-tag.system-tag();
 
     .cog {
       position: absolute;

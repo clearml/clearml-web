@@ -1,18 +1,18 @@
-@import "mixins/common";
+@use "mixins/common";
 
 .top-labels {
-  @include counter-label();
+  @include common.counter-label();
   text-align: left;
   padding-top: 8px;
 }
 
 .sub-title {
-  @include counter-label();
+  @include common.counter-label();
   padding-right: 10px;
 }
 
 .experiment-tag {
-  @include card-header-tag();
+  @include common.card-header-tag();
   color: var(--color-surface-container-low);
 }
 

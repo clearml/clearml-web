@@ -4,15 +4,14 @@ import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/me
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'sm-custom-columns-list',
-  templateUrl: './custom-columns-list.component.html',
-  styleUrls: ['./custom-columns-list.component.scss'],
-  imports: [
-    MenuItemComponent,
-    MatProgressSpinnerModule,
-],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-custom-columns-list',
+    templateUrl: './custom-columns-list.component.html',
+    styleUrls: ['./custom-columns-list.component.scss'],
+    imports: [
+        MenuItemComponent,
+        MatProgressSpinnerModule,
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomColumnsListComponent {
   tableCols = input<ISmCol[]>();

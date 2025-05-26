@@ -1,11 +1,11 @@
-@import "../layout/layout";
+@use "../layout/layout";
 
 :host{
   overflow: auto;
   padding: 24px 24px 0 24px;
 }
 .header-container {
-  height: $project-header-height;
+  height: layout.$project-header-height;
 }
 
 .info-content {
@@ -44,11 +44,12 @@
   .overview-placeholder {
     min-height: 320px;
     flex: 1;
+    color: var(--color-empty-state);
 
     .no-data-title {
-      font-size: 20px;
-      font-weight: 500;
       margin: 24px 0;
+      font-size: 16px;
+      font-weight: 500;
     }
 
     .no-data-button {

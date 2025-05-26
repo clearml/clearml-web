@@ -1,7 +1,7 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
   [tableCols]="tableMode() === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
-  [isArchived]="isArchived$ | ngrxPush"
+  [isArchived]="isArchivedMode()"
   [metricVariants]="metricsVariants$()"
   [hyperParams]="tableMode() === 'compare' ? null : hyperParams$ | ngrxPush"
   [minimizedView]="minimizedView$ | ngrxPush"
@@ -35,7 +35,7 @@
     <button
       mat-flat-button
       class="me-3"
-      [disabled]="isArchived$ | ngrxPush"
+      [disabled]="isArchivedMode() || isExampleProject"
       [class.icon-only]="isSmallScreen"
       data-id="New Experiment"
       (click)="newExperiment()"

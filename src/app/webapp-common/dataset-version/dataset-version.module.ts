@@ -46,6 +46,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
 import {OpenDatasetVersionContentComponent} from '@common/dataset-version/open-dataset-version-content/open-dataset-version-content.component';
+import {ExperimentOutputLogComponent} from '@common/experiments/containers/experiment-output-log/experiment-output-log.component';
 
 
 
@@ -104,7 +105,8 @@ export const routes: Routes = [
     MatButton,
     IdBadgeComponent,
     OpenDatasetVersionPreviewComponent,
-    OpenDatasetVersionContentComponent
+    OpenDatasetVersionContentComponent,
+    ExperimentOutputLogComponent
   ]
 })
 export class DatasetVersionModule { }

@@ -28,7 +28,7 @@ import {isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-
 import {isFileserverUrl} from '~/shared/utils/url';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {concatLatestFrom} from '@ngrx/operators';
-import {selectExtraCredentials} from '~/core/reducers/auth.reducers';
+import {selectCompanyPreSignServices, selectExtraCredentials} from '~/core/reducers/auth.reducers';
 import {ErrorService} from '@common/shared/services/error.service';
 
 @Injectable()
@@ -183,13 +183,15 @@ export class CommonAuthEffects {
       mergeMap(([action, prevSigns]) =>
         forkJoin(action.sign.map(req =>
           of(action).pipe(
-            concatLatestFrom(() =>
-              this.store.select(selectSignedUrl(req.url))
-            ),
-            switchMap(([, signedUrl]) => (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() ||
-                (isFileserverUrl(req.url) && req.config?.disableCache) ||
-                (req.config?.error && isGoogleCloudUrl(req.url) && !signedUrl.signed.includes('X-Amz-Signature'))
-              ) ? this.adminService.signUrlIfNeeded(req.url, req.config, prevSigns[req.url]) : of({type: 'none'})),
+            concatLatestFrom(() => [
+              this.store.select(selectSignedUrl(req.url)),
+              this.store.select(selectCompanyPreSignServices)
+            ]),
+            switchMap(([, signedUrl, preSignService]) => (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() ||
+              (isFileserverUrl(req.url) && req.config?.disableCache) ||
+              (req.config?.error && isGoogleCloudUrl(req.url) && !signedUrl.signed.includes('X-Amz-Signature')) ||
+              preSignService.length > 0
+            ) ? this.adminService.signUrlIfNeeded(req.url, req.config, prevSigns[req.url]) : of({type: 'none'})),
             map(res => ({res, orgUrl: req.url}))
           )
         )).pipe(
@@ -250,9 +252,9 @@ export class CommonAuthEffects {
         .pipe(
           concatLatestFrom(() => this.store.select(selectS3BucketCredentialsBucketCredentials)),
           switchMap(([data, bucketCredentials]) => {
-            const actions = [...this.signAfterPopup];
-            this.signAfterPopup = [];
+            let actions = [];
             if (data) {
+              actions = [...this.signAfterPopup];
               if (!data.success) {
                 const emptyCredentials = bucketCredentials.find((cred => cred?.Bucket === data.Bucket)) === undefined;
                 const dontAskAgainForBucketName = emptyCredentials ? '' : data.Bucket + data.Endpoint;
@@ -260,6 +262,7 @@ export class CommonAuthEffects {
               }
               return [authActions.saveS3Credentials({newCredential: data}), ...actions];
             }
+            this.signAfterPopup = [];
             return actions;
           }),
           finalize(() => action?.credentials?.Bucket && delete this.openPopup[action.credentials.Bucket])

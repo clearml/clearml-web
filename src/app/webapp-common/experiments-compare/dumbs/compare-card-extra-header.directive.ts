@@ -1,7 +1,8 @@
 import {Directive} from '@angular/core';
 
 @Directive({
-  selector: '[compareCardExtraHeader]'
+    selector: '[compareCardExtraHeader]',
+    standalone: false
 })
 export class CompareCardExtraHeaderDirective {
 

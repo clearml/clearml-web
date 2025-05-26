@@ -7,18 +7,17 @@ import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-copy-clipboard',
-  templateUrl: './copy-clipboard.component.html',
-  styleUrls: ['./copy-clipboard.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    TooltipDirective,
-    ClipboardModule,
-    ClickStopPropagationDirective,
-    MatIcon,
-    MatButton
-  ],
-  standalone: true
+    selector: 'sm-copy-clipboard',
+    templateUrl: './copy-clipboard.component.html',
+    styleUrls: ['./copy-clipboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        ClipboardModule,
+        ClickStopPropagationDirective,
+        MatIcon,
+        MatButton
+    ]
 })
 export class CopyClipboardComponent {
 

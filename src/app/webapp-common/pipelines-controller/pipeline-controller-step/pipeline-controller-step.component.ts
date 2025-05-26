@@ -13,28 +13,23 @@ import {map} from 'rxjs/operators';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 
 @Component({
-  selector: 'sm-pipeline-controller-step',
-  templateUrl: './pipeline-controller-step.component.html',
-  styleUrls: ['./pipeline-controller-step.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('openClose', [
-      state(
-        'open',
-        style({
-          transform: 'scale(3)',
-          opacity: 0
-        }),
-      ),
-      state(
-        'closed',
-        style({
-          opacity: 1,
-        }),
-      ),
-      transition('closed => open', [animate('0.35s')]),
-    ]),
-  ],
+    selector: 'sm-pipeline-controller-step',
+    templateUrl: './pipeline-controller-step.component.html',
+    styleUrls: ['./pipeline-controller-step.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('openClose', [
+            state('open', style({
+                transform: 'scale(3)',
+                opacity: 0
+            })),
+            state('closed', style({
+                opacity: 1,
+            })),
+            transition('closed => open', [animate('0.35s')]),
+        ]),
+    ],
+    standalone: false
 })
 export class PipelineControllerStepComponent {
   step = input<PipelineItem>();

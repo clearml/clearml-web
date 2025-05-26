@@ -20,7 +20,6 @@ import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllE
 import {SortMeta} from 'primeng/api';
 import {createFiltersFromStore, encodeOrder, excludedKey, getTagsFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
-import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -90,7 +89,7 @@ export class SelectModelEffects {
 
   modelsFilterChanged = createEffect(() => this.actions$.pipe(
     ofType(actions.globalFilterChanged, actions.tableSortChanged, actions.tableFilterChanged, actions.showArchive, actions.clearTableFilter),
-    debounceTime(0), // Let other effects finish first
+    debounceTime(50), // Let other effects finish first
     switchMap((action) => this.fetchModels$(null)
       .pipe(
         mergeMap(res => [
@@ -125,7 +124,7 @@ export class SelectModelEffects {
     ofType(getSelectedModels),
     switchMap(action => this.apiModels.modelsGetAllEx({
       id: action.selectedIds,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       only_fields: this.selectModelsOnlyFields
     })),
     mergeMap(res => [
@@ -136,7 +135,7 @@ export class SelectModelEffects {
 
   getGetAllQuery(
     scrollId: string, projectId: string, searchQuery: string, orderFields: SortMeta[],
-    tableFilters: { [s: string]: FilterMetadata }, showArchived: boolean
+    tableFilters: Record<string, FilterMetadata>, showArchived: boolean
   ): ModelsGetAllExRequest {
     const userFilter = get(tableFilters, [MODELS_TABLE_COL_FIELDS.USER, 'value']);
     const tagsFilter = tableFilters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value;
@@ -153,7 +152,7 @@ export class SelectModelEffects {
         pattern: escapeRegex(searchQuery),
         fields: ['id', 'name', 'framework', 'system_tags', 'uri']
       } : undefined,
-      /* eslint-disable @typescript-eslint/naming-convention */
+
       project: projectFilter,
       scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
       size: MODELS_PAGE_SIZE,
@@ -170,7 +169,7 @@ export class SelectModelEffects {
       ...(!window.location.href.includes('compare') && {ready: true}),
       framework: tableFilters?.[MODELS_TABLE_COL_FIELDS.FRAMEWORK]?.value ?? undefined,
       user: (userFilter && userFilter.length > 0) ? userFilter : undefined
-      /* eslint-enable @typescript-eslint/naming-convention */
+
     };
   }
 

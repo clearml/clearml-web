@@ -1,29 +1,30 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, Subject, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter} from 'rxjs/operators';
+import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {selectModelPlots, selectSelectedModel, selectSplitSize} from '@common/models/reducers';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
+import {convertPlots, ExtMetricsPlotEvent, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getPlots, setPlots} from '@common/models/actions/models-info.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {selectModelSettingsHiddenPlot} from '@common/experiments/reducers';
 import {isEqual} from 'lodash-es';
 import {setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {GroupedList} from '@common/tasks/tasks.model';
 
 @Component({
-  selector: 'sm-model-info-plot',
-  templateUrl: './model-info-plots.component.html',
-  styleUrls: [
-    './model-info-plots.component.scss',
-    '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-model-info-plot',
+    templateUrl: './model-info-plots.component.html',
+    styleUrls: [
+        './model-info-plots.component.scss',
+        '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private store = inject(Store);
@@ -33,8 +34,8 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
 
   public graphs: Record<string, any[]>;
-  public plotsList$ = new Subject<SelectableListItem[]>();
-  public plotsList: SelectableListItem[];
+  public plotsList$ = new Subject<GroupedList>();
+  public plotsList: GroupedList;
   public searchTerm: string;
   public minimized = true;
   public dark = false;
@@ -42,9 +43,18 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private refreshDisabled: boolean;
   private modelId: string;
   public selectedMetrics: string[];
+  private originalPlotList: { metric: string; variant: string }[];
   protected splitSize$ = this.store.select(selectSplitSize);
   protected modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
-  protected plots$ = this.store.select(selectModelPlots);
+  protected plots$ = this.store.select(selectModelPlots).pipe(
+    filter((metrics) => !!metrics),
+    tap((list: MetricsPlotEvent[]) => {
+      this.originalPlotList = list.map((plot) => ({
+        metric: plot.metric,
+        variant: plot.variant
+      }));
+    })
+  );
   protected listOfHidden$ = this.store.select(selectModelSettingsHiddenPlot)
     .pipe(distinctUntilChanged(isEqual));
 
@@ -56,9 +66,19 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     this.sub.add(combineLatest([this.listOfHidden$, this.plots$, this.plotsList$])
       .pipe(filter(() => !!this.plotsList))
       .subscribe(([hiddenList]) => {
-        this.selectedMetrics = hiddenList.length === 0 ?
-          this.plotsList.map( name => name.name) :
-          this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric));
+        const selectedMetrics = hiddenList.length === 0 ?
+          [...this.originalPlotList] :
+          this.originalPlotList.filter(({metric, variant}) => !hiddenList.includes(`${metric}${variant}`));
+
+        const metricsWithoutVariants = selectedMetrics
+          .map(({metric}) => metric)
+          .filter(m => !!m);
+
+        this.selectedMetrics = Array.from(new Set([
+          ...selectedMetrics.map(({metric, variant}) => `${metric}${variant}`),
+          ...metricsWithoutVariants
+        ]));
+
         this.cdr.markForCheck();
       }));
 
@@ -96,20 +116,16 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
       .subscribe(metricsPlots => {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
-        this.plotsList = this.preparePlotsList(groupedPlots);
+        this.plotsList = this.getPlotsList(groupedPlots);
         this.plotsList$.next(this.plotsList);
         const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: this.modelId});
         this.graphs = graphs;
-        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
+        if (parsingError) {
+          this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
+        }
         this.cdr.detectChanges();
       })
     );
-  }
-
-  private preparePlotsList(groupedPlots: Record<string, MetricsPlotEvent[]>): SelectableListItem[] {
-    const list = groupedPlots ? Object.keys(groupedPlots) : [];
-    const sortedList = sortMetricsList(list);
-    return sortedList.map((item) => ({name: item, value: item}));
   }
 
   refresh() {
@@ -119,14 +135,33 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     }
   }
 
+  getPlotsList(groupedPlots: Record<string, ExtMetricsPlotEvent[]>) {
+    return Object.keys(groupedPlots).sort().reduce((acc, metric) => {
+      if (groupedPlots[metric].length < 2) {
+        acc[metric + groupedPlots[metric][0].variant] = {__displayName: metric} as any;
+      } else {
+        acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
+          acc2[plot.variant] = {};
+          return acc2;
+        }, {});
+      }
+      return acc;
+    }, {} as GroupedList);
+  }
+
   metricSelected(id: string) {
     this.graphsComponent()?.scrollToGraph(id);
   }
 
   hiddenListChanged(hiddenList: string[]) {
+    const metrics = Object.keys(this.plotsList);
+    const variants = metrics.map((metric) => Object.keys(this.plotsList[metric]).map(v => metric + v)).flat(2);
     this.store.dispatch(setExperimentSettings({
       id: this.modelId,
-      changes: {hiddenMetricsPlot: this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric))}}));
+      changes: {
+        hiddenMetricsPlot: [...metrics, ...variants].filter(metric => !hiddenList.includes(metric))
+      }
+    }));
   }
 
   searchTermChanged(searchTerm: string) {

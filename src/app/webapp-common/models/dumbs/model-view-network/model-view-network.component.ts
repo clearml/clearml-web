@@ -9,10 +9,11 @@ import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-
 import {SelectedModel} from '@common/models/shared/models.model';
 
 @Component({
-  selector   : 'sm-model-view-network',
-  templateUrl: './model-view-network.component.html',
-  styleUrls  : ['./model-view-network.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-model-view-network',
+    templateUrl: './model-view-network.component.html',
+    styleUrls: ['./model-view-network.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ModelViewNetworkComponent {
   private dialog = inject(MatDialog);

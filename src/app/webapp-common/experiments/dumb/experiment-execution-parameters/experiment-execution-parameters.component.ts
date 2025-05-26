@@ -1,19 +1,23 @@
 import {
   Component,
   OnChanges,
-  SimpleChanges, inject, viewChild, viewChildren, output, effect, input } from '@angular/core';
+  SimpleChanges, inject, viewChild, viewChildren, output, effect, input, signal
+} from '@angular/core';
 import {cloneDeep} from 'lodash-es';
 import {v4 as uuidV4} from 'uuid';
 import {NgForm} from '@angular/forms';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
-import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash-es';
 import {MatInput} from '@angular/material/input';
 import {Store} from '@ngrx/store';
-import { navigateToDataset } from '@common/experiments/actions/common-experiments-info.actions';
-import {trackByIndex} from '@common/shared/utils/forms-track-by';
+import {navigateToDataset} from '@common/experiments/actions/common-experiments-info.actions';
+import {injectResize} from 'ngxtension/resize';
+import {map, take} from 'rxjs/operators';
+import {startWith} from 'rxjs';
+import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
+import {MatDialog} from '@angular/material/dialog';
 
 export interface ExecutionParameter {
   name?: string;
@@ -22,51 +26,57 @@ export interface ExecutionParameter {
   id: string;
   type?: string;
   value?: string;
+  isMaximize?: boolean;
+  isJson?: boolean;
 }
 
 @Component({
   selector: 'sm-experiment-execution-parameters',
   templateUrl: './experiment-execution-parameters.component.html',
-  styleUrls: ['./experiment-execution-parameters.component.scss']
+  styleUrls: ['./experiment-execution-parameters.component.scss'],
+  standalone: false
 })
 export class ExperimentExecutionParametersComponent implements OnChanges {
   private store = inject(Store);
+  private dialog = inject(MatDialog);
+  private resize$ = injectResize({emitInitialResult: true});
 
-  form = [] as ExecutionParameter[];
+  public form = signal<ExecutionParameter[]>([]);
   private clickedRow: number;
 
-  public search = '';
-  public searchIndexList: {index: number; col: string}[] = [];
+  protected search = '';
+  protected searchIndexList: { index: number; col: string }[] = [];
   public matchIndex = -1;
-  public cols = [
-    {id: 'name', style: {width: '300px'}},
-    {id: 'value', style: {width: '60%'}},
-    {id: 'description', style: {width: '48px'}}
-  ] as ISmCol[];
+  protected calcCols$ = this.resize$
+    .pipe(
+      startWith({width: 500}),
+      map(res => res.width),
+      map(width => [
+        {id: 'name', style: {width: `${(width - 64) / 2}px`}},
+        {id: 'value', style: {width: `${(width - 64) / 2}px`}},
+        {id: 'description', style: {width: '64px'}}
+      ])
+    );
 
-
-  hyperParameters = viewChild<NgForm>('hyperParameters');
-  executionParametersTable = viewChild<TableComponent<ExecutionParameter>>(TableComponent);
-
-  formContainer = viewChild(CdkVirtualScrollViewport);
-  rows = viewChildren<MatInput>('row');
-  viewPort = viewChild(CdkVirtualScrollViewport);
+  section = input<string>();
+  size = input<number>();
+  formData = input<ExecutionParameter[]>();
+  editable = input<boolean>();
+  searchedText = input<string>();
   formDataChanged = output<{
-        field: string;
-        value: ParamsItem[];
-    }>();
+    field: string;
+    value: ParamsItem[];
+  }>();
   searchCounterChanged = output<number>();
   resetSearch = output();
   scrollToResultCounterReset = output();
-  section = input<string>();
 
-  size = input<number>();
-  formData = input<ExecutionParameter[]>();
+  public hyperParameters = viewChild<NgForm>('hyperParameters');
+  private executionParametersTable = viewChild<TableComponent<ExecutionParameter>>(TableComponent);
 
-
-  editable = input<boolean>();
-
-  searchedText = input<string>();
+  private formContainer = viewChild(CdkVirtualScrollViewport);
+  private rows = viewChildren<MatInput>('row');
+  private viewPort = viewChild(CdkVirtualScrollViewport);
 
   constructor() {
     effect(() => {
@@ -82,7 +92,12 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
     });
 
     effect(() => {
-      this.form = cloneDeep(this.formData()).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+      this.form.set(cloneDeep(this.formData()).map((row: ParamsItem) => ({
+        ...row,
+        id: uuidV4(),
+        isMaximize: this.isMaximize(row.value),
+        isJson: this.isJson(row.value)
+      })));
     });
 
     effect(() => {
@@ -94,18 +109,21 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   }
 
   formNames(id) {
-    return this.form.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
+    return this.form().filter(parameter => parameter.id !== id).map(parameter => parameter.name);
   }
 
   addRow() {
-    this.form.push({
-      id: uuidV4(),
-      section: this.section(),
-      name: '',
-      value: '',
-      description: '',
-      type: ''
-    });
+    this.form.update(form => ([
+      ...form,
+      {
+        id: uuidV4(),
+        section: this.section(),
+        name: '',
+        value: '',
+        description: '',
+        type: ''
+      }])
+    );
     window.setTimeout(() => {
       const height = this.viewPort().elementRef.nativeElement.scrollHeight;
       this.viewPort().scrollToIndex(height, 'smooth');
@@ -113,11 +131,12 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   }
 
   removeRow(index) {
-    this.form.splice(index, 1);
+    this.form().splice(index, 1);
+    this.hyperParameters().form.markAsDirty();
   }
 
   rowActivated({data}: { data: ExecutionParameter; e: MouseEvent }) {
-    this.clickedRow = this.form.findIndex(row => row.name === data.name);
+    this.clickedRow = this.form().findIndex(row => row.name === data.name);
   }
 
   resetIndex() {
@@ -161,7 +180,13 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   }
 
   cancel() {
-    this.form = cloneDeep(this.formData()).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+    this.form.set(cloneDeep(this.formData()).map((row: ParamsItem) => ({
+      ...row,
+      id: uuidV4(),
+      isMaximize: this.isMaximize(row.value),
+      isJson: this.isJson(row.value)
+    })));
+    this.hyperParameters().form.markAsPristine();
   }
 
   nextRow(event: Event, index: number) {
@@ -170,12 +195,59 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
     if (this.formData().length === index + 1) {
       this.addRow();
     }
-    window.setTimeout(()=> this.rows().at(index + 1)?.focus());
+    window.setTimeout(() => this.rows().at(index + 1)?.focus());
   }
 
   navigateToDataset(datasetId: string) {
     this.store.dispatch(navigateToDataset({datasetId}));
   }
 
-  protected readonly trackByIndex = trackByIndex;
+  private isMaximize(value: string): boolean {
+    return value.length > 24;
+  }
+
+  private isJson(value: string): boolean {
+      try {
+        const a = JSON.parse(value);
+        return true;
+      } catch (e) {
+        return false;
+      }
+  }
+
+  openJsonViewer(parameter: ExecutionParameter, readOnly: boolean) {
+    let text= '';
+    let isJson = false;
+    try {
+      text = JSON.parse(parameter.value);
+      isJson = true;
+    }
+    catch (e) {
+      text = parameter.value;
+    }
+    this.dialog.open<EditJsonComponent, EditJsonData, string>(EditJsonComponent, {
+      data: {
+        textData: text,
+        readOnly,
+        title: `${readOnly ? 'VIEW' : 'EDIT'} PARAMETER: "${parameter.name}"`,
+        format: isJson ? 'json' : null
+      } as EditJsonData,
+      maxWidth: 'calc(70vw + 64px)'
+    }).afterClosed()
+      .pipe(take(1))
+      .subscribe((data) => {
+          if (data !== undefined && data !== parameter.value) {
+            const dataString = JSON.stringify(data);
+            this.form.update(form => form.map(row =>
+              row.id === parameter.id ? {
+              ...row,
+                value: data.length === 0 ? '' : isJson ? dataString : data,
+                isJson: this.isJson(dataString),
+                isMaximize: this.isMaximize(dataString),
+            } : row));
+            this.hyperParameters().form.markAsDirty();
+          }
+        }
+      );
+  }
 }

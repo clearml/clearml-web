@@ -1,13 +1,12 @@
 <form [class.editable]="editable()" #hyperParameters="ngForm">
   <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="58" minBufferPx="280" maxBufferPx="560">
     @if (editable()) {
-      @for (parameter of form; track $index) {
+      @for (parameter of form(); track parameter.id) {
         <div class="w-100 d-flex pe-2">
           <mat-form-field
             [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
             appearance="outline"
-            class="strength"
-            >
+            class="strength">
             <input
               #parameterKey="ngModel"
               #row="matInput"
@@ -37,8 +36,7 @@
               </mat-error>
             }
           </mat-form-field>
-          <mat-form-field appearance="outline"
-            class="strength">
+          <mat-form-field appearance="outline" class="strength">
             <input
               #parameterValue="ngModel"
               [(ngModel)]="parameter['value']"
@@ -48,6 +46,11 @@
               [class.highlight-text]="(searchedText()?.length > 0) && parameter['value'].includes(searchedText())"
               [class.current-match]="searchIndexList[matchIndex]?.index === $index && searchIndexList[matchIndex]?.col==='value'"
               matInput/>
+            @if (parameter.isMaximize || parameter.value.length > 24) {
+              <button matSuffix mat-icon-button (click)="openJsonViewer(parameter, false)" class="sm">
+                <mat-icon fontSet="al" fontIcon="al-ico-edit"></mat-icon>
+              </button>
+            }
           </mat-form-field>
           <button mat-icon-button class="remove-button" (click)="removeRow($index)">
             <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
@@ -66,70 +69,86 @@
 @if (!editable()) {
   <div class="table-container">
     <sm-table
-      [columns]="cols"
+      [columns]="calcCols$ | ngrxPush"
       columnResizeMode="fit"
-      [tableData]="formData()"
+      [tableData]="form()"
       [enableTableSearch]="true"
       [globalFilterFields]="['name', 'value','description']"
       [noHeader]="true"
       [simple]="true"
       [scrollable]="true"
-      [virtualScroll]="false"
-      [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: formData(), itemSize: 36}"
+      [virtualScroll]="true"
       [rowHeight]="36"
       [selectionMode]="null"
       [selection]="[]"
       (rowClicked)="rowActivated($event)"
-      >
+    >
       <ng-template pTemplate="body"
-        let-col
-        let-i="rowIndex"
-        let-row="rowData">
+                   let-col
+                   let-i="rowIndex"
+                   let-row="rowData">
         @switch (col.id) {
           @case ('description') {
-            @if (row.type!=='legacy' && (row.description || row.type)) {
-              <span
-                class="allow-multi-space pointer"
-                customClass="hyper-parameters-tooltip parameter-tooltip"
+            @if (row.type !== 'legacy' && (row.description || row.type)) {
+              <button
+                mat-icon-button
+                class="allow-multi-space sm"
+                customClass="hyper-parameters-tooltip"
                 smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"
                 matTooltipPosition="before"
-                ><i class="al-icon al-ico-description"></i></span>
-              }
+              >
+                <mat-icon fontSet="al" fontIcon="al-ico-description"></mat-icon>
+              </button>
             }
-            @case ('name') {
-              <span
-                class="ellipsis name"
-                smShowTooltipIfEllipsis
-                matTooltipPosition="before"
-                [matTooltipShowDelay]="250"
-                [smTooltip]="row.name"
-                [smSearchText]="searchedText()"
-                highlightClass="highlight-text"
-                [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='name'"
-              >{{row.name}}</span>
-            }
-            @case ('value') {
-              @if (row.section === 'Datasets' && row.value.length === 36) {
-                <a
-                  (click)="$event.preventDefault(); navigateToDataset(row.value)"
-                  href="" target="_blank"
-                >{{row.value}}</a>
-              } @else {
+          }
+          @case ('name') {
+            <span
+              class="ellipsis name"
+              smShowTooltipIfEllipsis
+              matTooltipPosition="before"
+              [matTooltipShowDelay]="250"
+              [smTooltip]="row.name"
+              [smSearchText]="searchedText()"
+              highlightClass="highlight-text"
+              [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='name'"
+            >{{ row.name }}</span>
+          }
+          @case ('value') {
+            @if (row.section === 'Datasets' && row.value.length === 36) {
+              <a
+                (click)="$event.preventDefault(); navigateToDataset(row.value)"
+                href="" target="_blank"
+              >{{ row.value }}</a>
+            } @else {
+              <div class="value-container">
                 <span
                   class="ellipsis"
-                  smShowTooltipIfEllipsis
                   matTooltipPosition="before"
                   [matTooltipShowDelay]="250"
                   [smTooltip]="row.value"
                   [smSearchText]="searchedText()"
+                  [matTooltipDisabled]="!row.isMaximize || row.value.length >= 150"
                   highlightClass="highlight-text"
                   [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='value'"
-                >{{row.value}}</span>
-              }
+                >{{ row.value }}</span>
+                @if (row.isMaximize && row.value.length >= 150) {
+                  <sm-multi-line-tooltip [smallIcon]="true" [wordBreak]="true" iconClass="al-ico-line-expand">
+                    <div style="white-space: pre-line">{{ (row.value | jsonIndent).slice(0, 150) }}</div>
+                    @if (row.value.length >= 150 - 4) {
+                      <div class="dots-slice">● ● ●</div>
+                      <mat-divider class="divider"></mat-divider>
+                      <a href="" (click)="$event.preventDefault(); openJsonViewer(row, true)">
+                        View All
+                      </a>
+                    }
+                  </sm-multi-line-tooltip>
+                }
+              </div>
             }
           }
-        </ng-template>
-      </sm-table>
-    </div>
-  }
+        }
+      </ng-template>
+    </sm-table>
+  </div>
+}
 

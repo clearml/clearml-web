@@ -25,7 +25,6 @@ export interface Environment {
   fileBaseUrl: string;
   displayedServerUrls?: {apiServer?: string; filesServer?: string};
   alternativeFilesBaseUrl?: string;
-  demo: boolean;
   headerPrefix: string;
   version: string;
   userKey: string;
@@ -76,7 +75,6 @@ export const BASE_ENV: Environment = {
   accountAdministration: true,
   production: true,
   cookieName: 'allegro_token',
-  demo: false,
   updateCheck: false,
   autoLogin: false,
   apiBaseUrl: null,

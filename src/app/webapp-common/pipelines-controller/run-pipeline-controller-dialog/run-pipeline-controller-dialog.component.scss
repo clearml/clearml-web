@@ -2,11 +2,15 @@
   .section-title {
     color: var(--color-on-surface-variant);
     font-size: 14px;
-    margin-top: 14px;
+    margin-top: 32px;
+    font-weight: 500;
+    &.first {
+      margin-top: 0;
+    }
   }
 
   .param-line{
-    margin-top: 24px;
+    margin-top: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;

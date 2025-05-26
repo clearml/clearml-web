@@ -4,13 +4,12 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 
 
 @Component({
-  selector: 'sm-section-header',
-  templateUrl: './section-header.component.html',
-  styleUrls: ['./section-header.component.scss'],
-  standalone: true,
-  imports: [
-    TooltipDirective
-]
+    selector: 'sm-section-header',
+    templateUrl: './section-header.component.html',
+    styleUrls: ['./section-header.component.scss'],
+    imports: [
+        TooltipDirective
+    ]
 })
 export class SectionHeaderComponent {
 

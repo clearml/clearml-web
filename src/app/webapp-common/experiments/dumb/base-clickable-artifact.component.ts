@@ -7,8 +7,9 @@ import {getSignedUrl} from '../../core/actions/common-auth.actions';
 import {downloadArtifacts} from '@common/experiments/actions/common-experiments-info.actions';
 
 @Component({
-  selector: 'sm-base-clickable-artifact',
-  template: '<div></div>'
+    selector: 'sm-base-clickable-artifact',
+    template: '<div></div>',
+    standalone: false
 })
 export class BaseClickableArtifactComponent {
   protected timestamp: number;

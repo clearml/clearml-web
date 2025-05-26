@@ -117,7 +117,7 @@ export class DashboardSearchEffects {
       this.store.select(selectActiveSearch),
       this.store.select(selectSearchTerm)
     ]),
-    mergeMap(([, active, term]) => {
+    switchMap(([, active, term]) => {
       const actionsToFire = [];
       if (!active) {
         // actionsToFire.push(searchClear());
@@ -181,7 +181,7 @@ export class DashboardSearchEffects {
       order_by: orderBy,
       /* eslint-enable @typescript-eslint/naming-convention */
     }).pipe(
-      mergeMap(res => [setProjectsResults({
+      switchMap(res => [setProjectsResults({
         projects: res.projects,
         scrollId: res.scroll_id
       }), deactivateLoader(action.type)]),
@@ -315,7 +315,7 @@ export class DashboardSearchEffects {
       /* eslint-enable @typescript-eslint/naming-convention */
     }).pipe(
       mergeMap(res => [setExperimentsResults({
-        experiments: res.tasks,
+        tasks: res.tasks,
         scrollId: res.scroll_id
       }), deactivateLoader(action.type)]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error)])))

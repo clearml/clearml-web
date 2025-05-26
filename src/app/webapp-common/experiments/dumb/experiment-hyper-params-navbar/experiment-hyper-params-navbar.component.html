@@ -1,56 +1,58 @@
-<mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" data-id="User Properties">
-    USER PROPERTIES
-  </mat-expansion-panel-header>
-  <div
-    queryParamsHandling="preserve"
-    [routerLink]="'hyper-param/properties'"
-    [class.selected]="selectedHyperParam() === 'properties'"
-    class="hyper-container pointer ellipsis"
-    routerLink="hyper-param"
-    data-id="properties"
+@if (configuration() || hyperParams()) {
+  <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
+    <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" data-id="User Properties">
+      USER PROPERTIES
+    </mat-expansion-panel-header>
+    <div
+      queryParamsHandling="preserve"
+      [routerLink]="'hyper-param/properties'"
+      [class.selected]="selectedHyperParam() === 'properties'"
+      class="hyper-container pointer ellipsis"
+      routerLink="hyper-param"
+      data-id="properties"
     >
-    <mat-icon fontSet="al" fontIcon="al-ico-data-audit" data-id="properties"></mat-icon>
-    Properties
-  </div>
-</mat-expansion-panel>
-@if (((hyperParams() | keyvalue)|filterOut:'key':'properties')?.length>0) {
-  <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
-    <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" data-id="HyperParameters">
-      HYPERPARAMETERS
-    </mat-expansion-panel-header>
-    @for (hyperParameter of (hyperParams() | keyvalue)|filterOut:'key':'properties' | sort:'key'; track hyperParameter['key']) {
-      <div
-        queryParamsHandling="preserve"
-        [routerLink]="'hyper-param/' + (hyperParameter.key | safeUrlParameter)"
-        [class.selected]="selectedHyperParam() === (hyperParameter.key | safeUrlParameter)"
-        class="hyper-container pointer"
-        routerLink="hyper-param"
-        data-id="paramters"
-      >
-        <mat-icon fontSet="al" fontIcon="al-ico-data-audit" data-id="properties"></mat-icon>
-        <span class="ellipsis">{{hyperParameter.key | replaceViaMapPipe:sectionReplaceMap}}</span>
-      </div>
-    }
+      <mat-icon fontSet="al" fontIcon="al-ico-data-audit" data-id="properties"></mat-icon>
+      Properties
+    </div>
   </mat-expansion-panel>
-}
+  @if (((hyperParams() | keyvalue)|filterOut:'key':'properties')?.length > 0) {
+    <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
+      <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" data-id="HyperParameters">
+        HYPERPARAMETERS
+      </mat-expansion-panel-header>
+      @for (hyperParameter of (hyperParams() | keyvalue)|filterOut:'key':'properties' | sort:'key'; track hyperParameter['key']) {
+        <div
+          queryParamsHandling="preserve"
+          [routerLink]="'hyper-param/' + (hyperParameter.key | safeUrlParameter)"
+          [class.selected]="selectedHyperParam() === (hyperParameter.key | safeUrlParameter)"
+          class="hyper-container pointer"
+          routerLink="hyper-param"
+          data-id="paramters"
+        >
+          <mat-icon fontSet="al" fontIcon="al-ico-data-audit" data-id="properties"></mat-icon>
+          <span class="ellipsis">{{ hyperParameter.key | replaceViaMapPipe:sectionReplaceMap }}</span>
+        </div>
+      }
+    </mat-expansion-panel>
+  }
 
-@if ((configuration() | keyvalue)?.length>0) {
-  <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
-    <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
-      CONFIGURATION OBJECTS
-    </mat-expansion-panel-header>
-    @for (confObj of configuration() | keyvalue; track confObj['key']) {
-      <div
-        queryParamsHandling="preserve"
-        [routerLink]="'configuration/' + (confObj.key | safeUrlParameter)"
-        [class.selected]="selected() === confObj.key"
-        class="hyper-container pointer"
-        routerLink="configuration"
-      >
-        <mat-icon fontSet="al" fontIcon="al-ico-data-audit" [class.selected]="selected() === confObj.key"></mat-icon>
-        <span class="ellipsis">{{confObj.key | replaceViaMapPipe:sectionReplaceMap}}</span>
-      </div>
-    }
-  </mat-expansion-panel>
+  @if ((configuration() | keyvalue)?.length > 0) {
+    <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
+      <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
+        CONFIGURATION OBJECTS
+      </mat-expansion-panel-header>
+      @for (confObj of configuration() | keyvalue; track confObj['key']) {
+        <div
+          queryParamsHandling="preserve"
+          [routerLink]="'configuration/' + (confObj.key | safeUrlParameter)"
+          [class.selected]="selected() === confObj.key"
+          class="hyper-container pointer"
+          routerLink="configuration"
+        >
+          <mat-icon fontSet="al" fontIcon="al-ico-data-audit" [class.selected]="selected() === confObj.key"></mat-icon>
+          <span class="ellipsis">{{ confObj.key | replaceViaMapPipe:sectionReplaceMap }}</span>
+        </div>
+      }
+    </mat-expansion-panel>
+  }
 }

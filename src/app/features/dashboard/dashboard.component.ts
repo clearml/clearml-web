@@ -17,9 +17,10 @@ import {selectActiveSearch} from '@common/common-search/common-search.reducer';
 
 
 @Component({
-  selector: 'sm-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+    selector: 'sm-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    standalone: false
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private store = inject(Store);

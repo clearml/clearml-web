@@ -58,6 +58,7 @@ export const isSourceVideo = (source) => {
   return isVideo(contentType, uri);
 };
 
+export const isMarkDown = (url: string) => url.endsWith('.md');
 export const isHtmlOrText = (url: string) => {
   if (!url) {
     return false;
@@ -65,7 +66,7 @@ export const isHtmlOrText = (url: string) => {
   try {
     const parsed = new URL(url);
     const ext = last(parsed.pathname.split('.'));
-    return ['txt', 'text', 'html', 'htm'].includes(ext);
+    return ['txt', 'text', 'html', 'htm', 'md'].includes(ext);
   } catch {
     return false;
   }

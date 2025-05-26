@@ -25,14 +25,16 @@
         ></sm-experiment-artifacts-navbar>
       </as-split-area>
       <as-split-area>
-        <router-outlet></router-outlet>
+        @if (modelInfo) {
+          <router-outlet></router-outlet>
+        }
       </as-split-area>
     </as-split>
   } @else {
     @if (modelInfo) {
       <div class="d-flex h-100">
         <div class="no-data">
-          <mat-icon fontSet="al" fontIcon="al-ico-artifacts" class="xxxl"></mat-icon>
+          <mat-icon fontSet="al" fontIcon="al-ico-artifacts" class="xxl"></mat-icon>
           <h4>NO ARTIFACTS RECORDED</h4>
         </div>
       </div>

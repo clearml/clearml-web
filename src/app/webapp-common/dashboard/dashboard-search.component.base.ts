@@ -1,11 +1,14 @@
-import {initSearch, resetSearch} from '../common-search/common-search.actions';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
-import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchSetTerm, searchStart} from '../dashboard-search/dashboard-search.actions';
+import {
+  clearSearchResults,
+  getCurrentPageResults,
+  searchClear,
+  searchStart
+} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
 import {combineLatest, Subscription} from 'rxjs';
-import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
   selectDatasetsResults,
@@ -21,24 +24,32 @@ import {
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
-import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {activeLinksList, ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IReport} from '@common/reports/reports.consts';
-import {isEqual} from 'lodash-es';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {isEqual} from 'lodash-es';
 
 @Component({
-  selector: 'sm-dashboard-search-base',
-  template: '',
+    selector: 'sm-dashboard-search-base',
+    template: '',
+    standalone: false
 })
 export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   protected store = inject(Store);
   protected router = inject(Router);
   protected route = inject(ActivatedRoute);
   protected cdr = inject(ChangeDetectorRef);
+  readonly navigationOptions: {
+    replaceUrl: true,
+    queryParamsHandling: 'merge',
+    queryParams: {
+      gq: undefined,
+      gqreg: undefined,
+      tab: undefined
+    }}
 
-  protected searchQuery$        = this.store.select(selectSearchQuery);
   protected modelsResults$      = this.store.select(selectModelsResults);
   protected reportsResults$      = this.store.select(selectReportsResults);
   protected pipelinesResults$   = this.store.select(selectPipelinesResults);
@@ -48,9 +59,12 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   protected searchTerm$         = this.store.select(selectSearchTerm);
   protected resultsCount$ = this.store.select(selectResultsCount);
   public activeLink = 'projects' as ActiveSearchLink;
-  private searchSubs;
   private scrollIds: Map<ActiveSearchLink, string>;
   private subs = new Subscription();
+  itemSelected = output();
+  searchStarted: boolean;
+  private firstSearch= true;
+
 
   constructor() {
     this.syncAppSearch();
@@ -60,110 +74,105 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
     this.subs.add(this.resultsCount$.pipe(
       filter(resultsCount => !!resultsCount),
       distinctUntilChanged()
-    ).subscribe((resultsCount) => this.setFirstActiveLink(resultsCount)));
+    ).subscribe((resultsCount) => {
+      this.setFirstActiveLink(resultsCount)}));
 
     this.subs.add(this.route.queryParams.pipe(distinctUntilKeyChanged('tab'))
       .subscribe(params => {
       if (params.tab && activeLinksList.find( link => link.name === params.tab)) {
         this.activeLink = params.tab;
-        this.activeLinkChanged(this.activeLink)
+        window.setTimeout(() => this.activeLinkChanged(this.activeLink));
         this.cdr.markForCheck();
       }
-    }));
-
-    this.subs.add(this.searchQuery$.pipe(
-      distinctUntilChanged((previous, current) => isEqual(previous, current)))
-      .subscribe(query => {
-      this.store.dispatch(searchSetTerm(query));
     }));
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(searchClear());
-    this.searchTermChanged('');
-    this.stopSyncSearch();
     this.subs.unsubscribe();
-    this.searchSubs.unsubscribe();
+    this.store.dispatch(searchClear());
   }
 
-  stopSyncSearch() {
-    this.store.dispatch(resetSearch());
-    this.searchSubs.unsubscribe();
-  }
 
   syncAppSearch() {
-    this.store.dispatch(initSearch({payload: 'Search for all'}));
-
-    this.searchSubs = combineLatest([
+    this.subs.add( combineLatest([
       this.searchTerm$,
       this.store.select(selectShowOnlyUserWork),
-    ])
-      .subscribe(([query]) => this.searchTermChanged(query?.query, query?.regExp));
-
-    this.searchSubs.add(this.store.select(selectSearchScrollIds).subscribe(scrollIds => this.scrollIds = scrollIds));
+    ]).pipe(
+      distinctUntilChanged((pre, next)=> (isEqual(pre[0], next[0]) && pre[1]===next[1])),
+      debounceTime(400))
+      .subscribe(([query]) => {
+        this.searchTermChanged(query?.query, query?.regExp)}));
+    this.subs.add(this.store.select(selectSearchScrollIds).subscribe(scrollIds => this.scrollIds = scrollIds));
   }
 
   public modelSelected(model: Model) {
     // TODO ADD task.id to route
     const projectId = model.project ? model.project : '*';
-    this.router.navigateByUrl('projects/' + projectId + '/models/' + model.id);
+    this.router.navigateByUrl('projects/' + projectId + '/models/' + model.id, this.navigationOptions);
+    this.itemSelected.emit()
   }
 
   public searchTermChanged(term: string, regExp?: boolean) {
+    this.searchStarted = true;
     if (term && term.length > 0) {
-      this.store.dispatch(searchStart({query:term, regExp}));
+      this.store.dispatch(clearSearchResults());
+      this.store.dispatch(searchStart({query: term, regExp}));
     } else {
-      this.activeLink = activeSearchLink.projects;
-      this.store.dispatch(searchDeactivate());
+      this.store.dispatch(searchClear())
     }
   }
 
   public projectCardClicked(project: Project) {
-    this.router.navigateByUrl(`projects/${project.id}`);
+    this.router.navigateByUrl(`projects/${project.id}`, this.navigationOptions);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+    this.itemSelected.emit();
+
   }
 
   pipelineSelected(project: Project) {
-    this.router.navigateByUrl(`pipelines/${project.id}/tasks`);
+    this.router.navigateByUrl(`pipelines/${project.id}/tasks`, this.navigationOptions);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+    this.itemSelected.emit();
   }
 
   reportSelected(report: IReport) {
     this.router.navigate(['reports',(report.project as any).id, report.id]);
+    this.itemSelected.emit();
   }
 
   public openDatasetCardClicked(project: Project) {
-    this.router.navigateByUrl(`datasets/simple/${project.id}/tasks`);
+    this.router.navigateByUrl(`datasets/simple/${project.id}/tasks`, this.navigationOptions);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+    this.itemSelected.emit();
   }
 
   public taskSelected(task: IRecentTask | ITask) {
-    // TODO ADD task.id to route
     const projectId = task.project ? task.project.id : '*';
-    return this.router.navigateByUrl('projects/' + projectId + '/tasks/' + task.id);
+    this.router.navigateByUrl('projects/' + projectId + '/tasks/' + task.id, this.navigationOptions);
+    this.itemSelected.emit();
   }
 
 
   public activeLinkChanged(activeLink) {
-    if (!this.scrollIds?.[activeLink]) {
+    if (this.searchStarted===false && !this.scrollIds?.[activeLink]) {
       this.store.dispatch(getCurrentPageResults({activeLink}));
     }
 
   }
 
   setFirstActiveLink(resultsCount) {
+    this.router.navigate([], {queryParams: {tab: this.activeLink}, queryParamsHandling: 'merge', replaceUrl: true})
     if (resultsCount[this.activeLink] > 0) {
-      this.router.navigate([], {queryParams: {tab: this.activeLink}, queryParamsHandling: 'merge', replaceUrl: true})
       this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink}));
-    } else {
+    } else  {
       const firstTabIndex = activeLinksList.findIndex(activeLink => resultsCount[activeLink.name] > 0);
-      if (firstTabIndex > -1) {
+      if (firstTabIndex > -1 && this.firstSearch) {
         this.router.navigate([], {queryParams: {tab: activeLinksList[firstTabIndex].name}, queryParamsHandling: 'merge'})
-        this.store.dispatch(getCurrentPageResults({activeLink: activeLinksList[firstTabIndex].name as ActiveSearchLink}));
       } else {
-        this.store.dispatch(clearSearchResults());
-      }
-    }
+      this.store.dispatch(clearSearchResults());
+    }}
+    this.searchStarted = false;
+    this.firstSearch = false;
   }
 
   loadMore() {
@@ -173,4 +182,5 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   changeActiveLink(tab: string) {
     this.router.navigate([], {queryParams: {tab}, queryParamsHandling: 'merge'})
   }
+
 }

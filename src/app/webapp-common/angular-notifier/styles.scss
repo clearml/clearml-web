@@ -8,14 +8,14 @@
 // We do *NOT* use the partial syntax, and also explicitely write out the file type, so compiling works properly.
 
 // Core
-@import "styles/core";
+@forward "styles/core";
 
 // Themes
-@import "styles/themes/theme-material";
+@forward "styles/themes/theme-material";
 
 // Types
-@import "styles/types/type-default";
-@import "styles/types/type-error";
-@import "styles/types/type-info";
-@import "styles/types/type-success";
-@import "styles/types/type-warning";
+@forward "styles/types/type-default";
+@forward "styles/types/type-error";
+@forward "styles/types/type-info";
+@forward "styles/types/type-success";
+@forward "styles/types/type-warning";

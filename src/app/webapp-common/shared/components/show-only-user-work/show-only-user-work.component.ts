@@ -4,22 +4,19 @@ import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
-import {AsyncPipe} from '@angular/common';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {PushPipe} from '@ngrx/component';
 
 @Component({
-  selector: 'sm-show-only-user-work',
-  templateUrl: './show-only-user-work.component.html',
-  styleUrls: ['./show-only-user-work.component.scss'],
-  standalone: true,
-  imports: [
-    MenuComponent,
-    MenuItemComponent,
-    AsyncPipe,
-    PushPipe
-  ]
+    selector: 'sm-show-only-user-work',
+    templateUrl: './show-only-user-work.component.html',
+    styleUrls: ['./show-only-user-work.component.scss'],
+    imports: [
+        MenuComponent,
+        MenuItemComponent,
+        PushPipe
+    ]
 })
 export class ShowOnlyUserWorkComponent {
   public isUserMenuOpened: boolean;

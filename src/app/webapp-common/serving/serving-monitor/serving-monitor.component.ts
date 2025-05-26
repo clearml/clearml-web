@@ -1,8 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, viewChild} from '@angular/core';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {
-  SelectableFilterListComponent
-} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
 import {Store} from '@ngrx/store';
 import {AngularSplitModule} from 'angular-split';
 import {ServingStatsComponent} from '@common/serving/serving-stats/serving-stats.component';
@@ -17,33 +14,33 @@ import {
   ServingGetEndpointMetricsHistoryRequest
 } from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryRequest';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import MetricTypeEnum = ServingGetEndpointMetricsHistoryRequest.MetricTypeEnum;
+import {SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {GroupedList} from '@common/tasks/tasks.model';
 
 @Component({
-  selector: 'sm-serving-monitor',
-  templateUrl: './serving-monitor.component.html',
-  styleUrl: './serving-monitor.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatDrawerContent,
-    SelectableFilterListComponent,
-    MatDrawerContainer,
-    MatDrawer,
-    AngularSplitModule,
-    ServingStatsComponent,
-    MatFormField,
-    MatOption,
-    MatSelect,
-    FormsModule,
-    TooltipDirective,
-    MatButton,
-    MatIcon,
-    MatIconButton
-  ],
+    selector: 'sm-serving-monitor',
+    templateUrl: './serving-monitor.component.html',
+    styleUrl: './serving-monitor.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatDrawerContent,
+        MatDrawerContainer,
+        MatDrawer,
+        AngularSplitModule,
+        ServingStatsComponent,
+        MatFormField,
+        MatOption,
+        MatSelect,
+        FormsModule,
+        TooltipDirective,
+        MatButton,
+        MatIcon,
+        MatIconButton,
+        SelectableGroupedFilterListComponent
+    ]
 })
 export class ServingMonitorComponent {
   private store = inject(Store);
@@ -73,7 +70,10 @@ export class ServingMonitorComponent {
     {label: 'NETWORK THROUGHPUT TX (MBps)', value: MetricTypeEnum.NetworkTx}
   ];
 
-  chartsList: SelectableListItem[] = this.chartParamOptions.map(option => ({name: option.label, value: option.label}));
+  chartsList: GroupedList = this.chartParamOptions.reduce((acc, curr) => {
+    acc[curr.label] = {};
+    return acc;
+  }, {});
 
   searchTermChanged(searchTerm: string) {
     this.searchTerm.set(searchTerm);

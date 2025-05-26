@@ -19,9 +19,10 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
-  selector: 'sm-experiment-info-model',
-  templateUrl: './experiment-info-model.component.html',
-  styleUrls: ['./experiment-info-model.component.scss']
+    selector: 'sm-experiment-info-model',
+    templateUrl: './experiment-info-model.component.html',
+    styleUrls: ['./experiment-info-model.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoModelComponent {
   public modelInfo$: Observable<IExperimentModelInfo>;

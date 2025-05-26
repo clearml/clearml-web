@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
   OnDestroy,
   OnInit,
   viewChild, inject, effect
@@ -56,6 +55,7 @@ import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tag
 import {selectBlockUserScript, selectDefaultNestedModeForFeature, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
+import {NgxPrintDirective} from 'ngx-print';
 
 const replaceSlash = (part) => part
   .replace('\\', '/')
@@ -68,10 +68,11 @@ const replaceSlash = (part) => part
   );
 
 @Component({
-  selector: 'sm-report',
-  templateUrl: './report.component.html',
-  styleUrls: ['./report.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-report',
+    templateUrl: './report.component.html',
+    styleUrls: ['./report.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ReportComponent implements OnInit, OnDestroy {
   private store = inject(Store);
@@ -113,7 +114,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   public theme = this.store.selectSignal(selectThemeMode);
 
   private mdEditor = viewChild<MarkdownEditorComponent>(MarkdownEditorComponent);
-  private printHiddenButton = viewChild<ElementRef>('printHiddenButton');
+  private printHiddenButton = viewChild(NgxPrintDirective);
 
   constructor() {
     this.store.dispatch(getReportsTags());
@@ -423,6 +424,6 @@ export class ReportComponent implements OnInit, OnDestroy {
     });
     document.body.appendChild(clonedNode);
     window.setTimeout(() => document.body.removeChild(clonedNode), 3000);
-    this.printHiddenButton().nativeElement.click();
+    this.printHiddenButton().print();
   }
 }

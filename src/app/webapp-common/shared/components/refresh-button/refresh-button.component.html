@@ -42,11 +42,19 @@
     (smHesitate)="showMenu.set(false)"
     #hesitateMenu="hesitate"
   >
-    <mat-slide-toggle color="primary" [ngModel]="autoRefreshState()" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
-      <span class="toggle-label" [class.enabled]="autoRefreshState()">AUTO REFRESH</span>
-    </mat-slide-toggle>
-    <div class="mx-3">•</div>
-    <button mat-button (click)="refresh()">REFRESH</button>
+    @if (showMenu()) {
+      <mat-slide-toggle
+        @fadeInOut
+        [ngModel]="autoRefreshState()"
+        (ngModelChange)="setAutoRefresh.emit($event)"
+      >
+        <span class="toggle-label" [class.enabled]="autoRefreshState()">AUTO REFRESH</span>
+      </mat-slide-toggle>
+      <div @fadeInOut class="dot">•</div>
+      <button @fadeInOut mat-button (click)="refresh()">REFRESH</button>
+    }
   </div>
-  <div class="tip"></div>
+  @if (showMenu()) {
+    <div @fadeInOut class="tip"></div>
+  }
 </div>

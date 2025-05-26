@@ -1,7 +1,6 @@
-@import "variables";
-@import "mixins/link";
+@use "mixins/link";
 
-@include link();
+@include link.link();
 ::ng-deep body sm-s3-access .editable {
   padding: 0;
   background-color: var(--color-on-surface);

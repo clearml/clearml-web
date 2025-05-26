@@ -2,8 +2,31 @@
 
 
 :root {
+  .mat-mdc-button-base {
+    @include mat.button-overrides((
+      filled-container-height: 36px,
+      outlined-container-height: 36px,
+      text-container-height: 36px,
+    ));
+
+    @include mat.icon-button-overrides((
+      state-layer-size: 36px
+    ));
+    --mat-list-active-indicator-shape: none;
+
+    &.active {
+      .mat-mdc-button-persistent-ripple::before {
+        opacity: 0.2;
+      }
+    }
+  }
 
   .mat-mdc-unelevated-button {
+
+    .mat-mdc-button-touch-target {
+      height: var(--mdc-filled-button-container-height);
+    }
+
     .mat-icon.al-icon {
       height: 16px;
       width: 16px;
@@ -25,6 +48,7 @@
   }
 
   .mat-mdc-outlined-button {
+    --mdc-outlined-button-label-text-size: 12px;
     .mat-icon.al-icon {
       height: 16px;
       width: 16px;
@@ -54,6 +78,10 @@
         line-height: 20px;
       }
     }
+  }
+
+  .mat-button-toggle-appearance-standard {
+    --mat-standard-button-toggle-label-text-size: 12px;
   }
 
   // icon + text
@@ -139,14 +167,9 @@
 
 
 @mixin buttons($theme) {
-  --mdc-icon-button-icon-color: #{mat.get-theme-color($theme, primary)};
-
-  --mdc-filled-button-container-height: 36px;
-  --mdc-outlined-button-container-height: 36px;
-  --mdc-text-button-container-height: 36px;
-  --mdc-icon-button-state-layer-size: 36px;
-
-
+  .mat-mdc-button-base {
+    --mdc-icon-button-icon-color: #{mat.get-theme-color($theme, primary)};
+  }
 
   .secondary-button {
     @include mat.button-color($theme, $color-variant: secondary);
@@ -159,7 +182,4 @@
   .delete-button {
     @include mat.button-color($theme, $color-variant: error);
   }
-
-
-  --mat-list-active-indicator-shape: none;
 }

@@ -36,7 +36,6 @@ import {
   saveExperimentConfigObj,
   saveExperimentSection,
   saveHyperParamsSection,
-  setExperimentOperationLog,
   setExperimentSaving,
   TreeStep
 } from '../actions/common-experiments-info.actions';
@@ -97,7 +96,9 @@ export class CommonExperimentsInfoEffects {
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(commonInfoActions.getExperimentInfo, commonInfoActions.getSelectedPipelineStep),
+    ofType(commonInfoActions.getExperimentInfo, commonInfoActions.getSelectedPipelineStep, getExperimentConfigurationNames,
+      commonInfoActions.getExperiment, getPipelineConfigurationObj, commonInfoActions.getExperimentUncommittedChanges),
+    filter(action => !action?.['autoRefresh']),
     map(action => activeLoader(action.type))
   ));
 
@@ -174,7 +175,8 @@ export class CommonExperimentsInfoEffects {
                 id: experimentId,
                 changes: {configuration: configurationObj}
               }),
-              deactivateLoader(action.type),
+              deactivateLoader(getExperimentConfigurationObj.type),
+              deactivateLoader(getPipelineConfigurationObj.type),
               setBackdrop({active: false}),
               deactivateEdit(),
               setExperimentSaving({saving: false})
@@ -214,19 +216,6 @@ export class CommonExperimentsInfoEffects {
     ))
   ));
 
-  getExperimentEventLog$ = createEffect(() => this.actions$.pipe(
-    ofType(commonInfoActions.getExperimentOperationLog),
-    concatLatestFrom(() => [this.store.select(selectRouterConfig)]),
-    filter(([, routeConfig]) => routeConfig.includes('general')),
-    switchMap(([action,]) => this.apiTasks.tasksGetOperationsLog({task: action.id, page_size: 5000}).pipe(
-      mergeMap(res => [setExperimentOperationLog({operationLog: res.operations}), deactivateLoader(action.type)]),
-      catchError(error => [
-        requestFailed(error),
-        deactivateLoader(action.type)
-      ])
-    ))));
-
-
   getExperimentInfo$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getExperimentInfo, commonInfoActions.autoRefreshExperimentInfo, commonInfoActions.experimentUpdatedSuccessfully),
     concatLatestFrom(() => [
@@ -237,8 +226,7 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectAppVisible),
       this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
     ]),
-    switchMap(([action, tableSelected, selected,
-                 selectedExperimentFromTable, infoData, visible, customView]) => {
+    switchMap(([action, tableSelected, selected, selectedExperimentFromTable, infoData, visible, customView]) => {
       const currentSelected = tableSelected || selected;
       if (this.previousSelectedId && currentSelected?.id != this.previousSelectedId) {
         this.previousSelectedLastUpdate = null;
@@ -248,9 +236,10 @@ export class CommonExperimentsInfoEffects {
         return of([action, null, tableSelected, selected, customView]);
       }
 
-      return (selectedExperimentFromTable ? of(selectedExperimentFromTable) :
-
-          this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0]))
+      return (selectedExperimentFromTable ?
+          of(selectedExperimentFromTable) :
+          this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']})
+            .pipe(map(res => res.tasks[0]))
       ).pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, customView]));
     }),
     filter(([action, , tableSelected, selected]) => (action.type !== commonInfoActions.autoRefreshExperimentInfo.type || (!tableSelected) || (tableSelected?.id === selected?.id))),
@@ -342,7 +331,7 @@ export class CommonExperimentsInfoEffects {
           requestFailed(error),
           deactivateLoader(action.type),
           deactivateLoader(commonInfoActions.getExperimentInfo.type),
-          ...(action.autoRefresh ? [] : [setServerError(error, null, 'Fetch experiment failed')])
+          ...(action.autoRefresh ? [] : [setServerError(error, null, 'Fetch task failed')])
         ])
       )
     )
@@ -356,9 +345,15 @@ export class CommonExperimentsInfoEffects {
         .pipe(
           mergeMap(res => {
             const experiment = res.tasks[0];
-            return [commonInfoActions.setExperimentUncommittedChanges({diff: experiment?.script?.diff})];
+            return [
+              commonInfoActions.setExperimentUncommittedChanges({diff: experiment?.script?.diff}),
+              deactivateLoader(action.type)
+            ];
           }),
-          catchError(() => [commonInfoActions.setExperimentUncommittedChanges({diff: ''})])
+          catchError(() => [
+            commonInfoActions.setExperimentUncommittedChanges({diff: ''}),
+            deactivateLoader(action.type)
+          ])
         )
     )
   ));
@@ -453,7 +448,7 @@ export class CommonExperimentsInfoEffects {
           }),
           catchError((err: HttpErrorResponse) => [
             requestFailed(err),
-            setServerError(err, null, 'Update Experiment failed'),
+            setServerError(err, null, 'Update task failed'),
             commonInfoActions.getExperimentInfo({id: action.id})
           ])
         )
@@ -527,7 +522,6 @@ export class CommonExperimentsInfoEffects {
       this.apiTasks.tasksEditHyperParams({
         task: selectedExperiment.id,
         hyperparams: action.hyperparams.length > 0 ? action.hyperparams : [{section}],
-
         replace_hyperparams: ReplaceHyperparamsEnum.Section
       })
         .pipe(
@@ -608,7 +602,7 @@ export class CommonExperimentsInfoEffects {
       if (res.tasks?.length > 0) {
         const task = res.tasks[0];
         const a = document.createElement('a');
-        a.href = `/datasets/simple/${task.project.id}/experiments/${task.id}`;
+        a.href = `/datasets/simple/${task.project.id}/tasks/${task.id}`;
         a.target = '_blank';
         a.click();
         return {type: 'none'};

@@ -87,14 +87,6 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 .filter-header-cell {
   border-right: $tableBodyCellBorder !important;
   overflow: unset;
-
-  i {
-    color: var(--color-on-surface-variant);
-
-    &:hover {
-      color: var(--color-outline);
-    }
-  }
 }
 
 .filter-header {
@@ -102,18 +94,6 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   width: 401px;
   align-items: center;
   gap: 24px;
-  padding-left: 8px;
-
-  .btn-icon {
-    border: 1px solid transparent;
-    background-color: transparent;
-    padding: 5px;
-
-    &:hover {
-      border-color: var(--color-surface-container-high);
-      background-color: var(--color-surface-container-lowest);
-    }
-  }
 
   .is-filtered {
     border-color: var(--color-surface-container-high);
@@ -122,17 +102,6 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 
   mat-form-field {
     flex-grow: 1;
-  }
-
-  .al-ico-filter-on,
-  .al-ico-filter-off {
-    .path2:before {
-      color: var(--color-on-surface-variant);
-    }
-
-    .path1:before {
-      color: var(--color-primary);
-    }
   }
 }
 
@@ -150,9 +119,9 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   width: 200px;
   max-width: 200px;
   overflow: hidden;
-  border-top: 1px solid transparent !important;
   border-right: $tableBodyCellBorder;
   border-left-width: 0;
+  border-bottom-width: 0;
   color: var(--color-primary);
   font-weight: 500;
   padding-left: 24px !important;
@@ -179,20 +148,6 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 
 .row-info-icon {
   color: var(--color-primary);
-}
-
-tr:hover {
-  background-color: var(--color-surface-container-low);
-}
-
-tr.first-row {
-  td {
-    border-top-color: var(--color-outline-variant) !important;
-  }
-
-  &:first-child td {
-    border-top-color: transparent !important;
-  }
 }
 
 .value-text {
@@ -277,26 +232,30 @@ tr.first-row {
 
     .p-datatable-tbody {
       > tr {
-         background: $tableBodyRowBg;
         color: $tableBodyRowTextColor;
         transition: $listItemTransition;
 
         > td {
+          background: $tableBodyRowBg;
           text-align: $tableCellContentAlignment;
-          border-top: $tableBodyCellBorder;
           padding: $tableBodyCellPadding;
+          border-color: var(--color-surface-container-high);
 
           .p-row-editor-save {
             margin-right: $inlineSpacing;
           }
         }
 
-        &:hover {
-          background: $tableBodyRowHoverBg;
+        &.last-row {
+          td {
+            border-bottom: 1px solid var(--color-outline-variant);
+          }
         }
 
-        &:hover .metrics-column {
-          background: var(--color-surface-container-lowest);
+        &:hover {
+          > td:not(.metrics-column) {
+            background: $tableBodyRowHoverBg;
+          }
         }
 
         &:focus {
@@ -310,7 +269,7 @@ tr.first-row {
       }
     }
 
-    .p-column-resizer-helper {
+    .p-datatable-column-resizer-helper {
       background: $tableResizerHelperBg;
     }
 
@@ -319,8 +278,8 @@ tr.first-row {
       background: var(--color-surface-container-lowest);
     }
 
-    &.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table,
-    &.p-datatable-scrollable > .p-datatable-wrapper > .p-scroller-viewport > .p-scroller > .p-datatable-table {
+    &.p-datatable-scrollable > .p-datatable-table-container > .p-datatable-table,
+    &.p-datatable-scrollable > .p-datatable-table-container > .p-scroller-viewport > .p-scroller > .p-datatable-table {
       > .p-datatable-thead,
       > .p-datatable-tfoot {
         background-color: $tableHeaderCellBg;
@@ -331,69 +290,6 @@ tr.first-row {
       font-size: $loadingIconFontSize;
     }
 
-    &.p-datatable-gridlines {
-      .p-datatable-header {
-        border-width: 1px 1px 0 1px;
-      }
-
-      .p-datatable-footer {
-        border-width: 0 1px 1px 1px;
-      }
-
-      .p-paginator-top {
-        border-width: 0 1px 0 1px;
-      }
-
-      .p-paginator-bottom {
-        border-width: 0 1px 1px 1px;
-      }
-
-      .p-datatable-thead {
-        > tr {
-          > th {
-            border-width: 1px 0 1px 1px;
-
-            &:last-child {
-              border-width: 1px;
-            }
-          }
-        }
-      }
-
-      .p-datatable-tbody {
-        > tr {
-          > td {
-            border-width: 1px 0 0 1px;
-
-            &:last-child {
-              border-width: 1px 1px 0 1px;
-            }
-          }
-
-          &:last-child {
-            > td {
-              border-width: 1px 0 1px 1px;
-
-              &:last-child {
-                border-width: 1px;
-              }
-            }
-          }
-        }
-      }
-
-      &:has(.p-datatable-thead):has(.p-datatable-tbody) .p-datatable-tbody {
-        > tr {
-          > td {
-            border-width: 0 0 1px 1px;
-
-            &:last-child {
-              border-width: 0 1px 1px 1px;
-            }
-          }
-        }
-      }
-    }
 
     .p-scroller {
       height: 100% !important;
@@ -417,11 +313,12 @@ tr.first-row {
 }
 
 .no-output {
-  color: var(--color-on-surface);
+  color: var(--color-empty-state);
   z-index: 1;
 
-  mat-icon {
-    color: var(--color-tint-14);
+  h4 {
+    font-size: 16px;
+    font-weight: 500;
   }
 
   &.all-filtered-message {
@@ -430,9 +327,4 @@ tr.first-row {
       color: var(--color-primary);
     }
   }
-}
-.i-no-table-data {
-  width: 150px;
-  height: 100px;
-  margin-bottom: 10px;
 }

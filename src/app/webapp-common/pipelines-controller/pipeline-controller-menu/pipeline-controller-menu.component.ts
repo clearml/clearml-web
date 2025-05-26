@@ -13,10 +13,11 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
 
 
 @Component({
-  selector: 'sm-controller-menu',
-  templateUrl: './pipeline-controller-menu.component.html',
-  styleUrls: ['./pipeline-controller-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-controller-menu',
+    templateUrl: './pipeline-controller-menu.component.html',
+    styleUrls: ['./pipeline-controller-menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   entityTypeEnum = EntityTypeEnum;

@@ -20,9 +20,10 @@ export interface VersionItem extends DagModelItem {
 }
 
 @Component({
-  selector: 'sm-dataset-version-step',
-  templateUrl: './dataset-version-step.component.html',
-  styleUrls: ['../../pipelines-controller/pipeline-controller-step/pipeline-controller-step.component.scss', './dataset-version-step.component.scss']
+    selector: 'sm-dataset-version-step',
+    templateUrl: './dataset-version-step.component.html',
+    styleUrls: ['../../pipelines-controller/pipeline-controller-step/pipeline-controller-step.component.scss', './dataset-version-step.component.scss'],
+    standalone: false
 })
 export class DatasetVersionStepComponent {
   protected readonly fileSizeConfigStorage = fileSizeConfigStorage;

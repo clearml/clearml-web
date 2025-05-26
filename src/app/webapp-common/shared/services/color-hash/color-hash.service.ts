@@ -69,6 +69,9 @@ export class ColorHashService {
     if (tLum < 0.3 && lighten) {
       tColor = tColor.lighten(30 - tLum * 100);
     }
+    if (tColor.getBrightness() > 210 && !lighten) {
+      tColor = tColor.shade(12);
+    }
     const {r, g, b} = tColor.toRgb();
     const color = initColor ? initColor : [r, g, b];
     this.setColorForString(label, color, false);

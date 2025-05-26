@@ -1,16 +1,18 @@
-@import "customizations/colors";
-@import "customizations/form-fields";
-@import "customizations/dialogs";
-@import "customizations/scrollbar";
-@import "customizations/tooltip";
-@import "customizations/slide-toggle";
+@forward "customizations/colors";
+@forward "customizations/form-fields";
+@forward "customizations/dialogs";
+@forward "customizations/scrollbar";
+@forward "customizations/tooltip";
+@forward "customizations/slide-toggle";
+@use "customizations/colors";
+@use "customizations/dialogs";
+
 
 body {
   color: var(--color-on-surface-variant);
 }
 
 @mixin components($theme) {
-  @include generate-colors($theme);
-  @include form-fields($theme);
-  @include dialogs($theme);
+  @include colors.generate-colors($theme);
+  @include dialogs.dialogs($theme);
 }

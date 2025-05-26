@@ -11,9 +11,10 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
 import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
 
 @Component({
-  selector: 'sm-pipeline-info',
-  templateUrl: './pipeline-info.component.html',
-  styleUrls: ['./pipeline-info.component.scss']
+    selector: 'sm-pipeline-info',
+    templateUrl: './pipeline-info.component.html',
+    styleUrls: ['./pipeline-info.component.scss'],
+    standalone: false
 })
 export class PipelineInfoComponent {
       private store = inject(Store);

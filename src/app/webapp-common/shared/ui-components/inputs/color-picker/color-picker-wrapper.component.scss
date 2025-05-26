@@ -5,8 +5,12 @@ $z-index-colorpicker: 1001;
     z-index: $z-index-colorpicker;
     border-radius: 4px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-    border: unset;
-    background-color: var(--color-surface-container);
+    border-color: var(--color-outline-variant);
+    background-color: var(--color-surface-container-low);
+
+    .cursor {
+      box-shadow: 0 0 0 2px #fff;
+    }
 
     .saturation-lightness {
       border-radius: 3px 3px 0 0;

@@ -6,7 +6,7 @@
   [selectedModels]="singleRowContext ? (selectedModel? [selectedModel] : undefined ): checkedModels"
   [selectedDisableAvailableIsMultiple]="!singleRowContext"
   [selectedDisableAvailable]="singleRowContext ? getSingleSelectedModelsDisableAvailable(selectedModel? selectedModel: contextModel) : selectedModelsDisableAvailable"
-  [numSelected]="singleRowContext ? 1 : checkedModels.length"
+  [numSelected]="singleRowContext ? 1 : checkedModels?.length"
   [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
   [projectTags]="projectTags$ | ngrxPush"
   [companyTags]="companyTags$ | ngrxPush"
@@ -72,6 +72,7 @@
           @if (col.id === modelsTableColFields.SELECTED) {
             <mat-checkbox
                           class="header-checkbox"
+                          data-id="Select All Loaded Tasks"
                           [formControl]="selectionChecked"
                           [indeterminate]="selectionIndeterminate"
                           [disableRipple]="true"

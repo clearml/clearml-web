@@ -1,14 +1,28 @@
-@import "variables";
-
 :host {
-  position: absolute;
-  height: 32px;
   display: flex;
   align-items: center;
-  right: 110px;
-  // background-color: var(--color-surface-container-low);
   z-index: 1;
-  padding-left: 20px;
+
+  .search-icon-container {
+    width: 284px;
+    position: absolute;
+
+    .search-icon {
+      transition: left 0.35s ease-in-out;
+      left: 0;
+      z-index: 1;
+
+
+      &.open {
+        left: 247px;
+      }
+
+      .al-ico-search {
+        color: var(--color-primary);
+      }
+
+    }
+  }
 
   .search-container {
     width: 0;
@@ -24,11 +38,11 @@
 
   .regexp {
     position: absolute;
-    right: 8px;
+    right: 36px;
 
     &.active {
-      color: var(--color-on-secondary);
-      background-color: var(--color-secondary);
+      color: var(--color-on-primary);
+      background-color: var(--color-primary);
     }
 
     &.error {
@@ -37,7 +51,7 @@
   }
 
   .al-ico-error-circle {
-    right: 48px;
+    right: 60px;
   }
 
   .al-ico-dialog-x {

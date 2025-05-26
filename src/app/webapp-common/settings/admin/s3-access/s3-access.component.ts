@@ -12,28 +12,27 @@ import {MatIcon} from '@angular/material/icon';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions} from '@angular/material/form-field';
 
 @Component({
-  selector: 'sm-s3-access',
-  templateUrl: './s3-access.component.html',
-  styleUrls: ['./s3-access.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ReactiveFormsModule,
-    TooltipDirective,
-    MatInput,
-    MatFormField,
-    MatButton,
-    MatIcon,
-    MatIconButton
-  ],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => S3AccessComponent),
-      multi: true
-    },
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {subscriptSizing: 'dynamic'} as MatFormFieldDefaultOptions}
-  ]
+    selector: 'sm-s3-access',
+    templateUrl: './s3-access.component.html',
+    styleUrls: ['./s3-access.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ReactiveFormsModule,
+        TooltipDirective,
+        MatInput,
+        MatFormField,
+        MatButton,
+        MatIcon,
+        MatIconButton
+    ],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => S3AccessComponent),
+            multi: true
+        },
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } as MatFormFieldDefaultOptions }
+    ]
 })
 export class S3AccessComponent implements ControlValueAccessor {
   private formBuilder = inject(FormBuilder);

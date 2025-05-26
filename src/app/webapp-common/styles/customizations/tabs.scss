@@ -1,15 +1,23 @@
 @use '@angular/material' as mat;
 
-@mixin tabs($theme) {
-  --mat-tab-header-active-label-text-color: #{mat.get-theme-color($theme, primary)};
-  --mat-tab-header-inactive-label-text-color: #{mat.get-theme-color($theme, outline)};
-  --mat-tab-header-active-hover-label-text-color: #{mat.get-theme-color($theme, primary)};
-  --mat-tab-header-active-focus-label-text-color: #{mat.get-theme-color($theme, primary)};
-  --mat-tab-header-inactive-focus-label-text-color: #{mat.get-theme-color($theme, primary)};
-  --mat-tab-header-inactive-hover-label-text-color: #{mat.get-theme-color($theme, primary)};
-  --mat-tab-header-active-ripple-color: transparent;
-  --mat-tab-header-inactive-ripple-color: transparent;
+.mat-mdc-tab-nav-bar,
+.mat-mdc-tab-group {
+  @include mat.tabs-overrides((
+    divider-height: 0,
+    active-ripple-color: transparent,
+    inactive-ripple-color: transparent,
+    active-label-text-color: var(--color-primary),
+    active-hover-label-text-color: var(--color-primary),
+    active-focus-label-text-color: var(--color-primary),
+    inactive-focus-label-text-color: var(--color-primary),
+    inactive-hover-label-text-color: var(--color-primary),
+    inactive-label-text-color: var(--color-outline),
+  ));
+}
 
-  --mat-tab-header-divider-height: 0;
+.mat-mdc-tab-group.with-border {
+  mat-tab-header {
+    border-bottom: solid 1px var(--mat-tab-header-divider-color, var(--mat-sys-surface-variant));
+  }
 }
 

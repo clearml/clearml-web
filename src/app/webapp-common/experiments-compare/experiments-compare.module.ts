@@ -81,9 +81,6 @@ import {
   GroupedCheckedFilterListComponent
 } from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 import {
-  SelectableFilterListComponent
-} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
-import {
   SelectableGroupedFilterListComponent
 } from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
@@ -107,6 +104,7 @@ import {DrawerComponent} from '@common/shared/ui-components/panel/drawer/drawer.
 import {PushPipe} from '@ngrx/component';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {SelectModelModule} from '@common/select-model/select-model.module';
 
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
@@ -179,6 +177,7 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
       SelectCompareHeaderEffects,
       ExperimentsCompareScalarsGraphEffects
     ]),
+    SelectModelModule,
     MatRadioModule,
     FormsModule,
     ParallelCoordinatesGraphComponent,
@@ -200,7 +199,6 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     PortalComponent,
     TooltipDirective,
     GroupedCheckedFilterListComponent,
-    SelectableFilterListComponent,
     SelectableGroupedFilterListComponent,
     RefreshButtonComponent,
     MatSlideToggleModule,

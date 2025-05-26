@@ -1,12 +1,11 @@
 import {Component, inject, viewChild, effect, input, ChangeDetectionStrategy} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {MatTabNav, MatTabsModule} from '@angular/material/tabs';
-import { AsyncPipe, UpperCasePipe } from '@angular/common';
+import {UpperCasePipe} from '@angular/common';
 import {Store} from '@ngrx/store';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {debounceTime} from 'rxjs/operators';
-import {PushPipe} from '@ngrx/component';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 export interface Link {
@@ -16,19 +15,16 @@ export interface Link {
 }
 
 @Component({
-  selector: 'sm-router-tab-nav-bar',
-  templateUrl: './router-tab-nav-bar.component.html',
-  styleUrls: ['./router-tab-nav-bar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    AsyncPipe,
-    MatTabsModule,
-    RouterLink,
-    UpperCasePipe,
-    RouterLinkActive,
-    PushPipe
-],
-  standalone: true
+    selector: 'sm-router-tab-nav-bar',
+    templateUrl: './router-tab-nav-bar.component.html',
+    styleUrls: ['./router-tab-nav-bar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatTabsModule,
+        RouterLink,
+        UpperCasePipe,
+        RouterLinkActive,
+    ]
 })
 export class RouterTabNavBarComponent {
   private store = inject(Store);

@@ -56,7 +56,7 @@
   <div class="steps-content">
     @if (queue) {
       <div class="text">
-        {{entityName}} have been enqueued on the <b>{{queue?.display_name ?? queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
+        {{entityName}} have been enqueued on the <b>{{queue?.display_name || queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
       </div>
     }
     @if (!currentLink || currentLink === links[0]) {
@@ -82,8 +82,8 @@
           @if (step.subNote || (isJupyter() && ((queue && $index === 2) || (!queue && $index === 1)))) {
             <div class="sub-note"><mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="me-1 sm"></mat-icon>
             @if ((isJupyter() && ((queue && $index === 2) || (!queue && $index === 1)))) {
-              @if (accessKey) {
-                Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a>
+              @if (accessKey()) {
+                Manage your API credentials in the <a class="ms-1" target="_blank" href="settings/workspace-configuration">workspace settings page</a>
               } @else {
                 Fill in your API credentials (if you don’t have any, create new credentials)
               }
@@ -97,50 +97,48 @@
         }
       </div>
     }
-    <div class="step-container cred-step" [class.jupyter]="isJupyter()" [class.first-step]="!credentialsCreated" [class.has-ws]="community() && workspace.name" [class.has-label]="credentialsLabel">
+    <div class="step-container cred-step" [class.jupyter]="isJupyter()" [class.first-step]="!credentialsCreated()" [class.has-ws]="community() && workspace.name" [class.has-label]="credentialsLabel">
       @if (!isJupyter()) {
         <div class="sub-note" >Complete the clearml configuration information as prompted.</div>
       }
-      @if (!credentialsCreated) {
+      @if (!credentialsCreated()) {
         <button mat-flat-button class="my-2" data-id="New Credentials" (click)="createCredentials()">
           CREATE NEW CREDENTIALS
         </button>
       }
-      <div class="cred-visible" [class.invisible]="!accessKey || isJupyter()">
+      <div class="cred-visible" [class.invisible]="!accessKey() || isJupyter()">
         <div class="code">
-          <div class="mt-2 w-100 code">
-            <div class="content">
-              <span class="variable">api</span> &#123;
-              @if (credentialsComment()) {
-                <div class="ms-2">
-                  <span class="comment"># {{credentialsComment()}}</span>
-                </div>
-              }
+          <div class="content">
+            <span class="variable">api</span> &#123;
+            @if (credentialsComment()) {
               <div class="ms-2">
-                <span class="variable">web_server</span> <span class="operation me-1">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
+                <span class="comment"># {{credentialsComment()}}</span>
               </div>
+            }
+            <div class="ms-2">
+              <span class="variable">web_server</span> <span class="operation me-1">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
+            </div>
+            <div class="ms-2">
+              <span class="variable">api_server</span><span class="operation me-1">:</span> <span class="string">{{configService.apiServerUrl()}}</span>
+            </div>
+            @if (configService.fileServerUrl()) {
               <div class="ms-2">
-                <span class="variable">api_server</span><span class="operation me-1">:</span> <span class="string">{{configService.apiServerUrl()}}</span>
+                <span class="variable">files_server</span><span class="operation me-1">:</span> <span class="string">{{configService.fileServerUrl()}}</span>
               </div>
-              @if (configService.fileServerUrl()) {
-                <div class="ms-2">
-                  <span class="variable">files_server</span><span class="operation me-1">:</span> <span class="string">{{configService.fileServerUrl()}}</span>
-                </div>
-              }
-              <div class="ms-2">
-                <span class="variable">credentials</span> &#123;
-              </div>
-              <div class="ms-4">
-                <span class="string">"access_key"</span><span class="operation mx-1">=</span><span class="string">"{{accessKey}}"</span>
-              </div>
-              <div class="ms-4">
-                <span class="string">"secret_key"</span><span class="operation mx-1">=</span><span class="string">"{{secretKey}}"</span>
-              </div>
-              <div class="ms-2">
-                &#125;
-              </div>
+            }
+            <div class="ms-2">
+              <span class="variable">credentials</span> &#123;
+            </div>
+            <div class="ms-4">
+              <span class="string">"access_key"</span><span class="operation mx-1">=</span><span class="string">"{{accessKey()}}"</span>
+            </div>
+            <div class="ms-4">
+              <span class="string">"secret_key"</span><span class="operation mx-1">=</span><span class="string">"{{secretKey()}}"</span>
+            </div>
+            <div class="ms-2">
               &#125;
             </div>
+            &#125;
           </div>
           <sm-copy-clipboard
             data-id="copyButton"
@@ -148,7 +146,7 @@
             [clipboardText]="getCopyConfig()"></sm-copy-clipboard>
         </div>
     @if (!showTabs) {
-      <div class="sub-note"><mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="me-1 info"></mat-icon>Manage your app credentials in the<a class="ms-1" target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
+      <div class="sub-note"><mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="me-1 sm info"></mat-icon>Manage your API credentials in the<a class="ms-1" target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
     }
   </div>
 </div>

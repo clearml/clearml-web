@@ -1,24 +1,28 @@
 import {Component} from '@angular/core';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {
   ExperimentOutputScalarsComponent
 } from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
-import {ActivatedRoute} from '@angular/router';
-import {selectSelectedModel} from '@common/models/reducers';
+import {selectModelId, selectSelectedModel} from '@common/models/reducers';
 import {
   experimentScalarRequested
 } from '@common/experiments/actions/common-experiment-output.actions';
-import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 import {
   selectModelInfoHistograms,
   selectModelSettingsGroupBy,
   selectModelSettingsHiddenScalar,
+  selectModelSettingsSmoothSigma,
   selectModelSettingsSmoothType,
   selectModelSettingsSmoothWeight,
-  selectModelSettingsXAxisType, selectSelectedSettingsModelTableMetric,
-
+  selectModelSettingsXAxisType,
+  selectSelectedModelSettingsIsProjectLevel,
+  selectSelectedSettingsModelTableMetric
 } from '@common/experiments/reducers';
-import {isEqual} from 'lodash-es';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {selectSelectedModelSettings} from '~/features/experiments/reducers';
+import {explicitEffect} from 'ngxtension/explicit-effect';
+import {computedPrevious} from 'ngxtension/computed-previous';
 
 @Component({
   selector: 'sm-model-info-scalars',
@@ -26,47 +30,76 @@ import {isEqual} from 'lodash-es';
   styleUrls: [
     '../../../experiments/containers/experiment-output-scalars/experiment-output-scalars.component.scss',
     '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
-  ]
+  ],
+  standalone: false
 })
 export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent {
+  protected override experiment = this.store.selectSignal(selectSelectedModel);
+  protected override experimentId = this.store.selectSignal(selectModelId);
+  protected override xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
+  protected override entitySelector = this.store.select(selectModelId);
+  protected override scalars = this.store.selectSignal(selectModelInfoHistograms);
+  protected override xAxisTypePrev = computedPrevious(this.xAxisType);
+  protected override routerParams$ = this.store.select(selectRouterParams)
+    .pipe(
+      filter(params => !!params.modelId),
+      distinctUntilChanged()
+    );
 
-  constructor(private route: ActivatedRoute) {
+  constructor() {
     super();
-    this.tableSelectedMetrics$ = this.store.select(selectSelectedSettingsModelTableMetric);
-    this.entitySelector = this.store.select(selectSelectedModel);
+    this.tableSelectedMetrics = this.store.selectSignal(selectSelectedSettingsModelTableMetric);
+    this.entitySelector = this.store.select(selectModelId);
     this.entityType = 'model';
-    this.exportForReport = !route.snapshot?.parent?.parent?.data?.setAllProject;
+    this.exportForReport = !this.activeRoute.snapshot?.parent?.parent?.data?.setAllProject;
 
-    this.xAxisType$ = this.store.select(selectModelSettingsXAxisType);
-    this.groupBy$ = this.store.select(selectModelSettingsGroupBy);
-    this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
-    this.smoothWeightDelayed$ = this.store.select(selectModelSettingsSmoothWeight).pipe(debounceTime(75));
-    this.smoothType$ = this.store.select(selectModelSettingsSmoothType);
-    this.listOfHidden$ = this.store.select(selectModelSettingsHiddenScalar)
-      .pipe(distinctUntilChanged(isEqual));
+    this.groupBy = this.store.selectSignal(selectModelSettingsGroupBy);
+    this.smoothWeight = toSignal(this.store.select(selectModelSettingsSmoothWeight).pipe(filter(smooth => smooth !== null)));
+    this.smoothWeightDelayed = toSignal(this.store.select(selectModelSettingsSmoothWeight).pipe(debounceTime(75)));
+    this.smoothType = this.store.selectSignal(selectModelSettingsSmoothType);
+    this.smoothSigma = this.store.selectSignal(selectModelSettingsSmoothSigma);
+    this.isProjectLevel = this.store.selectSignal(selectSelectedModelSettingsIsProjectLevel);
+    this.allSettings = this.store.selectSignal(selectSelectedModelSettings);
+    this.listOfHidden = this.store.selectSignal(selectModelSettingsHiddenScalar);
 
-    this.scalars$ = this.store.select(selectModelInfoHistograms)
-      .pipe(
-        filter((metrics) => !!metrics),
-      );
+    this.xAxisEffectRef.destroy();
+    explicitEffect(
+      [this.xAxisType],
+      ([xAxisType]) => {
+        if (this.experiment() && xAxisType && this.xAxisTypePrev() !== xAxisType) {
+          this.axisChanged();
+        }
+      });
 
-    this.routerParams$ = this.store.select(selectRouterParams)
-      .pipe(
-        filter(params => !!params.modelId),
-        tap(params => this.experimentId = params.modelId),
-        distinctUntilChanged()
-      );
+    this.mainEffectRef1.destroy();
+    this.mainEffectRef1 = explicitEffect(
+      [this.listOfHidden], ([hiddenList]) => {
+        if (this.scalars() && this.groupBy() && hiddenList) {
+          this.dataHandler(this.scalars(), hiddenList, this.groupBy(), true);
+        }
+      });
 
+    this.mainEffectRef2.destroy();
+    this.mainEffectRef2 = explicitEffect(
+      [this.groupBy, this.scalars, this.xAxisType], ([groupBy, scalars]) => {
+        if (groupBy && scalars &&
+          // prevent rendering chart with misfit x-axis type and data
+          (Object.values(scalars || {}).length === 0 || (this.xAxisType() !== 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] > 1600000000000) ||
+            (this.xAxisType() === 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] < 1600000000000))
+        ) {
+          this.dataHandler(scalars, this.listOfHidden(), groupBy, false);
+        }
+      });
   }
 
   override refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, model: true}));
+      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId(), refresh: true, model: true}));
     }
   }
 
   protected override axisChanged() {
-    this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, model: true}));
+    this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId(), model: true, skipSingleValue: true}));
   }
 }

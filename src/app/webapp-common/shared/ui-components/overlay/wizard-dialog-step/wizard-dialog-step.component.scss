@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 @keyframes hide-step {
   0% {
@@ -31,10 +31,10 @@
   opacity: 1;
   padding-top: 5vh;
   padding-bottom: 2vh;
-  animation: show-step $transition-slow;
+  animation: show-step variables.$transition-slow;
   animation-fill-mode: forwards;
   &.hide-step {
-    animation: hide-step $transition-slow;
+    animation: hide-step variables.$transition-slow;
     animation-fill-mode: forwards;
 
   }
@@ -58,10 +58,10 @@
   font-size: 10vh;
   font-weight: 900;
   color: color-mix(in srgb, var(--color-secondary), transparent 50%);
-  animation: show-step $transition-slow;
+  animation: show-step variables.$transition-slow;
   animation-fill-mode: forwards;
   &.hide-step {
-    animation: hide-step $transition-slow;
+    animation: hide-step variables.$transition-slow;
     animation-fill-mode: forwards;
   }
 }
@@ -82,7 +82,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   &.hide-step {
-    animation: hide-step $transition-slow;
+    animation: hide-step variables.$transition-slow;
     animation-fill-mode: forwards;
   }
 }
@@ -95,7 +95,7 @@
 
   &.hide-step {
     visibility: visible;
-    transition-delay: $transition-slow;
+    transition-delay: variables.$transition-slow;
   }
 }
 
@@ -104,7 +104,7 @@
 }
 .step{
   &.hide-step{
-    transition-delay: $transition-slow;
+    transition-delay: variables.$transition-slow;
   }
 }
 

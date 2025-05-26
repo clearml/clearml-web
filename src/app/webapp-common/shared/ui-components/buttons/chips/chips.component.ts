@@ -14,18 +14,17 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-chips',
-  templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    ChooseColorModule,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective,
-    MatIconButton,
-    MatIcon
-]
+    selector: 'sm-chips',
+    templateUrl: './chips.component.html',
+    styleUrls: ['./chips.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ChooseColorModule,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective,
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class ChipsComponent implements OnInit, OnDestroy {
 

@@ -6,27 +6,29 @@
 <div class="section">
   <div class="details">
     <h2>Model endpoint deployment</h2>
-    Deploy scalable multi-model endpoints with configurable multi-GPU specification and GPU/CPU offloading
+    Deploy scalable multi-model endpoints with configurable multi-GPU specification and GPU/CPU offloading.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-model-deployment-' + theme() + '.png'"
-    #image1
-    (click)="imageClicked(image1)"
-    width="640"
-    height="360"
-    alt="Model deployment"
-  >
+  <div class="image" (click)="imageClicked(image1)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-model-deployment-' + theme() + '.png'"
+      #image1
+      width="640"
+      height="360"
+      alt="Model deployment"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-gradio-with-input-' + theme() + '.png'"
-    #image2
-    (click)="imageClicked(image2)"
-    width="640"
-    height="360"
-    alt="gradio streamlit"
-  >
+  <div class="image" (click)="imageClicked(image2)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-gradio-with-input-' + theme() + '.png'"
+      #image2
+      width="640"
+      height="360"
+      alt="gradio streamlit"
+    >
+  </div>
   <div class="details">
     <h2>Easy ML/UI</h2>
     A UI launcher transforms any Gradio/Streamlit code into securely available web application.
@@ -38,25 +40,27 @@
     <h2>LLM Chat</h2>
     Securely deploy a UI chat client for any LLM.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-llm-edited-box-' + theme() + '.png'"
-    #image3
-    (click)="imageClicked(image3)"
-    width="640"
-    height="360"
-    alt="query"
-  >
+  <div class="image" (click)="imageClicked(image3)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-llm-edited-box-' + theme() + '.png'"
+      #image3
+      width="640"
+      height="360"
+      alt="query"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/custom-apps-fhd-' + theme() + '.png'"
-    #image4
-    (click)="imageClicked(image4)"
-    width="640"
-    height="360"
-    alt="custom apps"
-  >
+  <div class="image" (click)="imageClicked(image4)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/custom-apps-fhd-' + theme() + '.png'"
+      #image4
+      width="640"
+      height="360"
+      alt="custom apps"
+    >
+  </div>
   <div class="details">
     <h2>No-code app builder</h2>
     Add custom apps to your ClearML deployment to make AI accessible across your organization.

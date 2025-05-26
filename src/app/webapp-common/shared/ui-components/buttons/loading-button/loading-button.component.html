@@ -1,9 +1,0 @@
-<button mat-flat-button [disabled]="disabled()">
-  <span>{{label()}}</span>
-  <ng-content></ng-content>
-  @if (loading()) {
-    <mat-icon>
-      <mat-spinner [diameter]="16" [strokeWidth]="2"></mat-spinner>
-    </mat-icon>
-  }
-</button>

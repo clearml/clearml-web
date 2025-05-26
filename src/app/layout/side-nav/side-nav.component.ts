@@ -20,7 +20,8 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
       provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
       useValue: {showDelay: 0, position: 'right'} as MatTooltipDefaultOptions
     },
-  ]
+  ],
+  standalone: false
 })
 export class SideNavComponent {
   public store = inject(Store);

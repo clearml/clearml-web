@@ -1,4 +1,24 @@
+@use "sass:color";
 @use '@angular/material' as mat;
+
+:root {
+  // tint
+  --color-tint-5: rgba(from var(--color-primary) r g b / 5%);
+  --color-tint-8: rgba(from var(--color-primary) r g b / 8%);
+  --color-tint-11: rgba(from var(--color-primary) r g b / 11%);
+  --color-tint-12: rgba(from var(--color-primary) r g b / 12%);
+  --color-tint-14: rgba(from var(--color-primary) r g b / 14%);
+
+  // color aliases
+  --color-in_progress: var(--color-running);
+  --color-in_progress-container: var(--color-running-container);
+  --color-aborted: var(--color-completed);
+  --color-stopped: var(--color-completed);
+  --color-created: var(--color-draft);
+  --color-stopped-container: var(--color-completed-container);
+  --color-error-container: var(--color-failed-container);
+  --color-queued: var(--color-pending);
+}
 
 @mixin generate-colors($theme) {
   --color-primary: #{mat.get-theme-color($theme, primary)};
@@ -27,7 +47,7 @@
   --color-on-tertiary-fixed-variant: #{mat.get-theme-color($theme, on-tertiary-fixed-variant)};
   --color-error: #{mat.get-theme-color($theme, error)};
   --color-on-error: #{mat.get-theme-color($theme, on-error)};
-  --color-error-container: #{mat.get-theme-color($theme, error-container)};
+  //--color-error-container: #{mat.get-theme-color($theme, error-container)};
   --color-on-error-container: #{mat.get-theme-color($theme, on-error-container)};
   --color-surface-dim: #{mat.get-theme-color($theme, surface-dim)};
   --color-surface: #{mat.get-theme-color($theme, surface)};
@@ -46,13 +66,6 @@
   --color-inverse-primary: #{mat.get-theme-color($theme, inverse-primary)};
   --color-scrim: #{mat.get-theme-color($theme, scrim)};
   --color-shadow: #{mat.get-theme-color($theme, shadow)};
-
-  // tint
-  --color-tint-5: rgba(from var(--color-primary) r g b / 5%);
-  --color-tint-8: rgba(from var(--color-primary) r g b / 8%);
-  --color-tint-11: rgba(from var(--color-primary) r g b / 11%);
-  --color-tint-12: rgba(from var(--color-primary) r g b / 12%);
-  --color-tint-14: rgba(from var(--color-primary) r g b / 14%);
 
   // LIGHT
   @if mat.get-theme-type($theme) == light {
@@ -84,12 +97,15 @@
     --color-completed-container: #4fb9ff;
     --color-failed-container: #FFB4AB;
     --color-published-container: #D3FF00;
-    --color-skipped-container: #{lighten(#cc9054, 30%)};
-    --color-cached-container: #{lighten(#9e54cc, 30%)};
-    --color-executed-container: #{lighten(#4040d5, 30%)};
+    --color-skipped-container: #{color.adjust(#cc9054, $lightness: 30%)};
+    --color-cached-container: #{color.adjust(#9e54cc, $lightness: 30%)};
+    --color-executed-container: #{color.adjust(#4040d5, $lightness: 30%)};
     --color-warning: #FF5602;
+    --color-success: #199732;
     --color-neon-surface: #74C87A;
     --color-on-neon-surface: #223723;
+
+    --color-empty-state: #{mat.get-theme-color($theme, neutral, 70)};
 
   // DARK
   } @else {
@@ -126,19 +142,9 @@
     --color-cached-container: #9e54cc;
     --color-executed-container: #4040d5;
     --color-warning: #FD8934;
+    --color-success: #95f4a8;
     --color-neon-surface: #95F4DC;
     --color-on-neon-surface:  #005143;
-
+    --color-empty-state: #{mat.get-theme-color($theme, neutral, 50)};
   }
-
-  // color aliases
-  --color-in_progress: var(--color-running);
-  --color-in_progress-container: var(--color-running-container);
-  --color-aborted: var(--color-completed);
-  --color-stopped: var(--color-completed);
-  --color-created: var(--color-draft);
-  --color-stopped-container: var(--color-completed-container);
-  --color-error-container: var(--color-failed-container);
-  --color-queued: var(--color-pending);
-
 }

@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   .filter-sort-container {
     ::ng-deep .menu-button {
@@ -35,19 +33,15 @@
 }
 
 .filter-type {
-  padding: 4px 14px;
+  padding: 4px 0;
   text-align: right;
 
   .link {
-    font-size: 12px;
-    font-weight: 500;
     color: var(--color-outline);
-    cursor: pointer;
 
     &.selected {
       color: var(--color-on-surface);
       pointer-events: none;
-      cursor: initial;
     }
   }
 }

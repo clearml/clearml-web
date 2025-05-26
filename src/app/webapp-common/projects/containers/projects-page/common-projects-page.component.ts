@@ -1,54 +1,22 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {
-  CommonProjectReadyForDeletion,
-  selectNoMoreProjects,
-  selectProjectReadyForDeletion,
-  selectProjects,
-  selectProjectsOrderBy,
-  selectProjectsSortOrder
-} from '../../common-projects.reducer';
-import {
-  checkProjectForDeletion,
-  getAllProjectsPageProjects,
-  resetProjects,
-  resetProjectsSearchQuery,
-  resetReadyToDelete, setCurrentScrollId,
-  setProjectsOrderBy,
-  setProjectsSearchQuery,
-  updateProject
-} from '../../common-projects.actions';
+import {CommonProjectReadyForDeletion, selectNoMoreProjects, selectProjectReadyForDeletion, selectProjects, selectProjectsOrderBy, selectProjectsSortOrder} from '../../common-projects.reducer';
+import {checkProjectForDeletion, getAllProjectsPageProjects, resetProjects, resetProjectsSearchQuery, resetReadyToDelete, setCurrentScrollId, setProjectsOrderBy, setProjectsSearchQuery, updateProject} from '../../common-projects.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {ProjectDialogComponent, ProjectDialogConfig} from '@common/shared/project-dialog/project-dialog.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {
-  debounceTime,
-  distinctUntilKeyChanged,
-  filter,
-  map,
-  skip,
-  take,
-  tap,
-} from 'rxjs/operators';
+import {debounceTime, distinctUntilKeyChanged, filter, map, skip, take, tap} from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as coreProjectsActions from '@common/core/actions/projects.actions';
 import {setDeep, setSelectedProjectId} from '@common/core/actions/projects.actions';
 import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
-import {
-  getDeleteProjectPopupStatsBreakdown,
-  isDeletableProject,
-  popupEntitiesListConst,
-  readyForDeletionFilter
-} from '~/features/projects/projects-page.utils';
+import {getDeleteProjectPopupStatsBreakdown, isDeletableProject, popupEntitiesListConst, readyForDeletionFilter} from '~/features/projects/projects-page.utils';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {Project} from '~/business-logic/model/projects/project';
-import {
-  CommonDeleteDialogComponent,
-  DeleteData
-} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {CommonDeleteDialogComponent, DeleteData} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {selectRouterProjectId, selectSelectedProject} from '@common/core/reducers/projects.reducer';
@@ -57,11 +25,15 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {concatLatestFrom} from '@ngrx/operators';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
+import {ProjectSettingsDialogComponent, ProjectSettingsDialogConfig} from '@common/shared/project-dialog/project-settings/project-settings-dialog.component';
+import {ProjectSettingsDialog} from '@common/projects/common-projects.consts';
+import {setExperimentMetricsSearchTerm} from '@common/experiments/actions/common-experiment-output.actions';
 
 @Component({
   selector: 'sm-common-projects-page',
   templateUrl: './common-projects-page.component.html',
-  styleUrls: ['./common-projects-page.component.scss']
+  styleUrls: ['./common-projects-page.component.scss'],
+  standalone: false
 })
 export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public projectsList$: Observable<Project[]>;
@@ -136,7 +108,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
           const pageProjectsList = this.getExtraProjects(selectedProjectId, selectedProject);
           return pageProjectsList.concat(projectsList);
         }
-      }),
+      })
     );
     this.syncAppSearch();
   }
@@ -158,7 +130,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       name: 'All Tasks',
       basename: 'All Tasks',
 
-      sub_projects: null,
+      sub_projects: null
     } as ProjectsGetAllResponseSingle];
   }
 
@@ -179,7 +151,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.subs.add(this.selectedProject$.pipe(
       filter(project => (!!project)),
       distinctUntilKeyChanged('id'),
-      skip(1),
+      skip(1)
     ).subscribe(() => {
       this.store.dispatch(setCurrentScrollId({scrollId: null}));
       this.store.dispatch(getAllProjectsPageProjects());
@@ -290,7 +262,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(initSearch({payload: `Search for ${this.getName()}s`}));
     this.subs.add(this.searchQuery$.pipe(take(1)).subscribe(query =>
       this.store.dispatch(setProjectsSearchQuery({...query, skipGetAll: true}))));
-    this.subs.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query)));
+    this.subs.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => this.search(query)));
   }
 
   public projectCardClicked(project: ProjectsGetAllResponseSingle) {
@@ -337,6 +309,22 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         this.store.dispatch(resetProjectsSearchQuery());
         this.store.dispatch(getAllProjectsPageProjects());
         this.store.dispatch(coreProjectsActions.getAllSystemProjects());
+      });
+  }
+
+  openProjectSettings(project: Project) {
+    this.dialog.open<ProjectSettingsDialogComponent, ProjectSettingsDialogConfig, ProjectSettingsDialog>(ProjectSettingsDialogComponent, {
+      data: {
+        project: project ?? this.selectedProject
+      },
+      width: '760px',
+    }).afterClosed()
+      .subscribe((confirmed) => {
+        this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));
+        if (confirmed) {
+          this.store.dispatch(resetProjects());
+          this.store.dispatch(getAllProjectsPageProjects());
+        }
       });
   }
 

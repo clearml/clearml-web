@@ -7,13 +7,6 @@
       (projectCreated)="createProject($event)">
     </sm-create-new-project-form>
   }
-  @if ( mode === 'edit') {
-    <sm-edit-project-form
-      [project]="baseProject"
-      (projectUpdated)="updateProject($event)"
-      (cancelClicked)="closeDialog()">
-    </sm-edit-project-form>
-  }
   @if ( mode === 'move') {
     <sm-project-move-to-form
       [projects]="projects$ | ngrxPush"

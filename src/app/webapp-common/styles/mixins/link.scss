@@ -1,5 +1,3 @@
-@import "variables";
-
 @mixin link($link-color: var(--color-primary)) {
   a[href] {
     color: $link-color;

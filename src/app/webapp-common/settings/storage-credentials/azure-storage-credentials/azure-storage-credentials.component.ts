@@ -1,9 +1,7 @@
 import {ChangeDetectorRef, Component, inject, input, OnInit, output} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormFieldModule, MatLabel} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
@@ -16,24 +14,19 @@ type AzureForm = FormGroup<{
 }>
 
 @Component({
-  selector: 'sm-azure-storage-credentials',
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatFormFieldModule,
-    MatInputModule,
-    MatLabel,
-    ReactiveFormsModule,
-    TooltipDirective,
-    MatButton,
-    MatIcon,
-    MatIconButton
-  ],
-  templateUrl: './azure-storage-credentials.component.html',
-  styleUrls: ['./azure-storage-credentials.component.scss', '../storage-credentials.scss']
+    selector: 'sm-azure-storage-credentials',
+    imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatLabel,
+        ReactiveFormsModule,
+        MatButton,
+        MatIcon,
+        MatIconButton
+    ],
+    templateUrl: './azure-storage-credentials.component.html',
+    styleUrls: ['./azure-storage-credentials.component.scss', '../storage-credentials.scss']
 })
 export class AzureStorageCredentialsComponent implements OnInit {
 

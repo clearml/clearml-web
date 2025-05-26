@@ -1,8 +1,7 @@
-@import "mixins/common";
-@import "variables";
+@use "mixins/common";
 
 $reqWidth: 56px;
-$font-size: 18px;
+
 .completed {
   background-color: var(--color-completed);
 }
@@ -64,7 +63,7 @@ $font-size: 18px;
     }
   }
   .counter-label {
-    @include counter-label();
+    @include common.counter-label();
     text-transform: uppercase;
   }
 }

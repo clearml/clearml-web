@@ -4,7 +4,7 @@ import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-na
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
-import {parseInt} from 'lodash-es';
+import {escapeRegExp, get, parseInt} from 'lodash-es';
 import { ContainerInfo } from '~/business-logic/model/serving/containerInfo';
 
 export const servingTableCols: ISmCol[] = [
@@ -144,8 +144,8 @@ export const endpointsStatsParamInfo = {
 };
 
 export const modelServingRoutes = [
-  {header: 'ACTIVE', subHeader: '', link: ['endpoints', 'active']},
-  {header: 'LOADING', subHeader: '', link: ['endpoints', 'loading']}
+  {header: 'ACTIVE', subHeader: '', link: 'endpoints/active'},
+  {header: 'LOADING', subHeader: '', link: 'endpoints/loading'}
 ] as HeaderNavbarTabConfig[];
 
 export function sortAndFilterEndpoints(endpoints: EndpointStats[] | ContainerInfo[], filters: Record<string, FilterMetadata>, sortFields: SortMeta[]): EndpointStats[] | ContainerInfo[] {
@@ -176,4 +176,20 @@ export function sortAndFilterEndpoints(endpoints: EndpointStats[] | ContainerInf
     });
     return res;
   });
+}
+
+export const filterEndpoints = (endpoints, sq ) => {
+  let query = sq?.query.toLowerCase();
+  try {
+    if (!sq?.regExp) {
+      query = escapeRegExp(query)
+    }
+    const exp = new RegExp(query, 'i');
+    return endpoints?.filter(endpoint =>
+      ['endpoint', 'model', 'id'].some(col => exp.test(get(endpoint, col) as unknown as string))
+    );
+  }
+  catch {
+    return endpoints;
+  }
 }

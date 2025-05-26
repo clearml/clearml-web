@@ -1,10 +1,11 @@
-import {Component, computed, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, input, OnInit, output, signal, viewChild} from '@angular/core';
 import {trackById, trackByIndex, trackByValue} from '@common/shared/utils/forms-track-by';
 import {Task} from '~/business-logic/model/tasks/task';
 import {FormControl} from '@angular/forms';
 import {sortMetricsList} from '@common/tasks/tasks.utils';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {Table} from 'primeng/table';
 
 interface tableRow {
   metricId: string;
@@ -12,48 +13,52 @@ interface tableRow {
   metric: string;
   variant: string;
   firstMetricRow: boolean;
+  lastInGroup: boolean;
   last: number;
   min: number;
   max: number;
 }
 
 @Component({
-  selector: 'sm-experiment-metric-data-table',
-  styleUrls: [
-    '../../../experiments-compare/containers/experiment-compare-metric-values/experiment-compare-metric-values.component.scss',
-    './experiment-metric-data-table.component.scss'
-  ],
-  templateUrl: './experiment-metric-data-table.component.html'
+    selector: 'sm-experiment-metric-data-table',
+    styleUrls: [
+        '../../../experiments-compare/containers/experiment-compare-metric-values/experiment-compare-metric-values.component.scss',
+        './experiment-metric-data-table.component.scss'
+    ],
+    templateUrl: './experiment-metric-data-table.component.html',
+    standalone: false
 })
 
 
 export class ExperimentMetricDataTableComponent implements OnInit {
-  public settings: ExperimentCompareSettings = {selectedMetricsScalar: []} as ExperimentCompareSettings;
+  protected settings: ExperimentCompareSettings = {selectedMetricsScalar: []} as ExperimentCompareSettings;
+  protected initialSelectedMetricsScalar: string[] = [];
+  protected variantFilter = new FormControl('');
+
   selectedExperiment = input<string>();
   selectedMetricsScalar = input<string[]>();
   lastMetrics = input<Task['last_metrics']>();
   selectedMetricsChanged = output<string[]>();
-  filterOpen: boolean;
-  filterValue = signal<string>('');
-  listSearchTerm = signal<string>('');
+  protected filterOpen: boolean;
+  protected filterValue = signal<string>('');
+  protected listSearchTerm = signal<string>('');
+  private table = viewChild(Table);
 
-  public initialSelectedMetricsScalar: string[] = [];
-
-
+  constructor() {
+    effect(() => {
+      if (this.table() && this.dataTableFiltered()) {
+        window.setTimeout(() => this.table().scroller?.setSize(), 50);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.variantFilter.valueChanges.subscribe((value) => this.filterValue.set(value));
-
   }
-
-
-  public variantFilter = new FormControl('');
-
 
   searchTermChanged(searchTerm: string) {
     this.listSearchTerm.set(searchTerm);
   }
-
 
   public scrolled: boolean;
   public showFilterTooltip: boolean;
@@ -98,6 +103,7 @@ export class ExperimentMetricDataTableComponent implements OnInit {
         metric: this.lastMetrics()[metricId][variantId].metric,
         variant: this.lastMetrics()[metricId][variantId].variant,
         firstMetricRow: false,
+        lastInGroup: false,
         last: this.lastMetrics()[metricId][variantId].value,
         min: this.lastMetrics()[metricId][variantId].min_value,
         max: this.lastMetrics()[metricId][variantId].max_value,
@@ -128,10 +134,9 @@ export class ExperimentMetricDataTableComponent implements OnInit {
     const filteredData = this.dataTable()
       .filter(row => !this.selectedMetricsScalar() || this.selectedMetricsScalar()?.includes(`${row.metric}${row.variant}`))
       .filter(row => row.metric.toLowerCase().includes(this.filterValue().toLowerCase()) || row.variant.toLowerCase().includes(this.filterValue().toLowerCase()));
-    let previousMetric: string;
-    return filteredData.map(row => {
-      row.firstMetricRow = row.metric !== previousMetric;
-      previousMetric = row.metric;
+    return filteredData.map((row, i) => {
+      row.firstMetricRow = row.metric !== filteredData[i - 1]?.metric;
+      row.lastInGroup = row.metric !== filteredData[i + 1]?.metric;
       return row;
     });
   });

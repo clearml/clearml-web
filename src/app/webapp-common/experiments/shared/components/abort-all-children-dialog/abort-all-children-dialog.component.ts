@@ -3,9 +3,10 @@ import {Component, inject} from '@angular/core';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
-  selector: 'sm-abort-all-children-dialog',
-  templateUrl: './abort-all-children-dialog.component.html',
-  styleUrls: ['./abort-all-children-dialog.component.scss']
+    selector: 'sm-abort-all-children-dialog',
+    templateUrl: './abort-all-children-dialog.component.html',
+    styleUrls: ['./abort-all-children-dialog.component.scss'],
+    standalone: false
 })
 export class AbortAllChildrenDialogComponent {
   protected data = inject<{

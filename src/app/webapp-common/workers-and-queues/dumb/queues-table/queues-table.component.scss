@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   .first {
     display: block;
@@ -14,6 +12,7 @@
   height: 100%;
 
   &.short {
+    height: 400px;
     max-height: 400px;
   }
 }

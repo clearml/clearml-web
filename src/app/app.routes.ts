@@ -34,6 +34,7 @@ export const routes: Routes = [
           {path: '', pathMatch: 'full', children: [], canActivate: [projectRedirectGuardGuard]},
           {
             path: 'overview',
+            data: {search: false},
             loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule),
             canDeactivate: [resetContextMenuGuard]
           },
@@ -52,7 +53,7 @@ export const routes: Routes = [
           {path: 'compare-experiments', redirectTo: 'compare-tasks'},
           {
             path: 'compare-tasks',
-            data: {entityType: EntityTypeEnum.experiment},
+            data: {entityType: EntityTypeEnum.experiment, search: false},
             loadChildren: () =>
               import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },

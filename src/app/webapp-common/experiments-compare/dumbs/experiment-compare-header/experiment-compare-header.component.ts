@@ -4,7 +4,12 @@ import {Store} from '@ngrx/store';
 import {selectHideIdenticalFields, selectShowRowExtremes} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {
-  refreshIfNeeded, setExportTable, setHideIdenticalFields, setShowGlobalLegend, setShowRowExtremes, setShowSearchExperimentsForCompare
+  refreshIfNeeded,
+  setExportTable,
+  setHideIdenticalFields,
+  setShowGlobalLegend,
+  setShowRowExtremes,
+  setShowSearchExperimentsForCompare
 } from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
@@ -12,26 +17,30 @@ import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {filter, map} from 'rxjs/operators';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {SelectExperimentsForCompareComponent, allowAddExperiment$} from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
+import {
+  SelectExperimentsForCompareComponent,
+  allowAddExperiment$
+} from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {paramsActions} from '@common/experiments-compare/actions/experiments-compare-params.actions';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {setArchive} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-experiment-compare-header',
   templateUrl: './experiment-compare-header.component.html',
   styleUrls: ['./experiment-compare-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 
   viewModeToIcon = {
     graph: 'al-ico-charts-view',
     scatter: 'al-ico-scatter-view',
-  }
+  };
 
   private routerSubscription: Subscription;
   public selectHideIdenticalFields$: Observable<boolean>;
@@ -62,7 +71,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
       .pipe(map(params => params[this.currentPage]));
     this.routerSubscription = this.store.select(selectRouterParams).subscribe((params) => {
       this.selectedIds = params?.ids;
-    })
+    });
   }
 
   ngOnInit() {
@@ -75,7 +84,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
       const currentPage = this.route?.snapshot?.firstChild?.url?.[0]?.path;
       const viewMode = this.route?.snapshot?.firstChild?.url?.[1]?.path;
       if (currentPage && viewMode && (currentPage !== this.currentPage || viewMode !== this.viewMode)) {
-        this.store.dispatch(paramsActions.setView({primary: currentPage, secondary: viewMode}))
+        this.store.dispatch(paramsActions.setView({primary: currentPage, secondary: viewMode}));
       }
       this.currentPage = currentPage;
       this.viewMode = viewMode;
@@ -95,6 +104,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     const page = event.value.replace(/.*_/, '');
     this.router.navigate([`./${this.currentPage}/${page}`], {
       relativeTo: this.route,
+      queryParams: {params: undefined},
       queryParamsHandling: 'merge'
     });
   }
@@ -106,7 +116,8 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
         data: {
           selectionMode: 'multiple',
           selectedModels: selectedIds,
-        header: 'Select compared model'},
+          header: 'Select compared model'
+        },
         panelClass: 'full-screen',
       }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
     } else {

@@ -20,19 +20,18 @@ export interface TipsModalData {
 
 
 @Component({
-  selector: 'sm-tip-of-the-day-modal',
-  templateUrl: './tip-of-the-day-modal.component.html',
-  styleUrls: ['./tip-of-the-day-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    DialogTemplateComponent,
-    ClickStopPropagationDirective,
-    SaferPipe,
-    TooltipDirective,
-    MatCheckbox,
-    FormsModule
-  ],
-  standalone: true
+    selector: 'sm-tip-of-the-day-modal',
+    templateUrl: './tip-of-the-day-modal.component.html',
+    styleUrls: ['./tip-of-the-day-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DialogTemplateComponent,
+        ClickStopPropagationDirective,
+        SaferPipe,
+        TooltipDirective,
+        MatCheckbox,
+        FormsModule
+    ]
 })
 export class TipOfTheDayModalComponent {
   public matDialogRef = inject<MatDialogRef<TipOfTheDayModalComponent>>(MatDialogRef<TipOfTheDayModalComponent>);

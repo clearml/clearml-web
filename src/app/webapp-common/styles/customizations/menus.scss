@@ -1,58 +1,59 @@
 :root {
-  --mat-menu-item-icon-size: 20px;
-  --mat-menu-item-label-text-size: 14px;
-  --mat-menu-item-label-text-weight: 400;
-
-  --mat-menu-item-label-text-color: var(--color-on-primary-container);
-  --mat-menu-item-focus-state-layer-color: var(--color-secondary-container);
-
-
-  .mat-mdc-menu-item .mat-icon-no-color, 
-  .mat-mdc-menu-item .mat-mdc-menu-submenu-icon {
-    --mat-menu-item-icon-color: var(--color-primary);
-  }
-
-  .mat-mdc-menu-item {
-    --mat-menu-item-label-text-size: 14px;
-    --mat-menu-item-label-text-weight: normal;
-    text-decoration: none;
-    .mat-icon {
-      --mat-menu-item-icon-size: 20px;
-    }
-  }
-
-  .mat-mdc-menu-panel {
+  .mat-mdc-menu-panel:not(.multiline-tooltip) {
     max-width: 450px;
     min-width: 114px;
     min-height: 32px;
     border: 1px solid var(--color-surface-container-high);
+    margin-top: 6px;
 
     &.custom-columns {
       width: 370px;
     }
-    .mat-mdc-menu-content {
-      padding: 4px;
+  }
+
+  .mat-mdc-menu-content {
+    padding: 4px;
+    --mat-menu-item-icon-size: 20px;
+    --mat-menu-item-label-text-size: 14px;
+    --mat-menu-item-label-text-weight: 400;
+
+    --mat-menu-item-label-text-color: var(--color-on-primary-container);
+    --mat-menu-item-focus-state-layer-color: var(--color-secondary-container);
+
+
+    .mat-mdc-menu-item .mat-icon-no-color,
+    .mat-mdc-menu-item .mat-mdc-menu-submenu-icon {
+      --mat-menu-item-icon-color: var(--color-primary);
     }
-  }
 
-  .mat-mdc-menu-item {
-    min-height: 40px;
-    border-radius: 4px;
-  }
+    .mat-mdc-menu-item {
+      --mat-menu-item-label-text-size: 14px;
+      --mat-menu-item-label-text-weight: normal;
+      text-decoration: none;
+      .mat-icon {
+        --mat-menu-item-icon-size: 20px;
+      }
+    }
 
-  .mat-mdc-menu-item-text {
-    display: inline-block;
-    flex-grow: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+    .mat-mdc-menu-item {
+      min-height: 40px;
+      border-radius: 4px;
+    }
 
-  .mat-mdc-menu-content hr {
-    margin: 4px 0;
-    color: inherit;
-    border: 0;
-    border-top: 1px solid var(--color-outline-variant);
+    .mat-mdc-menu-item-text {
+      display: inline-block;
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    hr {
+      margin: 4px 0;
+      color: inherit;
+      border: 0;
+      border-top: 1px solid var(--color-outline-variant);
+    }
   }
 
   .menu-opened {

@@ -4,62 +4,66 @@
 </div>
 
 <div class="section">
+  <div class="image" (click)="imageClicked(image1)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/hpds-images-fhd-' + theme() + '.png'"
+      #image1
+      width="640"
+      height="360"
+      alt="Versioning media"
+    >
+  </div>
   <div class="details">
     <h2>Data Versioning</h2>
     Git-like meta-data based dataset versioning ensuring traceable, reproducible AI development.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/hpds-images-fhd-' + theme() + '.png'"
-    #image1
-    (click)="imageClicked(image1)"
-    width="640"
-    height="360"
-    alt="Versioning media"
-  >
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/hpds-query-fhd-' + theme() + '.png'"
-    #image3
-    (click)="imageClicked(image3)"
-    width="640"
-    height="360"
-    alt="query"
-  >
   <div class="details">
-    <h2>Data selection</h2>
-    Robust and flexible query interface facilitating data exploration and training data quality control.
+    <h2>Data Selection and Exploration</h2>
+    Robust, flexible query interface with integrated vector similarity search, facilitating data exploration and training data quality control.
+  </div>
+  <div class="image" (click)="imageClicked(image2)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/hpds-query-fhd-' + theme() + '.png'"
+      #image2
+      width="640"
+      height="360"
+      alt="query"
+    >
   </div>
 </div>
 
 <div class="section">
+  <div class="image" (click)="imageClicked(image3)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/hpds-stats-fhd-' + theme() + '.png'"
+      #image3
+      width="640"
+      height="360"
+      alt="Statistics"
+    >
+  </div>
   <div class="details">
     <h2>Data insight</h2>
     On-demand exploration of dataset qualities at both sample and annotation level.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/hpds-stats-fhd-' + theme() + '.png'"
-    #image4
-    (click)="imageClicked(image4)"
-    width="640"
-    height="360"
-    alt="Statistics"
-  >
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/hpds-annotator-fhd-' + theme() + '.png'"
-    #image5
-    (click)="imageClicked(image5)"
-    width="640"
-    height="360"
-    alt="Annotation"
-  >
   <div class="details">
     <h2>UI annotation editor</h2>
     Browse any data sample, explore and edit annotations and meta-data.
+  </div>
+  <div class="image" (click)="imageClicked(image4)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/hpds-annotator-fhd-' + theme() + '.png'"
+      #image4
+      width="640"
+      height="360"
+      alt="Annotation"
+    >
   </div>
 </div>
 <div class="cta">

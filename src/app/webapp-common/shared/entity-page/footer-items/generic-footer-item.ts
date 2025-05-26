@@ -1,5 +1,5 @@
-import {IFooterState, ItemFooterModel} from './footer-items.models';
-import {IconNames} from '../../../constants';
+import {ItemFooterModel} from './footer-items.models';
+import {IconNames} from '@common/constants';
 
 export class GenericFooterItem extends ItemFooterModel {
   constructor({icon = null,
@@ -17,7 +17,7 @@ export class GenericFooterItem extends ItemFooterModel {
     this.emit = true;
   }
 
-  getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+  getItemState(): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
     return {};
   }
 }

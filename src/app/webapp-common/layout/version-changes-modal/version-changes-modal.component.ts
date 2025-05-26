@@ -6,8 +6,6 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {MatCheckbox} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {Change} from '@common/shared/services/changes.service';
 import {MatButton} from '@angular/material/button';
@@ -20,22 +18,19 @@ export interface ChangesModalData {
 
 
 @Component({
-  selector: 'sm-version-changes-modal',
-  templateUrl: './version-changes-modal.component.html',
-  styleUrls: ['./version-changes-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    DialogTemplateComponent,
-    ClickStopPropagationDirective,
-    SaferPipe,
-    TooltipDirective,
-    MatCheckbox,
-    FormsModule,
-    MatDialogActions,
-    MatButton,
-    MatDialogClose
-  ],
-  standalone: true
+    selector: 'sm-version-changes-modal',
+    templateUrl: './version-changes-modal.component.html',
+    styleUrls: ['./version-changes-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DialogTemplateComponent,
+        ClickStopPropagationDirective,
+        SaferPipe,
+        FormsModule,
+        MatDialogActions,
+        MatButton,
+        MatDialogClose
+    ]
 })
 export class VersionChangesModalComponent {
   protected matDialogRef = inject(MatDialogRef<VersionChangesModalComponent>);

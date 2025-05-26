@@ -16,27 +16,27 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {IOption} from '@common/constants';
 import {FormsModule} from '@angular/forms';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-table-card-filter',
-  templateUrl: './table-card-filter.component.html',
-  styleUrls: ['./table-card-filter.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatMenuModule,
-    MatInputModule,
-    CheckboxThreeStateListComponent,
-    MatListModule,
-    MenuItemComponent,
-    FilterPipe,
-    ClickStopPropagationDirective,
-    DotsLoadMoreComponent,
-    FormsModule,
-    MatIconButton,
-    MatIcon,
+    selector: 'sm-table-card-filter',
+    templateUrl: './table-card-filter.component.html',
+    styleUrls: ['./table-card-filter.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatMenuModule,
+        MatInputModule,
+        CheckboxThreeStateListComponent,
+        MatListModule,
+        MenuItemComponent,
+        FilterPipe,
+        ClickStopPropagationDirective,
+        DotsLoadMoreComponent,
+        FormsModule,
+        MatIconButton,
+        MatIcon,
+    MatButton,
   ]
 })
 export class TableCardFilterComponent {

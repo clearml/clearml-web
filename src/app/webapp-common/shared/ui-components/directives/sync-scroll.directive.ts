@@ -4,7 +4,8 @@ import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 
 @Directive({
-  selector: '[smSyncScroll]'
+    selector: '[smSyncScroll]',
+    standalone: false
 })
 export class SyncScrollDirective implements OnDestroy {
 

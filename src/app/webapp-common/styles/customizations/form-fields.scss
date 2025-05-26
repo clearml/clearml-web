@@ -2,6 +2,33 @@
 
 
 .mat-mdc-form-field {
+  --mat-form-field-outlined-label-text-populated-size: 12px;
+  --mat-form-field-subscript-text-tracking: 0;
+  --mat-form-field-container-height: 36px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mdc-outlined-text-field-focus-outline-width: 1px;
+  --mat-form-field-subscript-text-size: 12px;
+
+  --mdc-outlined-text-field-hover-outline-color: var(--color-outline);
+  --mdc-outlined-text-field-outline-color: var(--color-outline-variant);
+  --mdc-outlined-text-field-label-text-color: var(--color-on-surface-variant);
+  --mdc-outlined-text-field-hover-label-text-color: var(--color-on-surface);
+
+  --mat-form-field-state-layer-color: transparent;
+  --mdc-filled-text-field-container-color: transparent;
+  --mdc-outlined-text-field-input-text-placeholder-color: var(--color-outline);
+
+  --mdc-checkbox-unselected-icon-color: var(--color-primary);
+  --mdc-checkbox-selected-icon-color: var(--color-primary);
+  --mat-radio-label-text-size: 14px;
+
+  --mat-select-panel-background-color: var(--color-surface-container-lowest);
+  --mat-autocomplete-background-color: var(--color-surface-container-lowest);
+  --mat-menu-container-color: var(--color-surface-container-low);
+
+  .mat-mdc-select-placeholder {
+    --mat-select-placeholder-text-color: var(--color-outline);
+  }
 
   --mat-menu-item-label-text-size: 14px;
   --mat-menu-item-label-text-line-height: 16px;
@@ -36,19 +63,23 @@
     }
   }
 }
+
 .mat-mdc-form-field-type-mat-chip-grid .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix,
 .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix:has(.mat-mdc-form-field-textarea-control) {
   height: auto;
   min-height: 36px;
   padding: 5px 0;
 }
+
 .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix {
   padding-top: 2px;
 }
+
 .select-panel-width {
   min-width: fit-content;
   max-width: 50vw !important;
 }
+
 .mat-mdc-form-field:has(.mat-mdc-floating-label) {
 
   .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
@@ -85,6 +116,7 @@
       z-index: 0;
       border-radius: 4px;
     }
+
     .mat-mdc-notch-piece {
       background-color: var(--color-surface);
     }
@@ -106,8 +138,9 @@
     min-height: 40px;
     line-height: 40px;
     margin-bottom: 2px;
-    border-radius:4px;
-    .mat-pseudo-checkbox-minimal{
+    border-radius: 4px;
+
+    .mat-pseudo-checkbox-minimal {
       margin-left: unset;
     }
 
@@ -129,7 +162,20 @@
   }
 }
 
-.mat-mdc-form-field-error {font-size: 12px;}
+.mat-mdc-form-field-error {
+  font-size: 12px;
+}
+
+.mdc-checkbox {
+  transform: scale(0.9); /* Adjust the scale value as needed */
+  & + .mdc-label {
+    padding-left: 0px
+  }
+}
+.mat-mdc-checkbox .mat-internal-form-field {
+  --mat-checkbox-label-text-size: 14px;
+}
+
 
 sm-table {
   --mdc-checkbox-state-layer-size: 18px;
@@ -138,6 +184,7 @@ sm-table {
     background-color: var(--color-on-primary);
   }
 }
+
 // hide arrows for number inputs
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -148,34 +195,4 @@ input[type=number]::-webkit-outer-spin-button {
 // hide arrows for number inputs (FireFox)
 input[type=number] {
   -moz-appearance: textfield !important;
-}
-
-
-@mixin form-fields($theme) {
-
-  --mat-form-field-outlined-label-text-populated-size: 12px;
-  --mat-form-field-subscript-text-tracking: 0;
-  --mat-form-field-container-height: 36px;
-  --mat-form-field-container-vertical-padding: 8px;
-  --mdc-outlined-text-field-focus-outline-width: 1px;
-  --mat-form-field-subscript-text-size: 12px;
-
-  --mdc-outlined-text-field-hover-outline-color: var(--color-outline);
-  --mdc-outlined-text-field-outline-color: var(--color-outline-variant);
-  --mdc-outlined-text-field-label-text-color: var(--color-on-surface-variant);
-  --mdc-outlined-text-field-hover-label-text-color: var(--color-on-surface);
-
-  --mat-form-field-state-layer-color: transparent;
-  --mdc-filled-text-field-container-color: transparent;
-  --mdc-outlined-text-field-input-text-placeholder-color: var(--color-outline);
-
-  --mdc-checkbox-unselected-icon-color: var(--color-primary);
-  --mdc-checkbox-selected-icon-color: var(--color-primary);
-  --mat-checkbox-label-text-size: 14px;
-  --mat-radio-label-text-size: 14px;
-
-  --mat-select-panel-background-color: var(--color-surface-container-lowest);
-  --mat-autocomplete-background-color: var(--color-surface-container-lowest);
-  --mat-menu-container-color: var(--color-surface-container-low);
-
 }

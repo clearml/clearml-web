@@ -5,8 +5,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {interval, combineLatest, switchMap, fromEvent, startWith} from 'rxjs';
-import {Queue} from '~/business-logic/model/queues/queue';
-import {queueActions} from '../../actions/queues.actions';
+import {Queue, queueActions} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {
@@ -17,10 +16,11 @@ import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {debounceTime, map} from 'rxjs/operators';
 
 @Component({
-  selector: 'sm-queue-stats',
-  templateUrl: './queue-stats.component.html',
-  styleUrls: ['./queue-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-queue-stats',
+    templateUrl: './queue-stats.component.html',
+    styleUrls: ['./queue-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class QueueStatsComponent {
   private readonly store = inject(Store);

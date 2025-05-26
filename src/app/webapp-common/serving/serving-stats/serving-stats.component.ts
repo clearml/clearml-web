@@ -15,15 +15,14 @@ import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 const REFRESH_INTERVAL = 45000;
 
 @Component({
-  selector: 'sm-serving-stats',
-  templateUrl: './serving-stats.component.html',
-  styleUrls: ['./serving-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    FormsModule,
-    LineChartComponent
-  ],
-  standalone: true
+    selector: 'sm-serving-stats',
+    templateUrl: './serving-stats.component.html',
+    styleUrls: ['./serving-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule,
+        LineChartComponent
+    ]
 })
 export class ServingStatsComponent {
   private store = inject(Store);
@@ -33,6 +32,7 @@ export class ServingStatsComponent {
 
   protected allChartsData = this.store.selectSignal(servingFeature.selectStats);
   protected selectedEndpoint = this.store.selectSignal(servingFeature.selectSelectedEndpoint);
+  protected allSeriesLegends = this.store.selectSignal(servingFeature.selectAllSeriesLegends);
 
   protected refreshChart = signal(true);
   protected yAxisLabel = signal('');
@@ -40,7 +40,9 @@ export class ServingStatsComponent {
   chartData = computed(() => this.allChartsData()?.[this.metricType().value] ?? null);
   private selectedWorkerId: string | undefined;
 
-  protected presetColors = presetColorsDark;
+  // Keep same series (topics) in same colors in all plots even if different order (plot has color persistent when order changes)
+  legends = computed(() => this.chartData()?.map(a => a.topicName))
+  protected presetColors = computed(() => this.legends()?.map(series => presetColorsDark[this.allSeriesLegends().findIndex(leg => leg === series)]));
 
   protected yAxisLabels = {
     'cpu_usage;gpu_usage': 'Usage %',
@@ -61,7 +63,7 @@ export class ServingStatsComponent {
         }
       }
       this.selectedWorkerId = this.selectedEndpoint()?.id;
-    }, {allowSignalWrites: true});
+    });
 
     effect(() => {
       if (!!this.currentTimeFrame() && !!this.metricType() && this.selectedEndpoint()) {
@@ -72,13 +74,13 @@ export class ServingStatsComponent {
         this.previousEndpoint = this.selectedEndpoint();
         this.previousTimeFrame = this.currentTimeFrame();
       }
-    }, {allowSignalWrites: true});
+    });
 
     effect(() => {
       if (this.chartData()) {
         this.refreshChart.set(false);
       }
-    }, {allowSignalWrites: true});
+    });
 
     this.autoRefreshSubscription();
   }

@@ -58,7 +58,6 @@ import {TableComponent} from '@common/shared/ui-components/data/table/table.comp
 import {MatSelectModule} from '@angular/material/select';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {GroupedCheckedFilterListComponent} from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
-import {SelectableFilterListComponent} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
 import {TableCardComponent} from '@common/shared/ui-components/data/table-card/table-card.component';
 import {ToggleArchiveComponent} from '@common/shared/ui-components/buttons/toggle-archive/toggle-archive.component';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
@@ -80,6 +79,10 @@ import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
 import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
 import {MiniTagsListComponent} from '@common/shared/ui-components/tags/user-tag/mini-tags-list/mini-tags-list.component';
 import {TableCardFilterComponent} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter.component';
+import {SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {JsonIndentPipe} from '@common/experiments/dumb/experiment-execution-parameters/json-indent.pipe';
+import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
+import {MatDivider} from '@angular/material/divider';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -178,7 +181,6 @@ const DECLARATIONS = [
     MatSelectModule,
     ButtonToggleComponent,
     GroupedCheckedFilterListComponent,
-    SelectableFilterListComponent,
     TableCardComponent,
     ToggleArchiveComponent,
     RefreshButtonComponent,
@@ -203,6 +205,10 @@ const DECLARATIONS = [
     MiniTagsListComponent,
     TableCardFilterComponent,
     ReactiveFormsModule,
+    SelectableGroupedFilterListComponent,
+    JsonIndentPipe,
+    MultiLineTooltipComponent,
+    MatDivider,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

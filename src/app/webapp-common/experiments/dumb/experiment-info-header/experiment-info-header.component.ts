@@ -6,7 +6,7 @@ import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
-import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
+import {EXPERIMENT_COMMENT} from '@common/experiments/dumb/experiment-details/experiment-details.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   MenuItems,
@@ -17,6 +17,7 @@ import {
   selectionDisabledDequeue,
   selectionDisabledEnqueue,
   selectionDisabledMoveTo,
+  selectionDisabledPipelineRun,
   selectionDisabledPublishExperiments,
   selectionDisabledQueue,
   selectionDisabledReset,
@@ -29,9 +30,10 @@ import { selectExperimentsTags } from '@common/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
-  selector: 'sm-experiment-info-header',
-  templateUrl: './experiment-info-header.component.html',
-  styleUrls: ['./experiment-info-header.component.scss']
+    selector: 'sm-experiment-info-header',
+    templateUrl: './experiment-info-header.component.html',
+    styleUrls: ['./experiment-info-header.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoHeaderComponent {
   private store = inject(Store);
@@ -42,7 +44,7 @@ export class ExperimentInfoHeaderComponent {
   protected projectTags$ = this.store.select(selectExperimentsTags);
   protected companyTags$ = this.store.select(selectCompanyTags);
 
-  experiment = input<any>();
+  experiment = input<IExperimentInfo>();
   editable = input(true);
   infoData = input<IExperimentInfo>();
   backdropActive = input(false);
@@ -72,7 +74,8 @@ export class ExperimentInfoHeaderComponent {
     [MenuItems.dequeue]: selectionDisabledDequeue([this.experiment()]),
     [MenuItems.queue]: selectionDisabledQueue([this.experiment()]),
     [MenuItems.viewWorker]: selectionDisabledViewWorker([this.experiment()]),
-    [MenuItems.archive]: selectionDisabledArchive([this.experiment()])
+    [MenuItems.archive]: selectionDisabledArchive([this.experiment()]),
+    [MenuItems.run]: selectionDisabledPipelineRun([this.experiment()])
   }));
 
   onNameChanged(name) {
@@ -112,8 +115,8 @@ export class ExperimentInfoHeaderComponent {
   }
 
   editDescriptionHandler() {
-    this.router.navigate(['general'], {relativeTo: this.activatedRoute});
-    window.setTimeout(() => this.store.dispatch(activateEdit(EXPERIMENT_COMMENT)), 50);
+    this.router.navigate(['general'], {relativeTo: this.activatedRoute}).then(() =>
+      window.setTimeout(() => this.store.dispatch(activateEdit(EXPERIMENT_COMMENT)), 500));
   }
 
   copyToClipboard() {

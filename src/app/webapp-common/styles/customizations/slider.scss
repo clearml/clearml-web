@@ -6,6 +6,20 @@
 
     height: $size;
     margin: 0 4px;
+
+    --mdc-slider-inactive-track-color: var(--color-outline);
+    --mdc-slider-active-track-color: var(--color-outline);
+
+    &.indicator-position-bottom {
+      --mat-slider-value-indicator-border-radius: 50% 0 50% 50%;
+      --mat-slider-value-indicator-width: 36px;
+      --mat-slider-value-indicator-height: 36px;
+      .mdc-slider__value-indicator-container {
+        bottom: auto;
+        top: 40px;
+      }
+    }
+
     &__thumb {
       left: #{$size * -0.5 - 2};
       height: $size;
@@ -19,9 +33,6 @@
       height: $size;
       top: 0;
     }
-
-    --mdc-slider-inactive-track-color: var(--color-outline);
-    --mdc-slider-active-track-color: var(--color-outline);
   }
 
   .mat-mdc-slider-visual-thumb .mat-ripple {

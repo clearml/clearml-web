@@ -1,4 +1,5 @@
-@import "src/app/webapp-common/assets/fonts/variables";
+@use "sass:color";
+@use "src/app/webapp-common/assets/fonts/variables" as fonts;
 
 :host {
   display: block;
@@ -6,6 +7,7 @@
   container-type: inline-size;
   container-name: section;
   overflow: auto;
+  width: 100%;
 
   @container section (max-width: 1200px) {
     .section {
@@ -18,10 +20,6 @@
         grid-template-areas:
         "details"
         "image";
-      }
-      img {
-        width: 100%;
-        height: auto;
       }
     }
     .details {
@@ -42,7 +40,7 @@ h1 {
 h2 {
   color: var(--color-primary);
   font-size: 32px;
-  line-height: 42px;
+  line-height: 38px;
   margin: 0 0 12px 0;
   font-weight: normal;
 }
@@ -72,22 +70,9 @@ h2 {
 
   &:nth-of-type(even) {
     grid-template-areas: "image details";
-    background-color: color-mix(in srgb, var(--color-surface-container-low), transparent 20%);
-  }
-
-  img {
-    grid-area: image;
-    margin: 0 auto;
-    border: 1px solid var(--color-outline-variant);
-    border-radius: 6px;
-    cursor: pointer;
-    &:hover {
-      border-color: var(--color-outline);
-    }
+    background-color: var(--color-tint-5);
   }
 }
-
-
 
 .details {
   grid-area: details;
@@ -99,35 +84,62 @@ h2 {
   padding: 24px 0;
 }
 
-.full-screen {
-  position: fixed;
-  width: calc(100% - 400px);
-  right: 24px;
-  height: unset;
-  top: 90px;
-  aspect-ratio: 16 / 9;
-  z-index: 9;
-  box-shadow: 0 0 5px 6px var(--color-surface-container-high);
-  transition: 0.3s ease-in-out;
+.image {
+  grid-area: image;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  img {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 6px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    transition: border 0.3s;
+    &:hover {
+      border-color: var(--color-outline);
+    }
+  }
 }
 
-.full-screen::before {
-  content: $al-ico-dialog-x;
-  font-family: "trains";
-  cursor: pointer;
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  z-index: 10;
-  background: var(--color-surface-container-high);
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
-  font-size: 18px;
-  pointer-events: none;
-  text-align: center;
-  border-radius:100%;
-  border: 1px solid var(--color-outline);
+.full-screen {
+  position: fixed;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 9;
+  padding: 0 24px;
+  background-color: rgba(0, 0, 0, 0.32);
+  transition: background-color 0.3s ease-in-out;
+  &:before {
+    content: fonts.$al-ico-dialog-x;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: fonts.$icomoon-font-family;
+    cursor: pointer;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    border-radius:100%;
+    color: var(--color-primary);
+    background: var(--color-surface-container-high);
+    border: 1px solid var(--color-outline);
+  }
+
+  img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(100vh - 100px);
+    box-shadow: none;
+    border-color: var(--color-outline-variant);
+  }
 }
 
 .cta {
@@ -149,7 +161,7 @@ h2 {
   transition: box-shadow 0.3s;
   &:hover {
     color: white;
-    background-color: darken(#a335d5, 10%);
+    background-color: #{color.adjust(#a335d5, $lightness: 10%)};
     text-decoration: none;
   }
   &:focus {

@@ -23,9 +23,10 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
-  selector: 'sm-experiment-info-hyper-parameters',
-  templateUrl: './experiment-info-hyper-parameters.component.html',
-  styleUrls: ['./experiment-info-hyper-parameters.component.scss']
+    selector: 'sm-experiment-info-hyper-parameters',
+    templateUrl: './experiment-info-hyper-parameters.component.html',
+    styleUrls: ['./experiment-info-hyper-parameters.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoHyperParametersComponent {
   private store = inject(Store);

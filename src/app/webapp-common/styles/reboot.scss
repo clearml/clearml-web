@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 * {
   outline: none !important;
@@ -14,11 +14,15 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: $font-family-base;
+  font-family: variables.$font-family-base;
   font-size: 14px;
   overflow: hidden;
 }
 
+sm-root {
+  display: block;
+  height: 100%;
+}
 
 a {
   text-decoration: none;

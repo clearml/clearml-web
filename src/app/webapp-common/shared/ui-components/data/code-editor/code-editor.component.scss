@@ -1,12 +1,20 @@
-@import "variables";
-
 :host {
   position: relative;
   .ace {
     height: 100%;
     width: 100%;
     line-height: 1.6;
-    background-color: var(--color-surface-container);
+    background-color: var(--color-surface-container-low);
+    border-radius: 4px;
+    border: 1px solid var(--color-outline-variant);
+    &.readonly {
+      ::ng-deep .ace_cursor-layer {
+        opacity: 0;
+      }
+    }
+    ::ng-deep .ace_scrollbar.ace_scrollbar-h{
+      background-color: var(--color-surface-container-low);
+    }
   }
 
   .copy-button {

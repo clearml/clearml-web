@@ -13,7 +13,6 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {HasSelectedPipe} from '@common/experiments/dumb/select-metric-for-custom-col/has-selected.pipe';
-import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
 import {MatCheckbox} from '@angular/material/checkbox';
 
 export interface SelectionEvent {
@@ -23,30 +22,28 @@ export interface SelectionEvent {
 }
 
 @Component({
-  selector: 'sm-select-metric-for-custom-col',
-  templateUrl: './select-metric-for-custom-col.component.html',
-  styleUrls: ['./select-metric-for-custom-col.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SearchComponent,
-    ClickStopPropagationDirective,
-    MatProgressSpinner,
-    MatExpansionPanel,
-    IsEmptyPipe,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    TooltipDirective,
-    AdvancedFilterPipe,
-    MatExpansionPanelContent,
-    ShowTooltipIfEllipsisDirective,
-    MatRadioButton,
-    MatRadioGroup,
-    FormsModule,
-    HasSelectedPipe,
-    IsRowSelectedPipe,
-    MatCheckbox
-  ],
-  standalone: true
+    selector: 'sm-select-metric-for-custom-col',
+    templateUrl: './select-metric-for-custom-col.component.html',
+    styleUrls: ['./select-metric-for-custom-col.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        SearchComponent,
+        ClickStopPropagationDirective,
+        MatProgressSpinner,
+        MatExpansionPanel,
+        IsEmptyPipe,
+        MatExpansionPanelHeader,
+        MatExpansionPanelTitle,
+        TooltipDirective,
+        AdvancedFilterPipe,
+        MatExpansionPanelContent,
+        ShowTooltipIfEllipsisDirective,
+        MatRadioButton,
+        MatRadioGroup,
+        FormsModule,
+        HasSelectedPipe,
+        MatCheckbox
+    ]
 })
 export class SelectMetricForCustomColComponent {
   public metricTree: Record<string, MetricVariantResult[]>;

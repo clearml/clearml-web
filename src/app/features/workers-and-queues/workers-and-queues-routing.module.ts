@@ -4,7 +4,8 @@ import {WorkersComponent} from '@common/workers-and-queues/containers/workers/wo
 import {QueuesComponent} from '@common/workers-and-queues/containers/queues/queues.component';
 import {WorkersAndQueuesResolver} from '~/shared/resolvers/workers-and-queues.resolver';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {OrchestrationComponent} from "~/features/workers-and-queues/orchestration.component";
+import {OrchestrationComponent} from '~/features/workers-and-queues/orchestration.component';
+import {resetContextMenuGuard} from '@common/shared/guards/resetContextMenuGuard.guard';
 
 const wQBreadcrumb = [[{
   name: 'WORKERS AND QUEUES',
@@ -14,6 +15,7 @@ export const routes: Routes = [
   {
     path: '',
     component: OrchestrationComponent,
+    canDeactivate: [resetContextMenuGuard],
     resolve: {
       queuesManager: WorkersAndQueuesResolver
     },

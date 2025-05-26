@@ -7,13 +7,12 @@ import {DOCUMENT} from '@angular/common';
 import {DialogModule} from '@angular/cdk/dialog';
 
 @Component({
-  selector: 'sm-portal',
-  templateUrl: './portal.component.html',
-  styleUrls: ['./portal.component.scss'],
-  standalone: true,
-  imports: [
-    DialogModule
-  ]
+    selector: 'sm-portal',
+    templateUrl: './portal.component.html',
+    styleUrls: ['./portal.component.scss'],
+    imports: [
+        DialogModule
+    ]
 })
 export class PortalComponent implements AfterViewInit, OnDestroy {
   @Input() outletId: string;

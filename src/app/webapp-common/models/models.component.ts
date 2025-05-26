@@ -69,9 +69,10 @@ import {toSignal} from '@angular/core/rxjs-interop';
 
 
 @Component({
-  selector: 'sm-models',
-  templateUrl: './models.component.html',
-  styleUrls: ['./models.component.scss']
+    selector: 'sm-models',
+    templateUrl: './models.component.html',
+    styleUrls: ['./models.component.scss'],
+    standalone: false
 })
 export class ModelsComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
   public readonly originalTableColumns = MODELS_TABLE_COLS;
@@ -260,7 +261,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for models'}));
-    this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query))));
+    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query))));
   }
 
   getNextModels() {

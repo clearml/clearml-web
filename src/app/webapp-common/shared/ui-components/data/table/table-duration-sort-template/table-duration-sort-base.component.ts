@@ -81,7 +81,8 @@ export class DataInputOutputHelper {
 
 
 @Component({
-  template: 'sm-table-duration-base'
+    template: 'sm-table-duration-base',
+    standalone: false
 })
 export abstract class TableDurationSortBaseComponent {
   protected cdr: ChangeDetectorRef;

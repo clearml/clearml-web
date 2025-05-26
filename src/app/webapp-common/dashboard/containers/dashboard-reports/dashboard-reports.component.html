@@ -23,7 +23,6 @@
     }
     @if (recentList().length < cardsInRow) {
       <sm-plus-card
-        [folder]="true"
         (plusCardClick)="openCreateDialog()"
       ></sm-plus-card>
     }

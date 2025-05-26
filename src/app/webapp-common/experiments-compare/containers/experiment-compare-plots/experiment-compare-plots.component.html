@@ -1,22 +1,21 @@
 <div class="d-flex h-100">
   @if (!minimized) {
     <div class="list-container">
-      <sm-selectable-filter-list
-        checkAllIcon="al-ico-show"
-        placeholder="Find plots"
+      <sm-selectable-grouped-filter-list
+        placeHolder="Find plots"
         [list]="graphList"
         [checkedList]="settings.selectedMetricsPlot"
         [searchTerm]="searchTerm$ | ngrxPush"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="selectedListChanged($event)"
         (searchTermChanged)="searchTermChanged($event)"
-        >
-      </sm-selectable-filter-list>
+      ></sm-selectable-grouped-filter-list>
     </div>
   }
   <div class="graphs-container h-100 w-100">
     <sm-experiment-graphs
       [metrics]="graphs"
+      [list]="graphList"
       [isCompare]="true"
       [isGroupGraphs]="true"
       [hiddenList]="settings.selectedMetricsPlot"

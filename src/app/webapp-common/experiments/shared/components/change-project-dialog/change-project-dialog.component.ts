@@ -14,10 +14,11 @@ import {rootProjectsPageSize} from '@common/constants';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 
 @Component({
-  selector: 'sm-change-project-dialog',
-  templateUrl: './change-project-dialog.component.html',
-  styleUrls: ['./change-project-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-change-project-dialog',
+    templateUrl: './change-project-dialog.component.html',
+    styleUrls: ['./change-project-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   private store = inject(Store);

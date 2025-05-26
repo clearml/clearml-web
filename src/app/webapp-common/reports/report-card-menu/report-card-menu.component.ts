@@ -9,17 +9,16 @@ import {MatIcon} from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 
 @Component({
-  selector: 'sm-report-card-menu',
-  templateUrl: './report-card-menu.component.html',
-  styleUrls: ['./report-card-menu.component.scss'],
-  imports: [
-    MatMenuModule,
-    TagsMenuComponent,
-    ClickStopPropagationDirective,
-    MatIconButton,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-report-card-menu',
+    templateUrl: './report-card-menu.component.html',
+    styleUrls: ['./report-card-menu.component.scss'],
+    imports: [
+        MatMenuModule,
+        TagsMenuComponent,
+        ClickStopPropagationDirective,
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class ReportCardMenuComponent {
   readonly icons = ICONS;

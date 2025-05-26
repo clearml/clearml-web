@@ -1,163 +1,172 @@
-@if (hiddenList()?.length === 0 || graphsState().noGraphs() && !(multipleSingleValueData()?.data.length > 0) && !(singleValueData()?.length > 0)) {
+@if (
+  !loading() &&
+  (hiddenList()?.length === 0 || graphsState().noGraphs()) &&
+  !(multipleSingleValueData()?.data.length > 0 && hiddenList()?.length !== 0) &&
+  !(singleValueData()?.length > 0 && hiddenList()?.length !== 0)
+  ) {
   <div class="no-output">
-    <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxxl"></mat-icon>
-    @if (graphsState().graphList().length > 0) {
+    <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
+    @if (graphsState().graphList().length > 0 || multipleSingleValueData()?.data.length > 0 || singleValueData()?.length > 0) {
       <h4>ALL CHARTS ARE HIDDEN</h4>
     } @else {
       <h4>NO CHART DATA</h4>
     }
   </div>
 }
-
-<div #allMetrics class="metrics-section" [class.hidden]="hiddenList()?.length === 0">
-  @if (singleValueData()?.length > 0 && hiddenList().includes(singleValueChartTitle)) {
-    <div class="d-flex align-items-center justify-content-center summary-container">
-      @if (exportForReport()) {
-        <sm-single-value-summary-table
-          [data]="singleValueData()"
-          [experimentName]="experimentName()"
-          class="single-value-summary-section"
+<!--faster outside @else-->
+  <div #allMetrics class="metrics-section" [class.hidden]="hiddenList()?.length === 0">
+    @if (singleValueData()?.length > 0 && hiddenList()?.includes(singleValueChartTitle)) {
+      <div class="d-flex align-items-center justify-content-center summary-container">
+        @if (exportForReport()) {
+          <sm-single-value-summary-table
+            [data]="singleValueData()"
+            [experimentName]="experimentName()"
+            class="single-value-summary-section"
+            (createEmbedCode)="creatingEmbedCode(null, $event)"
+          ></sm-single-value-summary-table>
+        } @else {
+          <sm-single-value-summary-table
+            [data]="singleValueData()"
+            [experimentName]="experimentName()"
+            class="single-value-summary-section"
+          ></sm-single-value-summary-table>
+        }
+      </div>
+    }
+    @if (plotlyReady() && multipleSingleValueData()?.data.length > 0) {
+      <div class="d-flex align-items-center justify-content-center summary-container">
+        <sm-single-graph
+          #singleValueGraph
+          class="w-100 single-value-summary-section"
+          [graphsNumber]="1"
+          [legendStringLength]="legendStringLength()"
+          [chart]="multipleSingleValueData()"
+          [id]="'singleValues'"
+          [isCompare]="isCompare()"
+          [hoverMode]="hoverMode()"
+          [showLoaderOnDraw]="showLoaderOnDraw()"
+          [identifier]="generateIdentifier(multipleSingleValueData())"
+          [exportForReport]="exportForReport()"
           (createEmbedCode)="creatingEmbedCode(null, $event)"
-        ></sm-single-value-summary-table>
-      } @else {
-        <sm-single-value-summary-table
-          [data]="singleValueData()"
-          [experimentName]="experimentName()"
-          class="single-value-summary-section"
-        ></sm-single-value-summary-table>
-      }
-    </div>
-  }
-  @if (multipleSingleValueData()?.data.length > 0) {
-    <div class="d-flex align-items-center justify-content-center summary-container">
-      <sm-single-graph
-        #singleValueGraph
-        class="w-100 single-value-summary-section"
-        [graphsNumber]="1"
-        [legendStringLength]="legendStringLength()"
-        [chart]="multipleSingleValueData()"
-        [id]="'singleValues'"
-        [isCompare]="isCompare()"
-        [hoverMode]="hoverMode()"
-        [showLoaderOnDraw]="showLoaderOnDraw()"
-        [identifier]="generateIdentifier(multipleSingleValueData())"
-        [exportForReport]="exportForReport()"
-        (createEmbedCode)="creatingEmbedCode(null, $event)"
-        (hoverModeChanged)="hoverModeChanged.emit($event)"
-      ></sm-single-graph>
-    </div>
-  }
-  <div [class.all-metrics]="graphsState().graphList()?.length > 0"
-       [class.row]="!isGroupGraphs()"
-  >
-    @for (metric of (graphsState().graphList()); track metric) {
-      <div class="metric-group-container less-padding"
-           #metricGroup
-           [class.two-in-a-row]="!isGroupGraphs() && graphsState().graphList().length > 1 && isWidthBigEnough()"
-           [style.height.percent]=""
-           [class.hidden]="inHiddenList(metric)"
-      >
-        <div [id]="experimentGraphidPrefix + metric" class="graph-id">
-          <div #groupElement>
-            @if (isGroupGraphs()) {
-              <div class="metric-group-header" [class.disable-resize]="disableResize()" (click)="collapseGroup(groupElement)">
-                <div class="flex-placeholder"></div>
-                <div class="header-text" >{{ metric }}
-                  @if (graphsData()[metric]?.length > 1) {
-                    <span class="counter">({{graphsData()[metric].length}} plots)</span>
+          (hoverModeChanged)="hoverModeChanged.emit($event)"
+        ></sm-single-graph>
+      </div>
+    }
+    <div [class.all-metrics]="graphsState().graphList()?.length > 0"
+         [class.row]="!isGroupGraphs()"
+    >
+      @for (metric of (graphsState().graphList()); track metric) {
+        <div class="metric-group-container less-padding"
+             #metricGroup
+             [class.two-in-a-row]="!isGroupGraphs() && graphsState().graphList().length > 1 && isWidthBigEnough()"
+             [class.hidden]="inHiddenList(metric, '')"
+        >
+          <div [id]="experimentGraphidPrefix + metric" class="graph-id">
+            <div #groupElement>
+              @if (isGroupGraphs()) {
+                <div class="metric-group-header" [class.disable-resize]="disableResize()" (click)="collapseGroup(groupElement)">
+                  <div class="flex-placeholder"></div>
+                  <div class="header-text">{{ metric }}
+                    @if (visibility()[metric]?.length > 1) {
+                      <span class="counter">({{(visibility()[metric] | getCounterString)}} plots)</span>
+                    }
+                  </div>
+                  @if (graphsData()?.[metric]?.length > 0) {
+                    <div class="d-flex gap-3">
+                      <button  mat-icon-button
+                               class="ms-auto"
+                               smTooltip="Copy group embed code"
+                               matTooltipPosition="below"
+                               (click)="$event.stopPropagation(); creatingEmbedCodeGroup(graphsData()?.[metric], groupCode)">
+                        <div #groupCode>
+                          <mat-icon  fontSet="al" fontIcon="al-ico-code-square"></mat-icon>
+                        </div>
+                      </button>
+                      <button  mat-icon-button class="ms-auto group-btn">
+                        <mat-icon  fontSet="al" fontIcon="al-ico-ico-chevron-down"></mat-icon>
+                      </button>
+                    </div>
                   }
                 </div>
-                @if (graphsData()[metric]?.length > 0) {
-                  <div class="d-flex gap-3">
-                  <button  mat-icon-button
-                           class="ms-auto"
-                           smTooltip="Copy group embed code"
-                           matTooltipPosition="below"
-                           (click)="$event.stopPropagation(); creatingEmbedCodeGroup(graphsData()[metric], groupCode)">
-                    <div #groupCode>
-                      <mat-icon  fontSet="al" fontIcon="al-ico-code-square"></mat-icon>
-                    </div>
-                  </button>
-                  <button  mat-icon-button class="ms-auto group-btn">
-                      <mat-icon  fontSet="al" fontIcon="al-ico-ico-chevron-down"></mat-icon>
-                  </button>
+              }
+              <div class="single-graph">
+                <!--          <div [class.row]="isGroupGraphs"-->
+                <!--               [class.single-graph]="graphsData()[metric].length === 1">-->
+                @for (chartItem of graphsData()?.[metric]; track trackByIdFn(chartItem)) {
+                  <div
+                    #singleGraphContainer
+                    mwlResizable
+                    [style.height]="height > 0? height : '450px'"
+                    class="single-graph-container"
+                    [class.hidden]="isGroupGraphs() && inHiddenList(metric, chartItem.variant)"
+                    [validateResize]="validateResize"
+                    [enableGhostResize]="!disableResize()"
+                    [ghostElementPositioning]="'absolute'"
+                    [id]="experimentGraphidPrefix + metric + (isGroupGraphs() ? chartItem.variant : '')"
+                    (resizing)="onResizing($event);"
+                    (resizeEnd)="sizeChanged($event)"
+                    (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)"
+                  >
+                    @if (plotlyReady() && this.signedImagePlots[chartItem.id] | ngrxPush) {
+                      @defer (on viewport) {
+                        <sm-single-graph
+                          [class.less-padding]="isGroupGraphs()"
+                          [class.two-in-a-row]="isGroupGraphs() && chartItem?.data[0]?.type !== 'table' && graphsData()?.[metric].length > 1 && isWidthBigEnough()"
+                          [graphsNumber]="graphsState().numIterations()"
+                          [legendStringLength]="legendStringLength()"
+                          [chart]="chartItem"
+                          [id]="chartItem.id"
+                          [isCompare]="isCompare()"
+                          [hoverMode]="hoverMode()"
+                          [showLoaderOnDraw]="showLoaderOnDraw()"
+                          [legendConfiguration]="legendConfiguration()"
+                          [smoothSigma]="smoothSigma()"
+                          [smoothWeight]="smoothWeight()"
+                          [smoothType]="smoothType()"
+                          [xAxisType]="xAxisType()"
+                          [height]="height"
+                          [width]="width"
+                          [moveLegendToTitle]="checkIfLegendToTitle(chartItem)"
+                          [identifier]="generateIdentifier(chartItem)"
+                          [exportForReport]="exportForReport()"
+                          (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
+                          (hoverModeChanged)="hoverModeChanged.emit($event)"
+                        ></sm-single-graph>
+                      } @placeholder {
+                        <div
+                          [id]="chartItem.id"
+                          [style.height]="height ?? '405px'"
+                          [style.width]="width"
+                        ></div>
+                      }
+                    }
+                    @if (!disableResize()) {
+                      <div
+                        class="resize-handle-right"
+                        mwlResizeHandle
+                        [resizeEdges]="{ right: true }">
+                        <div class="right-line"></div>
+                        <div class="right-handle"></div>
+                      </div>
+                    }
+                    @if (!disableResize()) {
+                      <div
+                        class="resize-handle-bottom"
+                        mwlResizeHandle
+                        [resizeEdges]="{ bottom: true }">
+                        <div class="bottom-line"></div>
+                        <div class="bottom-handle"></div>
+                      </div>
+                    }
+                    <div class="resize-overlay-text"></div>
+                    <div class="resize-overlay" [class.active]="activeResizeElement && activeResizeElement !== singleGraphContainer"></div>
                   </div>
                 }
               </div>
-            }
-            <div class="single-graph">
-              <!--          <div [class.row]="isGroupGraphs"-->
-              <!--               [class.single-graph]="graphsData()[metric].length === 1">-->
-              @for (chartItem of graphsData()[metric]; track trackByIdFn(chartItem)) {
-                <div
-                  #singleGraphContainer
-                  mwlResizable
-                  [style.height]="height > 0? height : '450px'"
-                  class="single-graph-container"
-                  [validateResize]="validateResize"
-                  [enableGhostResize]="!disableResize()"
-                  [ghostElementPositioning]="'absolute'"
-                  [id]="chartItem.id"
-                  (resizing)="onResizing($event);"
-                  (resizeEnd)="sizeChanged($event)"
-                  (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)"
-                >
-                  @defer (on viewport) {
-                    <sm-single-graph
-                      [class.less-padding]="isGroupGraphs()"
-                      [class.two-in-a-row]="isGroupGraphs() && chartItem?.data[0]?.type !== 'table' && graphsData()[metric].length > 1 && isWidthBigEnough()"
-                      [graphsNumber]="graphsState().numIterations()"
-                      [legendStringLength]="legendStringLength()"
-                      [chart]="chartItem"
-                      [id]="chartItem.id"
-                      [isCompare]="isCompare()"
-                      [hoverMode]="hoverMode()"
-                      [showLoaderOnDraw]="showLoaderOnDraw()"
-                      [legendConfiguration]="legendConfiguration()"
-                      [smoothWeight]="smoothWeight()"
-                      [smoothType]="smoothType()"
-                      [xAxisType]="xAxisType()"
-                      [height]="height"
-                      [width]="width"
-                      [moveLegendToTitle]="checkIfLegendToTitle(chartItem)"
-                      [identifier]="generateIdentifier(chartItem)"
-                      [exportForReport]="exportForReport()"
-                      (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
-                      (hoverModeChanged)="hoverModeChanged.emit($event)"
-                    ></sm-single-graph>
-                  } @placeholder {
-                    <div
-                      [style.height]="height ?? '405px'"
-                      [style.width]="width"
-                    ></div>
-                  }
-                  @if (!disableResize()) {
-                    <div
-                      class="resize-handle-right"
-                      mwlResizeHandle
-                      [resizeEdges]="{ right: true }">
-                      <div class="right-line"></div>
-                      <div class="right-handle"></div>
-                    </div>
-                  }
-                  @if (!disableResize()) {
-                    <div
-                      class="resize-handle-bottom"
-                      mwlResizeHandle
-                      [resizeEdges]="{ bottom: true }">
-                      <div class="bottom-line"></div>
-                      <div class="bottom-handle"></div>
-                    </div>
-                  }
-                  <div class="resize-overlay-text"></div>
-                  <div class="resize-overlay" [class.active]="activeResizeElement && activeResizeElement !== singleGraphContainer"></div>
-                </div>
-              }
             </div>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   </div>
-</div>
 

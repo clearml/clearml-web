@@ -223,11 +223,13 @@ export class CommonExperimentsMenuEffects {
       } as TasksCloneRequest)
         .pipe(
           mergeMap((res: TasksCloneResponse) => {
-            this.router.navigate(['projects', action.cloneData.project?.value || res.id || '*', 'tasks', res.id]);
+            this.router.navigate(['projects', action.cloneData.project?.value || res.new_project?.id || '*', 'tasks', res.id]);
             return [
               viewActions.getExperiments(),
               deactivateLoader(action.type),
-              ...action.cloneData.newProjectName ? [getAllSystemProjects()] : [],
+              ...action.cloneData.newProjectName ? [
+                projectsActions.setDeep({deep: false}),
+                getAllSystemProjects()] : [],
             ];
           }),
           catchError(error => [

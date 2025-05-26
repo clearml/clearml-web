@@ -1,28 +1,24 @@
-import {ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {MatMenuModule, MenuPositionY} from '@angular/material/menu';
-import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {MatIcon} from '@angular/material/icon';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {MatIconButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-multi-line-tooltip',
-  templateUrl: `./multi-line-tooltip.component.html`,
-  styleUrls: ['./multi-line-tooltip.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
+    selector: 'sm-multi-line-tooltip',
+    templateUrl: `./multi-line-tooltip.component.html`,
+    styleUrls: ['./multi-line-tooltip.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatMenuModule,
+    MatIcon,
     HesitateDirective,
-    ClickStopPropagationDirective,
-    SaferPipe,
-    MatIconButton,
-    MatIcon
+    ClickStopPropagationDirective
   ]
 })
 export class MultiLineTooltipComponent {
   iconClass = input<string>();
   smallIcon = input<boolean>(false);
   position = input<MenuPositionY>('below');
+  wordBreak = input<boolean>(false);
 }

@@ -5,7 +5,6 @@ import {MatSelectModule} from '@angular/material/select';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ResizableModule} from 'angular-resizable-element';
 import {ExperimentGraphsComponent} from './experiment-graphs.component';
-import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar.component';
 import {SingleValueSummaryTableComponent} from '../single-value-summary-table/single-value-summary-table.component';
 import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {MatInputModule} from '@angular/material/input';
@@ -25,15 +24,15 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import { MatIcon } from '@angular/material/icon';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {GetCounterStringPipe} from '@common/shared/experiment-graphs/filter-hidden.pipe';
 
 
 
 
 const declarations= [
   ExperimentMetricDataTableComponent,
-  ExperimentGraphsComponent,
-  GraphSettingsBarComponent,
+  ExperimentGraphsComponent
 ];
 @NgModule({
   declarations,
@@ -59,7 +58,9 @@ const declarations= [
     TooltipDirective,
     ReactiveFormsModule,
     MatIcon,
-    MatIconButton
+    MatIconButton,
+    GetCounterStringPipe,
+    MatButton
   ]
 })
 export class ExperimentGraphsModule { }

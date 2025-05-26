@@ -8,15 +8,14 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-template/admin-dialog-template.component';
 
 @Component({
-  selector: 'sm-create-credential-dialog',
-  templateUrl: './create-credential-dialog.component.html',
-  styleUrls: ['./create-credential-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    AdminDialogTemplateComponent
-  ]
+    selector: 'sm-create-credential-dialog',
+    templateUrl: './create-credential-dialog.component.html',
+    styleUrls: ['./create-credential-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DialogTemplateComponent,
+        AdminDialogTemplateComponent
+    ]
 })
   export class CreateCredentialDialogComponent {
   private store = inject(Store);

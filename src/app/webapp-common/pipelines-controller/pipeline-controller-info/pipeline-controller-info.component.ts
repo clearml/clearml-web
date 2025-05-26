@@ -60,28 +60,23 @@ export enum StatusOption {
 
 
 @Component({
-  selector: 'sm-pipeline-controller-diagram',
-  templateUrl: './pipeline-controller-info.component.html',
-  styleUrls: ['./pipeline-controller-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DagManagerUnsortedService],
-  animations: [
-    trigger('shrinkRegular', [
-      state(
-        'shrink',
-        style({
-          opacity: '0',
-        }),
-      ),
-      state(
-        'regular',
-        style({
-          opacity: '1',
-        }),
-      ),
-      transition('shrink => regular', [animate('1s')]),
-    ]),
-  ],
+    selector: 'sm-pipeline-controller-diagram',
+    templateUrl: './pipeline-controller-info.component.html',
+    styleUrls: ['./pipeline-controller-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [DagManagerUnsortedService],
+    animations: [
+        trigger('shrinkRegular', [
+            state('shrink', style({
+                opacity: '0',
+            })),
+            state('regular', style({
+                opacity: '1',
+            })),
+            transition('shrink => regular', [animate('1s')]),
+        ]),
+    ],
+    standalone: false
 })
 
 export class PipelineControllerInfoComponent implements OnDestroy {
@@ -167,6 +162,7 @@ export class PipelineControllerInfoComponent implements OnDestroy {
       .subscribe(([task,]) => {
         if (task?.id !== this.infoData?.id) {
           this.enableStaging.set(false);
+          this.focusOnStage.set(false);
           this.selectedEntity.set(null);
           this.stepDiff.set(null);
           this.detailsPanelMode.set(this.getPanelMode());
@@ -417,8 +413,10 @@ export class PipelineControllerInfoComponent implements OnDestroy {
     } else if (!this.dragging) {
       this.stepDiff.set(null);
       this.detailsPanelMode.set(this.defaultDetailsMode);
-      this.store.dispatch(setSelectedPipelineStep({step: this.focusOnStage()?.id ? this.focusOnStage() : null}));
-      this.selectedEntity.set(this.focusOnStage()?.id ? this.focusOnStage() : null);
+      if(!this.focusOnStage()){
+        this.store.dispatch(setSelectedPipelineStep({step: null}));
+        this.selectedEntity.set(null);
+      }
     } else {
       this.dragging = false;
     }

@@ -47,7 +47,8 @@ export class ModelsInfoEffects {
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(infoActions.getModelInfo),
+    ofType(infoActions.getModelInfo, infoActions.getModel, infoActions.getPlots),
+    filter(action => !action?.['autoRefresh']),
     map(action => activeLoader(action.type))));
 
   getModel = createEffect(() => this.actions$.pipe(
@@ -58,7 +59,7 @@ export class ModelsInfoEffects {
     ]),
     filter(([, , visible]) => visible),
     switchMap(([action, activeWorkspace]) =>
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       this.apiModels.modelsGetByIdEx({id: [action.modelId], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(
           mergeMap((res: ModelsGetAllResponse) => {
@@ -102,7 +103,7 @@ export class ModelsInfoEffects {
 
         const listed = models?.find(e => e.id === currentSelected?.id);
         return (listed ? of(listed) :
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
             this.apiModels.modelsGetByIdEx({id: [selected?.id ?? action.id], only_fields: ['last_change']}).pipe(map(res => res.models[0]))
         ).pipe(map(model => [action, model?.last_change ?? model?.last_update, model, selected]));
       }
@@ -171,6 +172,7 @@ export class ModelsInfoEffects {
             setBackdrop({active: false})
           ]),
           catchError(err => [
+            setBackdrop({active: false}),
             requestFailed(err),
             setServerError(err, null, 'Update metadata failed'),
           ])
@@ -209,11 +211,11 @@ export class ModelsInfoEffects {
 
   fetchExperimentPlots$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.getPlots),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     switchMap(action => this.eventsService.eventsGetTaskPlots({task: action.id, model_events: true}).pipe(
       map(res => [res.plots.length, res]),
       expand(([plotsLength, data]) => plotsLength < data.total
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         ? this.eventsService.eventsGetTaskPlots({task: action.id, iters: 1, scroll_id: data.scroll_id})
           .pipe(map(res => [plotsLength + res.plots.length, res]))
         : EMPTY
@@ -221,7 +223,8 @@ export class ModelsInfoEffects {
       reduce((acc, [, data]) => acc.concat(data.plots), [])
     )),
     mergeMap((allPlots: any) => [
-      infoActions.setPlots({plots: allPlots})
+      infoActions.setPlots({plots: allPlots}),
+      deactivateLoader(infoActions.getPlots.type)
     ]),
     catchError(error => [
       requestFailed(error),

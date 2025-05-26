@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
-import {debounceTime, filter, map, switchMap, take} from 'rxjs/operators';
+import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
 import {appFeature} from './app.reducer';
@@ -17,7 +17,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {_mergeVariants, allowedMergedTypes, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
+import {_mergeVariants, allowedMergedTypes, checkIfLegendToTitle, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
@@ -40,8 +40,6 @@ import {
 } from '@common/shared/single-value-summary-table/single-value-summary-table.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {BreakpointObserver, BreakpointState} from '@angular/cdk/layout';
 import {DOCUMENT} from '@angular/common';
 
 
@@ -52,27 +50,26 @@ export interface SelectedMetricVariant extends MetricVariantResult {
 }
 
 @Component({
-  selector: 'sm-widget-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    SingleGraphStateModule,
-    SingleGraphModule,
-    DebugSampleModule,
-    ParallelCoordinatesGraphComponent,
-    SingleValueSummaryTableComponent
-  ]
+    selector: 'sm-widget-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        SingleGraphStateModule,
+        SingleGraphModule,
+        DebugSampleModule,
+        ParallelCoordinatesGraphComponent,
+        SingleValueSummaryTableComponent
+    ]
 })
 export class AppComponent implements OnInit {
   private store = inject(Store);
   private configService = inject(ConfigurationService);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
-  private breakpointObserver = inject(BreakpointObserver);
   private renderer = inject(Renderer2);
   private readonly document = inject(DOCUMENT);
+  protected readonly checkIfLegendToTitle = checkIfLegendToTitle;
 
   protected title = 'report-widgets';
   public plotData: ExtFrame;
@@ -87,12 +84,12 @@ export class AppComponent implements OnInit {
   public hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   protected signIsNeeded$ = this.store.selectSignal(appFeature.selectSignIsNeeded);
   protected noPermissions$ = this.store.selectSignal(appFeature.selectNoPermissions);
-  public isDarkTheme: boolean;
+  private tasksData = this.store.selectSignal(appFeature.selectTaskData);
+  public isDarkTheme = false;
   public externalTool = false;
   public parcoordsData: { experiments: ExtraTask[]; params: string[]; metrics: SelectedMetricVariant[] };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
   public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
-  public webappLink: string;
   public readonly xaxis: ScalarKeyEnum;
 
   @HostListener('window:resize')
@@ -106,7 +103,6 @@ export class AppComponent implements OnInit {
     });
     this.searchParams = new URLSearchParams(window.location.search);
     this.type = this.searchParams.get('type') as WidgetTypes;
-    this.webappLink = this.buildSourceLink(this.searchParams, '*', null);
     this.singleGraphHeight = window.innerHeight;
     this.otherSearchParams = this.getOtherSearchParams();
     this.xaxis = this.searchParams.get('xaxis') as ScalarKeyEnum;
@@ -136,7 +132,7 @@ export class AppComponent implements OnInit {
       if (!(window.top as any).holdIframe) {
         this.activate();
       }
-    } catch (e) {
+    } catch {
       this.externalTool = true;
       this.hideMaximize = 'hide';
       console.log('no-access-to-parent-window');
@@ -180,7 +176,7 @@ export class AppComponent implements OnInit {
       if (window.top.document.body.parentElement.className) {
         this.isDarkTheme = window.top.document.body.parentElement.classList.contains('dark-mode');
       }
-    } catch (e) {
+    } catch {
       this.isDarkTheme = this.searchParams.get('light') ? this.searchParams.get('light') === 'false' : !this.isDarkTheme;
     }
     this.renderer.addClass(this.document.documentElement, `${this.isDarkTheme ? 'dark' : 'light'}-mode`);
@@ -219,15 +215,15 @@ export class AppComponent implements OnInit {
       take(1))
       .subscribe((metricsPlots) => {
         this.plotLoaded = true;
-        if (this.searchParams.getAll('objects').length < 2) {
+        if (this.tasksData().sourceTasks.length < 2) {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
           this.plotData = {...Object.values(merged)[0], ...Object.values(merged)[0].plotParsed};
         } else {
           const {merged} = prepareMultiPlots(metricsPlots as ReportsApiMultiplotsResponse);
           const newGraphs = convertMultiPlots(merged);
           const originalObject = this.searchParams.get('objects');
-          const series = this.searchParams.get('series');
-          this.plotData = series ? Object.values(newGraphs)[0].find(a => (a.data[0] as any).seriesName === series) :
+          const series = this.searchParams.getAll('series');
+          this.plotData = series?.length > 0 ? Object.values(newGraphs)[0].find(a => series.includes((a.data[0] as any).seriesName)) :
             Object.values(newGraphs)[0]?.find(a => originalObject === (a.task ?? a.data[0].task)) ??
             Object.values(newGraphs)[0]?.[0];
         }
@@ -436,16 +432,23 @@ export class AppComponent implements OnInit {
     return {metric: lastMetric.metric, variant: lastMetric.variant};
   }
 
-  private buildSourceLink(searchParams: URLSearchParams, project: string, tasks: string[]): string {
+  protected navigateToSource() {
+    const a = document.createElement('a');
+    a.href = this.buildSourceLink(this.searchParams, '*');
+    a.target = '_blank';
+    a.click();
+  }
+
+  private buildSourceLink(searchParams: URLSearchParams, project: string): string {
     const isModels = searchParams.has('models') || this.searchParams.get('objectType') === 'model';
     const objects = searchParams.getAll('objects');
     const variants = searchParams.getAll('variants');
     const metricsPath = searchParams.getAll('metrics');
     let entityIds = objects.length > 0 ? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
-    if (entityIds.length === 0 && tasks?.length > 0) {
-      entityIds = tasks;
+    if (entityIds.length === 0 && this.tasksData().sourceTasks.length > 0) {
+      entityIds = this.tasksData().sourceTasks.slice(0,100);
     }
-    const isCompare = entityIds.length > 1;
+    const isCompare =this.tasksData().sourceTasks.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
       url += `${isModels ? 'compare-models;ids=' : 'compare-tasks;ids='}${entityIds.filter(id => !!id).join(',')}/${
@@ -469,11 +472,11 @@ export class AppComponent implements OnInit {
       switch (type) {
         case 'single':
         case 'scalar':
-          return 'info-output/metrics/scalar';
+          return 'output/metrics/scalar';
         case 'plot':
-          return 'info-output/metrics/plots';
+          return 'output/metrics/plots';
         case 'sample':
-          return 'info-output/debugImages';
+          return 'output/debugImages';
       }
     }
     return '';

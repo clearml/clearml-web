@@ -1,21 +1,24 @@
 @if (!reportMode) {
   <div class="actions">
-    <button
-      mat-icon-button
-      smTooltip="Maximize"
-      (click)="maximize()"
-      ><mat-icon fontSet="al" fontIcon="al-ico-fit"></mat-icon></button>
       <button
         mat-icon-button
         smTooltip="Copy embed code"
         (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
-        ><mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon></button>
-        <button
-          mat-icon-button
-          smTooltip="Download as PNG"
-          (click)="downloadImage()"
-          ><mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon></button>
-        </div>
+        ><mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        smTooltip="Download as PNG"
+        (click)="downloadImage()"
+        ><mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        smTooltip="Maximize"
+        (click)="maximize()"
+      ><mat-icon fontSet="al" fontIcon="al-ico-maximize"></mat-icon>
+      </button>
+  </div>
       }
       <div #container class="graph-container" [class.dark-theme]="isDarkTheme()">
         <div #parallelGraph>

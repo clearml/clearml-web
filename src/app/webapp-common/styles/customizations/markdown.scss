@@ -1,18 +1,20 @@
+@use "../../assets/fonts/variables";
+
 
 .fa-check-square {
-  font-family: "trains";
+  font-family: variables.$icomoon-font-family;
   display:inline-block;
   font-style: normal;
   &::before {
-    content: $al-ico-sqr-ok;
+    content: variables.$al-ico-sqr-ok;
   }
 }
 
 .fa-square {
-  font-family: "trains";
+  font-family: variables.$icomoon-font-family;
   display:inline-block;
   font-style: normal;
   &::before {
-    content: $al-ico-sqr-empty;
+    content: variables.$al-ico-sqr-empty;
   }
 }

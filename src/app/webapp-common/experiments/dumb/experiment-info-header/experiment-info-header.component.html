@@ -1,7 +1,10 @@
 <div class="d-flex align-items-center">
   <div class="d-flex align-items-center experiment-name-cont">
-    <sm-experiment-type-icon-label class="me-3" data-id="experimentIcon" [showLabel]="false" [type]="experiment()?.type" iconClass="lg">
-    </sm-experiment-type-icon-label>
+    @if (experiment()) {
+      <sm-experiment-type-icon-label
+        class="me-3" data-id="experimentIcon" [showLabel]="false" [type]="experiment()?.type" iconClass="lg"
+      ></sm-experiment-type-icon-label>
+    }
     <sm-inline-edit
       class="edit-name"
       [minLength]="2"
@@ -42,7 +45,7 @@
       </button>
       </span>
 
-      <mat-menu #menu="matMenu"  [hasBackdrop]="false" class="line-item" yPosition="above" >
+      <mat-menu #menu="matMenu"  [hasBackdrop]="false" class="line-item description-info-edit" yPosition="above" >
         <sm-experiment-info-edit-description
           #menuHesitate="hesitate"
           [delay]="1000"
@@ -66,7 +69,7 @@
       @if (showMenu() && experiment()) {
         <sm-experiment-menu-extended
           class="line-item"
-          [experiment]="experiment()"
+          [experiment]="$any(experiment())"
           [selectedExperiment]="experiment()"
           [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
           [selectedDisableAvailable]="selectedDisableAvailable()"

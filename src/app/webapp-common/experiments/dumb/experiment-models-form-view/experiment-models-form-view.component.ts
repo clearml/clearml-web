@@ -11,9 +11,10 @@ import {resetSelectModelState} from '@common/select-model/select-model.actions';
 
 
 @Component({
-  selector: 'sm-experiment-models-form-view',
-  templateUrl: './experiment-models-form-view.component.html',
-  styleUrls: ['./experiment-models-form-view.component.scss']
+    selector: 'sm-experiment-models-form-view',
+    templateUrl: './experiment-models-form-view.component.html',
+    styleUrls: ['./experiment-models-form-view.component.scss'],
+    standalone: false
 })
 export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent implements OnDestroy{
   private dialog = inject(MatDialog);

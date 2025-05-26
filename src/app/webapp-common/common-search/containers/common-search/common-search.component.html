@@ -1,10 +1,15 @@
-<span class="search-container" [class.open]="isSearching$ | ngrxPush">
+<div class="search-icon-container">
+<button [disabled]="isSearching() && !searchElem().searchBarInput().nativeElement.value " mat-icon-button (click)="isSearching()? clearSearch():openSearch()" data-id="searchIcon" class="me-2 search-icon" [class.open]="isSearching()" >
+  <mat-icon fontSet="al" [fontIcon]="searchElem().searchBarInput().nativeElement.value ?'al-ico-dialog-x':'al-ico-search'" data-id="search Icon"></mat-icon>
+</button>
+</div>
+<span class="search-container" [class.open]="isSearching()">
   <sm-search
     #searchComponent
-    class="search-header"
+    class="outline contained-icon"
     [class.regex-error]="regexError"
     [value]="(searchQuery$ | ngrxPush)?.original"
-    [placeholder]="searchPlaceholder$ | ngrxPush"
+    [placeholder]="searchPlaceholder()"
     [hideIcons]="true"
     [minimumChars]="minChars"
     (focusout)="onSearchFocusOut()"
@@ -13,29 +18,16 @@
     @if (regexError) {
       <mat-icon class="error regexp" fontSet="al" fontIcon="al-ico-error-circle" inline [smTooltip]="regexError" [matTooltipPosition]="'below'"></mat-icon>
     }
-    <button mat-icon-button
-      class="regexp sm"
-      [class.active]="regExp"
-      smClickStopPropagation
-      [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
-      (click)="toggleRegExp(); searchComponent.searchBarInput.nativeElement.focus();"
+    @if (showRegex$ | ngrxPush) {
+      <button mat-icon-button
+              class="regexp sm"
+              [class.active]="regExp"
+              smClickStopPropagation
+              [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
+              (click)="toggleRegExp(); searchComponent.searchBarInput().nativeElement.focus();"
       >
         <mat-icon fontSet="al" fontIcon="al-ico-regex" data-id="enableRegexButton"></mat-icon>
       </button>
+    }
   </sm-search>
 </span>
-@if (searchActive) {
-  @if ((isSearching$ | ngrxPush)) {
-    <button mat-icon-button (click)="clearSearch()" smClickStopPropagation>
-      <mat-icon
-        fontSet="al"
-        fontIcon="al-ico-dialog-x"
-        data-id="closeSearchButton">
-      </mat-icon>
-    </button>
-  } @else {
-    <button mat-icon-button (click)="openSearch()" data-id="searchIcon">
-      <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="search Icon"></mat-icon>
-    </button>
-  }
-}

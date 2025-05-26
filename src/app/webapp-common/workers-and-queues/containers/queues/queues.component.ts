@@ -20,10 +20,11 @@ import {combineLatest, interval} from 'rxjs';
 const REFRESH_INTERVAL = 30000;
 
 @Component({
-  selector: 'sm-queues',
-  templateUrl: './queues.component.html',
-  styleUrls: ['./queues.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-queues',
+    templateUrl: './queues.component.html',
+    styleUrls: ['./queues.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class QueuesComponent {
   private store = inject(Store);

@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 $link-item-size-height: 36px;
 $link-item-size-width: 40px;
@@ -9,7 +9,7 @@ $item-margin: 20px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: $side-bar-close-width;
+  width: variables.$side-bar-close-width;
   background-color: color-mix(in srgb, var(--color-surface), transparent 5%);
   border-right: 1px solid var(--color-surface-container-high);
   .logo {

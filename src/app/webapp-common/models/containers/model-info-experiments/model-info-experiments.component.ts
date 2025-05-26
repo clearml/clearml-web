@@ -1,34 +1,40 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, viewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectSelectedModel} from '@common/models/reducers';
-import {Observable} from 'rxjs';
+import {selectModelId, selectSelectedModel} from '@common/models/reducers';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
-import {SelectedModel} from '@common/models/shared/models.model';
-import {map} from 'rxjs/operators';
 import {get} from 'lodash-es';
 import {addMessage} from '@common/core/actions/layout.actions';
+import {computedPrevious} from 'ngxtension/computed-previous';
 
 
 @Component({
   selector: 'sm-model-info-experiments',
   templateUrl: './model-info-experiments.component.html',
-  styleUrls: ['./model-info-experiments.component.scss']
+  styleUrls: ['./model-info-experiments.component.scss'],
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelInfoExperimentsComponent {
+  private store = inject(Store);
   public entityType = EntityTypeEnum.experiment;
 
-  @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
-  public selectedModel$: Observable<SelectedModel>;
-  public selectedModelCreatingTaskLink$: Observable<string>;
+  table = viewChild(ExperimentsTableComponent);
+  public selectedModel = this.store.selectSignal(selectSelectedModel);
+  public selectedModelCreatingTaskLink = computed(() => `/projects/${get(this.selectedModel(), 'task.project.id', '*')}/tasks/${get(this.selectedModel(), 'task.id', '')}`);
 
+  private selectedModelFromRouter = this.store.selectSignal(selectModelId);
+  private selectedModelFromRouterP = computedPrevious(this.selectedModelFromRouter);
 
-  constructor(private store: Store,
-  ) {
-    this.selectedModel$ = this.store.select(selectSelectedModel);
-    this.selectedModelCreatingTaskLink$ = this.selectedModel$.pipe(map(model=>`/projects/${get( model, 'task.project.id', '*')}/tasks/${get(model, 'task.id','' )}` ));
+  protected model = linkedSignal(() => this.selectedModel());
+
+  constructor() {
+    effect(() => {
+      if (this.selectedModelFromRouterP() !== this.selectedModelFromRouter()) {
+        this.model.set(null);
+      }
+    });
   }
-
 
   copyToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));

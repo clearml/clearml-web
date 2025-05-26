@@ -17,14 +17,14 @@
       (valueChanged)="!(!!projectId && $event) && toggleNestedView($any($event))"
     ></sm-button-toggle>
     <div class="d-flex">
-      <button mat-flat-button (click)="createPipeline()">
+      <button mat-flat-button (click)="createPipeline()" data-id="New Pipeline">
         <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
         NEW PIPELINE
       </button>
     </div>
   </sm-projects-header>
   @if (((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush))) || searching) {
-    @for (project of projectsList$ | ngrxPush; track project.id) {
+    @for (project of projectsList$ | ngrxPush; track project.id + $index) {
       <sm-pipeline-card
         [hideMenu]="['All Tasks'].includes(project.name) || project['isRoot'] || isExample(project)"
         [hideProjectPathIcon]="!!projectId"
@@ -40,7 +40,7 @@
   } @else {
     <div class="empty-state">
       <div class="title-icon">
-        <mat-icon fontSet="al" fontIcon="al-ico-pipelines" class="xl"></mat-icon>
+        <mat-icon fontSet="al" fontIcon="al-ico-pipelines" class="xxl"></mat-icon>
       </div>
       <div class="title">NO PIPELINES TO SHOW</div>
       <div class="sub-title">Run your first pipeline to see it displayed here

@@ -14,23 +14,22 @@ import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/e
 import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-label/status-icon-label.component';
 
 @Component({
-  selector: 'sm-experiment-compare-general-data',
-  templateUrl: './experiment-compare-general-data.component.html',
-  styleUrls: ['./experiment-compare-general-data.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    RouterLink,
-    IdBadgeComponent,
-    TagListComponent,
-    DecimalPipe,
-    NAPipe,
-    TimeAgoPipe,
-    DatePipe,
-    EllipsisMiddleDirective,
-    StatusIconLabelComponent
-  ]
+    selector: 'sm-experiment-compare-general-data',
+    templateUrl: './experiment-compare-general-data.component.html',
+    styleUrls: ['./experiment-compare-general-data.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        RouterLink,
+        IdBadgeComponent,
+        TagListComponent,
+        DecimalPipe,
+        NAPipe,
+        TimeAgoPipe,
+        DatePipe,
+        EllipsisMiddleDirective,
+        StatusIconLabelComponent
+    ]
 })
 export class ExperimentCompareGeneralDataComponent {
 

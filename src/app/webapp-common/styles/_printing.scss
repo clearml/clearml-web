@@ -1,0 +1,39 @@
+@media print {
+  * {
+    color: black !important;
+  }
+
+  html, body, .content, .info-content {
+    overflow: visible !important;
+  }
+
+  sm-side-nav,
+  .actions button, .actions .add-button,
+  .content.report .mat-drawer, .report .hover-button {
+    display: none !important;
+  }
+
+  .md-layout #print-element {
+    padding: 0 !important
+  }
+  .content.report .mat-drawer-content {
+    margin-left: unset !important
+  }
+  .content.report .mat-drawer-content,
+  .content.report .mat-drawer-container {
+    overflow: visible !important;
+  }
+
+  .md-editor-container,
+  .preview-panel {
+    border: none !important;
+  }
+
+  .header-container,
+  .header,
+  .content {
+    max-width: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

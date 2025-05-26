@@ -18,6 +18,9 @@ $notifier-shadow-color: rgba(0, 0, 0, .2) !default;
 	&--warning {
 		border-left-color: var(--color-warning);
 	}
+  &--warn {
+    border-left-color: var(--color-warning);
+  }
 	&--error {
 		border-left-color: var(--color-failed);
 	}

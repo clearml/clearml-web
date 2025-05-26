@@ -16,9 +16,10 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
 @Component({
-  selector: 'sm-experiment-info-task-model',
-  templateUrl: './experiment-info-task-model.component.html',
-  styleUrls: ['./experiment-info-task-model.component.scss']
+    selector: 'sm-experiment-info-task-model',
+    templateUrl: './experiment-info-task-model.component.html',
+    styleUrls: ['./experiment-info-task-model.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
       private store = inject(Store);

@@ -78,9 +78,10 @@ export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => 
 
 
 @Component({
-  selector: 'sm-select-experiments-for-compare',
-  templateUrl: './select-experiments-for-compare.component.html',
-  styleUrls: ['./select-experiments-for-compare.component.scss']
+    selector: 'sm-select-experiments-for-compare',
+    templateUrl: './select-experiments-for-compare.component.html',
+    styleUrls: ['./select-experiments-for-compare.component.scss'],
+    standalone: false
 })
 export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public entityTypes = EntityTypeEnum;

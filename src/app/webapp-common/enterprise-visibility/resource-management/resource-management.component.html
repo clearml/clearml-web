@@ -8,25 +8,27 @@
     <h2>Cluster Dashboard</h2>
     Gain complete visibility into your AI cluster with a detailed dashboard and activity log. Identify infrastructure utilization by resource group, compute type, and worker.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/resource-dashboard-fhd-' + theme() + '.png'"
-    #image1
-    (click)="imageClicked(image1)"
-    width="640"
-    height="360"
-    alt="resource dashboard"
-  >
+  <div class="image" (click)="imageClicked(image1)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/resource-dashboard-fhd-' + theme() + '.png'"
+      #image1
+      width="640"
+      height="360"
+      alt="Resource Dashboard"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/resource-configuration-fhd-' + theme() + '.png'"
-    #image2
-    (click)="imageClicked(image2)"
-    width="640"
-    height="360"
-    alt="resource configuration"
-  >
+  <div class="image" (click)="imageClicked(image2)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/resource-configuration-fhd-' + theme() + '.png'"
+      #image2
+      width="640"
+      height="360"
+      alt="resource configuration"
+    >
+  </div>
   <div class="details">
     <h2>Resource Allocation & Policy Management</h2>
     Easily create, manage, and monitor multiple resource pools with granular configurations up to GPU fractions for prioritizing compute utilization across your different teams and users.
@@ -35,28 +37,30 @@
 
 <div class="section">
   <div class="details">
-    <h2>Quota management</h2>
+    <h2>Quota Management</h2>
     Exert granular control over your compute resource allocation by user, team, or project using quotas, priorities, hierarchies, and logic for over-quota situations.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/resource-policies-fhd-' + theme() + '.png'"
-    #image3
-    (click)="imageClicked(image3)"
-    width="640"
-    height="360"
-    alt="resource policies"
-  >
+  <div class="image" (click)="imageClicked(image3)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/resource-policies-fhd-' + theme() + '.png'"
+      #image3
+      width="640"
+      height="360"
+      alt="resource policies"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-autoscaler-' + theme() + '.png'"
-    #image4
-    (click)="imageClicked(image4)"
-    width="640"
-    height="360"
-    alt="autoscalers"
-  >
+  <div class="image" (click)="imageClicked(image4)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-autoscaler-' + theme() + '.png'"
+      #image4
+      width="640"
+      height="360"
+      alt="autoscalers"
+    >
+  </div>
   <div class="details">
     <h2>Cloud Autoscalers</h2>
     Autoscalers for AWS, Azure, and GCP dynamically adjust compute resources based on real-time workload demands, within defined cost limits, optimizing resource utilization and minimizing cloud costs.

@@ -39,11 +39,13 @@ export interface ExperimentSettings {
   selectedHyperParams: Array<string>;
   selectedMetric: string;
   smoothWeight: number;
+  smoothSigma: number;
   smoothType: SmoothTypeEnum;
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
   lastModified?: number;
-  valueType?: 'min_value' | 'max_value' | 'value'
+  valueType?: 'min_value' | 'max_value' | 'value';
+  projectLevel?: boolean;
 }
 
 export const experimentOutputInitState: ExperimentOutputState = {
@@ -114,6 +116,10 @@ export const experimentOutputReducer = createReducer(
   on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
   on(actions.setExperimentScalarSingleValue, (state, action) => ({...state, scalarSingleValue: action.values})),
   on(actions.setExperimentMetricsVariantValues, (state, action) => ({...state, lastMetrics: action.lastMetrics})),
+  on(actions.removeExperimentSettings, (state, action) => ({
+    ...state,
+    settingsList: state.settingsList.filter(setting => setting.id !== action.id),
+  })),
   on(actions.setExperimentSettings, (state, action) => {
     let newSettings: ExperimentSettings[];
     const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;

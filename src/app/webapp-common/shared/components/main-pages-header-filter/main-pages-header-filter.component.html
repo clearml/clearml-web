@@ -30,8 +30,8 @@
       </mat-form-field>
     </form>
     <div class="filter-type" smClickStopPropagation>
-      <span data-id="AnyTagOption" class="link me-3" [class.selected]="matchMode() !== 'AND'" (click)="toggleMatch()">Any</span>
-      <span data-id="allTagOption" class="link" [class.selected]="matchMode() === 'AND'" (click)="toggleMatch()">All</span>
+      <button mat-button data-id="AnyTagOption" class="link" [class.selected]="matchMode() !== 'AND'" (click)="toggleMatch()">Any</button>
+      <button mat-button data-id="allTagOption" class="link" [class.selected]="matchMode() === 'AND'" (click)="toggleMatch()">All</button>
     </div>
     <div class="results scroll"  smClickStopPropagation>
       <sm-checkbox-three-state-list

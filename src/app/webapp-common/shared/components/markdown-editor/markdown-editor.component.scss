@@ -1,5 +1,5 @@
-@import "variables";
-@import "../../../assets/fonts/variables";
+@use "variables";
+@use "../../../assets/fonts/variables" as font;
 
 .md-editor-preview {
   width: 100%;
@@ -32,6 +32,7 @@
     opacity: 0;
     visibility: hidden;
     align-items: center;
+    border-radius: 24px 0 0 24px;
   }
 
   .btn-expand-view {
@@ -195,6 +196,7 @@
               border: none;
               outline: none;
               background-color: rgba(0, 0, 0, 0);
+              color: var(--color-primary);
               fill: currentColor;
               text-decoration: none;
               cursor: pointer;
@@ -208,7 +210,6 @@
               line-height: 23px;
               padding: calc(calc(var(--mdc-icon-button-state-layer-size, 48px) - var(--mdc-icon-button-icon-size, 24px)) / 2);
               font-size: var(--mdc-icon-button-icon-size);
-              color: var(--mdc-icon-button-icon-color, var(--mat-app-on-surface-variant));
               -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
               &:hover {
@@ -229,23 +230,23 @@
               }
 
               &.fa-bold:before {
-                content: $al-ico-bold;
+                content: font.$al-ico-bold;
               }
 
               &.fa-italic:before {
-                content: $al-ico-italic;
+                content: font.$al-ico-italic;
               }
 
               &.fa-heading:before {
-                content: $al-ico-heading;
+                content: font.$al-ico-heading;
               }
 
               &.fa-quote-left:before {
-                content: $al-ico-quote;
+                content: font.$al-ico-quote;
               }
 
               &.fa-link:before {
-                content: $al-ico-link;
+                content: font.$al-ico-link;
                 display: flex;
                 align-items: center;
                 font-size: 20px;
@@ -253,19 +254,19 @@
               }
 
               &.fa-image:before {
-                content: $al-ico-image;
+                content: font.$al-ico-image;
               }
 
               &.fa-list-ul:before {
-                content: $al-ico-list-bulleted;
+                content: font.$al-ico-list-bulleted;
               }
 
               &.fa-list-ol:before {
-                content: $al-ico-list-numbered;
+                content: font.$al-ico-list-numbered;
               }
 
               &.fa-file-code:before {
-                content: $al-ico-code;
+                content: font.$al-ico-code;
               }
             }
           }
@@ -291,7 +292,7 @@
         code {
           padding: 2px 6px;
           font-size: 12px;
-          font-family: $font-family-monospace;
+          font-family: variables.$font-family-monospace;
           line-height: 18px;
           border-radius: 4px;
         }
@@ -302,7 +303,7 @@
           color: var(--color-on-surface-variant);
         }
 
-        iframe {
+        iframe:not(.iframe-maximized) {
           &:nth-child(1) {
             margin-top: 40px;
           }

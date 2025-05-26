@@ -16,7 +16,7 @@ import 'chartjs-adapter-date-fns';
 import {fileSizeConfigCount} from '@common/shared/pipes/filesize.pipe';
 import {filesize} from 'filesize';
 import {Store} from '@ngrx/store';
-import {selectThemeMode} from '@common/core/reducers/view.reducer';
+import {selectDarkTheme} from '@common/core/reducers/view.reducer';
 
 
 declare module 'chart.js' {
@@ -43,15 +43,14 @@ export interface concatLatestFrom {
 }
 
 @Component({
-  selector: 'sm-line-chart',
-  templateUrl: './line-chart.component.html',
-  styleUrls: ['./line-chart.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    BaseChartDirective,
-    MatProgressSpinnerModule
-  ]
+    selector: 'sm-line-chart',
+    templateUrl: './line-chart.component.html',
+    styleUrls: ['./line-chart.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        BaseChartDirective,
+        MatProgressSpinnerModule
+    ]
 })
 export class LineChartComponent {
   private readonly store = inject(Store);
@@ -100,7 +99,7 @@ export class LineChartComponent {
   showLoadingOverlay = input(false);
   data = input<Topic[]>();
 
-  theme = this.store.selectSignal(selectThemeMode);
+  darkTheme = this.store.selectSignal(selectDarkTheme);
 
   chartData = computed<ChartData<'line', Topic['dates']>>(() => {
     const topics = this.data();
@@ -138,7 +137,7 @@ export class LineChartComponent {
           autoSkip: true,
           autoSkipPadding: 50,
           maxRotation: 0,
-          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
+          ...(this.darkTheme() && {color: '#c1cdf3'}),
         },
         time: {
           tooltipFormat: 'P pp',
@@ -149,12 +148,16 @@ export class LineChartComponent {
             minute: 'p',
             second: 'pp'
           }
+        },
+        grid: {
+          display: true,
+          ...(this.darkTheme() && {color: '#39405f'}),
         }
       },
       y: {
         title: {
           display: !!this.yLabel(), text: this.yLabel(),
-          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
+          ...(this.darkTheme() && {color: '#c1cdf3'}),
           },
         position: 'left',
         suggestedMin: 0,
@@ -163,12 +166,12 @@ export class LineChartComponent {
           autoSkip: true,
           count: 5,
           precision: 0,
-          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
+          ...(this.darkTheme() && {color: '#c1cdf3'}),
           callback: value => typeof value === 'number' ? this.yTickFormatter()(value) : value
         },
         grid: {
           display: true,
-          ...(this.theme() === 'dark' && {color: '#39405f'}),
+          ...(this.darkTheme() && {color: '#39405f'}),
         }
       }
     },
@@ -178,7 +181,7 @@ export class LineChartComponent {
         display: true,
         position: 'bottom',
         labels: {
-          ...(this.theme() === 'dark' && {color: '#dce0ee'}),
+          ...(this.darkTheme() && {color: '#dce0ee'}),
           font: {weight: 'normal', size: 12},
           padding: 20,
           usePointStyle: true
@@ -188,7 +191,7 @@ export class LineChartComponent {
       tooltip: {
         backgroundColor: '#1a1e2c',
         borderWidth: 1,
-        ...(this.theme() === 'dark' && {
+        ...(this.darkTheme() && {
           borderColor: '#8492c2',
           bodyColor: '#c3cdf0',
         }),
@@ -201,7 +204,7 @@ export class LineChartComponent {
       },
       hoverLine: {
         dash: [6, 6],
-        ...(this.theme() === 'dark' && { color: '#8492c2'}),
+        ...(this.darkTheme() && { color: '#8492c2'}),
         width: 1
       }
     },

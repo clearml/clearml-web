@@ -11,7 +11,7 @@ export class RetryFooterItem extends ItemFooterModel {
     this.icon = ICONS.RETRY as Partial<IconNames>;
   }
 
-  getItemState(state: IFooterState<unknown>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+  getItemState(state: IFooterState<{id: string}>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
     const retry = state.data[this.id];
 
     return {

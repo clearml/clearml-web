@@ -18,7 +18,7 @@
     </sm-menu>
   </div>
   @if (selectedHyperParams?.length > 0) {
-    <div>
+    <div class="selected-parameters">
       @for (hyperParam of selectedHyperParams; track trackByIndex($index)) {
         <div class="selected-parameter">
           <span class="ellipsis parameter-name" smShowTooltipIfEllipsis [smTooltip]="hyperParam">{{ hyperParam }}</span>

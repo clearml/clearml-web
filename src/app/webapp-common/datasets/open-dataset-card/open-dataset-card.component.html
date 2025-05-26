@@ -29,7 +29,7 @@
             ></i>
           }</span>
       </sm-inline-edit>
-      @if (!hideMenu) {
+      @if (!hideMenu()) {
         <sm-pipeline-card-menu
           class="menu-wrapper"
           [project]="project"
@@ -65,7 +65,7 @@
     ></sm-circle-counter>
   </div>
   <div footer class="footer-tags">
-    @if (!hideMenu) {
+    @if (!hideMenu()) {
       <sm-tag-list
         class="w-100"
         [tags]="project.tags"

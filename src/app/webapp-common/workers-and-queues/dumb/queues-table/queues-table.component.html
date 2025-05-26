@@ -1,23 +1,26 @@
 <div #tableContainer class="queues-container" [class.short]="!short()">
   <sm-queues-menu-extended
-    [menuOpen]="menuOpen"
+    [menuOpen]="menuOpen()"
     [menuPosition]="menuPosition()"
     [selectedQueue]="contextQueue"
     (deleteQueue)="deleteQueue.emit($event)"
     (renameQueue)="renameQueue.emit($event)"
     (clearQueue)="clearQueue.emit($event)"
   ></sm-queues-menu-extended>
-  <sm-table #table
-            [tableData]="queues()"
-            [columns]="cols"
-            [rowsNumber]="100"
-            [rowHeight]="40"
-            [reorderableColumns]="false"
-            [resizableColumns]="false"
-            [scrollable]="true"
-            [selection]="selectedQueue()"
-            (rowSelectionChanged)="onRowClicked($event)"
-            (rowRightClick)="openContextMenu($event)"
+  <sm-table
+    #table
+    [tableData]="queues()"
+    [columns]="cols()"
+    [rowsNumber]="100"
+    [rowHeight]="40"
+    [reorderableColumns]="false"
+    [resizableColumns]="false"
+    [scrollable]="true"
+    [virtualScroll]="true"
+    [columnResizeMode]="'fit'"
+    [selection]="selectedQueue()"
+    (rowSelectionChanged)="onRowClicked($event)"
+    (rowRightClick)="openContextMenu($event)"
   >
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort
@@ -30,7 +33,7 @@
     <ng-template let-col let-queue="rowData" pTemplate="body">
       @switch (col.id) {
         @case (QUEUES_TABLE_COL_FIELDS.NAME) {
-          <div class="w-100 d-flex align-items-center first id-cell">
+          <div class="d-flex align-items-center first id-cell">
             <div class="queue-name" [smTooltip]="queue?.caption" smShowTooltipIfEllipsis>{{queue?.caption}}</div>
             <div class="copy-btn">
               <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.id">

@@ -3,8 +3,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {selectBackdropActive} from '@common/core/reducers/view.reducer';
-import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common/core/actions/projects.actions';
@@ -15,10 +13,11 @@ import {ServingActions} from '@common/serving/serving.actions';
 
 
 @Component({
-  selector: 'sm-serving-info',
-  templateUrl: './serving-info.component.html',
-  styleUrls: ['./serving-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-serving-info',
+    templateUrl: './serving-info.component.html',
+    styleUrls: ['./serving-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServingInfoComponent implements OnInit, OnDestroy {
   public minimized: boolean;
@@ -26,9 +25,6 @@ export class ServingInfoComponent implements OnInit, OnDestroy {
   public selectedModel: EndpointStats;
   private sub = new Subscription();
   public selectedModel$: Observable<EndpointStats | null>;
-  public isExample: boolean;
-  public backdropActive$: Observable<boolean>;
-  public selectedTableModel$: Observable<EndpointStats>;
   public splitSize$: Observable<number>;
   links = [
     {name: 'details', url: ['general']},
@@ -43,8 +39,6 @@ export class ServingInfoComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.selectedTableModel$ = this.store.select(servingFeature.selectSelectedEndpoint);
     this.splitSize$ = this.store.select(servingFeature.selectSplitSize);
     this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
     this.modelsFeature = this.route.snapshot.data?.setAllProject;
@@ -62,7 +56,6 @@ export class ServingInfoComponent implements OnInit, OnDestroy {
     this.sub.add(this.store.select(servingFeature.selectSelectedEndpoint)
       .subscribe(model => {
         this.selectedModel = model;
-        this.isExample = isReadOnly(model);
         this.cdr.detectChanges();
       })
     );

@@ -1,9 +1,10 @@
-@import "../../styles/variables";
-@import "./variables";
+@use "sass:color";
+@use "src/app/webapp-common/styles/variables" as vars;
+@use "src/app/webapp-common/assets/fonts/variables";
 
 @font-face {
-  font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?rh580d') format('truetype');
+  font-family: '#{variables.$icomoon-font-family}';
+  src: url('./#{variables.$icomoon-font-family}.ttf?hfr2ih') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,7 +12,7 @@
 
 [class^="al-ico-"], [class*=" al-ico-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: '#{$icomoon-font-family}' !important;
+  font-family: '#{variables.$icomoon-font-family}' !important;
   speak: never;
   font-style: normal;
   font-weight: normal;
@@ -24,144 +25,179 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-app-gateway {
+  &:before {
+    content: variables.$al-ico-app-gateway; 
+  }
+}
+.al-ico-distance {
+  &:before {
+    content: variables.$al-ico-distance; 
+  }
+}
+.al-ico-pin {
+  &:before {
+    content: variables.$al-ico-pin; 
+  }
+}
+.al-ico-pin-off {
+  &:before {
+    content: variables.$al-ico-pin-off; 
+  }
+}
+.al-ico-nearest {
+  &:before {
+    content: variables.$al-ico-nearest; 
+  }
+}
+.al-ico-no-data-code {
+  &:before {
+    content: variables.$al-ico-no-data-code;
+  }
+}
+.al-ico-no-data-markdown {
+  &:before {
+    content: variables.$al-ico-no-data-markdown;
+  }
+}
 .al-ico-enterprise-rocket {
   &:before {
-    content: $al-ico-enterprise-rocket; 
+    content: variables.$al-ico-enterprise-rocket;
   }
 }
 .al-ico-no-data-table {
   &:before {
-    content: $al-ico-no-data-table; 
+    content: variables.$al-ico-no-data-table;
   }
 }
 .al-ico-palette {
   &:before {
-    content: $al-ico-palette;
+    content: variables.$al-ico-palette;
   }
 }
 .al-ico-log {
   &:before {
-    content: $al-ico-log;
+    content: variables.$al-ico-log;
   }
 }
 .al-ico-debug-samples {
   &:before {
-    content: $al-ico-debug-samples;
+    content: variables.$al-ico-debug-samples;
   }
 }
 .al-ico-artifacts {
   &:before {
-    content: $al-ico-artifacts;
+    content: variables.$al-ico-artifacts;
   }
 }
 .al-ico-close-circle {
   &:before {
-    content: $al-ico-close-circle;
+    content: variables.$al-ico-close-circle;
   }
 }
 .al-ico-bullhorn {
   &:before {
-    content: $al-ico-bullhorn;
+    content: variables.$al-ico-bullhorn;
   }
 }
 .al-ico-view-horizontal {
   &:before {
-    content: $al-ico-view-horizontal;
+    content: variables.$al-ico-view-horizontal;
   }
 }
 
 .al-ico-model-endpoints {
   &:before {
-    content: $al-ico-model-endpoints;
+    content: variables.$al-ico-model-endpoints;
   }
 }
 .al-ico-vm {
   &:before {
-    content: $al-ico-vm;
+    content: variables.$al-ico-vm;
   }
 }
 .al-ico-retry {
   &:before {
-    content: $al-ico-retry;
+    content: variables.$al-ico-retry;
   }
 }
 .al-ico-link-off {
   &:before {
-    content: $al-ico-link-off;
+    content: variables.$al-ico-link-off;
   }
 }
 .al-ico-policy {
   &:before {
-    content: $al-ico-policy;
+    content: variables.$al-ico-policy;
   }
 }
 .al-ico-info-group {
   &:before {
-    content: $al-ico-info-group;
+    content: variables.$al-ico-info-group;
   }
 }
 .al-ico-advanced-filters {
   &:before {
-    content: $al-ico-advanced-filters;
+    content: variables.$al-ico-advanced-filters;
   }
 }
 .al-ico-triggers-scheduled {
   &:before {
-    content: $al-ico-triggers-scheduled;
+    content: variables.$al-ico-triggers-scheduled;
   }
 }
 .al-ico-queue {
   &:before {
-    content: $al-ico-queue;
+    content: variables.$al-ico-queue;
   }
 }
 .al-ico-link-plus {
   &:before {
-    content: $al-ico-link-plus;
+    content: variables.$al-ico-link-plus;
   }
 }
 .al-ico-drag-vertical {
   &:before {
-    content: $al-ico-drag-vertical;
+    content: variables.$al-ico-drag-vertical;
   }
 }
 .al-ico-drag-horizontal {
   &:before {
-    content: $al-ico-drag-horizontal;
+    content: variables.$al-ico-drag-horizontal;
   }
 }
 .al-ico-admin-support {
   &:before {
-    content: $al-ico-admin-support;
+    content: variables.$al-ico-admin-support;
   }
 }
 .al-ico-scatter-view {
   &:before {
-    content: $al-ico-scatter-view;
+    content: variables.$al-ico-scatter-view;
   }
 }.al-ico-scatter-view {
   &:before {
-    content: $al-ico-scatter-view;
+    content: variables.$al-ico-scatter-view;
   }
 }
 .al-ico-schedulers {
   &:before {
-    content: $al-ico-schedulers;
+    content: variables.$al-ico-schedulers;
   }
 }
 .al-ico-triggers {
   &:before {
-    content: $al-ico-triggers;
+    content: variables.$al-ico-triggers;
   }
 }
 .al-ico-autoscalers {
   &:before {
-    content: $al-ico-autoscalers;
+    content: variables.$al-ico-autoscalers;
   }
 }
 .al-ico-automation {
   &:before {
-    content: $al-ico-automation;
+    content: variables.$al-ico-automation;
   }
 }
 .al-ico-charts-view:before {
@@ -172,795 +208,795 @@
 }
 .al-ico-tune {
   &:before {
-    content: $al-ico-tune;
+    content: variables.$al-ico-tune;
   }
 }
 
 .al-ico-equal-outline {
   &:before {
-    content: $al-ico-equal-outline;
+    content: variables.$al-ico-equal-outline;
   }
 }
 .al-ico-maximize {
   &:before {
-    content: $al-ico-maximize;
+    content: variables.$al-ico-maximize;
   }
 }
 .al-ico-gpu-card {
   &:before {
-    content: $al-ico-gpu-card;
+    content: variables.$al-ico-gpu-card;
   }
 }
 .al-ico-legend {
   &:before {
-    content: $al-ico-legend;
+    content: variables.$al-ico-legend;
   }
 }
 .al-ico-model-filled {
   &:before {
-    content: $al-ico-model-filled;
+    content: variables.$al-ico-model-filled;
   }
 }
 .al-ico-type-report {
   &:before {
-    content: $al-ico-type-report;
+    content: variables.$al-ico-type-report;
   }
 }
 .al-ico-info-circle-outline {
   &:before {
-    content: $al-ico-info-circle-outline;
+    content: variables.$al-ico-info-circle-outline;
   }
 }
 .al-ico-ghost {
   &:before {
-    content: $al-ico-ghost;
+    content: variables.$al-ico-ghost;
   }
 }
 .al-ico-flat-view {
   &:before {
-    content: $al-ico-flat-view;
+    content: variables.$al-ico-flat-view;
   }
 }
 .al-ico-camera {
   &:before {
-    content: $al-ico-camera;
+    content: variables.$al-ico-camera;
   }
 }
 .al-ico-markdown {
   &:before {
-    content: $al-ico-markdown;
+    content: variables.$al-ico-markdown;
   }
 }
 .al-ico-hor-expand {
   &:before {
-    content: $al-ico-hor-expand;
+    content: variables.$al-ico-hor-expand;
   }
 }
 .al-ico-hor-minimize {
   &:before {
-    content: $al-ico-hor-minimize;
+    content: variables.$al-ico-hor-minimize;
   }
 }
 .al-ico-pdf {
   &:before {
-    content: $al-ico-pdf;
+    content: variables.$al-ico-pdf;
   }
 }
 .al-ico-reports {
   &:before {
-    content: $al-ico-reports;
+    content: variables.$al-ico-reports;
   }
 }
 .al-ico-gpu {
   &:before {
-    content: $al-ico-gpu;
+    content: variables.$al-ico-gpu;
   }
 }
 .al-ico-project-path {
   &:before {
-    content: $al-ico-project-path;
+    content: variables.$al-ico-project-path;
   }
 }
 .al-ico-tree-view {
   &:before {
-    content: $al-ico-tree-view;
+    content: variables.$al-ico-tree-view;
   }
 }
 .al-ico-sort-asc {
   &:before {
-    content: $al-ico-sort-asc;
+    content: variables.$al-ico-sort-asc;
   }
 }
 .al-ico-sort-desc {
   &:before {
-    content: $al-ico-sort-desc;
+    content: variables.$al-ico-sort-desc;
   }
 }
 .al-ico-grid-view {
   &:before {
-    content: $al-ico-grid-view;
+    content: variables.$al-ico-grid-view;
   }
 }
 .al-ico-connect {
   &:before {
-    content: $al-ico-connect;
+    content: variables.$al-ico-connect;
   }
 }
 .al-ico-disconnect {
   &:before {
-    content: $al-ico-disconnect;
+    content: variables.$al-ico-disconnect;
   }
 }
 .al-ico-trash-all {
   &:before {
-    content: $al-ico-trash-all;
+    content: variables.$al-ico-trash-all;
   }
 }
 .al-ico-drag {
   &:before {
-    content: $al-ico-drag;
+    content: variables.$al-ico-drag;
   }
 }
 .al-ico-py {
   &:before {
-    content: $al-ico-py;
+    content: variables.$al-ico-py;
   }
 }
 .al-ico-file {
   &:before {
-    content: $al-ico-file;
+    content: variables.$al-ico-file;
   }
 }
 .al-ico-txt {
   &:before {
-    content: $al-ico-txt;
+    content: variables.$al-ico-txt;
   }
 }
 .al-ico-pkl {
   &:before {
-    content: $al-ico-pkl;
+    content: variables.$al-ico-pkl;
   }
 }
 .al-ico-image {
   &:before {
-    content: $al-ico-image;
+    content: variables.$al-ico-image;
   }
 }
 .al-ico-zip {
   &:before {
-    content: $al-ico-zip;
+    content: variables.$al-ico-zip;
   }
 }
 .al-ico-code-file {
   &:before {
-    content: $al-ico-code-file;
+    content: variables.$al-ico-code-file;
   }
 }
 .al-ico-audio {
   &:before {
-    content: $al-ico-audio;
+    content: variables.$al-ico-audio;
   }
 }
 .al-ico-upload {
   &:before {
-    content: $al-ico-upload;
+    content: variables.$al-ico-upload;
   }
 }
 .al-ico-min-panel {
   &:before {
-    content: $al-ico-min-panel;
+    content: variables.$al-ico-min-panel;
   }
 }
 .al-ico-max-panel {
   &:before {
-    content: $al-ico-max-panel;
+    content: variables.$al-ico-max-panel;
   }
 }
 .al-ico-datasets {
   &:before {
-    content: $al-ico-datasets;
+    content: variables.$al-ico-datasets;
   }
 }
 .al-ico-t-logo-b {
   &:before {
-    content: $al-ico-t-logo-b;
+    content: variables.$al-ico-t-logo-b;
   }
 }
 .al-ico-bars-menu {
   &:before {
-    content: $al-ico-bars-menu;
+    content: variables.$al-ico-bars-menu;
   }
 }
 .al-ico-home {
   &:before {
-    content: $al-ico-home;
+    content: variables.$al-ico-home;
   }
 }
 .al-ico-projects {
   &:before {
-    content: $al-ico-projects;
+    content: variables.$al-ico-projects;
   }
 }
 .al-ico-queues {
   &:before {
-    content: $al-ico-queues;
+    content: variables.$al-ico-queues;
   }
 }
 .al-ico-annotator {
   &:before {
-    content: $al-ico-annotator;
+    content: variables.$al-ico-annotator;
   }
 }
 .al-ico-account {
   &:before {
-    content: $al-ico-account;
+    content: variables.$al-ico-account;
   }
 }
 .al-ico-compare {
   &:before {
-    content: $al-ico-compare;
+    content: variables.$al-ico-compare;
   }
 }
 .al-ico-archive {
   &:before {
-    content: $al-ico-archive;
+    content: variables.$al-ico-archive;
   }
 }
 .al-ico-cloud-head {
   &:before {
-    content: $al-ico-cloud-head;
+    content: variables.$al-ico-cloud-head;
   }
 }
 .al-ico-how-to {
   &:before {
-    content: $al-ico-how-to;
+    content: variables.$al-ico-how-to;
   }
 }
 .al-ico-compare-c {
   &:before {
-    content: $al-ico-compare-c;
+    content: variables.$al-ico-compare-c;
   }
 }
 .al-ico-published-title {
   &:before {
-    content: $al-ico-published-title;
+    content: variables.$al-ico-published-title;
   }
 }
 .al-ico-publish {
   &:before {
-    content: $al-ico-publish;
+    content: variables.$al-ico-publish;
   }
 }
 .al-ico-unpublish {
   &:before {
-    content: $al-ico-unpublish;
+    content: variables.$al-ico-unpublish;
   }
 }
 .al-ico-published {
   &:before {
-    content: $al-ico-published;
+    content: variables.$al-ico-published;
   }
 }
 .al-ico-info {
   &:before {
-    content: $al-ico-info;
+    content: variables.$al-ico-info;
   }
 }
 .al-ico-warn {
   &:before {
-    content: $al-ico-warn;
+    content: variables.$al-ico-warn;
   }
 }
 .al-ico-settings {
   &:before {
-    content: $al-ico-settings;
+    content: variables.$al-ico-settings;
   }
 }
 .al-ico-trash {
   &:before {
-    content: $al-ico-trash;
+    content: variables.$al-ico-trash;
   }
 }
 .al-ico-arrow-from-right {
   &:before {
-    content: $al-ico-arrow-from-right;
+    content: variables.$al-ico-arrow-from-right;
   }
 }
 .al-ico-arrow-from-left {
   &:before {
-    content: $al-ico-arrow-from-left;
+    content: variables.$al-ico-arrow-from-left;
   }
 }
 .al-ico-arrow-to-bottom {
   &:before {
-    content: $al-ico-arrow-to-bottom;
+    content: variables.$al-ico-arrow-to-bottom;
   }
 }
 .al-ico-arrow-to-top {
   &:before {
-    content: $al-ico-arrow-to-top;
+    content: variables.$al-ico-arrow-to-top;
   }
 }
 .al-ico-training {
   &:before {
-    content: $al-ico-training;
+    content: variables.$al-ico-training;
   }
 }
 .al-ico-test {
   &:before {
-    content: $al-ico-test;
+    content: variables.$al-ico-test;
   }
 }
 .al-ico-testing {
   &:before {
-    content: $al-ico-testing;
+    content: variables.$al-ico-testing;
   }
 }
 .al-ico-type-training {
   &:before {
-    content: $al-ico-type-training;
+    content: variables.$al-ico-type-training;
   }
 }
 .al-ico-type-testing {
   &:before {
-    content: $al-ico-type-testing;
+    content: variables.$al-ico-type-testing;
   }
 }
 .al-ico-type-data-processing {
   &:before {
-    content: $al-ico-type-data-processing;
+    content: variables.$al-ico-type-data-processing;
   }
 }
 .al-ico-type-qc {
   &:before {
-    content: $al-ico-type-qc;
+    content: variables.$al-ico-type-qc;
   }
 }
 .al-ico-type-service {
   &:before {
-    content: $al-ico-type-service;
+    content: variables.$al-ico-type-service;
   }
 }
 .al-ico-type-optimizer {
   &:before {
-    content: $al-ico-type-optimizer;
+    content: variables.$al-ico-type-optimizer;
   }
 }
 .al-ico-type-monitor {
   &:before {
-    content: $al-ico-type-monitor;
+    content: variables.$al-ico-type-monitor;
   }
 }
 .al-ico-type-inference {
   &:before {
-    content: $al-ico-type-inference;
+    content: variables.$al-ico-type-inference;
   }
 }
 .al-ico-type-application {
   &:before {
-    content: $al-ico-type-application;
+    content: variables.$al-ico-type-application;
   }
 }
 .al-ico-type-controller {
   &:before {
-    content: $al-ico-type-controller;
+    content: variables.$al-ico-type-controller;
   }
 }
 .al-ico-type-custom {
   &:before {
-    content: $al-ico-type-custom;
+    content: variables.$al-ico-type-custom;
   }
 }
 .al-ico-how-to1 {
   &:before {
-    content: $al-ico-how-to1;
+    content: variables.$al-ico-how-to1;
   }
 }
 .al-ico-model {
   &:before {
-    content: $al-ico-model;
+    content: variables.$al-ico-model;
   }
 }
 .al-ico-dialog-x {
   &:before {
-    content: $al-ico-dialog-x;
+    content: variables.$al-ico-dialog-x;
   }
 }
 .al-ico-temp-image {
   &:before {
-    content: $al-ico-temp-image;
+    content: variables.$al-ico-temp-image;
   }
 }
 .al-ico-temp-list-alt {
   &:before {
-    content: $al-ico-temp-list-alt;
+    content: variables.$al-ico-temp-list-alt;
   }
 }
 .al-ico-dog {
   &:before {
-    content: $al-ico-dog;
+    content: variables.$al-ico-dog;
   }
 }
 .al-ico-alert-purple {
   &:before {
-    content: $al-ico-alert-purple;
+    content: variables.$al-ico-alert-purple;
   }
 }
 .al-ico-back {
   &:before {
-    content: $al-ico-back;
+    content: variables.$al-ico-back;
   }
 }
 .al-ico-cat {
   &:before {
-    content: $al-ico-cat;
+    content: variables.$al-ico-cat;
   }
 }
 .al-ico-clone {
   &:before {
-    content: $al-ico-clone;
+    content: variables.$al-ico-clone;
   }
 }
 .al-ico-completed {
   &:before {
-    content: $al-ico-completed;
+    content: variables.$al-ico-completed;
   }
 }
 .al-ico-data-audit {
   &:before {
-    content: $al-ico-data-audit;
+    content: variables.$al-ico-data-audit;
   }
 }
 .al-ico-download-frames {
   &:before {
-    content: $al-ico-download-frames;
+    content: variables.$al-ico-download-frames;
   }
 }
 .al-ico-dropdown-arrow {
   &:before {
-    content: $al-ico-dropdown-arrow;
+    content: variables.$al-ico-dropdown-arrow;
   }
 }
 .al-ico-ellipse-icon {
   &:before {
-    content: $al-ico-ellipse-icon;
+    content: variables.$al-ico-ellipse-icon;
   }
 }
 .al-ico-filter {
   &:before {
-    content: $al-ico-filter;
+    content: variables.$al-ico-filter;
   }
 }
 .al-ico-fit {
   &:before {
-    content: $al-ico-fit;
+    content: variables.$al-ico-fit;
   }
 }
 .al-ico-id {
   &:before {
-    content: $al-ico-id;
+    content: variables.$al-ico-id;
   }
 }
 .al-ico-info-max {
   &:before {
-    content: $al-ico-info-max;
+    content: variables.$al-ico-info-max;
   }
 }
 .al-ico-info-min {
   &:before {
-    content: $al-ico-info-min;
+    content: variables.$al-ico-info-min;
   }
 }
 .al-ico-keypoint {
   &:before {
-    content: $al-ico-keypoint;
+    content: variables.$al-ico-keypoint;
   }
 }
 .al-ico-list-view {
   &:before {
-    content: $al-ico-list-view;
+    content: variables.$al-ico-list-view;
   }
 }
 .al-ico-minus {
   &:before {
-    content: $al-ico-minus;
+    content: variables.$al-ico-minus;
   }
 }
 .al-ico-previous {
   &:before {
-    content: $al-ico-previous;
+    content: variables.$al-ico-previous;
   }
 }
 .al-ico-next {
   &:before {
-    content: $al-ico-next;
+    content: variables.$al-ico-next;
   }
 }
 .al-ico-plus {
   &:before {
-    content: $al-ico-plus;
+    content: variables.$al-ico-plus;
   }
 }
 .al-ico-polygon {
   &:before {
-    content: $al-ico-polygon;
+    content: variables.$al-ico-polygon;
   }
 }
 .al-ico-pytorch-icon {
   &:before {
-    content: $al-ico-pytorch-icon;
+    content: variables.$al-ico-pytorch-icon;
   }
 }
 .al-ico-rectangle {
   &:before {
-    content: $al-ico-rectangle;
+    content: variables.$al-ico-rectangle;
   }
 }
 .al-ico-running {
   &:before {
-    content: $al-ico-running;
+    content: variables.$al-ico-running;
   }
 }
 .al-ico-setup {
   &:before {
-    content: $al-ico-setup;
+    content: variables.$al-ico-setup;
   }
 }
 .al-ico-undo {
   &:before {
-    content: $al-ico-undo;
+    content: variables.$al-ico-undo;
   }
 }
 .al-ico-zoom-1-to-1 {
   &:before {
-    content: $al-ico-zoom-1-to-1;
+    content: variables.$al-ico-zoom-1-to-1;
   }
 }
 .al-ico-zoom-in {
   &:before {
-    content: $al-ico-zoom-in;
+    content: variables.$al-ico-zoom-in;
   }
 }
 .al-ico-zoom-out {
   &:before {
-    content: $al-ico-zoom-out;
+    content: variables.$al-ico-zoom-out;
   }
 }
 .al-ico-search {
   &:before {
-    content: $al-ico-search;
+    content: variables.$al-ico-search;
   }
 }
 .al-ico-zoom-to-fit {
   &:before {
-    content: $al-ico-zoom-to-fit;
+    content: variables.$al-ico-zoom-to-fit;
   }
 }
 .al-ico-reset {
   &:before {
-    content: $al-ico-reset;
+    content: variables.$al-ico-reset;
   }
 }
 .al-ico-import {
   &:before {
-    content: $al-ico-import;
+    content: variables.$al-ico-import;
   }
 }
 .al-ico-export {
   &:before {
-    content: $al-ico-export;
+    content: variables.$al-ico-export;
   }
 }
 .al-ico-between {
   &:before {
-    content: $al-ico-between;
+    content: variables.$al-ico-between;
   }
 }
 .al-ico-next-batch {
   &:before {
-    content: $al-ico-next-batch;
+    content: variables.$al-ico-next-batch;
   }
 }
 .al-ico-prev-batch {
   &:before {
-    content: $al-ico-prev-batch;
+    content: variables.$al-ico-prev-batch;
   }
 }
 .al-ico-back-to-top {
   &:before {
-    content: $al-ico-back-to-top;
+    content: variables.$al-ico-back-to-top;
   }
 }
 .al-ico-redo {
   &:before {
-    content: $al-ico-redo;
+    content: variables.$al-ico-redo;
   }
 }
 .al-ico-download {
   &:before {
-    content: $al-ico-download;
+    content: variables.$al-ico-download;
   }
 }
 .al-ico-edit {
   &:before {
-    content: $al-ico-edit;
+    content: variables.$al-ico-edit;
   }
 }
 .al-ico-pending {
   &:before {
-    content: $al-ico-pending;
+    content: variables.$al-ico-pending;
   }
 }
 .al-ico-sqr-empty {
   &:before {
-    content: $al-ico-sqr-empty; 
+    content: variables.$al-ico-sqr-empty;
   }
 }
 .al-ico-success {
   &:before {
-    content: $al-ico-success;
+    content: variables.$al-ico-success;
   }
 }
 .al-ico-alert-outline {
   &:before {
-    content: $al-ico-alert-outline;
+    content: variables.$al-ico-alert-outline;
   }
 }
 .al-ico-github {
   &:before {
-    content: $al-ico-github;
+    content: variables.$al-ico-github;
   }
 }
 .al-ico-description {
   &:before {
-    content: $al-ico-description;
+    content: variables.$al-ico-description;
   }
 }
 .al-ico-line-expand {
   &:before {
-    content: $al-ico-line-expand;
+    content: variables.$al-ico-line-expand;
   }
 }
 .al-ico-user-logout {
   &:before {
-    content: $al-ico-user-logout;
+    content: variables.$al-ico-user-logout;
   }
 }
 .al-ico-documentation {
   &:before {
-    content: $al-ico-documentation;
+    content: variables.$al-ico-documentation;
   }
 }
 .al-ico-frame-rule {
   &:before {
-    content: $al-ico-frame-rule;
+    content: variables.$al-ico-frame-rule;
   }
 }
 .al-ico-source-rule {
   &:before {
-    content: $al-ico-source-rule;
+    content: variables.$al-ico-source-rule;
   }
 }
 .al-ico-get-link-dialog {
   &:before {
-    content: $al-ico-get-link-dialog;
+    content: variables.$al-ico-get-link-dialog;
   }
 }
 .al-ico-iteration {
   &:before {
-    content: $al-ico-iteration;
+    content: variables.$al-ico-iteration;
   }
 }
 .al-ico-mapping {
   &:before {
-    content: $al-ico-mapping;
+    content: variables.$al-ico-mapping;
   }
 }
 .al-ico-labels {
   &:before {
-    content: $al-ico-labels;
+    content: variables.$al-ico-labels;
   }
 }
 .al-ico-augmentation {
   &:before {
-    content: $al-ico-augmentation;
+    content: variables.$al-ico-augmentation;
   }
 }
 .al-ico-filter-outlined {
   &:before {
-    content: $al-ico-filter-outlined;
+    content: variables.$al-ico-filter-outlined;
   }
 }
 .al-ico-input-data {
   &:before {
-    content: $al-ico-input-data;
+    content: variables.$al-ico-input-data;
   }
 }
 .al-ico-help-outlined {
   &:before {
-    content: $al-ico-help-outlined;
+    content: variables.$al-ico-help-outlined;
   }
 }
 .al-ico-email {
   &:before {
-    content: $al-ico-email;
+    content: variables.$al-ico-email;
   }
 }
 .al-ico-tips {
   &:before {
-    content: $al-ico-tips;
+    content: variables.$al-ico-tips;
   }
 }
 .al-ico-caret-right {
   &:before {
-    content: $al-ico-caret-right;
+    content: variables.$al-ico-caret-right;
   }
 }
 .al-ico-currently-active {
   &:before {
-    content: $al-ico-currently-active;
+    content: variables.$al-ico-currently-active;
   }
 }
 .al-ico-complete {
   &:before {
-    content: $al-ico-complete;
+    content: variables.$al-ico-complete;
   }
 }
 .al-ico-access-key {
   &:before {
-    content: $al-ico-access-key;
+    content: variables.$al-ico-access-key;
   }
 }
 .al-ico-alert {
   &:before {
-    content: $al-ico-alert;
+    content: variables.$al-ico-alert;
   }
 }
 .al-ico-users {
   &:before {
-    content: $al-ico-users;
+    content: variables.$al-ico-users;
   }
 }
 .al-ico-exit-archive {
   &:before {
-    content: $al-ico-exit-archive;
+    content: variables.$al-ico-exit-archive;
   }
 }
 .al-ico-calendar {
   &:before {
-    content: $al-ico-calendar;
+    content: variables.$al-ico-calendar;
   }
 }
 .al-ico-time {
   &:before {
-    content: $al-ico-time;
+    content: variables.$al-ico-time;
   }
 }
 .al-ico-add {
   &:before {
-    content: $al-ico-add;
+    content: variables.$al-ico-add;
   }
 }
 .al-ico-time-colon {
   &:before {
-    content: $al-ico-time-colon;
+    content: variables.$al-ico-time-colon;
   }
 }
 .al-ico-regex {
   &:before {
-    content: $al-ico-regex;
+    content: variables.$al-ico-regex;
   }
 }
 .al-ico-filter-on .path1 {
   &:before {
-    content: $al-ico-filter-on-path1;
+    content: variables.$al-ico-filter-on-path1;
     color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 255, 0);
   }
 }
 .al-ico-filter-on .path2 {
   &:before {
-    content: $al-ico-filter-on-path2;
+    content: variables.$al-ico-filter-on-path2;
     margin-left: -1em;
     color: var(--color-on-surface); // don't overwrite
 
@@ -968,279 +1004,279 @@
 }
 .al-ico-filter-off {
   &:before {
-    content: $al-ico-filter-off;
+    content: variables.$al-ico-filter-off;
     color: var(--color-outline); // don't overwrite
   }
 }
 .al-ico-sort-off {
   &:before {
-    content: $al-ico-sort-off;
+    content: variables.$al-ico-sort-off;
     //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path1 {
   &:before {
-    content: $al-ico-sort-on-down-path1;
+    content: variables.$al-ico-sort-on-down-path1;
     //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path2 {
   &:before {
-    content: $al-ico-sort-on-down-path2;
+    content: variables.$al-ico-sort-on-down-path2;
     margin-left: -1em;
     //color: $blue-200; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path1 {
   &:before {
-    content: $al-ico-sort-on-up-path1;
+    content: variables.$al-ico-sort-on-up-path1;
     //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path2 {
   &:before {
-    content: $al-ico-sort-on-up-path2;
+    content: variables.$al-ico-sort-on-up-path2;
     margin-left: -1em;
     //color: $blue-200; // don't overwrite
   }
 }
 .al-ico-arrow-left {
   &:before {
-    content: $al-ico-arrow-left;
+    content: variables.$al-ico-arrow-left;
   }
 }
 .al-ico-arrow-right {
   &:before {
-    content: $al-ico-arrow-right;
+    content: variables.$al-ico-arrow-right;
   }
 }
 .al-ico-step-backward {
   &:before {
-    content: $al-ico-step-backward;
+    content: variables.$al-ico-step-backward;
   }
 }
 .al-ico-step-forward {
   &:before {
-    content: $al-ico-step-forward;
+    content: variables.$al-ico-step-forward;
   }
 }
 .al-ico-backward {
   &:before {
-    content: $al-ico-backward;
+    content: variables.$al-ico-backward;
   }
 }
 .al-ico-forward {
   &:before {
-    content: $al-ico-forward;
+    content: variables.$al-ico-forward;
   }
 }
 .al-ico-copy-to-clipboard {
   &:before {
-    content: $al-ico-copy-to-clipboard;
+    content: variables.$al-ico-copy-to-clipboard;
   }
 }
 .al-ico-card-example {
   &:before {
-    content: $al-ico-card-example;
+    content: variables.$al-ico-card-example;
   }
 }
 .al-ico-bold {
   &:before {
-    content: $al-ico-bold;
+    content: variables.$al-ico-bold;
   }
 }
 .al-ico-italic {
   &:before {
-    content: $al-ico-italic;
+    content: variables.$al-ico-italic;
   }
 }
 .al-ico-heading {
   &:before {
-    content: $al-ico-heading;
+    content: variables.$al-ico-heading;
   }
 }
 .al-ico-quote {
   &:before {
-    content: $al-ico-quote;
+    content: variables.$al-ico-quote;
   }
 }
 .al-ico-link {
   &:before {
-    content: $al-ico-link;
+    content: variables.$al-ico-link;
   }
 }
 .al-ico-code {
   &:before {
-    content: $al-ico-code;
+    content: variables.$al-ico-code;
   }
 }
 .al-ico-list-bulleted {
   &:before {
-    content: $al-ico-list-bulleted;
+    content: variables.$al-ico-list-bulleted;
   }
 }
 .al-ico-list-numbered {
   &:before {
-    content: $al-ico-list-numbered;
+    content: variables.$al-ico-list-numbered;
   }
 }
 .al-ico-me {
   &:before {
-    content: $al-ico-me;
+    content: variables.$al-ico-me;
   }
 }
 .al-ico-team {
   &:before {
-    content: $al-ico-team;
+    content: variables.$al-ico-team;
   }
 }
 .al-ico-task-desc {
   &:before {
-    content: $al-ico-task-desc;
+    content: variables.$al-ico-task-desc;
   }
 }
 .al-ico-dots {
   &:before {
-    content: $al-ico-dots;
+    content: variables.$al-ico-dots;
   }
 }
 .al-ico-move-to {
   &:before {
-    content: $al-ico-move-to;
+    content: variables.$al-ico-move-to;
   }
 }
 .al-ico-abort {
   &:before {
-    content: $al-ico-abort;
+    content: variables.$al-ico-abort;
   }
 }
 .al-ico-extend {
   &:before {
-    content: $al-ico-extend;
+    content: variables.$al-ico-extend;
   }
 }
 .al-ico-reset-exp {
   &:before {
-    content: $al-ico-reset-exp;
+    content: variables.$al-ico-reset-exp;
   }
 }
 .al-ico-tag {
   &:before {
-    content: $al-ico-tag;
+    content: variables.$al-ico-tag;
   }
 }
 .al-ico-shared-item {
   &:before {
-    content: $al-ico-shared-item;
+    content: variables.$al-ico-shared-item;
   }
 }
 .al-ico-restore {
   &:before {
-    content: $al-ico-restore;
+    content: variables.$al-ico-restore;
   }
 }
 .al-ico-workers {
   &:before {
-    content: $al-ico-workers;
+    content: variables.$al-ico-workers;
   }
 }
 .al-ico-dots-v-menu {
   &:before {
-    content: $al-ico-dots-v-menu;
+    content: variables.$al-ico-dots-v-menu;
   }
 }
 .al-ico-d-menu-down {
   &:before {
-    content: $al-ico-d-menu-down;
+    content: variables.$al-ico-d-menu-down;
   }
 }
 .al-ico-d-menu-up {
   &:before {
-    content: $al-ico-d-menu-up;
+    content: variables.$al-ico-d-menu-up;
   }
 }
 .al-ico-slash {
   &:before {
-    content: $al-ico-slash;
+    content: variables.$al-ico-slash;
   }
 }
 .al-ico-info-circle {
   &:before {
-    content: $al-ico-info-circle;
+    content: variables.$al-ico-info-circle;
   }
 }
 .al-ico-annotate {
   &:before {
-    content: $al-ico-annotate;
+    content: variables.$al-ico-annotate;
   }
 }
 .al-ico-task-desc-outline {
   &:before {
-    content: $al-ico-task-desc-outline;
+    content: variables.$al-ico-task-desc-outline;
   }
 }
 .al-ico-manage-queue {
   &:before {
-    content: $al-ico-manage-queue;
+    content: variables.$al-ico-manage-queue;
   }
 }
 .al-ico-enqueue {
   &:before {
-    content: $al-ico-enqueue;
+    content: variables.$al-ico-enqueue;
   }
 }
 .al-ico-dequeue {
   &:before {
-    content: $al-ico-dequeue;
+    content: variables.$al-ico-dequeue;
   }
 }
 .al-ico-applications {
   &:before {
-    content: $al-ico-applications;
+    content: variables.$al-ico-applications;
   }
 }
 .al-ico-ico-chevron-up {
   &:before {
-    content: $al-ico-ico-chevron-up;
+    content: variables.$al-ico-ico-chevron-up;
   }
 }
 .al-ico-ico-chevron-down {
   &:before {
-    content: $al-ico-ico-chevron-down;
+    content: variables.$al-ico-ico-chevron-down;
   }
 }
 .al-ico-no-data-graph {
   &:before {
-    content: $al-ico-no-data-graph;
+    content: variables.$al-ico-no-data-graph;
   }
 }
 .al-ico-no-scatter-graph {
   &:before {
-    content: $al-ico-no-scatter-graph;
+    content: variables.$al-ico-no-scatter-graph;
   }
 }
 .al-ico-auto-refresh-play .path1 {
   &:before {
-    content: $al-ico-auto-refresh-play-path1;
+    content: variables.$al-ico-auto-refresh-play-path1;
     //color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-play .path2 {
   &:before {
-    content: $al-ico-auto-refresh-play-path2;
+    content: variables.$al-ico-auto-refresh-play-path2;
     margin-left: -1em;
     color: var(--color-tertiary); // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path1 {
   &:before {
-    content: $al-ico-auto-refresh-pause-path1;
+    content: variables.$al-ico-auto-refresh-pause-path1;
     //color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path2 {
   &:before {
-    content: $al-ico-auto-refresh-pause-path2;
+    content: variables.$al-ico-auto-refresh-pause-path2;
     margin-left: -1em;
     color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 253, 0);
@@ -1248,106 +1284,106 @@
 }
 .al-ico-sqr-ok {
   &:before {
-    content: $al-ico-sqr-ok;
+    content: variables.$al-ico-sqr-ok;
   }
 }
 .al-ico-sqr-cancel {
   &:before {
-    content: $al-ico-sqr-cancel;
+    content: variables.$al-ico-sqr-cancel;
   }
 }
 .al-ico-queue-lg {
   &:before {
-    content: $al-ico-queue-lg;
+    content: variables.$al-ico-queue-lg;
   }
 }
 .al-ico-started-lg {
   &:before {
-    content: $al-ico-started-lg;
+    content: variables.$al-ico-started-lg;
   }
 }
 .al-ico-admin {
   &:before {
-    content: $al-ico-admin;
+    content: variables.$al-ico-admin;
   }
 }
 .al-ico-projects-outlined {
   &:before {
-    content: $al-ico-projects-outlined;
+    content: variables.$al-ico-projects-outlined;
   }
 }
 .al-ico-datasets-outlined {
   &:before {
-    content: $al-ico-datasets-outlined;
+    content: variables.$al-ico-datasets-outlined;
   }
 }
 .al-ico-hide {
   &:before {
-    content: $al-ico-hide;
+    content: variables.$al-ico-hide;
   }
 }
 .al-ico-show {
   &:before {
-    content: $al-ico-show;
+    content: variables.$al-ico-show;
   }
 }
 .al-ico-metadata {
   &:before {
-    content: $al-ico-metadata;
+    content: variables.$al-ico-metadata;
   }
 }
 .al-ico-filter-reset .path1 {
   &:before {
-    content: $al-ico-filter-reset-path1;
+    content: variables.$al-ico-filter-reset-path1;
     color: var(--color-primary); // don't overwrite
   }
 }
 .al-ico-filter-reset .path2 {
   &:before {
-    content: $al-ico-filter-reset-path2;
+    content: variables.$al-ico-filter-reset-path2;
     margin-left: -1em;
-    color: lighten($failed-red, 10%); // don't overwrite
+    color: color.adjust(vars.$failed-red, $lightness: 10%); // don't overwrite
     // color: rgb(237, 138, 131);
   }
 }
 .al-ico-version-label {
   &:before {
-    content: $al-ico-version-label;
+    content: variables.$al-ico-version-label;
   }
 }
 .al-ico-plugin {
   &:before {
-    content: $al-ico-plugin;
+    content: variables.$al-ico-plugin;
   }
 }
 .al-ico-abort-all {
   &:before {
-    content: $al-ico-abort-all;
+    content: variables.$al-ico-abort-all;
   }
 }
 .al-ico-refresh {
   &:before {
-    content: $al-ico-refresh;
+    content: variables.$al-ico-refresh;
   }
 }
 .al-ico-rocket {
   &:before {
-    content: $al-ico-rocket;
+    content: variables.$al-ico-rocket;
   }
 }
 .al-ico-logout {
   &:before {
-    content: $al-ico-logout;
+    content: variables.$al-ico-logout;
   }
 }
 .al-ico-settings-alert .path1 {
   &:before {
-    content: $al-ico-settings-alert-path1;
+    content: variables.$al-ico-settings-alert-path1;
   }
 }
 .al-ico-settings-alert .path2 {
   &:before {
-    content: $al-ico-settings-alert-path2;
+    content: variables.$al-ico-settings-alert-path2;
     margin-left: -1em;
     color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 255, 0);
@@ -1355,192 +1391,192 @@
 }
 .al-ico-platform {
   &:before {
-    content: $al-ico-platform;
+    content: variables.$al-ico-platform;
   }
 }
 .al-ico-creditcard {
   &:before {
-    content: $al-ico-creditcard;
+    content: variables.$al-ico-creditcard;
   }
 }
 .al-ico-star {
   &:before {
-    content: $al-ico-star;
+    content: variables.$al-ico-star;
   }
 }
 .al-ico-email-check {
   &:before {
-    content: $al-ico-email-check;
+    content: variables.$al-ico-email-check;
   }
 }
 .al-ico-slack {
   &:before {
-    content: $al-ico-slack;
+    content: variables.$al-ico-slack;
   }
 }
 .al-ico-youtube {
   &:before {
-    content: $al-ico-youtube;
+    content: variables.$al-ico-youtube;
   }
 }
 .al-ico-lock {
   &:before {
-    content: $al-ico-lock;
+    content: variables.$al-ico-lock;
   }
 }
 .al-ico-lock-open {
   &:before {
-    content: $al-ico-lock-open;
+    content: variables.$al-ico-lock-open;
   }
 }
 .al-ico-no-code {
   &:before {
-    content: $al-ico-no-code;
+    content: variables.$al-ico-no-code;
   }
 }
 .al-ico-calendar-checked {
   &:before {
-    content: $al-ico-calendar-checked;
+    content: variables.$al-ico-calendar-checked;
   }
 }
 .al-ico-no-source {
   &:before {
-    content: $al-ico-no-source;
+    content: variables.$al-ico-no-source;
   }
 }
 .al-ico-arrow-up {
   &:before {
-    content: $al-ico-arrow-up;
+    content: variables.$al-ico-arrow-up;
   }
 }
 .al-ico-arrow-down {
   &:before {
-    content: $al-ico-arrow-down;
+    content: variables.$al-ico-arrow-down;
   }
 }
 .al-ico-error-circle {
   &:before {
-    content: $al-ico-error-circle;
+    content: variables.$al-ico-error-circle;
   }
 }
 .al-ico-pipelines {
   &:before {
-    content: $al-ico-pipelines;
+    content: variables.$al-ico-pipelines;
   }
 }
 .al-ico-console {
   &:before {
-    content: $al-ico-console;
+    content: variables.$al-ico-console;
   }
 }
 .al-ico-link-arrow {
   &:before {
-    content: $al-ico-link-arrow;
+    content: variables.$al-ico-link-arrow;
   }
 }
 .al-ico-broken-file {
   &:before {
-    content: $al-ico-broken-file;
+    content: variables.$al-ico-broken-file;
   }
 }
 .al-ico-run {
   &:before {
-    content: $al-ico-run;
+    content: variables.$al-ico-run;
   }
 }
 .al-ico-table-view {
   &:before {
-    content: $al-ico-table-view;
+    content: variables.$al-ico-table-view;
   }
 }
 .al-ico-experiment-view {
   &:before {
-    content: $al-ico-experiment-view;
+    content: variables.$al-ico-experiment-view;
   }
 }
 .al-ico-code-square {
   &:before {
-    content: $al-ico-code-square;
+    content: variables.$al-ico-code-square;
   }
 }
 .al-ico-video {
   &:before {
-    content: $al-ico-video;
+    content: variables.$al-ico-video;
   }
 }
 .al-ico-less-than {
   &:before {
-    content: $al-ico-less-than;
+    content: variables.$al-ico-less-than;
   }
 }
 .al-ico-greater-than {
   &:before {
-    content: $al-ico-greater-than;
+    content: variables.$al-ico-greater-than;
   }
 }
 .al-ico-eye-outline {
   &:before {
-    content: $al-ico-eye-outline;
+    content: variables.$al-ico-eye-outline;
   }
 }
 .al-ico-csv {
   &:before {
-    content: $al-ico-csv;
+    content: variables.$al-ico-csv;
   }
 }
 .al-ico-status-draft {
   &:before {
-    content: $al-ico-status-draft;
+    content: variables.$al-ico-status-draft;
   }
 }
 .al-ico-status-published {
   &:before {
-    content: $al-ico-status-published;
+    content: variables.$al-ico-status-published;
   }
 }
 .al-ico-status-aborted-sec {
   &:before {
-    content: $al-ico-status-aborted-sec;
+    content: variables.$al-ico-status-aborted-sec;
   }
 }
 .al-ico-status-pending {
   &:before {
-    content: $al-ico-status-pending;
+    content: variables.$al-ico-status-pending;
   }
 }
 .al-ico-status-skipped {
   &:before {
-    content: $al-ico-status-skipped;
+    content: variables.$al-ico-status-skipped;
   }
 }
 .al-ico-status-cached {
   &:before {
-    content: $al-ico-status-cached;
+    content: variables.$al-ico-status-cached;
   }
 }
 .al-ico-status-executed {
   &:before {
-    content: $al-ico-status-executed;
+    content: variables.$al-ico-status-executed;
   }
 }
 .al-ico-status-running {
   &:before {
-    content: $al-ico-status-running;
+    content: variables.$al-ico-status-running;
   }
 }
 .al-ico-status-failed {
   &:before {
-    content: $al-ico-status-failed;
+    content: variables.$al-ico-status-failed;
   }
 }
 .al-ico-status-aborted {
   &:before {
-    content: $al-ico-status-aborted;
+    content: variables.$al-ico-status-aborted;
   }
 }
 .al-ico-status-completed {
   &:before {
-    content: $al-ico-status-completed;
+    content: variables.$al-ico-status-completed;
   }
 }
 

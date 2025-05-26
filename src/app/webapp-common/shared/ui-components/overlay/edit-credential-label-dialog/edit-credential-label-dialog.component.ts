@@ -5,16 +5,15 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 
 @Component({
-  selector: 'sm-edit-credential-label-dialog',
-  templateUrl: './edit-credential-label-dialog.component.html',
-  styleUrls: ['./edit-credential-label-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    ConfirmDialogComponent,
-    MatInputModule,
-    FormsModule
-  ]
+    selector: 'sm-edit-credential-label-dialog',
+    templateUrl: './edit-credential-label-dialog.component.html',
+    styleUrls: ['./edit-credential-label-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ConfirmDialogComponent,
+        MatInputModule,
+        FormsModule
+    ]
 })
 export class EditCredentialLabelDialogComponent implements AfterViewInit {
 

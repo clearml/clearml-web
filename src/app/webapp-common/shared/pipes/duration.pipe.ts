@@ -29,7 +29,7 @@ export class DurationPipe implements PipeTransform {
         return `${result}${units}`;
       } else if (hours) {
         if(units === 'd') {
-          result.push(hours.toString().padStart(2, '0'));
+          result.length > 0 ? result.push(hours.toString().padStart(2, '0')) : result.push(hours.toString());
         } else {
           result.push(hours.toString());
         }
@@ -44,7 +44,8 @@ export class DurationPipe implements PipeTransform {
       if (hours && !minutes) {
         return `${result}${units}`;
       } else if (minutes) {
-        result.push(minutes.toString().padStart(2, '0'));
+        // result.push(minutes.toString().padStart(2, '0'));
+        result.length > 0 ? result.push(minutes.toString().padStart(2, '0')) : result.push(minutes.toString());
         if (result.length === 2) {
           return `${result.join(':')}${units}`;
         }
@@ -55,7 +56,8 @@ export class DurationPipe implements PipeTransform {
       // 3- Extract minutes:
       const seconds = Math.floor(calcSeconds) % 100;
       if (seconds) {
-        result.push(seconds.toString().padStart(2, '0'));
+        // result.push(seconds.toString().padStart(2, '0'));
+        result.length > 0 ? result.push(seconds.toString().padStart(2, '0')) : result.push(seconds.toString());
         if (result.length === 2) {
           return `${result.join(':')}${units}`;
         }

@@ -1,10 +1,10 @@
 import {GenericFooterItem} from './generic-footer-item';
-import {ItemState} from './footer-items.models';
 
 export class DividerFooterItem extends GenericFooterItem {
+  override id = 'divider'
   override divider = true;
 
-  override getItemState(): ItemState
+  override getItemState()
   {
     return {};
   }

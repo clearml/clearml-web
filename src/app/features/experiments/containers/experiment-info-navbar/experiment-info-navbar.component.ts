@@ -3,10 +3,11 @@ import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-
 
 
 @Component({
-  selector: 'sm-experiment-info-navbar',
-  templateUrl: './experiment-info-navbar.component.html',
-  styleUrls: ['./experiment-info-navbar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiment-info-navbar',
+    templateUrl: './experiment-info-navbar.component.html',
+    styleUrls: ['./experiment-info-navbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentInfoNavbarComponent {
   public baseInfoRoute: string[];

@@ -47,7 +47,7 @@
             [displayWith]="displayFn"
             autoActiveFirstOption
           >
-            @if (!projectInput?.errors && projects !== null && projectInput.value &&
+            @if (!projectInput?.errors && projects !== null && projectInput.value && projectInput.value?.value !== null &&
                  !((projectInput.value?.label ?? projectInput.value) | stringIncludedInArray: allProjectsNames())
               ) {
               <mat-option class="item" [value]="projectInput.value">"{{ projectInput.value }}"

@@ -1,4 +1,4 @@
-@import "../../../layout/layout.scss";
+@use "../../../layout/layout.scss";
 
 ::ng-deep sm-models footer.d-flex.justify-content-center {
   align-items: center;
@@ -10,7 +10,7 @@
     display: block;
     height: 100%;
     &.compare {
-      height: calc(100% - #{$project-footer-height});
+      height: calc(100% - #{layout.$project-footer-height});
     }
   }
   .header-checkbox {

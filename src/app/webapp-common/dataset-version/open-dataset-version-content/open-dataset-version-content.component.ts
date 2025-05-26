@@ -21,23 +21,22 @@ interface RowData extends Row {
 }
 
 @Component({
-  selector: 'sm-open-dataset-version-content',
-  templateUrl: './open-dataset-version-content.component.html',
-  styleUrls: ['./open-dataset-version-content.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatMenu,
-    HesitateDirective,
-    ClipboardModule,
-    MatMenuTrigger,
-    MatIcon,
-    TableComponent,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective,
-    MatIconButton,
-    PrimeTemplate
-  ]
+    selector: 'sm-open-dataset-version-content',
+    templateUrl: './open-dataset-version-content.component.html',
+    styleUrls: ['./open-dataset-version-content.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatMenu,
+        HesitateDirective,
+        ClipboardModule,
+        MatMenuTrigger,
+        MatIcon,
+        TableComponent,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective,
+        MatIconButton,
+        PrimeTemplate
+    ]
 })
 export class OpenDatasetVersionContentComponent {
   private readonly ref = inject(ElementRef);

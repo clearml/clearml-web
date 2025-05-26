@@ -4,10 +4,11 @@ import {BaseClickableArtifactComponent} from '../base-clickable-artifact.compone
 import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 
 @Component({
-  selector: 'sm-experiment-artifact-item-view',
-  templateUrl: './experiment-artifact-item-view.component.html',
-  styleUrls: ['./experiment-artifact-item-view.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiment-artifact-item-view',
+    templateUrl: './experiment-artifact-item-view.component.html',
+    styleUrls: ['./experiment-artifact-item-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactComponent{
   public isLocalFile: boolean;

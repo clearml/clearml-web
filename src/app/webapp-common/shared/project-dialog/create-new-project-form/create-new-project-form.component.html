@@ -16,16 +16,16 @@
         @if (errors?.required) {
           Please add name.
         }
-        @if (errors?.uniqueProject) {
+        @else if (errors?.uniqueProject) {
           Project name in this path already exists.
         }
-        @if (errors?.minlength) {
+        @else if (errors?.minlength) {
           Project name should contain more than 3 characters.
         }
-        @if (errors?.emptyName && !errors?.minlength) {
+        @else if (errors?.emptyName && !errors?.minlength) {
           Project name can't contain only spaces.
         }
-        @if (errors?.pattern &&  !errors?.minlength) {
+        @else if (errors?.pattern && !errors?.minlength) {
           Project name can't contain slash (/)
         }
       </mat-error>
@@ -41,20 +41,17 @@
     [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
     (getEntities)="loadMore($event, false)"
     (loadMore)="loadMore($event, true)"
-  >
-  </sm-paginated-entity-selector>
-  <div class="errors">
-    @if ((!projectForm.controls.parent.untouched) && projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
-      <mat-error>
-        @if (errors?.required) {
-          Please add name.
-        }
-        @if (errors?.minlength) {
-          Project name should contain more than 3 characters.
-        }
-      </mat-error>
-    }
-  </div>
+  ></sm-paginated-entity-selector>
+  @if (!projectForm.controls.parent.untouched && projectForm.controls.parent.errors; as errors) {
+    <div class="extra-errors">
+      @if (errors?.required) {
+        <mat-error>Please add name.</mat-error>
+      }
+      @if (errors?.minlength) {
+        <mat-error>Project name should contain more than 3 characters.</mat-error>
+      }
+    </div>
+  }
 
   <mat-form-field appearance="outline">
     <mat-label>Description</mat-label>

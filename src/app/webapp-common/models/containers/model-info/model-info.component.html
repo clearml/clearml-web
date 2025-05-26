@@ -16,17 +16,17 @@
   >
   </sm-model-info-header>
   <div class="tab-nav" [class.minimized]="minimized">
-    @if (((routerConfig$ | async).includes('scalars') && minimized) || !minimized) {
+    @if ((routerConfig().includes('scalars') && minimized) || !minimized) {
       <span class="leave for grid"></span>
     }
     <sm-router-tab-nav-bar
       [splitSize]="splitSize$ | ngrxPush"
       [links]="links"
     ></sm-router-tab-nav-bar>
-    @if (((routerConfig$ | async).includes('scalars') && minimized) || !minimized) {
+    @if ((routerConfig().includes('scalars') && minimized) || !minimized) {
       <span class="close-button">
        <div class="scalar-buttons">
-         @if ((routerConfig$ | async).includes('scalars')) {
+         @if (routerConfig().includes('scalars')) {
            <div class="table-graph-toggle" [class.maximized]="!minimized">
              <button mat-icon-button (click)="toggleTableView()"
                      [smTooltip]="(metricValuesView$ | async) === false ? 'Metric values': 'Graphs'"
@@ -35,8 +35,8 @@
              </button>
           </div>
          }
-         @if ((metricValuesView$ | async) === false && (routerConfig$ | async).includes('scalars') && minimized) {
-          <button mat-icon-button [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
+         @if ((metricValuesView$ | async) === false && routerConfig().includes('scalars') && minimized) {
+          <button mat-icon-button data-id="scalar settings" [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
             <mat-icon fontSet="al" fontIcon="al-ico-settings"></mat-icon>
           </button>
           <mat-menu #graphSettingsMenu="matMenu">
@@ -44,15 +44,19 @@
             class="graph-settings-menu"
             (click)="$event.stopPropagation()"
             [verticalLayout]="true"
-            [smoothWeight]="smoothWeight$ | ngrxPush"
-            [smoothType]="smoothType$ | ngrxPush"
-            [xAxisType]="xAxisType$ | ngrxPush"
-            [groupBy]="groupBy$ | ngrxPush"
+            [smoothWeight]="smoothWeight()"
+            [smoothSigma]="smoothSigma()"
+            [smoothType]="smoothType()"
+            [xAxisType]="xAxisType()"
+            [groupBy]="groupBy()"
             [groupByOptions]="groupByOptions"
+            [clearable]="projectId() === '*'? null : !isProjectLevel()"
             (changeWeight)="changeSmoothness($event)"
+            (changeSigma)="changeSigma($event)"
             (changeXAxisType)="changeXAxisType($event)"
             (changeGroupBy)="changeGroupBy($event)"
             (changeSmoothType)="changeSmoothType($event)"
+            (setToProject)="setToProject()"
             ></sm-graph-settings-bar>
           </mat-menu>
          }

@@ -45,6 +45,15 @@ import {debounceTime, distinctUntilChanged, map} from 'rxjs/operators';
 import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
 import {shellBinaryValidator} from '@common/shared/validators/shell-binary.validator';
 import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {Ace} from 'ace-builds';
+
+const venvOptions = [
+  {label: 'Discover', value: 'discover'},
+  {label: 'manual', value: 'Specify'},
+];
+
+type VenvOption = typeof venvOptions[number]['value'];
 
 export interface createExperimentDialogResult {
   id?: string;
@@ -62,6 +71,7 @@ export interface createExperimentDialogResult {
   args: {key: string; value: string}[];
   poetry: boolean;
   binary: string;
+  venvType: VenvOption;
   venv: string;
   requirements: 'skip' | 'text' | 'manual';
   pip: string;
@@ -80,52 +90,54 @@ type ScriptType = typeof scriptTypes[number];
 
 
 @Component({
-  selector: 'sm-create-experiment-dialog',
-  templateUrl: './create-experiment-dialog.component.html',
-  styleUrl: './create-experiment-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatStepper,
-    MatStep,
-    MatFormField,
-    ReactiveFormsModule,
-    DialogTemplateComponent,
-    MatStepperPrevious,
-    MatStepperNext,
-    MatInput,
-    MatLabel,
-    MatSelect,
-    MatOption,
-    MatCheckbox,
-    MatRadioGroup,
-    MatRadioButton,
-    PaginatedEntitySelectorComponent,
-    MatStepperIcon,
-    NgTemplateOutlet,
-    MatError,
-    MatButton,
-    MatIconButton,
-    MatIcon,
-    CodeEditorComponent,
-    MatSuffix,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-  ],
-  providers: [
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: {subscriptSizing: 'dynamic', appearance: 'outline', floatLabel: 'always'} as MatFormFieldDefaultOptions
-    },
-    {provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: {disabled: true} as RippleGlobalOptions}
-  ]
+    selector: 'sm-create-experiment-dialog',
+    templateUrl: './create-experiment-dialog.component.html',
+    styleUrl: './create-experiment-dialog.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatStepper,
+        MatStep,
+        MatFormField,
+        ReactiveFormsModule,
+        DialogTemplateComponent,
+        MatStepperPrevious,
+        MatStepperNext,
+        MatInput,
+        MatLabel,
+        MatSelect,
+        MatOption,
+        MatCheckbox,
+        MatRadioGroup,
+        MatRadioButton,
+        PaginatedEntitySelectorComponent,
+        MatStepperIcon,
+        NgTemplateOutlet,
+        MatError,
+        MatButton,
+        MatIconButton,
+        MatIcon,
+        CodeEditorComponent,
+        MatSuffix,
+        MatExpansionPanel,
+        MatExpansionPanelHeader,
+        ButtonToggleComponent,
+    ],
+    providers: [
+        {
+            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+            useValue: { subscriptSizing: 'dynamic', appearance: 'outline', floatLabel: 'always' } as MatFormFieldDefaultOptions
+        },
+        { provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: { disabled: true } as RippleGlobalOptions }
+    ]
 })
 export class CreateExperimentDialogComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialogRef);
+  protected readonly venvOptions = venvOptions;
 
   private codeForm = viewChild<ElementRef<HTMLFormElement>>('codeForm');
+  private codeEditor = viewChild(CodeEditorComponent);
 
   protected queues = this.store.selectSignal(selectQueuesList);
   protected filteredQueues = computed(() => this.queueVal() ?
@@ -163,6 +175,7 @@ export class CreateExperimentDialogComponent {
   })
   envFormGroup = this.formBuilder.group({
     poetry: [false],
+    venvType: ['discover'],
     venv: [null],
     requirements: ['text'],
     pip: [''],
@@ -187,6 +200,7 @@ export class CreateExperimentDialogComponent {
     ));
   protected scriptTypes = computed(() => this.shell() ? scriptTypes.filter((e, index) => index !== 1) : scriptTypes);
   protected editMode = signal(false);
+  protected cursorPosition: Ace.Point;
 
   constructor() {
     this.store.dispatch(getQueuesForEnqueue());
@@ -258,10 +272,10 @@ index 000000000..ff86f39a4
         this.codeFormGroup.controls[type].setValidators(Validators.required);
       } else {
         this.codeFormGroup.controls[type].clearValidators();
-        this.codeFormGroup.controls[type].updateValueAndValidity({onlySelf: true});
       }
-      this.codeFormGroup.updateValueAndValidity();
-    })
+      this.codeFormGroup.controls[type].updateValueAndValidity({onlySelf: true});
+    });
+    this.codeFormGroup.updateValueAndValidity();
   }
 
   togglePoetry(usePoetry: boolean) {
@@ -298,6 +312,7 @@ index 000000000..ff86f39a4
       this.codeFormGroup.controls.script.setValue(file.name ?? 'main.py');
     };
     reader.readAsText(file);
+    ($event.target as HTMLInputElement).value = '';
   }
 
   editScript() {
@@ -306,12 +321,30 @@ index 000000000..ff86f39a4
 
   updateScript(code: string) {
     this.codeFormGroup.controls.uncommited.setValue(code);
+    this.cursorPosition = this.codeEditor().position;
+    if (!this.codeFormGroup.controls.script.value) {
+      this.codeFormGroup.controls.script.setValue(`custom_code.${this.shell() ? 'sh' : 'py'}`)
+    }
+    this.closeScript();
+  }
+
+  closeScript () {
     this.editMode.set(false)
-    window.setTimeout(() => this.codeForm().nativeElement.scrollTo({top: 1000, behavior: 'smooth'}));
+    window.setTimeout(() => this.codeForm().nativeElement.scrollTo({top: 1000, behavior: 'instant'}));
   }
 
   clearFile() {
     this.codeFormGroup.controls.script.setValue(null);
     this.codeFormGroup.controls.uncommited.setValue(null);
+  }
+
+  binaryChanged(value: string) {
+    if(value === 'shell' && this.codeFormGroup.controls.scriptType.value === 'module') {
+      this.codeFormGroup.controls.scriptType.setValue('script');
+    }
+  }
+
+  venevTypeChange(value: VenvOption) {
+    this.envFormGroup.controls.venvType.setValue(value);
   }
 }

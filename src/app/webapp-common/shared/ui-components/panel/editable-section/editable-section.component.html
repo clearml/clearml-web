@@ -3,15 +3,15 @@
   [class.dark-theme]="isDarkTheme()"
   [class]="containerClass()"
   [class.edit-mode]="inEditMode() && !disableInEditMode()"
-  [class.disable-edit]="disableEditable()"
   [class.force]="forceButtons()"
   (dblclick)="editable() && !disableEditable() && (!inEditMode()) && editModeChanged(true)"
-  >
+>
   <div class="edit-wrapper d-flex flex-row-reverse">
     @if (!disableEditable() && !inEditMode() && editable() && !hideEditButton()) {
       <button mat-flat-button id="editSection" class="edit-pen"
               (click)="editModeChanged(true)"
-      >EDIT</button>
+      >EDIT
+      </button>
     }
     @if (!disableEditable() && !inEditMode() && editable()) {
       <ng-content select="[extra-buttons]"></ng-content>
@@ -20,16 +20,16 @@
   </div>
   <ng-content></ng-content>
   @if (inEditMode() && !disableInEditMode()) {
-    <div class="cancel-save action-button edit-mode" >
+    <div class="cancel-save action-button edit-mode">
       <button mat-stroked-button class="me-2" (click)="cancelClickedEvent()" data-id="CancelButton">
         CANCEL
       </button>
       @if (!hideSaveButton()) {
-        <sm-loading-button
-          [disabled]="disableSave()" label="SAVE" data-id="SaveButton"
-          [loading]="saving()"
-          (click)="!disableSave() && !saving() && saveSection()"
-        class="action-button"></sm-loading-button>
+        <button mat-flat-button
+                data-id="SaveButton"
+                [disabled]="disableSave()"
+                (click)="!disableSave() && !saving() && saveSection()">SAVE
+        </button>
       }
     </div>
   }

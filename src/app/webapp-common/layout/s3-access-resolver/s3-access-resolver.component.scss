@@ -1,8 +1,7 @@
-@import "variables";
-@import "mixins/link";
+@use "mixins/link";
 
 :host {
-  @include link();
+  @include link.link();
 }
 
 .gcs-note {

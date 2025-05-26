@@ -1,13 +1,13 @@
-@import "variables";
+@use "variables";
 
 :host {
-  --mdc-secondary-navigation-tab-container-height: #{$nav-bar-height};
+  --mdc-secondary-navigation-tab-container-height: #{variables.$nav-bar-height};
   --mat-tab-header-inactive-label-text-color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
 
   .trial-badge {
     margin-left: 10px;
     background-color: var(--color-primary);
-    color: white;
+    color: var(--color-on-primary);
     padding: 2px 6px;
     border-radius: 3px;
     font-size: 11px;

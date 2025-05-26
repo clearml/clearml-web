@@ -1,5 +1,5 @@
-@import "variables";
-@import "mixins/icon";
+@use "variables";
+@use "mixins/icon";
 
 .al-icon, .icon {
   width: 20px;
@@ -93,234 +93,230 @@
 
 // no font icon
 .i-slack-mark-color {
-  @include icon('#{$assets-icons-path}/slack-mark-color.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/slack-mark-color.svg');
 }
 
 // no font icon
 .i-expand-collapse-all {
-  @include icon('#{$assets-icons-path}/expand-collapse-all.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/expand-collapse-all.svg');
 }
 
 // no font icon
 .i-dataview {
-  @include icon('#{$assets-icons-path}/dataview-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/dataview-icon.svg');
 }
 
 .i-in_progress, .i-Uploading {
-  @include icon('#{$assets-icons-path}/running-green.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/running-green.svg');
 
   &.bw {
-    @include icon('#{$assets-icons-path}/running-title.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/running-title.svg');
   }
 
   &.dark {
-    @include icon('#{$assets-icons-path}/running-dark.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/running-dark.svg');
   }
   &.notify {
-    @include icon('#{$assets-icons-path}/running-notify.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/running-notify.svg');
     &.grey{
-      @include icon('#{$assets-icons-path}/running-notify-grey.svg');
+      @include icon.icon('#{variables.$assets-icons-path}/running-notify-grey.svg');
     }
   }
 }
 
 .i-completed, .i-Final {
-  @include icon('#{$assets-icons-path}/completed.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/completed.svg');
 
   &.bw {
-    @include icon('#{$assets-icons-path}/completed-white.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/completed-white.svg');
   }
 }
 
 .i-stopped {
-  @include icon('#{$assets-icons-path}/completed.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/completed.svg');
 
   &.bw {
-    @include icon('#{$assets-icons-path}/completed-white.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/completed-white.svg');
   }
 }
 
 .i-dequeu {
-  @include icon('#{$assets-icons-path}/dequeue.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/dequeue.svg');
 }
 
 .i-closed {
-  @include icon('#{$assets-icons-path}/completed.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/completed.svg');
 }
 
 .i-failed {
-  @include icon('#{$assets-icons-path}/failed.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/failed.svg');
 
   &.bw {
-    @include icon('#{$assets-icons-path}/failed-white.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/failed-white.svg');
   }
 
   &.small {
-    @include icon('#{$assets-icons-path}/failed-sm.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/failed-sm.svg');
   }
 }
 
 .i-published {
-  @include icon('#{$assets-icons-path}/published-neon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/published-neon.svg');
 
   &.bw {
-    @include icon('#{$assets-icons-path}/published-title.svg');
+    @include icon.icon('#{variables.$assets-icons-path}/published-title.svg');
   }
 
 }
 
 .i-created {
-  @include icon('#{$assets-icons-path}/draft-light-blue.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/draft-light-blue.svg');
 }
 
 
 // no font icon
 .i-v-neon {
-  @include icon('#{$assets-icons-path}/v.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/v.svg');
 }
 
 // no font icon
 .i-v-black {
-  @include icon('#{$assets-icons-path}/black-v.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/black-v.svg');
 }
 
 // two colors
 .i-alert {
-  @include icon('#{$assets-icons-path}/alert.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/alert.svg');
 }
 
 .i-annotation-blue-neon {
-  @include icon('#{$assets-icons-path}/annotation-blue-neon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/annotation-blue-neon.svg');
 }
 
 // No font icon
 .i-terms {
-  @include icon('#{$assets-icons-path}/terms-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/terms-icon.svg');
 }
 
 // Icon font is only one color
 .i-model {
-  @include icon('#{$assets-icons-path}/model.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/model.svg');
 }
 
 
 // Font icon looks bad
 .i-alert-purple {
-  @include icon('#{$assets-icons-path}/alert-purple.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/alert-purple.svg');
 }
 
 
 .i-Caffe {
-  @include icon('#{$assets-icons-path}/caffe-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/caffe-icon.svg');
 }
 
 .i-PyTorch {
-  @include icon('#{$assets-icons-path}/pytorch-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/pytorch-icon.svg');
 }
 
 // No used in trains
 .i-Custom {
-  @include icon('#{$assets-icons-path}/custom-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/custom-icon.svg');
 }
 
 //No font icon
 .i-Keras {
-  @include icon('#{$assets-icons-path}/keras-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/keras-icon.svg');
 }
 
 .i-ScikitLearn {
-  @include icon('#{$assets-icons-path}/scikit_learn_logo.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/scikit_learn_logo.svg');
 }
 
 //No font icon
 .i-Tensor.Flow {
-  @include icon('#{$assets-icons-path}/tensorflow-icon.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/tensorflow-icon.svg');
   filter: none;
 }
 
 //No font icon dark-them
 .i-no-plots-dark {
-  @include icon('#{$assets-icons-path}/no-plots-dk.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/no-plots-dk.svg');
 }
 
 //No font icon dark-theme
 .i-no-code-dark {
-  @include icon('#{$assets-icons-path}/no-code-dk.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/no-code-dk.svg');
 }
 
 .i-kibana {
-  @include icon('#{$assets-icons-path}/kibana.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/kibana.svg');
 }
 
 
 .i-access-key {
-  @include icon('#{$assets-icons-path}/ico-access-key.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-access-key.svg');
 }
 
 .i-google {
-  @include icon('#{$assets-icons-path}/ico-google.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-google.svg');
 }
 
 .i-aws {
-  @include icon('#{$assets-icons-path}/ico-aws.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-aws.svg');
 }
 
 .i-azure {
-  @include icon('#{$assets-icons-path}/ico-azure.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-azure.svg');
 }
 
 .i-google-cloud {
-  @include icon('#{$assets-icons-path}/ico-google-cloud-storage.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-google-cloud-storage.svg');
 }
 
 .i-aws-cloud {
-  @include icon('#{$assets-icons-path}/ico-aws-S3-storage.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-aws-S3-storage.svg');
 }
 
 .i-azure-cloud {
-  @include icon('#{$assets-icons-path}/ico-azure-blob-storage.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-azure-blob-storage.svg');
 }
 
 .i-minio {
-  @include icon('#{$assets-icons-path}/logo_minio.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/logo_minio.svg');
 }
 
 .i-github {
-  @include icon('#{$assets-icons-path}/ico-github.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-github.svg');
 }
 
 .i-bitbucket {
-  @include icon('#{$assets-icons-path}/ico-bitbucket.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-bitbucket.svg');
 }
 
 .i-microsoft {
-  @include icon('#{$assets-icons-path}/ico-microsoft.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/ico-microsoft.svg');
 }
 
 .i-project-tags-filter-active {
-  @include icon('#{$assets-icons-path}/project-tags-filter-active.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/project-tags-filter-active.svg');
 }
 
 .i-project-tags-filter {
-  @include icon('#{$assets-icons-path}/project-tags-filter.svg');
-}
-
-.i-markdown {
-  @include icon('#{$assets-icons-path}/ico-markdown.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/project-tags-filter.svg');
 }
 
 .i-c-logo {
-  @include icon('#{$assets-icons-path}/c-logomark.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/c-logomark.svg');
 }
 
 .i-pipeline-empty-state {
-  @include icon('#{$assets-icons-path}/pipeline-empty-state.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/pipeline-empty-state.svg');
 }
 
 .i-datasets-empty-state {
-  @include icon('#{$assets-icons-path}/datasets-empty-state.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/datasets-empty-state.svg');
 }
 
 .i-welcome-researcher {
-  @include icon('#{$assets-icons-path}/welcome-researcher.svg');
+  @include icon.icon('#{variables.$assets-icons-path}/welcome-researcher.svg');
 }

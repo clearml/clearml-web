@@ -1,29 +1,21 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  OnDestroy, input, output, inject, ChangeDetectionStrategy, signal, computed
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, input, OnDestroy, output, signal} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {setBackdrop} from '@common/core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {fromEvent, Subscription} from 'rxjs';
 import {tap, throttleTime} from 'rxjs/operators';
-import {LoadingButtonComponent} from '@common/shared/ui-components/buttons/loading-button/loading-button.component';
 
 import {MatButton} from '@angular/material/button';
 import {computedPrevious} from 'ngxtension/computed-previous';
 
 @Component({
-  selector: 'sm-editable-section',
-  templateUrl: './editable-section.component.html',
-  styleUrls: ['./editable-section.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    LoadingButtonComponent,
-    MatButton
-  ]
+    selector: 'sm-editable-section',
+    templateUrl: './editable-section.component.html',
+    styleUrls: ['./editable-section.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatButton
+    ]
 })
 export class EditableSectionComponent implements OnDestroy {
   private store = inject(Store);
@@ -48,7 +40,7 @@ export class EditableSectionComponent implements OnDestroy {
     saving: this.saving(),
     inEditMode: signal(false)
   }));
-  get inEditMode () {
+  get inEditMode() {
     return this.state().inEditMode;
   }
 

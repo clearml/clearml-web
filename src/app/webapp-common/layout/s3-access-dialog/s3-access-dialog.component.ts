@@ -17,18 +17,17 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-s3-access-dialog',
-  templateUrl: './s3-access-dialog.component.html',
-  styleUrls: ['./s3-access-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatInputModule,
-    TooltipDirective,
-    SaferPipe,
-    MatButton
-  ]
+    selector: 'sm-s3-access-dialog',
+    templateUrl: './s3-access-dialog.component.html',
+    styleUrls: ['./s3-access-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule,
+        MatInputModule,
+        TooltipDirective,
+        SaferPipe,
+        MatButton
+    ]
 })
 export class S3AccessDialogComponent implements OnChanges {
   public formIsSubmitted: boolean;

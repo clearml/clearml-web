@@ -8,14 +8,11 @@ a[href]:hover {
   justify-content: center;
   gap: 24px;
   align-items: center;
-}
-
-.al-icon {
-  color: var(--color-tint-14);
+  color: var(--color-empty-state);
 }
 
 .message {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
 }
 

@@ -4,14 +4,13 @@ import {PageBaseComponent} from '@common/enterprise-visibility/page-base.compone
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-genai',
-  standalone: true,
-  imports: [
-    NgOptimizedImage,
-    MatIcon
-  ],
-  templateUrl: './genai.component.html',
-  styleUrl: '../pages.scss'
+    selector: 'sm-genai',
+    imports: [
+        NgOptimizedImage,
+        MatIcon
+    ],
+    templateUrl: './genai.component.html',
+    styleUrl: '../pages.scss'
 })
 export class GenaiComponent extends PageBaseComponent {
 }

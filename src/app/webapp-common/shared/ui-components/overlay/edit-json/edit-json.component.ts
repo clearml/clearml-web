@@ -13,22 +13,22 @@ export interface EditJsonData {
   textData?: string | object;
   readOnly?: boolean;
   title: string;
+  subtitle?: string;
   format?: 'json' | 'yaml' | 'hocon';
   placeHolder?: string;
   reorder?: boolean;
 }
 
 @Component({
-  selector: 'sm-edit-json',
-  templateUrl: './edit-json.component.html',
-  styleUrls: ['./edit-json.component.scss'],
-  providers: [{provide: JsonPipe, useClass: JsonPipe}],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    MatButton,
-    CodeEditorComponent
-  ]
+    selector: 'sm-edit-json',
+    templateUrl: './edit-json.component.html',
+    styleUrls: ['./edit-json.component.scss'],
+    providers: [{ provide: JsonPipe, useClass: JsonPipe }],
+    imports: [
+        DialogTemplateComponent,
+        MatButton,
+        CodeEditorComponent
+    ]
 })
 export class EditJsonComponent {
   protected data = inject<EditJsonData>(MAT_DIALOG_DATA);
@@ -42,13 +42,14 @@ export class EditJsonComponent {
   private _readOnly: boolean;
   protected placeHolder: string;
   protected title: string;
+  protected subtitle: string;
   protected readonly typeJson: boolean;
   private readonly format?: 'json' | 'yaml' | 'hocon';
   protected mode: string;
 
   protected editor = viewChild(CodeEditorComponent);
   protected aceCaretPosition = this.store.selectSignal(selectAceCaretPosition);
-  protected position = computed(() => this.aceCaretPosition?.[this.title] ?? null)
+  protected position = computed(() => this.aceCaretPosition()?.[this.title] ?? null)
 
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
@@ -93,6 +94,7 @@ export class EditJsonComponent {
     }
     this.readOnly = this.data.readOnly;
     this.title = this.data.title;
+    this.subtitle = this.data.subtitle;
 
     switch (this.format) {
       case 'hocon':
@@ -114,6 +116,7 @@ export class EditJsonComponent {
     if (isConfirmed) {
       try {
         const text = this.editor().aceCode;
+        this.textData = text;
         this.dialogRef.close(text ? (this.typeJson ? JSON.parse(text) : text) : '');
       } catch {
         this.store.dispatch(addMessage('warn', 'Not a valid JSON'));

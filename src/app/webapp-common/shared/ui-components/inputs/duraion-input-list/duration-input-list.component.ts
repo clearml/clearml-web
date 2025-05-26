@@ -65,23 +65,23 @@ export function durationInputFactory(values: (DURATION_INPUT_TYPE | DurationInpu
 }
 
 @Component({
-  selector: 'sm-duration-input-list',
-  templateUrl: './duration-input-list.component.html',
-  styleUrls: ['./duration-input-list.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DurationInputListComponent),
-      multi: true
-    }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    FormsModule,
-    MatInputModule,
-    KeydownStopPropagationDirective
-]
+    selector: 'sm-duration-input-list',
+    templateUrl: './duration-input-list.component.html',
+    styleUrls: ['./duration-input-list.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DurationInputListComponent),
+            multi: true
+        }
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        FormsModule,
+        MatInputModule,
+        KeydownStopPropagationDirective
+    ]
 })
 export class DurationInputListComponent extends DurationInputBase implements OnChanges {
   @ViewChildren('inputRef') private elReference: QueryList<ElementRef>;

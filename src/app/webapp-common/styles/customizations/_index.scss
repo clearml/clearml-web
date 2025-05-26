@@ -1,35 +1,41 @@
-@import "colors";
-@import "buttons";
-@import "tabs";
-@import "menus";
-@import "form-fields";
-@import "dialogs";
-@import "scrollbar";
-@import "expansion-panel";
-@import "sidenav";
-@import "cards";
-@import "table";
-@import "tooltip";
-@import "slide-toggle";
-@import "icons";
-@import "links";
-@import "divider";
-@import "ace";
-@import "slider";
-@import "angular-split";
-@import "markdown";
+@forward "colors";
+@forward "buttons";
+@forward "menus";
+@forward "form-fields";
+@forward "dialogs";
+@forward "scrollbar";
+@forward "expansion-panel";
+@forward "sidenav";
+@forward "cards";
+@forward "table";
+@forward "tooltip";
+@forward "slide-toggle";
+@forward "icons";
+@forward "links";
+@forward "divider";
+@forward "ace";
+@forward "slider";
+@forward "angular-split";
+@forward "markdown";
+@forward "tabs";
+@use "colors";
+@use "table";
+@use "buttons";
+@use "cards";
+@use "dialogs";
+@use "ace";
+@use "sidenav";
 
 body {
   color: var(--color-on-surface-variant);
 }
 
 @mixin components($theme) {
-  @include generate-colors($theme);
-  @include table($theme);
-  @include buttons($theme);
-  @include tabs($theme);
-  @include form-fields($theme);
-  @include cards($theme);
-  @include dialogs($theme);
-  @include ace-style($theme);
+  @include colors.generate-colors($theme);
+  @include table.table($theme);
+  @include buttons.buttons($theme);
+  @include cards.cards($theme);
+  @include dialogs.dialogs($theme);
+  @include ace.ace-style($theme);
+  @include sidenav.drawer($theme);
 }

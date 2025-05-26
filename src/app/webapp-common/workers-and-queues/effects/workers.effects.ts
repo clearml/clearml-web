@@ -21,14 +21,16 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 
 const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest => {
   const now = Math.floor((new Date()).getTime() / 1000);
+  const typeKeys = castArray(keys);
+  const keyList = typeKeys.map(key => key.key);
+  const requiresSplit = keyList.some(key => key === 'cpu_usage' || key === 'gpu_memory_used');
   return {
-
     from_date: now - range,
     to_date: now,
     worker_ids: entitie ? [entitie] : null,
-    items: castArray(keys),
-    interval: granularity
-
+    items: typeKeys,
+    interval: granularity,
+    ...(requiresSplit && { split_by_resource: true })
   };
 };
 

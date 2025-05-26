@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 :host {
   display: flex;
@@ -149,7 +149,7 @@
   &__item {
     display: flex;
     align-items: center;
-    font-family: $font-family-base, sans-serif;
+    font-family: variables.$font-family-base, sans-serif;
     font-size: 12px;
     height: 32px;
     color: var(--color-on-surface-variant);
@@ -186,19 +186,14 @@
 }
 
 .no-data {
+  color: var(--color-empty-state);
   h4 {
+    font-size: 16px;
     font-weight: 500;
   }
-  .al-icon {
-    color: var(--color-tint-14);
+  .sub-title {
+    color: var(--color-on-surface);
   }
-}
-
-.al-ico-no-data-graph {
-  font-size: 140px;
-  width: 140px;
-  height: auto;
-  color: rgba(0, 0, 0, 0.1);
 }
 
 sm-grouped-checked-filter-list {

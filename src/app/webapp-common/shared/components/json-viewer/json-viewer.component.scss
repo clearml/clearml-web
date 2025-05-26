@@ -1,5 +1,5 @@
-@import "variables";
-@import "src/app/webapp-common/assets/fonts/variables";
+@use "variables";
+@use "src/app/webapp-common/assets/fonts/variables" as font;
 
 $type-colors: (
   string: #FF6B6B,
@@ -38,8 +38,8 @@ $type-colors: (
         }
         &::after {
           display: inline-block;
-          font-family: $icomoon-font-family;
-          content: $al-ico-ico-chevron-down;
+          font-family: font.$icomoon-font-family;
+          content: font.$al-ico-ico-chevron-down;
           font-size: 18px;
           transform: rotate(-90deg);
           transition: transform 0.1s ease-in, color 0.1s ease-in;
@@ -81,12 +81,13 @@ $type-colors: (
     background-color: var(--color-tertiary-container);
     border-radius: 4px;
     padding: 0 2px;
-    &.current {
-      background-color: var(--color-warning);
-      &::selection {
-        background-color: var(--color-surface-container-lowest);
-        color: var(--color-warning);
-      }
+  }
+
+  .current .found {
+    background-color: var(--color-warning);
+    &::selection {
+      background-color: var(--color-surface-container-lowest);
+      color: var(--color-warning);
     }
   }
 
@@ -121,7 +122,7 @@ $type-colors: (
 
   mat-tree-node {
     --mat-tree-node-text-size: 12px;
-    --mat-tree-node-text-font: #{$font-family-monospace};
+    --mat-tree-node-text-font: #{variables.$font-family-monospace};
     line-height: normal;
   }
 }

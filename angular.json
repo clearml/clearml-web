@@ -23,11 +23,12 @@
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
               "includePaths": [
-                "",
-                "src/app/webapp-common/shared/ui-components/styles/",
                 "src/app/webapp-common/styles/",
                 "."
-              ]
+              ],
+              "sass": {
+                "silenceDeprecations": ["import", "mixed-decls"]
+              }
             },
             "assets": [
               "src/assets",
@@ -43,6 +44,7 @@
               }
             ],
             "styles": [
+              "src/app/webapp-common/assets/fonts/heebo.css",
               "node_modules/ngx-markdown-editor/assets/highlight.js/agate.min.css",
               {
                 "bundleName": "global-styles",
@@ -174,7 +176,7 @@
             "stylePreprocessorOptions": {
               "includePaths": [
                 "",
-                "src/app/webapp-common/shared/ui-components/styles/"
+                "src/app/webapp-common/styles/"
               ]
             },
             "assets": [
@@ -231,8 +233,7 @@
             "stylePreprocessorOptions": {
               "includePaths": [
                 "",
-                "src/app/webapp-common/styles/",
-                "src/app/webapp-common/shared/ui-components/styles/"
+                "src/app/webapp-common/styles/"
               ]
             },
             "styles": [
@@ -258,7 +259,10 @@
               "taira",
               "url"
             ],
-            "browser": "src/app/webapp-common/clearml-applications/report-widgets/src/main.ts"
+            "browser": "src/app/webapp-common/clearml-applications/report-widgets/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -355,7 +359,7 @@
     "schematicCollections": [
       "@angular-eslint/schematics",
       "@ngrx/schematics",
-      "ngxtension"
+      "ngxtension-plugin"
     ]
   }
 }

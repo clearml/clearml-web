@@ -1,10 +1,9 @@
-@import "../../layout/layout";
-@import "variables";
+@use "../../layout/layout";
 
 :host {
   display: block;
   position: relative;
-  height: $top-bar-height;
+  height: layout.$top-bar-height;
   border-bottom: 1px solid var(--color-surface-container-high);
 
   .share-view {
@@ -49,6 +48,15 @@
     sm-common-search,
     .resources-trigger {
       margin-right: 14px;
+    }
+
+    .refresh-button {
+      margin-right: 10px;
+      ::ng-deep {
+        .tooltip-container, .tip {
+          background-color: var(--color-surface-container-lowest);
+        }
+      } 
     }
 
     .menu-trigger {

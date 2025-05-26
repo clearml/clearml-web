@@ -1,0 +1,29 @@
+
+
+:host {
+  .content{
+    padding-top: 24px;
+  }
+  .search-container{
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    sm-show-only-user-work{
+      margin-left: 12px;
+    }
+  }
+  .regexp {
+    position: absolute;
+    right: 8px;
+
+    &.active {
+      color: var(--color-on-primary);
+      background-color: var(--color-primary);
+    }
+
+    &.error {
+      width: 20px;
+      right: 36px;
+    }
+  }
+}

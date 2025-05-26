@@ -9,12 +9,13 @@
   }
 
   ::ng-deep.list-container {
-    display: block;
+    display: flex;
     height: 100%;
     width: 360px;
     flex: 0 0 360px;
     padding: 0px 8px;
-    overflow-y: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     border-top: 1px solid var(--color-surface-container-high);
     border-right: 1px solid var(--color-surface-container-high);
   }
@@ -24,4 +25,11 @@
     width: calc(100% - 344px);
   }
 
+  sm-experiment-graphs {
+    background-color: var(--color-surface-container-lowest);
+  }
+
+  sm-selectable-grouped-filter-list {
+    width: 100%;
+  }
 }

@@ -39,15 +39,19 @@
               class="graph-settings-menu"
               (click)="$event.stopPropagation()"
               [verticalLayout]="true"
-              [smoothWeight]="smoothWeight$ | ngrxPush"
-              [smoothType]="smoothType$ | ngrxPush"
-              [xAxisType]="xAxisType$ | ngrxPush"
-              [groupBy]="groupBy$ | ngrxPush"
+              [smoothWeight]="smoothWeight()"
+              [smoothSigma]="smoothSigma()"
+              [smoothType]="smoothType()"
+              [xAxisType]="xAxisType()"
+              [groupBy]="groupBy()"
+              [clearable]="projectId === '*' ? null : !isProjectLevel()"
               [groupByOptions]="groupByOptions"
               (changeWeight)="changeSmoothness($event)"
+              (changeSigma)="changeSigma($event)"
               (changeXAxisType)="changeXAxisType($event)"
               (changeGroupBy)="changeGroupBy($event)"
               (changeSmoothType)="changeSmoothType($event)"
+              (setToProject)="setToProject()"
             ></sm-graph-settings-bar>
           </mat-menu>
 

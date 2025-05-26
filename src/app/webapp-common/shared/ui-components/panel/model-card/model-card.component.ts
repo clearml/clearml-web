@@ -13,21 +13,20 @@ import {Model} from '~/business-logic/model/models/model';
 
 
 @Component({
-  selector: 'sm-model-card',
-  templateUrl: './model-card.component.html',
-  styleUrls: ['./model-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CopyClipboardComponent,
-    TooltipDirective,
-    DatePipe,
-    TimeAgoPipe,
-    CircleStatusComponent,
-    CircleCounterComponent,
-    CardComponent,
-    ShowTooltipIfEllipsisDirective
-  ]
+    selector: 'sm-model-card',
+    templateUrl: './model-card.component.html',
+    styleUrls: ['./model-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CopyClipboardComponent,
+        TooltipDirective,
+        DatePipe,
+        TimeAgoPipe,
+        CircleStatusComponent,
+        CircleCounterComponent,
+        CardComponent,
+        ShowTooltipIfEllipsisDirective
+    ]
 })
 export class ModelCardComponent {
   protected readonly TIME_FORMAT_STRING = TIME_FORMAT_STRING;

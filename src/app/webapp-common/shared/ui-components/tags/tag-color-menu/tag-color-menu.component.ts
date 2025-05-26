@@ -16,9 +16,8 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatMenuModule} from '@angular/material/menu';
-import {ColorPickerDirective, ColorPickerModule} from 'ngx-color-picker';
+import {ColorPickerDirective} from 'ngx-color-picker';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import { AsyncPipe } from '@angular/common';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {PushPipe} from '@ngrx/component';
@@ -26,27 +25,25 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-tag-color-menu',
-  templateUrl: './tag-color-menu.component.html',
-  styleUrls: ['./tag-color-menu.component.scss'],
-  standalone: true,
-  imports: [
-    MatInputModule,
-    FormsModule,
-    DialogTemplateComponent,
-    MatMenuModule,
-    ColorPickerModule,
-    CdkVirtualScrollViewport,
-    CdkVirtualForOf,
-    AsyncPipe,
-    FilterPipe,
-    ClickStopPropagationDirective,
-    CdkFixedSizeVirtualScroll,
-    PushPipe,
-    MatButton,
-    MatIcon,
-    MatIconButton
-  ]
+    selector: 'sm-tag-color-menu',
+    templateUrl: './tag-color-menu.component.html',
+    styleUrls: ['./tag-color-menu.component.scss'],
+    imports: [
+        MatInputModule,
+        FormsModule,
+        DialogTemplateComponent,
+        MatMenuModule,
+        ColorPickerDirective,
+        CdkVirtualScrollViewport,
+        CdkVirtualForOf,
+        FilterPipe,
+        ClickStopPropagationDirective,
+        CdkFixedSizeVirtualScroll,
+        PushPipe,
+        MatButton,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class TagColorMenuComponent implements OnDestroy {
   filterText: string;

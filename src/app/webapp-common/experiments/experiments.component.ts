@@ -33,7 +33,7 @@ import {
   selectTableRefreshList,
   selectTableSortFields
 } from './reducers';
-import {selectCompanyTags, selectIsArchivedMode, selectIsDeepMode, selectProjectSystemTags, selectRouterProjectId, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
+import {selectCompanyTags, selectIsDeepMode, selectProjectSystemTags, selectRouterProjectId, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
@@ -66,7 +66,7 @@ import {MoveToFooterItem} from '../shared/entity-page/footer-items/move-to-foote
 import {EnqueueFooterItem} from '../shared/entity-page/footer-items/enqueue-footer-item';
 import {AbortFooterItem} from '../shared/entity-page/footer-items/abort-footer-item';
 import {addTag} from './actions/common-experiments-menu.actions';
-import {CountAvailableAndIsDisableSelectedFiltered, MenuItems, selectionDisabledAbort, selectionDisabledAbortAllChildren, selectionDisabledArchive, selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue, selectionDisabledMoveTo, selectionDisabledPublishExperiments, selectionDisabledQueue, selectionDisabledReset, selectionDisabledRetry, selectionDisabledViewWorker} from '../shared/entity-page/items.utils';
+import {CountAvailableAndIsDisableSelectedFiltered, MenuItems, selectionDisabledAbort, selectionDisabledAbortAllChildren, selectionDisabledArchive, selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue, selectionDisabledMoveTo, selectionDisabledPipelineRun, selectionDisabledPublishExperiments, selectionDisabledQueue, selectionDisabledReset, selectionDisabledRetry, selectionDisabledViewWorker} from '../shared/entity-page/items.utils';
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
@@ -85,13 +85,15 @@ import {
 import {RetryFooterItem} from '@common/shared/entity-page/footer-items/retry-footer-item';
 import {computedPrevious} from 'ngxtension/computed-previous';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {setExperiment} from '@common/experiments/actions/common-experiments-info.actions';
 
 
 @Component({
-  selector: 'sm-common-experiments',
-  templateUrl: './experiments.component.html',
-  styleUrls: ['./experiments.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-common-experiments',
+    templateUrl: './experiments.component.html',
+    styleUrls: ['./experiments.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentsComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
 
@@ -116,7 +118,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   protected backdropActive$ = this.store.select(selectBackdropActive);
   protected noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
   protected tableFilters$ = this.store.select(selectTableFilters);
-  protected isArchived$ = this.store.select(selectIsArchivedMode);
   protected selectedExperimentsDisableAvailable$ = this.store.select(selectSelectedExperimentsDisableAvailable);
   protected selectedExperimentsHasUpdate$ = this.store.select(selectTableRefreshList);
   protected checkedExperiments$ = this.store.select(selectSelectedExperiments)
@@ -144,9 +145,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   protected experiments$ = this.store.select(selectExperimentsList)
     .pipe(
       filter(experiments => experiments !== null),
-      withLatestFrom(this.isArchived$),
       // lil hack for hiding archived task after they have been archived from task info or footer...
-      map(([experiments, showArchived]) => filterArchivedExperiments(experiments, showArchived)));
+      map((experiments) => filterArchivedExperiments(experiments, this.isArchivedMode())));
 
   protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
 
@@ -378,6 +378,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.store.dispatch(experimentsActions.resetExperiments({}));
+    this.store.dispatch(setExperiment({experiment: null}));
     this.stopSyncSearch();
   }
 
@@ -389,7 +390,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for tasks'}));
 
-    this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => {
+    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => {
       this.store.dispatch(experimentsActions.globalFilterChanged(query));
     }));
   }
@@ -646,7 +647,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
       [MenuItems.dequeue]: selectionDisabledDequeue([experiment]),
       [MenuItems.queue]: selectionDisabledQueue([experiment]),
       [MenuItems.viewWorker]: selectionDisabledViewWorker([experiment]),
-      [MenuItems.archive]: selectionDisabledArchive([experiment])
+      [MenuItems.archive]: selectionDisabledArchive([experiment]),
+      [MenuItems.run]: selectionDisabledPipelineRun([experiment])
     };
   }
 

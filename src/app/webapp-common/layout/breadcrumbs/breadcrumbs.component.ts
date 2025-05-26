@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {debounceTime} from 'rxjs/operators';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink, UrlTree} from '@angular/router';
 import {fromEvent} from 'rxjs';
 import {addMessage} from '../../core/actions/layout.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
@@ -47,7 +47,9 @@ export enum CrumbTypeEnum {
 
 export interface IBreadcrumbsLink {
   name?: string;
-  url?: string;
+  url?: string | UrlTree;
+  queryParamsHandling?: 'merge' | 'preserve' | '';
+  linkLast?: boolean;
   subCrumbs?: { name?: string; url: string; hidden?: boolean }[];
   isProject?: boolean;
   type?: CrumbTypeEnum;
@@ -76,23 +78,22 @@ export interface IBreadcrumbsOptions {
 }
 
 @Component({
-  selector: 'sm-breadcrumbs',
-  templateUrl: './breadcrumbs.component.html',
-  styleUrls: ['./breadcrumbs.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatMenuModule,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective,
-    ClipboardModule,
-    RouterLink,
-    ClickStopPropagationDirective,
-    TagListComponent,
-    IdBadgeComponent,
-    MatIcon,
-    MatIconButton
-  ],
-  standalone: true
+    selector: 'sm-breadcrumbs',
+    templateUrl: './breadcrumbs.component.html',
+    styleUrls: ['./breadcrumbs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatMenuModule,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective,
+        ClipboardModule,
+        RouterLink,
+        ClickStopPropagationDirective,
+        TagListComponent,
+        IdBadgeComponent,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class BreadcrumbsComponent {
   private store = inject(Store);

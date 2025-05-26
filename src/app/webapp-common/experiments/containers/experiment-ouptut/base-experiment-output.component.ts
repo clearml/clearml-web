@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
+import {interval, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {debounce, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {
@@ -14,6 +14,7 @@ import {
 import {
   groupByCharts,
   GroupByCharts,
+  removeExperimentSettings,
   resetExperimentMetrics,
   setExperimentSettings,
   toggleMetricValuesView,
@@ -21,13 +22,13 @@ import {
 } from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
 import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
-import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
+import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {
   selectIsExperimentInEditMode,
   selectMetricValuesView,
-  selectSelectedExperiments,
-  selectSelectedSettingsGroupBy,
+  selectSelectedExperiments, selectSelectedExperimentSettings,
+  selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel, selectSelectedSettingsSmoothSigma,
   selectSelectedSettingsSmoothType,
   selectSelectedSettingsSmoothWeight,
   selectSelectedSettingsxAxisType,
@@ -41,36 +42,45 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {headerActions} from '@common/core/actions/router.actions';
-import { SmoothTypeEnum } from '@common/shared/single-graph/single-graph.utils';
-import { ScalarKeyEnum } from '~/business-logic/model/events/scalarKeyEnum';
+import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {concatLatestFrom} from '@ngrx/operators';
 
 @Component({
   selector: 'sm-base-experiment-output',
-  template: ''
+  template: '',
+  standalone: false
 })
 export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private refresh = inject(RefreshService);
 
   public selectedExperiment: IExperimentInfo;
   private subs = new Subscription();
-  public infoData$: Observable<any>;
-  public backdropActive$: Observable<any>;
   public minimized: boolean;
-  private isExperimentInEditMode$: Observable<boolean>;
-  private projectId: Project['id'];
+  protected projectId: Project['id'];
   public experimentId: string;
   public routerConfig: string[];
-  private isAppVisible$: Observable<boolean>;
-  isSharedAndNotOwner$: Observable<boolean>;
   public isExample: boolean;
   public isDevelopment: boolean;
-  private toMaximize = false;
-  public selectSplitSize$: Observable<number>;
-  private selectedProject$: Observable<Project>;
-  public metricValuesView$: Observable<boolean>;
-  public smoothWeight$: Observable<number>;
-  public smoothType$: Observable<SmoothTypeEnum>;
-  public xAxisType$: Observable<ScalarKeyEnum>;
-  public groupBy$: Observable<GroupByCharts>;
+  protected infoData$ = this.store.select(selectExperimentInfoData);
+  protected isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
+  protected isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
+  protected backdropActive$ = this.store.select(selectBackdropActive);
+  protected selectSplitSize$ = this.store.select(selectSplitSize);
+  protected selectedProject$ = this.store.select(selectSelectedProject);
+  protected metricValuesView$ = this.store.select(selectMetricValuesView);
+  protected smoothWeight = toSignal(this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null)));
+  protected smoothSigma = toSignal(this.store.select(selectSelectedSettingsSmoothSigma).pipe(filter(sigma => sigma !== null)));
+  protected smoothType = this.store.selectSignal(selectSelectedSettingsSmoothType);
+  protected xAxisType = this.store.selectSignal(selectSelectedSettingsxAxisType(false));
+  protected allSettings = this.store.selectSignal(selectSelectedExperimentSettings());
+  protected isProjectLevel = this.store.selectSignal(selectSelectedSettingsIsProjectLevel);
+  protected groupBy = this.store.selectSignal(selectSelectedSettingsGroupBy);
+  protected listOfHidden = this.store.selectSignal(selectSelectedSettingsHiddenScalar());
 
   groupByOptions = [
     {
@@ -82,26 +92,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       value: groupByCharts.none
     }
   ];
-
-  constructor(
-    private store: Store,
-    private router: Router,
-    private route: ActivatedRoute,
-    private refresh: RefreshService
-  ) {
-    this.infoData$ = this.store.select(selectExperimentInfoData);
-    this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
-    this.isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
-    this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.selectSplitSize$ = this.store.select(selectSplitSize);
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.metricValuesView$ = this.store.select(selectMetricValuesView);
-    this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
-    this.smoothType$ = this.store.select(selectSelectedSettingsSmoothType);
-    this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType(false));
-    this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
-  }
 
   ngOnInit() {
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
@@ -132,7 +122,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
     this.subs.add(this.refresh.tick
       .pipe(
-        debounceTime(5000), // Fix loop - getExperimentInfo trigger tick
+        debounce(auto => auto === false ? interval(0) : interval(5000)), // Fix loop - getExperimentInfo trigger tick
         withLatestFrom(this.isExperimentInEditMode$),
         filter(([, isExperimentInEditMode]) => !isExperimentInEditMode && !this.minimized)
       ).subscribe(([auto]) => {
@@ -160,6 +150,15 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
   setAutoRefresh($event: boolean) {
     this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
+  }
+
+  minimizeViewUrl(projectId: string, experimentId :string): string {
+    const part = this.route?.firstChild.routeConfig.path;
+    if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
+      return `projects/${projectId}/tasks/${experimentId}/info-output/${part}`;
+    } else {
+      return `projects/${projectId}/tasks/${experimentId}/${part}`
+    }
   }
 
   minimizeView() {
@@ -199,7 +198,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       this.router.navigateByUrl(parts.join('/'));
     }
     this.store.dispatch(headerActions.reset());
-    this.toMaximize = true;
   }
 
   onActivate(e, scrollContainer) {
@@ -212,8 +210,8 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
 
   setupBreadcrumbsOptions() {
-    this.subs.add(this.selectedProject$.pipe(
-    ).subscribe((selectedProject) => {
+    this.subs.add(this.selectedProject$.pipe(concatLatestFrom(()=>[this.store.select(selectRouterParams)])
+    ).subscribe(([selectedProject, params]) => {
       this.store.dispatch(setBreadcrumbsOptions({
         breadcrumbOptions: {
           showProjects: !!selectedProject,
@@ -226,7 +224,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
             filterBaseNameWith: null,
             compareModule: null,
             showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename}})
+            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename,
+                url: this.minimizeViewUrl(params.projectId, params.experimentId), queryParamsHandling: 'preserve', linkLast: true
+              }})
           }
         }
       }));
@@ -234,19 +234,38 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
 
   changeSmoothness($event: number) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), smoothWeight: $event}}));
+  }
+
+  changeSigma($event: number) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), smoothSigma: $event}}));
   }
 
   changeSmoothType($event: SmoothTypeEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), smoothType: $event}}));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), xAxisType: $event}}));
   }
 
   changeGroupBy($event: GroupByCharts) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {groupBy: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), groupBy: $event}}));
+  }
+
+  getSettingsObject = () => ({
+    ...(this.groupBy() && {groupBy: this.groupBy()}),
+    ...(this.xAxisType() && {xAxisType: this.xAxisType()}),
+    ...(this.smoothType() && {smoothType: this.smoothType()}),
+    ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
+    ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
+    ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    projectLevel: false
+  });
+
+  setToProject() {
+    this.store.dispatch(setExperimentSettings({changes: {...this.allSettings(), id: this.projectId, projectLevel: true}, id: this.projectId}));
+    this.store.dispatch(removeExperimentSettings({id: this.experimentId}));
   }
 
 }

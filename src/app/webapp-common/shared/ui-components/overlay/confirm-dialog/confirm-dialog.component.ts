@@ -9,18 +9,17 @@ import { NgTemplateOutlet } from '@angular/common';
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-confirm-dialog',
-  templateUrl: './confirm-dialog.component.html',
-  styleUrls: ['./confirm-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    MatCheckboxModule,
-    FormsModule,
-    NgTemplateOutlet,
-    SaferPipe,
-    MatButton
-  ]
+    selector: 'sm-confirm-dialog',
+    templateUrl: './confirm-dialog.component.html',
+    styleUrls: ['./confirm-dialog.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        MatCheckboxModule,
+        FormsModule,
+        NgTemplateOutlet,
+        SaferPipe,
+        MatButton
+    ]
 })
 export class ConfirmDialogComponent {
   protected data = inject<ConfirmDialogConfig>(MAT_DIALOG_DATA);

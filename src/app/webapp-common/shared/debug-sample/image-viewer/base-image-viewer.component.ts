@@ -1,6 +1,11 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {filter, map, switchMap, tap} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
+import {
+  Component, computed,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  signal, viewChild, inject
+} from '@angular/core';
+import {debounceTime, filter, map, switchMap, tap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {last} from 'lodash-es';
@@ -11,36 +16,74 @@ import {resetViewer} from '@common/shared/debug-sample/debug-sample.actions';
 import {selectCurrentImageViewerDebugImage} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+
+export interface ImageViewerData {
+  index: number;
+  isAllMetrics: boolean;
+  withoutNavigation: boolean;
+  url: string;
+  embedFunction: (DOMRect, metric: string, variant: string) => null;
+  snippetsMetaData: {
+    task: string;
+    metric: string;
+    variant: string;
+    iter: number
+  }[];
+}
+
 
 @Component({
   selector: 'sm-image-viewer',
-  template: ''
+  template: '',
+  standalone: false
 })
-export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
+export abstract class BaseImageViewerComponent implements OnDestroy {
+  public data = inject<ImageViewerData>(MAT_DIALOG_DATA);
+  public dialogRef = inject<MatDialogRef<BaseImageViewerComponent>>(MatDialogRef<BaseImageViewerComponent>);
+  public store = inject(Store);
+  public imageTop: string | number;
+  public imageLeft: number;
 
   public xCord: number;
   public yCord: number;
-  public scale = 1;
   readonly scaleStep = 0.1;
   public autoFitScale: number;
-  @ViewChild('imageContainer', {static: true}) imageContainer: ElementRef;
-  @ViewChild('debugImage', {static: true}) debugImage: ElementRef;
-  @ViewChild('sizeCont', {static: true}) sizeCont: ElementRef;
-  public imageHeight: number;
-  public imageWidth: number;
-  public imageTop: string | number;
-  public imageLeft: number;
-  public imageTranslateY = 0;
-  public imageTranslateX = 0;
+  protected imageContainer = viewChild<ElementRef>('imageContainer');
+  protected debugImage = viewChild<ElementRef>('debugImage');
+  protected scaleOffset = signal({
+    scale: 1,
+    offset: {x: 0, y: 0}
+  });
+  protected wheelEvent = signal<WheelEvent>(null);
+  protected wheelEvent$ = toObservable<WheelEvent>(this.wheelEvent);
+
+
+  protected translate = computed(() => `translate(${this.scaleOffset().offset.x}px, ${this.scaleOffset().offset.y}px)`);
   public dragging: boolean;
-  public currentDebugImage$: Observable<any>;
+  protected currentDebugImage$ = this.store.select(selectCurrentImageViewerDebugImage)
+    .pipe(
+      filter(event => !!event),
+      map(event => {
+        this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
+        return event;
+      })
+    );
+
   public currentDebugImage: any;
-  public url: string;
-  public isPlayer: boolean;
-  public currentDebugImageSubscription: Subscription;
-  public imageLoaded: boolean = false;
+  public wheeling: boolean;
+  protected url = signal<string>(null);
+  protected isPlayer = signal(false);
+  public imageLoaded = false;
   public iteration: number;
   public isFileserverUrl = isFileserverUrl;
+
+  protected imageHeight = computed(() => Math.floor(this.debugImage().nativeElement.naturalHeight * this.scaleOffset().scale));
+  protected imageWidth = computed(() => Math.floor(this.debugImage().nativeElement.naturalWidth * this.scaleOffset().scale));
+  private wheelingTimeout;
+  maxScale: number;
+  private viewerInitialized: boolean;
+  private lastZoomMode: 'oneToOne' | 'fit';
 
   @HostListener('document:keydown', ['$event'])
   baseOnKeyDown(e: KeyboardEvent) {
@@ -54,42 +97,102 @@ export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {index: number; isAllMetrics: boolean; withoutNavigation: boolean; snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>},
-    public dialogRef: MatDialogRef<BaseImageViewerComponent>,
-    public changeDetector: ChangeDetectorRef,
-    public store: Store
-  ) {
-    this.currentDebugImage$ = store.select(selectCurrentImageViewerDebugImage)
+  protected constructor() {
+    this.wheelEvent$.pipe(filter(we => !!we), debounceTime(10)).subscribe((wheelEvent) => {
+      this.wheelZoom(wheelEvent);
+    });
+
+    this.currentDebugImage$
       .pipe(
-        filter(event => !!event),
-        map(event => {
-          this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
-          return event;
-        })
-      );
+        takeUntilDestroyed(),
+        tap(currentDebugImage => {
+          this.currentDebugImage = currentDebugImage;
+          this.iteration = currentDebugImage.iter;
+        }),
+        switchMap(currentDebugImage => getSignedUrlOrOrigin$(currentDebugImage.url, this.store))
+      )
+      .subscribe(signed => {
+        this.url.set(signed);
+        this.isPlayer.set(new IsVideoPipe().transform(signed) || new IsAudioPipe().transform(signed));
+      });
   }
 
   calculateNewScale(scaleUp: boolean) {
     const scaleFactor = scaleUp ? 1 : -1;
-    this.scale = Math.max(this.scale + (this.scale * scaleFactor * this.scaleStep), 0.1);
-    this.changeScale();
+    this.scaleOffset.update(scaleOffset => ({
+      ...scaleOffset,
+      scale: Math.min(this.maxScale, Math.max(scaleOffset.scale + (scaleOffset.scale * scaleFactor * this.scaleStep), 0.1))
+    }));
   }
 
-  changeScale() {
-    this.imageHeight = Math.floor(this.debugImage.nativeElement.naturalHeight * this.scale);
-    this.imageWidth = Math.floor(this.debugImage.nativeElement.naturalWidth * this.scale);
+  rescale() {
+    if (this.lastZoomMode === 'oneToOne') {
+      this.resetScale();
+    } else if (this.lastZoomMode === 'fit') {
+      this.fitToScreen();
+    }
   }
 
   resetScale() {
-    this.scale = 1;
-    this.resetDrag();
-    this.changeScale();
+    this.lastZoomMode = 'oneToOne';
+    this.scaleOffset.set({scale: 1, offset: {x: 0, y: 0}});
+  }
+
+  wheelZoomHandler(event: WheelEvent) {
+    this.wheelEvent.set(event);
+  }
+
+  wheelZoomOutside(event: WheelEvent) {
+    this.wheelZoom(event, true);
+  }
+
+  wheelZoom(event: WheelEvent, fromOutside = false) {
+    clearTimeout(this.wheelingTimeout);
+    this.wheeling = true;
+    this.wheelingTimeout = setTimeout(() => this.wheeling = false, 300);
+    const oldScale = this.scaleOffset().scale;
+    const rect = (this.debugImage().nativeElement as HTMLImageElement).getBoundingClientRect();
+    const newScale = Math.min(this.maxScale, Math.max(oldScale - (event.deltaY > 0 ? 0.1 : -0.1) * oldScale, 0.1));
+    const ratio = newScale / oldScale;
+
+    if (newScale > this.autoFitScale || event.deltaY < 0) {
+      if (fromOutside) {
+        this.scaleOffset.update(scaleOffset => ({...scaleOffset, scale: newScale}));
+      } else {
+        this.scaleOffset.update(scaleOffset => ({
+          scale: newScale, offset: {
+            x: scaleOffset.offset.x - ((((event.clientX - rect.left) - (rect.width / 2)) / rect.width) * ((rect.width * ratio) - rect.width)),
+            y: scaleOffset.offset.y - ((((event.clientY - rect.top) - (rect.height / 2)) / rect.height) * ((rect.height * ratio) - rect.height))
+          }
+        }));
+      }
+      ;
+    } else if (newScale > 0.1) {
+      this.scaleOffset.update(scaleOffset => ({
+        scale: newScale, offset: {
+          x: scaleOffset.offset.x - scaleOffset.offset.x / 10,
+          y: scaleOffset.offset.y - scaleOffset.offset.y / 10
+        }
+      }));
+    }
+  }
+
+  dragImage($event: MouseEvent) {
+    if (this.dragging) {
+      this.scaleOffset.update(scaleOffset => ({
+        ...scaleOffset,
+        offset:
+          {
+            x: scaleOffset.offset.x + $event.movementX,
+            y: scaleOffset.offset.y + $event.movementY
+          }
+      }));
+    }
   }
 
   changeCords($event: MouseEvent) {
-    this.xCord = Math.floor($event.offsetX / this.scale);
-    this.yCord = Math.floor($event.offsetY / this.scale);
+    this.xCord = Math.floor($event.offsetX / this.scaleOffset().scale);
+    this.yCord = Math.floor($event.offsetY / this.scaleOffset().scale);
   }
 
   closeImageViewer() {
@@ -98,26 +201,14 @@ export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
   }
 
   fitToScreen() {
-    const heightScaleFit = (this.imageContainer.nativeElement.clientHeight - 120) / this.debugImage.nativeElement.naturalHeight;
-    const widthScaleFit = (this.imageContainer.nativeElement.clientWidth - 120) / this.debugImage.nativeElement.naturalWidth;
-    this.scale = Math.min(heightScaleFit, widthScaleFit);
-    this.autoFitScale = this.scale;
-    this.resetDrag();
-    this.changeScale();
+    this.lastZoomMode = 'fit';
+    const heightScaleFit = (this.imageContainer().nativeElement.clientHeight - 120) / this.debugImage().nativeElement.naturalHeight;
+    const widthScaleFit = (this.imageContainer().nativeElement.clientWidth - 120) / this.debugImage().nativeElement.naturalWidth;
+    this.scaleOffset.set({scale: Math.min(heightScaleFit, widthScaleFit), offset: {x: 0, y: 0}});
+    this.autoFitScale = this.scaleOffset().scale;
+    this.maxScale = Math.max(this.debugImage().nativeElement.naturalWidth, this.debugImage().nativeElement.naturalHeight);
   }
 
-  resetDrag() {
-    this.imageTranslateY = 0;
-    this.imageTranslateX = 0;
-  }
-
-
-  dragImage($event: MouseEvent) {
-    if (this.dragging) {
-      this.imageTranslateX += $event.movementX;
-      this.imageTranslateY += $event.movementY;
-    }
-  }
 
   resetCords() {
     this.xCord = null;
@@ -132,15 +223,9 @@ export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
     this.dragging = b;
   }
 
-
-  wheelZoom($event: WheelEvent) {
-    this.scale = Math.max(this.scale - (0.005 * $event.deltaY), 0.1);
-    this.changeScale();
-  }
-
   downloadImage() {
     if (this.currentDebugImage) {
-      const src = new URL(this.url ?? this.currentDebugImage.url);
+      const src = new URL(this.url() ?? this.currentDebugImage.url);
       if (isFileserverUrl(this.currentDebugImage.url)) {
         src.searchParams.set('download', '');
       }
@@ -154,29 +239,20 @@ export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-    this.currentDebugImageSubscription = this.currentDebugImage$
-      .pipe(
-        tap(currentDebugImage => {
-          this.currentDebugImage = currentDebugImage;
-          this.iteration = currentDebugImage.iter;
-        }),
-        switchMap(currentDebugImage => getSignedUrlOrOrigin$(currentDebugImage.url, this.store))
-      )
-      .subscribe(signed => {
-        this.url = signed;
-        this.isPlayer = (new IsVideoPipe().transform(signed) || new IsAudioPipe().transform(signed));
-        this.changeDetector.detectChanges();
-      });
-  }
-
   ngOnDestroy(): void {
     this.store.dispatch(resetViewer());
-    this.currentDebugImageSubscription.unsubscribe();
   }
 
   showImage() {
     this.imageLoaded = true;
   }
 
+  initialiseFitToScreen() {
+    if (!this.viewerInitialized) {
+      this.fitToScreen();
+      this.viewerInitialized = true;
+    } else {
+      this.rescale();
+    }
+  }
 }

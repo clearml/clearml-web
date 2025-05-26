@@ -41,7 +41,7 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       'last update at': experiment.last_update && formatDate(experiment.last_update, TIME_FORMAT_STRING, this.locale) || NA,
       'completed at': experiment.completed && formatDate(experiment.completed, TIME_FORMAT_STRING, this.locale) || NA,
       'run time': this.durationPipe.transform(experiment.active_duration) || NA,
-      'queue': experiment.execution.queue?.display_name ?? experiment.execution.queue?.name ?? NA,
+      'queue': experiment.execution.queue?.display_name || experiment.execution.queue?.name || NA,
       'worker': experiment.last_worker || NA,
       'created by': experiment.user.name || NA,
       'parent task': (experiment.parent as ITask)?.name || NA,

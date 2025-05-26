@@ -3,9 +3,7 @@ import {compareByFieldFunc} from '@common/tasks/tasks.utils';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {KeyValuePipe} from '@angular/common';
-import {AdvancedFilterPipe} from '@common/shared/pipes/advanced-filter.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatRadioModule} from '@angular/material/radio';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
@@ -18,24 +16,21 @@ import {decodeURIComponentSafe} from '@common/shared/utils/tableParamEncode';
 export type HyperParams<T> = ReadonlyMap<string, T[]>;
 
 @Component({
-  selector: 'sm-grouped-checked-filter-list',
-  templateUrl: './grouped-checked-filter-list.component.html',
-  styleUrls: ['./grouped-checked-filter-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    SearchComponent,
-    MatExpansionModule,
-    KeyValuePipe,
-    AdvancedFilterPipe,
-    TooltipDirective,
-    FilterPipe,
-    MatCheckboxModule,
-    MatRadioModule,
-    ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective,
-    FilterOutPipe
-  ]
+    selector: 'sm-grouped-checked-filter-list',
+    templateUrl: './grouped-checked-filter-list.component.html',
+    styleUrls: ['./grouped-checked-filter-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        SearchComponent,
+        MatExpansionModule,
+        KeyValuePipe,
+        TooltipDirective,
+        MatCheckboxModule,
+        MatRadioModule,
+        ClickStopPropagationDirective,
+        ShowTooltipIfEllipsisDirective,
+        FilterOutPipe
+    ]
 })
 export class GroupedCheckedFilterListComponent {
 

@@ -5,15 +5,14 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'sm-user-tag',
-  templateUrl: './user-tag.component.html',
-  styleUrls: ['./user-tag.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    TooltipDirective,
-    MatProgressSpinnerModule
-],
-  standalone: true
+    selector: 'sm-user-tag',
+    templateUrl: './user-tag.component.html',
+    styleUrls: ['./user-tag.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        MatProgressSpinnerModule
+    ]
 })
 export class UserTagComponent {
   caption = input<string>();

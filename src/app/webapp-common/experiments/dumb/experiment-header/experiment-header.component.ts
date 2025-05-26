@@ -23,13 +23,13 @@ import {NgTemplateOutlet} from '@angular/common';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
-import {MatMenu} from '@angular/material/menu';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
 
 @Component({
-  selector: 'sm-experiment-header',
-  templateUrl: './experiment-header.component.html',
-  styleUrls: ['./experiment-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-experiment-header',
+    templateUrl: './experiment-header.component.html',
+    styleUrls: ['./experiment-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PushPipe,
     ToggleArchiveComponent,
@@ -50,9 +50,8 @@ import {MatMenu} from '@angular/material/menu';
     MatIconButton,
     MatIcon,
     ExperimentGraphsModule,
-    MatMenu
-  ],
-  standalone: true
+    CommonSearchComponent,
+  ]
 })
 export class ExperimentHeaderComponent extends BaseEntityHeaderComponent {
 
