@@ -6,15 +6,14 @@ import {PushPipe} from '@ngrx/component';
 import {Tag} from '../../tag-list/tag-list.component';
 
 @Component({
-  selector: 'sm-mini-tags-list',
-  standalone: true,
-  imports: [
-    MiniTagComponent,
-    TooltipDirective,
-    PushPipe
-  ],
-  templateUrl: './mini-tags-list.component.html',
-  styleUrl: './mini-tags-list.component.scss'
+    selector: 'sm-mini-tags-list',
+    imports: [
+        MiniTagComponent,
+        TooltipDirective,
+        PushPipe
+    ],
+    templateUrl: './mini-tags-list.component.html',
+    styleUrl: './mini-tags-list.component.scss'
 })
 export class MiniTagsListComponent {
   tags = input<string[]>([]);

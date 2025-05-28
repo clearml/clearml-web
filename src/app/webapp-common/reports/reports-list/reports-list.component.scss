@@ -12,14 +12,21 @@
     align-items: center;
     flex: 1;
     height: 100%;
+    color: var(--color-empty-state);
+    text-align: center;
 
-    i {
-      margin-bottom: 24px;
+    .al-icon {
+      margin: 0 auto;
     }
 
     h4 {
-      margin-bottom: 24px;
-      font-size: 20px;
+      margin: 24px 0 6px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    button {
+      margin-top: 18px;
     }
   }
 

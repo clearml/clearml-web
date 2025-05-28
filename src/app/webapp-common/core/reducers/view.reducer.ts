@@ -157,7 +157,11 @@ export const viewReducers = [
   on(layoutActions.visibilityChanged, (state, action): ViewState => ({...state, applicationVisible: action.visible})),
   on(layoutActions.userThemeChanged, (state, action): ViewState => ({...state, theme: action.theme})),
   on(layoutActions.systemThemeChanged, (state, action): ViewState => ({...state, systemTheme: action.theme})),
-  on(layoutActions.setForcedTheme, (state, action): ViewState => ({...state, forcedTheme: action.theme, defaultTheme: action.theme})),
+  on(layoutActions.setForcedTheme, (state, action): ViewState => ({
+    ...state,
+    forcedTheme: action.theme,
+    ...(action.default && {defaultTheme: action.theme})
+  })),
   on(layoutActions.setThemeColors, (state, action): ViewState => ({...state, themeColors: action.colors})),
   on(layoutActions.setScaleFactor, (state, action): ViewState => ({...state, scaleFactor: action.scale})),
   on(layoutActions.firstLogin, (state, action): ViewState => ({
@@ -203,7 +207,7 @@ export const viewReducers = [
     neverShowChangesAgain:  action.version
   })),
   on(setBreadcrumbs, (state, action): ViewState => ({
-    ...state, breadcrumbs: action.breadcrumbs, ...(action.workspaceNeutral !== undefined && {workspaceNeutral: action.workspaceNeutral})
+    ...state, breadcrumbs: action.breadcrumbs,  workspaceNeutral: action.workspaceNeutral !== undefined ? action.workspaceNeutral: false
   })),
   on(headerActions.reset, (state): ViewState => ({
     ...state, headerMenuActiveFeature: initViewState.headerMenuActiveFeature, headerMenu: initViewState.headerMenu

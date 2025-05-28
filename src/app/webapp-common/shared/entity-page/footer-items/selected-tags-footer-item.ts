@@ -1,4 +1,4 @@
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items.models';
 import {MenuItems, selectionTags} from '../items.utils';
 
@@ -13,13 +13,7 @@ export class SelectedTagsFooterItem extends ItemFooterModel {
     this.disableDescription = 'Tags';
   }
 
-  getItemState(state: IFooterState<any>): {
-    icon?: any; title?: string; description?: string; disable?: boolean; disableDescription?: string;
-    emit?: boolean; emitValue?: any; preventCurrentItem?: boolean; class?: string; wrapperClass?: string; tags: string[];
-    companyTags: string[];
-    projectTags: string[];
-    tagsFilterByProject: boolean;
-  } {
+  getItemState(state: IFooterState<{id: string; tags: string[]}>) {
     const tags = state.data[this.id];
     return {
       disable: state.selectionAllHasExample,

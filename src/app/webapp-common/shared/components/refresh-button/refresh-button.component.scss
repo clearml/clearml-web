@@ -6,27 +6,21 @@
   justify-content: center;
 
   .refresh-wrapper {
+    position: relative;
     &.show-menu {
-      .tooltip-container, .tip {
-        opacity: 1;
-        pointer-events: auto;
+      .tooltip-container {
+        padding: 4px 6px 4px 12px;
       }
     }
   }
 
   .mdc-icon-button {
     .path_arrows {
-      fill: var(--color-outline);
+      fill: var(--color-primary);
     }
 
     .path_play, .path_pause {
       fill: var(--color-tertiary);
-    }
-
-    &:hover {
-      .path_arrows {
-        fill: var(--color-on-surface-variant);
-      }
     }
   }
 
@@ -47,20 +41,16 @@
   }
 
   .tooltip-container {
-    opacity: 0;
-    pointer-events: none;
     position: absolute;
-    right: 64px;
+    right: 42px;
     display: flex;
     align-items: center;
-    padding: 4px 12px;
     border-radius: 48px;
     background-color: var(--color-surface-container-low);
     line-height: normal;
     font-size: 12px;
     font-weight: 600;
     z-index: 10;
-    transition: opacity 0.3s 0.3s;
 
     .toggle-label {
       color: var(--color-on-primary-container);
@@ -72,16 +62,18 @@
         color: var(--color-primary);
       }
     }
+
+    .dot {
+      margin: 0 3px 0 12px;
+    }
   }
 
   .tip {
-    opacity: 0;
-    pointer-events: none;
     content: '';
     width: 16px;
     height: 16px;
     position: absolute;
-    right: 60px;
+    right: 38px;
     transform: rotate(45deg);
     background-color: var(--color-surface-container-low);
     transition: opacity 0.3s 0.3s;

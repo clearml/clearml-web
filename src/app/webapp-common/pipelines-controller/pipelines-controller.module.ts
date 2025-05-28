@@ -74,6 +74,7 @@ import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor
 import {MatButtonToggle} from '@angular/material/button-toggle';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {provideAnimations} from '@angular/platform-browser/animations';
+import {ExperimentOutputLogComponent} from '@common/experiments/containers/experiment-output-log/experiment-output-log.component';
 
 export const routes: Routes = [
   {
@@ -175,7 +176,8 @@ export const routes: Routes = [
     MatIconButton,
     CodeEditorComponent,
     MatButtonToggle,
-    MatSlideToggle
+    MatSlideToggle,
+    ExperimentOutputLogComponent
   ],
   providers: [
     ControllersComponent,

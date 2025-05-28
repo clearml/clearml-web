@@ -1,13 +1,12 @@
 import {Component, effect, EventEmitter, input, Output, output} from '@angular/core';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {pageSize} from '@common/projects/common-projects.consts';
 import {IReport} from '../reports.consts';
-import {Report} from '~/business-logic/model/reports/report';
 
 @Component({
-  selector: 'sm-reports-list',
-  templateUrl: './reports-list.component.html',
-  styleUrls: ['./reports-list.component.scss']
+    selector: 'sm-reports-list',
+    templateUrl: './reports-list.component.html',
+    styleUrls: ['./reports-list.component.scss'],
+    standalone: false
 })
 export class ReportsListComponent {
   constructor() {
@@ -51,7 +50,6 @@ export class ReportsListComponent {
   delete = output<IReport>();
   share = output<IReport>();
 
-  trackByFn = trackById;
   loading: boolean;
 
   loadMoreAction() {

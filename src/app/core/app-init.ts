@@ -1,14 +1,14 @@
 import {LoginService} from '~/shared/services/login.service';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {combineLatest} from 'rxjs';
+import {switchMap} from 'rxjs';
+import {inject} from '@angular/core';
 
-export const loadUserAndPreferences = (
-  loginService: LoginService,
-  confService: ConfigurationService,
-): () => Promise<any> => (): Promise<any> => new Promise((resolve) => {
-  combineLatest([
-    confService.initConfigurationService(),
-    loginService.initCredentials()
-  ])
-    .subscribe(() => loginService.loginFlow(resolve));
-});
+export const loadUserAndPreferences = ()=>
+  new Promise((resolve) => {
+    const loginService = inject(LoginService);
+    const confService = inject(ConfigurationService);
+
+    confService.initConfigurationService()
+      .pipe(switchMap(() => loginService.initCredentials()))
+      .subscribe(() => loginService.loginFlow(resolve));
+  });

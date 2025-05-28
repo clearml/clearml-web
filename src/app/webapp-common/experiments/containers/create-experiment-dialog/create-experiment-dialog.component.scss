@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 :host {
   --mat-expansion-container-shape: 0;
@@ -7,6 +7,10 @@
   ::ng-deep .generic-container {
     padding: 32px 24px 0 !important;
     --mat-stepper-container-color: transparent;
+
+    .ace_scroller {
+      bottom: 2px !important;
+    }
   }
 }
 
@@ -46,13 +50,22 @@ h5 {
   margin: 24px 0 6px;
 }
 
+h6 {
+  font-size: 12px;
+  margin: 24px 0 8px;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
 section {
   border-top: 1px solid var(--color-outline-variant);
   padding-bottom: 24px;
 }
 
 code {
-  font-family: $font-family-monospace;
+  font-family: variables.$font-family-monospace;
   border-radius: 4px;
   margin: 0 4px;
   padding: 2px 4px;
@@ -76,12 +89,28 @@ mat-form-field {
 }
 
 .checkbox {
-  margin: 24px 0 12px -6px;
+  margin: 12px 0 12px -6px;
+}
+
+.poetry {
+  margin-bottom: 12px;
+}
+
+.venv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 48px;
+  align-items: end;
+  gap: 24px;
+
+  mat-button-toggle-group {
+    height: 40px;
+  }
 }
 
 .terminal {
   resize:  none;
-  font-family: $font-family-monospace;
+  font-family: variables.$font-family-monospace;
   font-size: 13px !important;
   line-height: 1.6;
   padding: 6px;
@@ -117,4 +146,8 @@ sm-code-editor {
 }
 .mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled="true"]).cdk-keyboard-focused, .mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled="true"]).cdk-program-focused {
   background: inherit;
+}
+
+textarea {
+  resize: none;
 }

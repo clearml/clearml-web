@@ -7,8 +7,8 @@
 
   .actions {
     position: absolute;
-    right: 22px;
-    top: 24px;
+    right: 12px;
+    top: 12px;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -54,7 +54,8 @@
     flex-wrap: wrap;
     background-color: var(--color-surface-container-lowest);;
     font-size: 14px;
-    max-height: calc(100% - 524px);
+    max-height: 25%;
+    min-height: 30px;
     overflow: auto;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;

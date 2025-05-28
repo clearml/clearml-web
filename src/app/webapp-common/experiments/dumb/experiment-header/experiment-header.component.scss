@@ -1,4 +1,4 @@
-@import '../../../../webapp-common/layout/layout.scss';
+@use '../../../../webapp-common/layout/layout.scss';
 
 :host {
   display: block;
@@ -6,7 +6,7 @@
 
   .header-container {
     padding-left: 24px;
-    height: $project-header-height;
+    height: layout.$project-header-height;
     transition: background-color 0.5s;
 
     .hide-item {

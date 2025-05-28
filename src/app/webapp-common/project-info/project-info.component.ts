@@ -17,13 +17,15 @@ import {setBreadcrumbsOptions, updateProject} from '../core/actions/projects.act
 import {isExample} from '../shared/utils/shared-utils';
 import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {selectThemeMode} from '@common/core/reducers/view.reducer';
 
 
 @Component({
-  selector: 'sm-project-info',
-  templateUrl: './project-info.component.html',
-  styleUrls: ['./project-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-project-info',
+    templateUrl: './project-info.component.html',
+    styleUrls: ['./project-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ProjectInfoComponent {
   private store = inject(Store);
@@ -31,15 +33,21 @@ export class ProjectInfoComponent {
 
   protected blockUserScripts$ = this.store.select(selectBlockUserScript);
   private selectedProject$ = this.store.select(selectSelectedProject);
-  public isDirty: boolean;
   public panelOpen = signal(false);
   protected project = this.store.selectSignal(selectSelectedProject);
   protected example = computed(() => isExample(this.project()));
   private projectId = computed(() => this.project()?.id);
   protected info = computed(() => this.project()?.description);
   protected loading = computed(() => !this.project());
+  public theme = this.store.selectSignal(selectThemeMode);
 
   constructor() {
+    effect(() => {
+      if (this.theme()) {
+        Array.from(window.frames).forEach(frame => frame.postMessage('themeChanged', '*'));
+      }
+    });
+
     effect(() => {
       if (this.projectId()) {
         untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId()));

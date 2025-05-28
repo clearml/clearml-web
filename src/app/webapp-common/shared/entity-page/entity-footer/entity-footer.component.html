@@ -11,13 +11,13 @@
                                   : footerItemState.description   || footerItem.description"
           >
             @if (footerItem.divider) {
-              <div class="divider"></div>
+              <div class="divider" [attr.data-id]="'footer-' + footerItem.id"></div>
             } @else if (!footerItem.title && !footerItemState.title) {
               <button
                 mat-icon-button
                 (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
                 [disabled]="footerItemState?.disable"
-                [attr.data-id]="footerItem.icon ? 'FooterOptions' : 'archiveOption'"
+                [attr.data-id]="'footer-' + footerItem.id"
               ><mat-icon fontSet="al" [fontIcon]="footerItem.icon ?? footerItemState.icon"></mat-icon></button>
             } @else {
               @if (footerItem.icon) {
@@ -25,7 +25,7 @@
                 mat-stroked-button
                 (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
                 [disabled]="footerItemState?.disable"
-                [attr.data-id]="'compareOption'"
+                [attr.data-id]="'footer-' + footerItem.id"
               >
                 <mat-icon fontSet="al" [fontIcon]="footerItem.icon"></mat-icon>
                 <span>{{footerItem.title ?? footerItemState.title}}</span>
@@ -35,7 +35,7 @@
                   mat-button
                   (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
                   [disabled]="footerItemState?.disable"
-                  [attr.data-id]="footerItem.title"
+                  [attr.data-id]="'footer-' + footerItem.id"
                 >
                 <span>{{footerItem.title ?? footerItemState.title}}</span>
               </button>
@@ -56,6 +56,7 @@
             [disabled]="footerItemState.disable"
             (menuOpened)="tagMenuOpened(tagMenu())"
             (menuClosed)="tagMenuClosed(tagMenu())"
+            [attr.data-id]="'footer-' + footerItem.id"
           >
             <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>
           </button>

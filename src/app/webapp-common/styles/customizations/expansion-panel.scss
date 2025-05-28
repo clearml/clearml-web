@@ -42,9 +42,6 @@ body mat-expansion-panel.mat-expansion-panel {
     mat-expansion-panel-header {
       color: var(--color-primary);
     }
-    .mat-expansion-panel-content {
-      padding-bottom: 12px;
-    }
   }
   &:not(.mat-expanded) {
     .mat-expansion-panel-header:not([aria-disabled=true]):hover {

@@ -1,29 +1,32 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, EffectRef, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {
   selectExperimentInfoHistograms,
   selectExperimentMetricsSearchTerm,
+  selectHasScalarSingleValue,
   selectIsExperimentInProgress,
   selectLastMetricsValues,
   selectMetricValuesView,
-  selectScalarSingleValue,
+  selectScalarSingleValue, selectSelectedExperimentFromRouter, selectSelectedExperimentSettings,
   selectSelectedSettingsGroupBy,
-  selectSelectedSettingsHiddenScalar,
+  selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel, selectSelectedSettingsSmoothSigma,
   selectSelectedSettingsSmoothType,
   selectSelectedSettingsSmoothWeight, selectSelectedSettingsTableMetric,
   selectSelectedSettingsxAxisType,
   selectShowSettings,
   selectSplitSize
 } from '../../reducers';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Params} from '@angular/router';
 import {
   experimentScalarRequested,
   GroupByCharts,
   groupByCharts,
+  removeExperimentSettings,
   resetExperimentMetrics,
   setExperimentMetricsSearchTerm,
   setExperimentSettings,
@@ -34,54 +37,62 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
-import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
-import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
+import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {singleValueChartTitle} from '@common/experiments/shared/common-experiments.const';
 import {GroupedList} from '@common/tasks/tasks.model';
-
-export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
-  sortMetricsList(Object.keys(metricsScalar || [])).reduce((acc, curr) => {
-    acc[curr] = {};
-    return acc;
-  }, {});
-
+import {toSignal} from '@angular/core/rxjs-interop';
+import {explicitEffect} from 'ngxtension/explicit-effect';
+import {computedPrevious} from 'ngxtension/computed-previous';
 
 @Component({
   selector: 'sm-experiment-output-scalars',
   templateUrl: './experiment-output-scalars.component.html',
-  styleUrls: ['./experiment-output-scalars.component.scss', './shared-experiment-output.scss']
+  styleUrls: ['./experiment-output-scalars.component.scss', './shared-experiment-output.scss'],
+  standalone: false
 })
 export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   protected store = inject(Store);
-  private activeRoute = inject(ActivatedRoute);
+  protected activeRoute = inject(ActivatedRoute);
   private changeDetection = inject(ChangeDetectorRef);
   private reportEmbed = inject(ReportCodeEmbedService);
   private refreshService = inject(RefreshService);
 
-  public scalarList: GroupedList = {};
+  public scalarList = signal<GroupedList>({});
 
   private subs = new Subscription();
-  protected experimentId: string;
   protected routerParams$: Observable<Params>;
   public refreshDisabled: boolean;
-  public listOfHidden$: Observable<string[]>;
-  public scalars$: Observable<any>;
-  public searchTerm$: Observable<string>;
   public minimized = false;
-  public graphs: Record<string, ExtFrame[]>;
+  public graphs = signal<Record<string, ExtFrame[]>>(null);
   public selectIsExperimentPendingRunning: Observable<boolean>;
-  public smoothWeight$: Observable<number>;
-  public smoothWeightDelayed$: Observable<number>;
-  public smoothType$: Observable<SmoothTypeEnum>;
-  public showSettingsBar$ = this.store.select(selectShowSettings);
-  public xAxisType$: Observable<ScalarKeyEnum>;
-  public groupBy$: Observable<GroupByCharts>;
-  public splitSize$: Observable<number>;
-  public groupBy: GroupByCharts;
+  public showSettingsBar = this.store.selectSignal(selectShowSettings);
+  protected searchTerm = this.store.selectSignal(selectExperimentMetricsSearchTerm);
+  protected metricValuesView = this.store.selectSignal(selectMetricValuesView);
+  protected lastMetricsValues = this.store.selectSignal(selectLastMetricsValues);
+  protected tableSelectedMetrics = this.store.selectSignal(selectSelectedSettingsTableMetric);
+  protected splitSize = this.store.selectSignal(selectSplitSize);
+  protected entitySelector = this.store.select(selectSelectedExperimentFromRouter);
+  protected scalars = this.store.selectSignal(selectExperimentInfoHistograms);
+  protected smoothWeight = toSignal(this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null)));
+  protected smoothSigma = toSignal(this.store.select(selectSelectedSettingsSmoothSigma).pipe(filter(sigma => sigma !== null)));
+  protected smoothWeightDelayed = toSignal(this.store.select(selectSelectedSettingsSmoothWeight).pipe(debounceTime(75)));
+  protected smoothSigmaDelayed = toSignal(this.store.select(selectSelectedSettingsSmoothSigma).pipe(debounceTime(75)));
+  protected smoothType = this.store.selectSignal(selectSelectedSettingsSmoothType);
+  protected xAxisType = this.store.selectSignal(selectSelectedSettingsxAxisType(false));
+  protected xAxisTypePrev = computedPrevious(this.xAxisType);
+  protected groupBy = this.store.selectSignal(selectSelectedSettingsGroupBy);
+  protected singleValueData = this.store.selectSignal(selectScalarSingleValue);
+  protected hasSingleValueData = this.store.selectSignal(selectHasScalarSingleValue);
+  protected listOfHidden = this.store.selectSignal(selectSelectedSettingsHiddenScalar());
+  protected allSettings = this.store.selectSignal(selectSelectedExperimentSettings());
+  protected isProjectLevel = this.store.selectSignal(selectSelectedSettingsIsProjectLevel);
+  protected experiment = this.store.selectSignal<{ name?: string; id: string }>(selectSelectedExperiment);
+  protected experimentId = this.store.selectSignal(selectSelectedExperimentFromRouter);
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
+
   protected entityType: 'task' | 'model' = 'task';
   protected exportForReport = true;
-  private scalars: GroupedList;
 
   @ViewChild(ExperimentGraphsComponent) experimentGraphs;
   groupByOptions = [
@@ -94,104 +105,94 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       value: groupByCharts.none
     }
   ];
-  public singleValueData$: Observable<EventsGetTaskSingleValueMetricsResponseValues[]>;
-  public experimentName: string;
-  public singleValueExists: boolean;
-  protected entitySelector: Observable<{ id?: string; name?: string }>;
-  protected selectedMetrics: string[] = [];
-  private originalScalarList: {metric: string; variant: string}[];
-  public metricValuesView$: Observable<boolean>;
-  public lastMetricsValues$: Observable<Record<string, any>>;
+  protected selectedMetrics = signal<string[]>(null);
+  private originalScalarList: { metric: string; variant: string }[];
   private firstTime = true;
-  public tableSelectedMetrics$: Observable<string[]>;
+  protected xAxisEffectRef: EffectRef;
+  protected mainEffectRef1: EffectRef;
+  protected mainEffectRef2: EffectRef;
 
   constructor() {
-    this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
-    this.metricValuesView$ = this.store.select(selectMetricValuesView);
-    this.lastMetricsValues$ = this.store.select(selectLastMetricsValues);
-    this.tableSelectedMetrics$ = this.store.select(selectSelectedSettingsTableMetric);
-    this.splitSize$ = this.store.select(selectSplitSize);
-    this.entitySelector = this.store.select(selectSelectedExperiment);
-
-    this.scalars$ = this.store.select(selectExperimentInfoHistograms)
-      .pipe(
-        filter((metrics) => !!metrics),
-      );
-
-    this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
-    this.smoothWeightDelayed$ = this.store.select(selectSelectedSettingsSmoothWeight).pipe(debounceTime(75));
-    this.smoothType$ = this.store.select(selectSelectedSettingsSmoothType);
-    this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType(false));
-    this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
-    this.singleValueData$  =  this.store.select(selectScalarSingleValue)
-      .pipe(tap( data => this.singleValueExists = data?.length > 0));
-    this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenScalar);
-
-
     this.routerParams$ = this.store.select(selectRouterParams)
       .pipe(
         filter(params => !!params.experimentId),
-        tap(params => this.experimentId = params.experimentId),
         distinctUntilChanged()
       );
 
     this.selectIsExperimentPendingRunning = this.store.select(selectIsExperimentInProgress);
+
+    this.mainEffectRef1 = explicitEffect(
+      [this.listOfHidden], ([hiddenList]) => {
+        if (this.scalars() && this.groupBy() && hiddenList) {
+          this.dataHandler(this.scalars(), hiddenList, this.groupBy(), true);
+        }
+      });
+
+    this.mainEffectRef2 = explicitEffect(
+      [this.groupBy, this.scalars, this.xAxisType], ([groupBy, scalars]) => {
+        if (groupBy && scalars &&
+          // prevent rendering chart with misfit x-axis type and data
+          ( Object.values(scalars || {}).length === 0 ||
+            (this.xAxisType() !== 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] > 1600000000000) ||
+            (this.xAxisType() === 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] < 1600000000000))
+        ) {
+          this.dataHandler(scalars, this.listOfHidden(), groupBy, false);
+        }
+      });
+
+    this.xAxisEffectRef = explicitEffect(
+      [this.xAxisType],
+      ([xAxisType]) => {
+        if (this.experiment() && xAxisType && this.xAxisTypePrev() !== xAxisType) {
+          this.axisChanged();
+        }
+      });
+
+  }
+
+  protected dataHandler(scalars, hiddenList, groupBy, skipCalc) {
+    this.refreshDisabled = false;
+    this.originalScalarList = [
+      ...(this.hasSingleValueData() ? [{metric: singleValueChartTitle, variant: null}] : []),
+      ...Object.entries(scalars).map(([metric, value]) => Object.keys(value).map((variant) => ({
+        metric,
+        variant
+      }))).flat()
+    ];
+    if (!skipCalc) {
+      this.prepareGraphsAndUpdate(scalars);
+    }
+
+    const selectedMetric = (!this.isProjectLevel() && this.firstTime && hiddenList.length === 0) ?
+      this.originalScalarList.slice(0, 20) :
+      groupBy === 'metric' ?
+        this.originalScalarList.filter(({metric}) => !hiddenList.includes(metric)) :
+        this.originalScalarList.filter(({metric, variant}) => variant !== null ?
+          !hiddenList.includes(`${metric}${variant}`) && !hiddenList.includes(metric) :
+          !hiddenList.includes(metric)
+        );
+    this.firstTime = false;
+    const metricsWithoutVariants = selectedMetric
+      .map(({metric}) => metric)
+      .filter(m => !!m);
+    this.selectedMetrics.set(Array.from(new Set([
+      ...selectedMetric.map(({metric, variant}) => `${metric}${variant}`),
+      ...metricsWithoutVariants
+    ])));
   }
 
   ngOnInit() {
     this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
-    this.subs.add(this.groupBy$
-      .pipe(filter((groupBy) => !!groupBy))
-      .subscribe(groupBy => {
-        this.groupBy = groupBy;
-        this.prepareGraphsAndUpdate(this.scalars);
-      })
-    );
-
-    this.subs.add(this.xAxisType$
-      .pipe(filter(axis => !!axis && !!this.experimentId))
-      .subscribe(() => this.axisChanged())
-    );
-    this.subs.add(this.singleValueData$.subscribe((data)=> this.singleValueExists = data?.length > 0))
-
-    this.subs.add(this.entitySelector
-      .pipe(
-        filter(experiment => !!experiment?.id),
-        distinctUntilKeyChanged('id')
-      )
-      .subscribe(experiment => {
-        this.experimentId = experiment.id;
-        this.experimentName = experiment.name;
-        this.scalarList = {};
-        this.refresh();
-      })
-    );
 
     this.subs.add(this.refreshService.tick
-      .pipe(filter(autoRefresh => autoRefresh !== null && !!this.experimentId))
+      .pipe(filter(autoRefresh => autoRefresh !== null && !!this.experiment()?.id))
       .subscribe(() => this.refresh())
     );
 
-    this.subs.add(this.scalars$
-      .subscribe(scalars => {
-        this.refreshDisabled = false;
-        this.scalars = scalars;
-        this.originalScalarList = [
-          ...(this.singleValueExists ? [{metric: singleValueChartTitle, variant: null}] : []),
-          ...Object.entries(scalars).map(([metric, value]) => Object.keys(value).map((variant) => ({
-            metric,
-            variant
-          }))).flat()
-        ];
-        this.prepareGraphsAndUpdate(scalars);
-      })
-    );
-
-
     this.subs.add(this.routerParams$
       .subscribe(params => {
-        if (!this.experimentId || ![params.experimentId, params.modelId].includes(this.experimentId)) {
-          this.graphs = undefined;
+        if (!this.experimentId() || ![params.experimentId, params.modelId].includes(this.experimentId())) {
+          this.graphs.set(undefined);
           this.resetMetrics();
           // this.store.dispatch(new ExperimentScalarRequested(params.experimentId));
           this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));
@@ -199,34 +200,24 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subs.add(combineLatest([this.listOfHidden$, this.scalars$])
-      .pipe(debounceTime(50))
-      .subscribe(([hiddenList]) => {
-        const selectedMetric = (this.firstTime && hiddenList.length === Object.keys(this.scalarList).length) ?
-          this.originalScalarList.slice(0, 9) :
-          this.groupBy === 'metric' ?
-            this.originalScalarList.filter(({metric}) => !hiddenList.includes(metric)) :
-            this.originalScalarList.filter(({metric, variant}) => variant !== null ?
-              !hiddenList.includes(`${metric} / ${variant}`) && !hiddenList.includes(metric) :
-              !hiddenList.includes(metric)
-            );
-        this.firstTime = false;
-        const metricsWithoutVariants = selectedMetric
-          .map(({metric}) => metric)
-          .filter(m => !!m);
-        this.selectedMetrics = Array.from(new Set([
-          ...selectedMetric.map(({metric, variant}) => `${metric} / ${variant}`),
-          ...metricsWithoutVariants
-        ]));
-        this.changeDetection.detectChanges();
+    this.subs.add(this.entitySelector
+      .pipe(
+        filter(entity => !!entity),
+        distinctUntilChanged()
+      )
+      .subscribe(() => {
+        this.scalarList.set({});
+        this.selectedMetrics.set(null);
+        this.refresh();
       }));
   }
 
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
-      this.scalarList = {...(this.singleValueExists && {[singleValueChartTitle]: {}}), ...prepareScalarList(scalars)};
-      this.graphs = this.groupBy === 'metric' ? convertScalars(scalars, this.experimentId) : convertSplitScalars(scalars, this.experimentId);
-      this.changeDetection.markForCheck();
+      const taskId = this.experiment()?.id ?? this.experimentId();
+      this.scalarList.set({...(this.hasSingleValueData() && {[singleValueChartTitle]: {}}), ...this.prepareScalarList(scalars, this.groupBy() === 'none')});
+      this.graphs.set(this.groupBy() === 'metric' ? convertScalars(scalars, taskId) : convertSplitScalars(scalars, taskId));
+      // this.changeDetection.markForCheck();
     }
   }
 
@@ -241,11 +232,21 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
 
   hiddenListChanged(hiddenList: string[]) {
+    const metrics = this.originalScalarList.map(metric => metric.metric);
+    const variants = this.originalScalarList.map(metric => `${metric.metric}${metric.variant || ''}`);
+    const nonTaskMetrics = this.listOfHidden().filter(m => !metrics.some(metric => metric.startsWith(m)) && !variants.includes(m));
+    const newList = [
+      ...metrics.filter(metric => !hiddenList.some(a => a.startsWith(metric))),
+      ...variants.filter(metric => this.groupBy() === 'none' ? !hiddenList.includes(metric) : !hiddenList.some(a => metric.startsWith(a))),
+      ...nonTaskMetrics.filter(metric => !hiddenList.includes(metric))
+    ];
+
+    const metricsWithoutVariants = metrics.filter(metric => !variants.filter(v => v.startsWith(metric)).filter(v => !newList.includes(v)).length);
     this.store.dispatch(setExperimentSettings({
-      id: this.experimentId,
+      id: this.experiment()?.id,
       changes: {
-        hiddenMetricsScalar: Object.keys(this.scalarList)
-          .filter(metric => !hiddenList.includes(metric))
+        ...this.getSettingsObject(),
+        hiddenMetricsScalar: Array.from(new Set(newList.concat(metricsWithoutVariants)))
       }
     }));
   }
@@ -253,9 +254,27 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, refresh: true}));
+      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId(), refresh: true}));
     }
   }
+
+  prepareScalarList = (metricsScalar: GroupedList, splitted: boolean): GroupedList =>
+    sortMetricsList(Object.keys(metricsScalar || [])).reduce((acc, curr) => {
+      const variants = Object.keys(metricsScalar[curr]);
+      if (splitted) {
+        if (variants.length > 1) {
+          acc[curr] = {};
+          Object.keys(metricsScalar[curr]).forEach((variant) => {
+            acc[curr][variant] = {};
+          });
+        } else {
+          acc[curr + variants[0]] = {__displayName: `${curr} - ${variants[0]}`};
+        }
+      } else {
+        acc[curr] = {};
+      }
+      return acc;
+    }, {});
 
   searchTermChanged(searchTerm: string) {
     this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm}));
@@ -266,19 +285,39 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   }
 
   changeSmoothness($event: number) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), smoothWeight: $event}}));
+  }
+
+  changeSigma($event: number) {
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), smoothSigma: $event}}));
   }
 
   changeSmoothType($event: SmoothTypeEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), smoothType: $event}}));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), xAxisType: $event}}));
   }
 
   changeGroupBy($event: GroupByCharts) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {groupBy: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), groupBy: $event}}));
+  }
+
+
+  getSettingsObject = () => ({
+    ...(this.groupBy() && {groupBy: this.groupBy()}),
+    ...(this.xAxisType() && {xAxisType: this.xAxisType()}),
+    ...(this.smoothType() && {smoothType: this.smoothType()}),
+    ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
+    ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
+    ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    projectLevel: false
+  });
+
+  setToProject() {
+    this.store.dispatch(setExperimentSettings({changes: {...this.allSettings(), id: this.projectId(), projectLevel: true}, id: this.projectId()}));
+    this.store.dispatch(removeExperimentSettings({id: this.experiment()?.id}));
   }
 
   toggleSettingsBar() {
@@ -288,19 +327,19 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; xaxis?: ScalarKeyEnum; domRect: DOMRect; group?: boolean }) {
     this.reportEmbed.createCode({
       type: (!event.metrics && !event.variants) ? 'single' : 'scalar',
-      objects: [this.experimentId],
+      objects: [this.experiment()?.id],
       objectType: this.entityType,
       ...event
     });
   }
 
   protected axisChanged() {
-    this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
+    this.store.dispatch(experimentScalarRequested({experimentId: this.experiment()?.id, skipSingleValue: true}));
   }
 
   selectedMetricsChanged(selectedMetrics: string[]) {
     this.store.dispatch(setExperimentSettings({
-      id: this.experimentId,
+      id: this.experiment()?.id,
       changes: {selectedMetricTable: selectedMetrics}
     }));
   }

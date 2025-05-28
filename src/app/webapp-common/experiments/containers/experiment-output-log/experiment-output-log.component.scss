@@ -2,19 +2,26 @@
   display: block;
   height: 100%;
 
+  .header {
+    display: grid;
+    align-items: center;
+    padding: 12px 24px;
+    grid-template-columns: 1fr auto 250px;
+    gap: 24px;
+  }
+
   sm-experiment-log-info {
-    height: calc(100% - 50px);
+    height: calc(100% - 60px);
     &.no-header {
       height: calc(100%);
     }
   }
 
   .no-output {
+    color: var(--color-empty-state);
     h4 {
       font-weight: 500;
-    }
-    .al-icon {
-      color: var(--color-tint-14);
+      font-size: 16px;
     }
   }
 }

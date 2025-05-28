@@ -7,7 +7,7 @@
     [style.--card-height]="(cardsCollapsed() ? 56 : cardHeight()) + 'px'"
     [filterDelay]="0"
     [globalFilterFields]="enableTableSearch() ? globalFilterFields() : null"
-    [scrollHeight]="'flex'"
+    [scrollHeight]="scrollHeight()"
     [autoLayout]="false"
     [columns]="visibleColumns()"
     [selectionMode]="selectionMode()"
@@ -36,8 +36,8 @@
     (onRowUnselect)="onRowDeselected($event)"
     (onContextMenuSelect)="openContext($event)"
     (onColResize)="colResize($event)">
-    <ng-template pTemplate="emptymessage">
-      <tr class="no-data-row" [style.height.px]="rowHeight()" [style.line-height.px]="rowHeight()">
+    <ng-template #emptymessage>
+      <tr class="no-data-row" [style.height.px]="rowHeight()" [style.line-height.px]="30">
         <div [class.simple]="simple()" class="no-data-wrapper" [style.top.px]="this.scrollable && noDataTop">
           @if (!tableSate().loading() && !noDataTemplate()) {
             <span class="no-data">No data to show</span>
@@ -48,12 +48,12 @@
         <ng-container *ngTemplateOutlet="noDataTemplate()"></ng-container>
       }
     </ng-template>
-    <ng-template pTemplate="rowexpansion" let-row>
+    <ng-template #expandedrow let-row>
       <ng-container
         *ngTemplateOutlet="rowExpansionTemplate; context: {$implicit: row, lastFrame: lastRowExpanded}"></ng-container>
     </ng-template>
     @if (!noHeader()) {
-      <ng-template pTemplate="header" let-columns>
+      <ng-template #header let-columns>
         @if (!minimizedView()) {
           <tr class="header ui-state-default">
             @for (col of visibleColumns(); track col.id) {
@@ -93,14 +93,16 @@
                      (click)="cardsCollapsedToggle.emit()"></div>
                 <div class="table-actions">
                   <div class="recent-title">
-                    <sm-menu header="SORTED BY " class="menu" data-id="sortedByFilter">
-                      @for (col of sortableCols; track col.id) {
-                        <div>
-                          <sm-menu-item [itemLabel]="col.header" [sortOrder]="getOrder(col.id)"
-                                        (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
-                        </div>
-                      }
-                    </sm-menu>
+                    @if (sortableCols.length > 0) {
+                      <sm-menu header="SORTED BY " class="menu" data-id="sortedByFilter">
+                        @for (col of sortableCols; track col.id) {
+                          <div>
+                            <sm-menu-item [itemLabel]="col.header" [sortOrder]="getOrder(col.id)"
+                                          (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
+                          </div>
+                        }
+                      </sm-menu>
+                    }
                   </div>
                   <ng-container *ngTemplateOutlet="cardHeaderTemplate"></ng-container>
                 </div>
@@ -110,7 +112,7 @@
         }
       </ng-template>
     }
-    <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex" let-expanded="expanded">
+    <ng-template #body let-rowData let-columns="columns" let-index="rowIndex" let-expanded="expanded">
       <tr [pRowToggler]="expandableRows()? rowData : null"
           [pRowTogglerDisabled]="!expandableRows() || !expandRowOnClick()"
           [pSelectableRow]="rowData" [pContextMenuRow]="rowData"
@@ -156,6 +158,7 @@
           @if (rowRightClick.observed && !minimizedView()) {
             <button
               mat-flat-button class="icon-only context-button"
+              data-id="3DotMenuButton"
               (click)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
             ><mat-icon fontSet="al" fontIcon="al-ico-dots-v-menu"></mat-icon></button>
           }
@@ -188,7 +191,7 @@
         }
       }
     </ng-template>
-    <ng-template pTemplate="footer" let-columns>
+    <ng-template #footer let-columns>
       <ng-container *ngTemplateOutlet="footerTemplate"></ng-container>
     </ng-template>
   </p-table>

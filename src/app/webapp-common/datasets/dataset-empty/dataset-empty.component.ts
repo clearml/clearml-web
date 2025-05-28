@@ -1,12 +1,16 @@
-import {ChangeDetectionStrategy, Component, computed, input, model, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 
 @Component({
-  selector: 'sm-dataset-empty',
-  templateUrl: './dataset-empty.component.html',
-  styleUrls: ['./dataset-empty.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-dataset-empty',
+    templateUrl: './dataset-empty.component.html',
+    styleUrls: ['./dataset-empty.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DatasetEmptyComponent {
+  protected readonly confService = inject(ConfigurationService);
+
   initDatasetCLICode = `curl -o Affairs.csv https://vincentarelbundock.github.io/Rdatasets/csv/AER/Affairs.csv
 
 clearml-data create --project DatasetProject --name HelloDataset

@@ -51,7 +51,8 @@ export const modelsInfoReducer = createReducer(
   on(modelDetailsUpdated, (state, action): ModelInfoState => ({
     ...state,
     selectedModel: {...state.selectedModel, ...action.changes as unknown as SelectedModel},
-    infoDataFreeze: initialState.infoDataFreeze
+    infoDataFreeze: initialState.infoDataFreeze,
+    activeSectionEdit: null
   })),
   on(activateModelEdit, (state): ModelInfoState =>
     ({...state, activeSectionEdit: true, infoDataFreeze: state.selectedModel})),

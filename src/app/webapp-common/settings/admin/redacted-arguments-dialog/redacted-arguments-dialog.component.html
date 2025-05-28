@@ -15,8 +15,8 @@
             [(ngModel)]="redactedArgument.key"
             placeholder="Argument">
         </mat-form-field>
-        <button mat-icon-button>
-          <mat-icon fontSet="al" fontIcon="al-ico-trash"  (click)="redactedArguments.splice(i, 1)"></mat-icon>
+        <button mat-icon-button (click)="redactedArguments.splice(i, 1)">
+          <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
         </button>
       </div>
     }

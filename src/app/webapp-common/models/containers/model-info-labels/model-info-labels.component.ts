@@ -5,9 +5,10 @@ import {activateModelEdit, cancelModelEdit, editModel, setSavingModel} from '../
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 
 @Component({
-  selector: 'sm-model-info-labels',
-  templateUrl: './model-info-labels.component.html',
-  styleUrls: ['./model-info-labels.component.scss']
+    selector: 'sm-model-info-labels',
+    templateUrl: './model-info-labels.component.html',
+    styleUrls: ['./model-info-labels.component.scss'],
+    standalone: false
 })
 export class ModelInfoLabelsComponent {
 

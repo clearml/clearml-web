@@ -80,7 +80,7 @@ import {
   selectionDisabledDelete,
   selectionDisabledDequeue,
   selectionDisabledEnqueue,
-  selectionDisabledMoveTo,
+  selectionDisabledMoveTo, selectionDisabledPipelineRun,
   selectionDisabledPublishExperiments,
   selectionDisabledQueue,
   selectionDisabledReset,
@@ -319,7 +319,7 @@ export class CommonExperimentsViewEffects {
                   actions.push(autoRefreshExperimentInfo({id: selectedExperiment.id}));
                 } else {
                   // SetExperiments must be before GetExperimentInfo!
-                  actions.push(getExperimentInfo({id: selectedExperiment.id}));
+                  actions.push(getExperimentInfo({id: selectedExperiment.id, autoRefresh: null}));
                 }
               }
               return actions;
@@ -512,8 +512,8 @@ export class CommonExperimentsViewEffects {
 
   getCustomMetrics = createEffect(() => this.actions$.pipe(
     ofType(exActions.getCustomMetrics),
-    concatLatestFrom(() => [
-      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+    concatLatestFrom((action) => [
+      this.store.select(selectRouterParams).pipe(map(params => action.projectId ?? params?.projectId)),
       this.store.select(selectIsDeepMode)
     ]),
     switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetUniqueMetricVariants({
@@ -967,7 +967,8 @@ export class CommonExperimentsViewEffects {
           [MenuItems.queue]: selectionDisabledQueue(experiments),
           [MenuItems.viewWorker]: selectionDisabledViewWorker(experiments),
           [MenuItems.archive]: selectionDisabledArchive(experiments),
-          [MenuItems.tags]: selectionDisabledTags(experiments)
+          [MenuItems.tags]: selectionDisabledTags(experiments),
+          [MenuItems.run]: selectionDisabledPipelineRun(experiments)
         };
         //allHasExamples: selectionAllExamples(action.experiments),
         // allArchive: selectionAllIsArchive(action.experiments),
@@ -1013,8 +1014,8 @@ export class CommonExperimentsViewEffects {
               image: action.data.docker.image,
               setup_shell_script: action.data.docker.script
             }),
-            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venv ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
-              .concat(action.data.vars.map(v => ` -e ${v.key}:${v.value}`).join(''))
+            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venvType === 'manual' ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
+              .concat(action.data.vars?.map(v => ` -e ${v.key}:${v.value}`).join('') ?? '')
               .trimStart(),
           }
         } as TasksCreateRequest).pipe(

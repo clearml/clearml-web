@@ -6,7 +6,8 @@ import {Observable} from 'rxjs';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
   MenuItems,
-  selectionDisabledContinue
+  selectionDisabledContinue,
+  selectionDisabledPipelineRun
 } from '@common/shared/entity-page/items.utils';
 import {ShowItemsFooterSelected} from '@common/shared/entity-page/footer-items/show-items-footer-selected';
 import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
@@ -28,9 +29,10 @@ import {ExperimentMenuComponent} from '@common/experiments/shared/components/exp
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 
 @Component({
-  selector: 'sm-controllers',
-  templateUrl: './controllers.component.html',
-  styleUrls: ['./controllers.component.scss']
+    selector: 'sm-controllers',
+    templateUrl: './controllers.component.html',
+    styleUrls: ['./controllers.component.scss'],
+    standalone: false
 })
 export class ControllersComponent extends ExperimentsComponent implements OnInit {
 
@@ -99,7 +101,8 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
   override getSingleSelectedDisableAvailable(experiment) {
     return {
       ...(super.getSingleSelectedDisableAvailable(experiment)),
-      [MenuItems.continue]: selectionDisabledContinue([experiment])
+      [MenuItems.continue]: selectionDisabledContinue([experiment]),
+      [MenuItems.run]: selectionDisabledPipelineRun([experiment])
     };
   }
 

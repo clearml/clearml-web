@@ -20,15 +20,14 @@ export interface IReportsCreateRequest extends ReportsCreateRequest {
 }
 
 @Component({
-  selector: 'sm-report-dialog',
-  templateUrl: './report-dialog.component.html',
-  styleUrls: ['./report-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    PushPipe,
-    CreateNewReportFormComponent
-  ]
+    selector: 'sm-report-dialog',
+    templateUrl: './report-dialog.component.html',
+    styleUrls: ['./report-dialog.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        PushPipe,
+        CreateNewReportFormComponent
+    ]
 })
 export class ReportDialogComponent implements OnDestroy{
   public projects$: Observable<Project[]>;

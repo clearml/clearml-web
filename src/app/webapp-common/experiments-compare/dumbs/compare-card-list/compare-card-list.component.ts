@@ -7,9 +7,10 @@ import {CompareCardHeaderDirective} from '../compare-card-header.directive';
 import {IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
 
 @Component({
-  selector   : 'sm-compare-card-list',
-  templateUrl: './compare-card-list.component.html',
-  styleUrls  : ['./compare-card-list.component.scss']
+    selector: 'sm-compare-card-list',
+    templateUrl: './compare-card-list.component.html',
+    styleUrls: ['./compare-card-list.component.scss'],
+    standalone: false
 })
 export class CompareCardListComponent {
 

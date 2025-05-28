@@ -7,18 +7,17 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-select-metadata-keys-custom-cols',
-  templateUrl: './select-metadata-keys-custom-cols.component.html',
-  styleUrls: ['./select-metadata-keys-custom-cols.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SearchComponent,
-    MenuItemComponent,
-    SimpleFilterPipe,
-    MatProgressSpinnerModule,
-    ClickStopPropagationDirective
-]
+    selector: 'sm-select-metadata-keys-custom-cols',
+    templateUrl: './select-metadata-keys-custom-cols.component.html',
+    styleUrls: ['./select-metadata-keys-custom-cols.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        SearchComponent,
+        MenuItemComponent,
+        SimpleFilterPipe,
+        MatProgressSpinnerModule,
+        ClickStopPropagationDirective
+    ]
 })
 export class SelectMetadataKeysCustomColsComponent {
   searchText = signal<string>('');

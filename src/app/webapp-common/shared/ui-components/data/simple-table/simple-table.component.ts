@@ -4,15 +4,14 @@ import {FormsTrackBy} from '../../../utils/forms-track-by';
 import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
-  selector: 'sm-simple-table-2',
-  templateUrl: './simple-table.component.html',
-  styleUrls: ['./simple-table.component.scss'],
-  standalone: true,
-  imports: [
-    CdkDropList,
-    NgTemplateOutlet,
-    CdkDrag
-]
+    selector: 'sm-simple-table-2',
+    templateUrl: './simple-table.component.html',
+    styleUrls: ['./simple-table.component.scss'],
+    imports: [
+        CdkDropList,
+        NgTemplateOutlet,
+        CdkDrag
+    ]
 })
 export class SimpleTableComponent extends FormsTrackBy {
 

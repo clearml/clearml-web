@@ -5,15 +5,14 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-status-icon-label',
-  templateUrl: './status-icon-label.component.html',
-  styleUrls: ['./status-icon-label.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatProgressSpinnerModule,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-status-icon-label',
+    templateUrl: './status-icon-label.component.html',
+    styleUrls: ['./status-icon-label.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatProgressSpinnerModule,
+        MatIcon
+    ]
 })
 export class StatusIconLabelComponent {
   protected readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
@@ -35,11 +34,13 @@ export class StatusIconLabelComponent {
   statusIcon = computed(() => {
     switch (this.status()) {
       case 'created':
+      case 'Draft':
         return 'al-ico-status-draft';
       case 'completed':
       case 'stopped':
       case 'closed':
       case 'Final':
+      case 'Ready':
         return 'al-ico-completed';
       case 'in_progress':
       case 'Uploading':

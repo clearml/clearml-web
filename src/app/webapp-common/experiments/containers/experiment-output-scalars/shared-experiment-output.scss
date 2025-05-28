@@ -7,6 +7,10 @@ mat-drawer-container {
   --mat-sidenav-container-divider-color: var(--color-surface-container-high);
 }
 
+mat-drawer {
+  border-right: 1px solid var(--color-surface-container-high);
+}
+
 .hover-button-container {
   position: relative;
   left: 30px;

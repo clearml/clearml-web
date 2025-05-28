@@ -6,16 +6,15 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 
 
 @Component({
-  selector: 'sm-hyper-param-metric-column',
-  templateUrl: './hyper-param-metric-column.component.html',
-  styleUrls: ['./hyper-param-metric-column.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    GetParamMetricValuePipe,
-    GetVariantWithoutRoundPipe,
-    TooltipDirective
-],
-  standalone: true
+    selector: 'sm-hyper-param-metric-column',
+    templateUrl: './hyper-param-metric-column.component.html',
+    styleUrls: ['./hyper-param-metric-column.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        GetParamMetricValuePipe,
+        GetVariantWithoutRoundPipe,
+        TooltipDirective
+    ]
 })
 export class HyperParamMetricColumnComponent {
 

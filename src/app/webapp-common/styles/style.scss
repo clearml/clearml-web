@@ -1,27 +1,38 @@
 @use '@angular/material' as mat;
 
-@import "../assets/fonts/trains-icons.scss";
-@import "reboot";
-@import "minimal-bootstrap";
-@import "layout";
-@import "utilities";
-@import "customizations";
-@import "icons"; //needs a clean from sass vars
-@import "themes";
-@import "../angular-notifier/styles/core";
-@import "../angular-notifier/styles/types/type-default";
-@import "../angular-notifier/styles/themes/theme-material.scss";
-@import "notifications";
+@use "sass:meta";
+@forward "../assets/fonts/trains-icons.scss";
+@forward "reboot";
+@forward "minimal-bootstrap";
+@forward "layout";
+@forward "utilities";
+@forward "customizations";
+@forward "icons"; //needs a clean from sass vars
+@forward "themes";
+@forward "../angular-notifier/styles/core";
+@forward "../angular-notifier/styles/types/type-default";
+@forward "../angular-notifier/styles/themes/theme-material.scss";
+@forward "notifications";
+@forward "printing";
+@use "themes";
+@use "customizations";
 
-
-:root {
-  @include mat.all-component-themes($theme);
-  @include components($theme);
-
-  &.dark-mode {
-    @include mat.all-component-colors($dark-theme);
-    @include components($dark-theme);
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: var(--color-shadow);
   }
 }
 
-@import "src/app/shared/custom-styles";
+:root {
+  @include mat.all-component-themes(themes.$theme);
+  @include mat.system-level-colors(themes.$theme);
+  @include customizations.components(themes.$theme);
+
+  &.dark-mode {
+    @include mat.all-component-colors(themes.$dark-theme);
+    @include mat.system-level-colors(themes.$dark-theme);
+    @include customizations.components(themes.$dark-theme);
+  }
+}
+
+@include meta.load-css("src/app/shared/custom-styles");

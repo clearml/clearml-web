@@ -7,18 +7,20 @@
     <mat-icon
       smClickStopPropagation
       fontSet="al"
+      class="pointer"
       [fontIcon]="iconClass() ?? 'al-ico-info-circle'"
       [class.xs]="smallIcon()"
       [delay]="100"
       [action]="'enter'"
-      (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
+      (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true"
     ></mat-icon>
-  <span #tooltipElement [matMenuTriggerFor]="tooltipMenu" smClickStopPropagation></span>
+  <span #trigger="matMenuTrigger" [matMenuTriggerFor]="tooltipMenu" smClickStopPropagation></span>
 </span>
 
 <mat-menu #tooltipMenu="matMenu" [xPosition]="'after'" [yPosition]="position()" [hasBackdrop]="false" [class]="'multiline-tooltip'">
   <div
     class="tooltip-container"
+    [class.word-break]="wordBreak()"
     [delay]="500"
     [action]="'leave'"
     (smHesitate)="tooltipMenu.closed.emit()"

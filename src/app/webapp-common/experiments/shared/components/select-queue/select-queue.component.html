@@ -5,9 +5,9 @@
   (xClicked)="closeDialog(false)"
 >
   <form class="d-flex flex-column light-theme" (submit)="queueControl.valid && closeDialog(true)">
-    @if (reference) {
+    @if (reference()) {
       <p>
-        <b [smTooltip]="reference.length > 80 ? reference : undefined">{{ reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b>
+        <b [smTooltip]="reference().length > 80 ? reference() : undefined">{{ reference().length > 80 ? (reference() | slice:0:77) + '...' : reference() }}</b>
         @if (data.retryMode) {
           <span> {{ data.taskIds.length > 1 ? 'have' : 'has' }} previously failed - Make sure you’ve corrected the problem before rerunning.</span>
           <div>Select queue for execution.</div>
@@ -17,7 +17,7 @@
       </p>
     }
 
-    @if (enqueueWarning$ | ngrxPush) {
+    @if (enqueueWarning()) {
       <p class="mt-4 mb-4 text-danger enqueue-warning">
         <b>Note: Some tasks seems to not contain any executable code.
           <br>If enqueued to run, they might produce no results.</b>
@@ -42,22 +42,22 @@
         [displayWith]="displayFn"
         #auto="matAutocomplete"
       >
-        @if ((userAllowedToCreateQueue$ | ngrxPush) && queueControl.value &&
-          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesNames) &&
-          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesDisplays)
+        @if ((userAllowedToCreateQueue()) && queueControl.value &&
+          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesNames()) &&
+          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesDisplays())
         ) {
           <mat-option
             class="item"
             [value]="{name: $any(queueControl.value)?.name ?? queueControl.value}"
           >"{{ displayFn(queueControl.value) }}"<span class="new">(Create New)</span></mat-option>
         }
-        @for (option of filteredOptions$ | ngrxPush; track option.id) {
+        @for (option of filteredOptions(); track option.id) {
           <mat-option
             [value]="option"
             [smTooltip]="option.display_name ? option.display_name + ' (' + option.name + ')' : option.name"
             smShowTooltipIfEllipsis
           >
-            @for (part of (text.value ? split(option.caption, text.value) : [[option.caption, text.value]]); track part; let last = $last) {
+            @for (part of (text.value ? split(option.caption, text.value) : [[option.caption, text.value]]); track part[0] + part[1]; let last = $last) {
               <span class="pointer-events-none"
               >{{ part[0] }}@if (!last) {
                 <b>{{ part[1] }}</b>
@@ -67,8 +67,7 @@
         }
       </mat-autocomplete>
       @if (queueControl.hasError('requiredAutocompleteSelection') || queueControl.hasError('required')) {
-        <mat-error
-        >
+        <mat-error>
           Please provide a value
         </mat-error>
       }

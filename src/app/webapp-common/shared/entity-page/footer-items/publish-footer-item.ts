@@ -1,7 +1,7 @@
 import {IFooterState, ItemFooterModel} from './footer-items.models';
-import {IconNames, ICONS} from '../../../constants';
+import {IconNames, ICONS} from '@common/constants';
 import {MenuItems} from '../items.utils';
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export class PublishFooterItem extends ItemFooterModel {
 
@@ -13,7 +13,7 @@ export class PublishFooterItem extends ItemFooterModel {
     this.icon = ICONS.PUBLISHED as Partial<IconNames>;
   }
 
-  getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+  getItemState(state: IFooterState<{id: string}>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
     return {
       disable: state.data[this.id]?.disable,
       description: this.menuItemText.transform(state.data[MenuItems.publish]?.available, 'Publish'),

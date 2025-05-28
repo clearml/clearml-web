@@ -11,20 +11,19 @@ import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 
 @Component({
-  selector: 'sm-create-new-queue-form',
-  standalone: true,
-  templateUrl: './create-new-queue-form.component.html',
-  imports: [
-    MatDialogActions,
-    MatButton,
-    MatFormField,
-    FormsModule,
-    UniqueNameValidatorDirective,
-    MatInput,
-    MatLabel,
-    MatError,
-  ],
-  styleUrls: ['./create-new-queue-form.component.scss']
+    selector: 'sm-create-new-queue-form',
+    templateUrl: './create-new-queue-form.component.html',
+    imports: [
+        MatDialogActions,
+        MatButton,
+        MatFormField,
+        FormsModule,
+        UniqueNameValidatorDirective,
+        MatInput,
+        MatLabel,
+        MatError,
+    ],
+    styleUrls: ['./create-new-queue-form.component.scss']
 })
 export class CreateNewQueueFormComponent {
   public queuesNames: string[];

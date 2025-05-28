@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 @mixin ace-style($theme) {
   @if mat.get-theme-type($theme) == light {
     .ace-editor.ace_editor {
@@ -13,6 +15,37 @@
       .ace_gutter {
         background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
       }
+    }
+  }
+}
+
+.ace_search {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-container-high);
+  border: 1px solid var(--color-outline);
+
+  .ace_searchbtn_close {
+    color: var(--color-on-surface-variant);
+  }
+
+  .ace_search_field {
+    color: var(--color-on-surface);
+    background-color: var(--color-surface-container-highest);
+    border: 1px solid var(--color-outline-variant);
+  }
+
+  .ace_searchbtn {
+    color: var(--color-on-surface);
+    background-color: var(--color-surface-container-high);
+    border: 1px solid var(--color-outline-variant);
+    &:hover {
+      background-color: var(--color-surface-container-highest);
+    }
+  }
+  .ace_button {
+    color: var(--color-on-surface);
+    &:hover {
+      background-color: var(--color-surface-container-highest);
     }
   }
 }

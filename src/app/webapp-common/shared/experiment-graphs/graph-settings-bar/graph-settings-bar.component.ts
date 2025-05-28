@@ -1,41 +1,75 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, Output} from '@angular/core';
+import {Component, computed, ElementRef, HostListener, inject, input, Input, output, signal} from '@angular/core';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatSelectChange} from '@angular/material/select';
+import {MatFormField, MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
 import {GroupByCharts} from '@common/experiments/actions/common-experiment-output.actions';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {MatSlider, MatSliderThumb} from '@angular/material/slider';
+import {FormsModule} from '@angular/forms';
+import {KeyValuePipe} from '@angular/common';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
   selector: 'sm-graph-settings-bar',
   templateUrl: './graph-settings-bar.component.html',
-  styleUrls: ['./graph-settings-bar.component.scss']
+  styleUrls: ['./graph-settings-bar.component.scss'],
+  imports: [
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatSlider,
+    FormsModule,
+    MatSliderThumb,
+    KeyValuePipe,
+    MatIcon,
+    MatIconButton,
+    MatButton,
+    TooltipDirective
+  ]
 })
 export class GraphSettingsBarComponent {
+  private readonly shortModeWidth = 1250;
   readonly scalarKeyEnum = ScalarKeyEnum;
   readonly round = Math.round;
   protected readonly smoothTypeEnum = smoothTypeEnum;
   private el = inject(ElementRef);
-  private cdr = inject(ChangeDetectorRef);
-  public shortMode: boolean;
+
+  public shortMode = signal(this.el.nativeElement.clientWidth < this.shortModeWidth);
 
   @Input() set splitSize(splitSize: number) {
-    this.shortMode = this.el.nativeElement.clientWidth < 1200;
+    this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
   }
 
-  @Input() smoothWeight: number;
-  @Input() smoothType: SmoothTypeEnum;
-  @Input() xAxisType: ScalarKeyEnum = ScalarKeyEnum.Iter;
-  @Input() groupBy: GroupByCharts = 'metric';
-  @Input() groupByOptions: { name: string; value: GroupByCharts }[];
-  @Input() verticalLayout: boolean = false;
-  @Output() changeWeight = new EventEmitter<number>();
-  @Output() changeSmoothType = new EventEmitter<SmoothTypeEnum>();
-  @Output() changeXAxisType = new EventEmitter<ScalarKeyEnum>();
-  @Output() changeGroupBy = new EventEmitter<GroupByCharts>();
-  @Output() toggleSettings = new EventEmitter();
+  smoothWeight = input<number>();
+  smoothSigma = input<number>();
+  smoothType = input<SmoothTypeEnum>();
+  xAxisType = input<ScalarKeyEnum>(ScalarKeyEnum.Iter);
+  groupBy = input<GroupByCharts>('metric');
+  groupByOptions = input<{
+        name: string;
+        value: GroupByCharts;
+    }[]>();
+  verticalLayout = input<boolean>(false);
+  clearable = input<boolean>(false);
+  changeWeight = output<number>();
+  changeSigma = output<number>();
+  changeSmoothType = output<SmoothTypeEnum>();
+  changeXAxisType = output<ScalarKeyEnum>();
+  changeGroupBy = output<GroupByCharts>();
+  toggleSettings = output();
+  setToProject = output();
+
+  smoothState = computed(() => ({
+    smoothWeight: this.smoothWeight(),
+    weight: signal(this.smoothWeight()),
+    smoothSigma: this.smoothSigma(),
+    sigma: signal(this.smoothSigma())
+  }));
 
   @HostListener('window:resize')
   onResize() {
-    this.shortMode = this.el.nativeElement.clientWidth < 1130;
+    this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
   }
 
   xAxisTypeOption = [
@@ -53,6 +87,11 @@ export class GraphSettingsBarComponent {
     },
   ];
 
+  constructor() {
+    window.setTimeout(() => {
+      this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
+    }, 100);
+  }
   xAxisTypeChanged(key: MatSelectChange) {
     this.changeXAxisType.emit(key.value);
   }
@@ -62,37 +101,12 @@ export class GraphSettingsBarComponent {
   }
 
   selectSmoothType($event: MatSelectChange) {
-    this.changeWeight.emit([smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ? 0 : 10);
+    this.changeWeight.emit([smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ? 0 : $event.value=== smoothTypeEnum.gaussian? 7: $event.value=== smoothTypeEnum.runningAverage? 5: 10);
     this.changeSmoothType.emit($event.value);
   }
 
-  trimToLimits(value: number) {
-    if (value === 0) {
-      return;
-    }
-    if (value === null) {
-      this.changeWeight.emit(this.smoothWeight);
-      return;
-    }
-    if (value > (this.smoothType === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType === smoothTypeEnum.exponential ? 0 : 1)) {
-      this.smoothWeight = null;
-    }
-    setTimeout(() => {
-      if (this.smoothType === smoothTypeEnum.exponential) {
-        if (value > 0.999) {
-          this.smoothWeight = 0.999;
-        } else if (value < 0) {
-          this.smoothWeight = 0;
-        }
-      } else {
-        if (value > 100) {
-          this.smoothWeight = 100;
-        } else if (value < 1) {
-          this.smoothWeight = 1;
-        }
-      }
-      this.cdr.detectChanges();
-      this.changeWeight.emit(this.smoothWeight);
-    });
+
+  setToProjectLevel() {
+    this.setToProject.emit()
   }
 }

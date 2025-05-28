@@ -18,7 +18,7 @@
   <mat-drawer-content>
     @if (dataTable()?.length === 0) {
       <div class="no-output">
-        <mat-icon fontSet="al" fontIcon="al-ico-no-data-table" class="xxxl"></mat-icon>
+        <mat-icon fontSet="al" fontIcon="al-ico-no-data-table" class="xxl"></mat-icon>
         <h4>NO METRICS</h4>
       </div>
     }
@@ -79,7 +79,9 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-metricVariant>
-        <tr [class.first-row]="metricVariant.firstMetricRow">
+        <tr [class.first-row]="metricVariant.firstMetricRow"
+            [class.last-row]="metricVariant.lastInGroup"
+        >
           <td class="metrics-column" pFrozenColumn>
             <span class="ellipsis" [smTooltip]="metricVariant.firstMetricRow ? metricVariant.metric : ''" smShowTooltipIfEllipsis>{{ metricVariant.firstMetricRow ? metricVariant.metric : '' }}</span>
           </td>

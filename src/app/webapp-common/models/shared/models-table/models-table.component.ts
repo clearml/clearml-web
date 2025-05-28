@@ -38,38 +38,28 @@ import {getCustomMetrics, getModelsMetadataValuesForKey, selectAllModels} from '
 import {
   ModelMenuExtendedComponent
 } from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
-import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
+import {createFiltersFromStore, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '@common/experiments/shared/common-experiments.utils';
 import {animate, style, transition, trigger} from '@angular/animations';
 
 @Component({
-  selector: 'sm-models-table',
-  templateUrl: './models-table.component.html',
-  styleUrls: ['./models-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger(
-      'inOutAnimation',
-      [
-        transition(
-          ':enter',
-          [
-            style({opacity: 0}),
-            animate('0.25s ease-in',
-              style({opacity: 1}))
-          ]
-        ),
-        transition(
-          ':leave',
-          [
-            style({opacity: 1}),
-            animate('0.2s ease-in',
-              style({opacity: 0}))
-          ]
-        )
-      ]
-    )
-  ]
+    selector: 'sm-models-table',
+    templateUrl: './models-table.component.html',
+    styleUrls: ['./models-table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('inOutAnimation', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('0.25s ease-in', style({ opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ opacity: 1 }),
+                animate('0.2s ease-in', style({ opacity: 0 }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class ModelsTableComponent extends BaseTableView implements OnChanges {
   readonly modelsTableColFields = MODELS_TABLE_COL_FIELDS;
@@ -227,7 +217,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   }
 
   @Input() set tags(tags) {
-    const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS])));
+    const tagsAndActiveFilter = uniqueFilterValueAndExcluded(tags, this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS]);
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.map(tag => ({
       label: tag === null ? '(No tags)' : tag,
       value: tag

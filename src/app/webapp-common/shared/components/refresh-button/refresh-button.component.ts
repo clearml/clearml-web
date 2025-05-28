@@ -1,11 +1,10 @@
+import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Component, input, output, inject, signal} from '@angular/core';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {Store} from '@ngrx/store';
 import {selectAutoRefresh} from '@common/core/reducers/view.reducer';
-import { AsyncPipe } from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
-import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {MatButton, MatIconButton} from '@angular/material/button';
 
@@ -13,15 +12,20 @@ import {MatButton, MatIconButton} from '@angular/material/button';
   selector: 'sm-refresh-button',
   templateUrl: './refresh-button.component.html',
   styleUrls: ['./refresh-button.component.scss'],
-  standalone: true,
   imports: [
-    AsyncPipe,
     FormsModule,
     HesitateDirective,
-    ClickStopPropagationDirective,
     MatSlideToggle,
     MatIconButton,
-    MatButton
+    MatButton,
+  ],
+  animations: [
+    trigger('fadeInOut', [
+      state('void', style({ opacity: 0 })), // state when element is not present
+      state('*', style({ opacity: 1 })),    // state when element is present
+      transition('void => *', animate('0.3s ease-in')),
+      transition('* => void', animate('0.3s ease-out'))
+    ])
   ]
 })
 export class RefreshButtonComponent {

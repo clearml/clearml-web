@@ -3,10 +3,11 @@ import {ModelsViewModesEnum} from '../../models.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 @Component({
-  selector   : 'sm-select-model-header',
-  templateUrl: './select-model-header.component.html',
-  styleUrls  : ['./select-model-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-select-model-header',
+    templateUrl: './select-model-header.component.html',
+    styleUrls: ['./select-model-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SelectModelHeaderComponent {
 

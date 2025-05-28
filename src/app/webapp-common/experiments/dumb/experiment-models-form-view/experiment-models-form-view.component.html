@@ -13,9 +13,6 @@
             label="" [clipboardText]="model().uri"
           ></sm-copy-clipboard>
         }
-        @if (model()?.id) {
-          <sm-id-badge class="ms-3" [id]="model().id" (copied)="copySuccess()"></sm-id-badge>
-        }
       </div>
       @if (editable()) {
         <button mat-icon-button smTooltip="Select model" class="ms-3" (click)="chooseModel()">
@@ -29,6 +26,11 @@
       }
     </div>
   </sm-labeled-row>
+  @if (model()?.id) {
+    <sm-labeled-row label="MODEL ID">
+      <sm-id-badge [id]="model().id" (copied)="copySuccess()"></sm-id-badge>
+    </sm-labeled-row>
+  }
   @if (showCreatedExperiment()) {
     <sm-labeled-row label="CREATING TASK">
       <a [href]="'/projects/'+ ((source()?.projectId) ? source()?.projectId : '*') + '/experiments/' + (source()? source()?.experimentId: '')"

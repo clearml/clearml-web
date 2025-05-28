@@ -23,7 +23,7 @@
   }
   <sm-param-selector class="param-selector"
                      [itemsList]="hyperParams"
-                     [title]="'Select Parameters'"
+                     [title]="'Hyperparameters'"
                      [selectedHyperParams]="selectedHyperParams"
                      [single]="scatter"
                      [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
@@ -34,7 +34,7 @@
     <hr class="separate-margins">
     <div class="metric-title">Additional data point information</div>
     <sm-metric-variant-selector class="param-selector"
-                                [title]="'Select Metrics'"
+                                [title]="'Metrics'"
                                 [selectedMetricVariants]="(selectedMetricsHoverInfo$ | ngrxPush)"
                                 [multiSelect]="true"
                                 [skipValueType]="true"
@@ -44,7 +44,7 @@
                                 (clearSelection)="clearMetricsSelectionForHover()"
     ></sm-metric-variant-selector>
     <sm-param-selector class="param-selector"
-                       [title]="'Select Parameters'"
+                       [title]="'Hyperparameters'"
                        [itemsList]="hyperParams"
                        [selectedHyperParams]="selectedParamsHoverInfo$ | ngrxPush"
                        [single]="false"
@@ -74,9 +74,9 @@
       }
     } @else {
       <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">
-        <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxxl"></mat-icon>
+        <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
         <h4 class="no-data-title">NO DATA TO SHOW</h4>
-        <div>Please select parameters & metrics</div>
+        <div class="sub-title">Please select hyperparameters & metrics</div>
       </div>
     }
   }

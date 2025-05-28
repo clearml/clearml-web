@@ -1,12 +1,7 @@
-@import "variables";
-
 :host {
-  $chart-bar-height: 68px;
-
   display: block;
   position: relative;
   background-color: transparent;
-  // background-color: var(--color-surface);
   border-radius: 6px;
   overflow: hidden;
 
@@ -21,7 +16,6 @@
     .loading {
       display: flex;
       align-items: center;
-      // transform: translateY(#{-1 * $chart-bar-height * 0.5});
     }
 
     .text {

@@ -1,8 +1,8 @@
 <sm-card class="project-card"
   (click)="projectClicked()"
-  [isExample]="!['All Tasks'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
+  [isExample]="!['All Tasks'].includes(project.name) && !isRootProject() && (!project.company || ! project.company.id)"
   [showFolder]="true"
-  [oneTabMode]="!(project?.sub_projects?.length>0)"
+  [oneTabMode]="!(project?.sub_projects?.length > 0)"
   [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
   >
   <div secondTab class="sub-projects-list">
@@ -24,14 +24,14 @@
         smShowTooltipIfEllipsis
         [showAlwaysTooltip]="(project.name?.includes('/'))"
       >{{ project.basename }}</span>
-      @if (!hideMenu && project.default_output_destination) {
+      @if (!hideMenu() && project.default_output_destination) {
         <i class="al icon al-ico-info-circle sm" [smTooltip]="'Default output destination: ' + project.default_output_destination"></i>
       }
     </div>
     @if (project.system_tags?.includes('default')) {
       <div class="justify-content-end project-tag">Sample</div>
     }
-    @if (!hideMenu) {
+    @if (!hideMenu()) {
       <sm-project-card-menu-extended
         class="menu-wrapper"
         (deleteProjectClicked)="deleteProjectClicked.emit($event)"
@@ -39,6 +39,7 @@
         (newProjectClicked)="newProjectClicked.emit($event)"
         (projectNameInlineActivated)="projectName.inlineActivated()"
         (projectEditClicked)="projectEditClicked.emit($event)"
+        (projectSettingsClicked)="projectSettingsClicked.emit($event)"
         [project]="project"
         >
       </sm-project-card-menu-extended>

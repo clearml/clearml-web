@@ -44,9 +44,10 @@ import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-pa
 
 
 @Component({
-  selector: 'sm-experiment-compare-hyper-params-graph',
-  templateUrl: './experiment-compare-hyper-params-graph.component.html',
-  styleUrls: ['./experiment-compare-hyper-params-graph.component.scss']
+    selector: 'sm-experiment-compare-hyper-params-graph',
+    templateUrl: './experiment-compare-hyper-params-graph.component.html',
+    styleUrls: ['./experiment-compare-hyper-params-graph.component.scss'],
+    standalone: false
 })
 export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDestroy {
   private subs = new Subscription();

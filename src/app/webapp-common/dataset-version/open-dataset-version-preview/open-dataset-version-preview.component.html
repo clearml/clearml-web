@@ -2,18 +2,18 @@
   <div class="preview-container">
     <sm-experiment-output-plots #plots
       class="dataset-version-preview"
-      [class.hidden-like]="plots.plotsList?.length < 1"
+      [class.hidden-like]="plots.plotsListLength < 1"
       [isDatasetVersionPreview]="true"
       [selected]="selected()">
     </sm-experiment-output-plots>
     <sm-debug-images #debugImages
       class="dataset-version-preview"
-      [class.hidden]="!debugImages.debugImages?.[selected().id]?.data"
+      [class.hidden]="!debugImages.debugImages?.[selected()?.id]?.data"
       [hideNavigation]="true"
       [disableStatusRefreshFilter]="true"
       [selected]="selected()" >
     </sm-debug-images>
-    @if (plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected().id]?.data) {
+    @if (plots.plotsList !== undefined && plots.plotsListLength < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected()?.id]?.data) {
       <div class="no-data flex-middle">No preview to show</div>
     }
   </div>

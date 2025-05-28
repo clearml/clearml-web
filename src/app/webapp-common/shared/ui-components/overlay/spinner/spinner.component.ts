@@ -1,62 +1,42 @@
+import {PushPipe} from '@ngrx/component';
 import {Store} from '@ngrx/store';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {selectLoading} from '@common/core/reducers/view.reducer';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {selectIsLoading} from '@common/core/reducers/view.reducer';
 import {NavigationStart, Router} from '@angular/router';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {debounce, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {resetLoader} from '@common/core/actions/layout.actions';
-import {Observable, Subscription} from 'rxjs';
-import {isEqual} from 'lodash-es';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {interval} from 'rxjs';
 
 
 @Component({
-  selector: 'sm-spinner',
-  template: `
-    @if (showSpinner) {
+    selector: 'sm-spinner',
+    template: `
+    @if (loading$ | ngrxPush) {
       <div class="loader-container">
         <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
       </div>
     }
     `,
-  styleUrls: ['./spinner.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
+    styleUrls: ['./spinner.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    MatProgressSpinnerModule
-]
+    MatProgressSpinnerModule,
+    PushPipe
+  ]
 })
-export class SpinnerComponent implements OnInit, OnDestroy {
-  public showSpinner: boolean;
-  private spinnerSubscribe: Subscription;
-  private navEndSubscription: Subscription;
-  private loading$: Observable<{ [p: string]: boolean }>;
+export class SpinnerComponent {
+  protected loading$ = this.store.select(selectIsLoading)
+    .pipe(debounce(loading => interval((loading ? 0 : 200))));
 
-  constructor(private store: Store, private router: Router, private cdr: ChangeDetectorRef) {
-    this.loading$ = store.select(selectLoading);
-
-  }
-
-  ngOnInit() {
-    this.spinnerSubscribe = this.loading$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(isEqual)
-    ).subscribe(loaders => {
-        this.showSpinner = Object.values(loaders).some((value) => value);
-        this.cdr.detectChanges();
-    });
-
-    this.navEndSubscription = this.router.events
+  constructor(private store: Store, private router: Router) {
+    this.router.events
       .pipe(
         filter(event => event instanceof NavigationStart),
         map((event: NavigationStart) => event.url.split('?')[0]),
         distinctUntilChanged()
       ).subscribe(() => {
-        this.store.dispatch(resetLoader());
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.navEndSubscription.unsubscribe();
-    this.spinnerSubscribe.unsubscribe();
+      this.store.dispatch(resetLoader());
+    });
   }
 }

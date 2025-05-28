@@ -1,6 +1,6 @@
 <button
   #trigger="matMenuTrigger"
-  [class.menu-opened]="trigger.menuOpen"
+  [class.menu-opened]="trigger.menuOpen && (prefixIconClass() || header() || showCart())"
   mat-button smClickStopPropagation
   [disableRipple]="true"
   [matMenuTriggerFor]="menuHandle"

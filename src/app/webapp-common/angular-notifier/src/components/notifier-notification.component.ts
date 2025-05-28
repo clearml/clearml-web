@@ -16,20 +16,21 @@ import {NotifierTimerService} from '../services/notifier-timer.service';
  * mouse movements.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
-  host: {
-    '(click)': 'onNotificationClick()',
-    '(mouseout)': 'onNotificationMouseout()',
-    '(mouseover)': 'onNotificationMouseover()',
-    class: 'notifier__notification'
-  },
-  providers: [
-    // We provide the timer to the component's local injector, so that every notification components gets its own
-    // instance of the timer service, thus running their timers independently from each other
-    NotifierTimerService
-  ],
-  selector: 'notifier-notification',
-  templateUrl: './notifier-notification.component.html'
+    changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
+    host: {
+        '(click)': 'onNotificationClick()',
+        '(mouseout)': 'onNotificationMouseout()',
+        '(mouseover)': 'onNotificationMouseover()',
+        class: 'notifier__notification'
+    },
+    providers: [
+        // We provide the timer to the component's local injector, so that every notification components gets its own
+        // instance of the timer service, thus running their timers independently from each other
+        NotifierTimerService
+    ],
+    selector: 'notifier-notification',
+    templateUrl: './notifier-notification.component.html',
+    standalone: false
 })
 export class NotifierNotificationComponent implements AfterViewInit {
 

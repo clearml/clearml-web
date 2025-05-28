@@ -10,11 +10,12 @@ import {EditableSectionComponent} from '@common/shared/ui-components/panel/edita
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
 
 @Component({
-  selector: 'sm-experiment-general-info',
-  templateUrl: './experiment-general-info.component.html',
-  styleUrls: ['./experiment-general-info.component.scss']
+    selector: 'sm-experiment-details',
+    templateUrl: './experiment-details.component.html',
+    styleUrls: ['./experiment-details.component.scss'],
+    standalone: false
 })
-export class ExperimentGeneralInfoComponent {
+export class ExperimentDetailsComponent {
   private store = inject(Store);
 
   commentControl = new UntypedFormControl();

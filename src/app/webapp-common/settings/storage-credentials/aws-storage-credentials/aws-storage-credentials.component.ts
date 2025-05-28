@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, inject, input, OnInit, output} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormFieldModule, MatLabel} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -32,26 +31,22 @@ type AWSForm = FormGroup<{
 }>
 
 @Component({
-  selector: 'sm-aws-storage-credentials',
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatFormFieldModule,
-    MatInputModule,
-    MatLabel,
-    ReactiveFormsModule,
-    MatCheckboxModule,
-    TooltipDirective,
-    CopyClipboardComponent,
-    MatButton,
-    MatIcon,
-    MatIconButton,
-  ],
-  templateUrl: './aws-storage-credentials.component.html',
-  styleUrls: ['./aws-storage-credentials.component.scss', '../storage-credentials.scss']
+    selector: 'sm-aws-storage-credentials',
+    imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatLabel,
+        ReactiveFormsModule,
+        MatCheckboxModule,
+        TooltipDirective,
+        CopyClipboardComponent,
+        MatButton,
+        MatIcon,
+        MatIconButton,
+    ],
+    templateUrl: './aws-storage-credentials.component.html',
+    styleUrls: ['./aws-storage-credentials.component.scss', '../storage-credentials.scss']
 })
 export class AwsStorageCredentialsComponent implements OnInit {
 

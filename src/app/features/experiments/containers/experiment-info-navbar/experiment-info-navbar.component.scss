@@ -1,7 +1,7 @@
 .tab-nav {
   display: grid;
   grid-template-columns: 200px 1fr 200px;
-  border-bottom: 1px solid #efefef;
+  border-bottom: 1px solid var(--color-surface-container-high);
 
   &.minimized {
     grid-template-columns: 0 1fr 108px;

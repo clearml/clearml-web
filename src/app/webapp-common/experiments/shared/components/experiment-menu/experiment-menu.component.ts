@@ -57,9 +57,10 @@ import {Task} from '~/business-logic/model/tasks/task';
 
 
 @Component({
-  selector: 'sm-experiment-menu',
-  templateUrl: './experiment-menu.component.html',
-  styleUrls: ['./experiment-menu.component.scss']
+    selector: 'sm-experiment-menu',
+    templateUrl: './experiment-menu.component.html',
+    styleUrls: ['./experiment-menu.component.scss'],
+    standalone: false
 })
 export class ExperimentMenuComponent extends BaseContextMenuComponent {
   protected blTaskService = inject(BlTasksService);

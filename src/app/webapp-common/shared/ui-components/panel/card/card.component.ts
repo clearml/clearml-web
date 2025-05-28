@@ -3,14 +3,13 @@ import {ChangeDetectionStrategy, Component, signal, input } from '@angular/core'
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-card',
-  templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    ClickStopPropagationDirective
-]
+    selector: 'sm-card',
+    templateUrl: './card.component.html',
+    styleUrls: ['./card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ClickStopPropagationDirective
+    ]
 })
 export class CardComponent {
 

@@ -1,22 +1,24 @@
 @use '../../../../../../../../node_modules/@angular/material/index' as mat;
+@use "../../../../../styles/variables";
 
-//@import "../assets/fonts/trains-icons.scss";
-//@import "reboot";
-//@import "minimal-bootstrap";
-//@import "layout";
-//@import "utilities";
-@import "themes";
-@import "./customizations";
-@import "../../../../../styles/icons"; //needs a clean from sass vars
-
+//@use "../assets/fonts/trains-icons.scss";
+//@use "reboot";
+//@use "minimal-bootstrap";
+//@use "layout";
+//@use "utilities";
+@use "themes";
+@use "./customizations";
+@forward "../../../../../styles/icons"; //needs a clean from sass vars
 
 :root {
-  @include mat.all-component-themes($theme);
-  @include components($theme);
+  @include mat.all-component-themes(themes.$theme);
+  @include mat.system-level-colors(themes.$theme);
+  @include customizations.components(themes.$theme);
 
   &.dark-mode {
-    @include mat.all-component-colors($dark-theme);
-    @include components($dark-theme);
+    @include mat.all-component-colors(themes.$dark-theme);
+    @include mat.system-level-colors(themes.$dark-theme);
+    @include customizations.components(themes.$dark-theme);
   }
 }
 
@@ -26,7 +28,6 @@ $purple: #4d66ff;
 $white-primary-text: rgba(white, 0.87);
 $dark-primary-text: rgba(black, 0.87);
 
-@import "../../../../../styles/variables";
 
 * {
   margin: 0;
@@ -38,6 +39,10 @@ html, body {
   height: 100%;
   overflow: hidden;
   --mat-select-trigger-text-size: 14px;
+
+  &.dark-mode {
+    background-color: var(--color-surface-container-lowest);
+  }
 }
 
 body {

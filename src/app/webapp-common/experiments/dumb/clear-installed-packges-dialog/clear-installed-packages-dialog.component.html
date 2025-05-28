@@ -9,7 +9,7 @@
                      aria-label="Select an option">
       <mat-radio-button value="install"><span>Empty (Agent will install packages using 'requirements.txt' from repository). {{showReset? '*': ''}}</span></mat-radio-button>
       <mat-radio-button value="dontInstall"><span>Empty (Agent will not install any packages). {{showReset? '*': ''}}</span></mat-radio-button>
-      @if (showReset){<mat-radio-button value="reset" class="mb-2"><span class="ms-2">Set to originally recorded packages (original-pip).</span></mat-radio-button>}
+      @if (showReset){<mat-radio-button value="reset" class="mb-2">Set to originally recorded packages (original-pip).</mat-radio-button>}
       <div class="mt-2">{{showReset? '* ':''}}This will clear all packages{{showReset? ' - Both originally recorded, and from latest execution.':'.'}}</div>
     </mat-radio-group>
   </div>

@@ -4,10 +4,11 @@ import {IRecentTask} from '../../common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
 
 @Component({
-  selector: 'sm-dashboard-experiments',
-  templateUrl: './dashboard-experiments.component.html',
-  styleUrls: ['./dashboard-experiments.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-dashboard-experiments',
+    templateUrl: './dashboard-experiments.component.html',
+    styleUrls: ['./dashboard-experiments.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DashboardExperimentsComponent {
   private router = inject(Router);

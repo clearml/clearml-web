@@ -1,14 +1,13 @@
-@import "mixins/common";
-@import "variables";
+@use "mixins/common";
 
 $reqWidth: 56px;
 .number-counter-container {
   text-align: center;
   .number-counter {
-    @include counter-title();
+    @include common.counter-title();
   }
   .number-counter-label {
-    @include counter-label();
+    @include common.counter-label();
   }
 }
 

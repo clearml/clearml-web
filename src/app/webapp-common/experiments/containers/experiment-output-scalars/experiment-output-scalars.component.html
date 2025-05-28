@@ -1,5 +1,5 @@
-@if (metricValuesView$ | async) {
-  <sm-experiment-metric-data-table [selectedMetricsScalar]="tableSelectedMetrics$ | async" [lastMetrics]="lastMetricsValues$ | async" (selectedMetricsChanged)="selectedMetricsChanged($event)"></sm-experiment-metric-data-table>
+@if (metricValuesView()) {
+  <sm-experiment-metric-data-table [selectedMetricsScalar]="tableSelectedMetrics()" [lastMetrics]="lastMetricsValues()" (selectedMetricsChanged)="selectedMetricsChanged($event)"></sm-experiment-metric-data-table>
 } @else {
   <mat-drawer-container autosize class="light-theme">
     <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
@@ -8,23 +8,27 @@
           <sm-graph-settings-bar
             class="drawer-settings-bar"
             [verticalLayout]="true"
-            [smoothWeight]="smoothWeight$ | ngrxPush"
-            [smoothType]="smoothType$ | ngrxPush"
-            [xAxisType]="xAxisType$ | ngrxPush"
-            [groupBy]="groupBy"
+            [smoothWeight]="smoothWeight()"
+            [smoothSigma]="smoothSigma()"
+            [smoothType]="smoothType()"
+            [xAxisType]="xAxisType()"
+            [groupBy]="groupBy()"
             [groupByOptions]="groupByOptions"
+            [clearable]="projectId() === '*' ? null : !isProjectLevel()"
             (changeWeight)="changeSmoothness($event)"
+            (changeSigma)="changeSigma($event)"
             (toggleSettings)="toggleSettingsBar()"
             (changeXAxisType)="changeXAxisType($event)"
             (changeGroupBy)="changeGroupBy($event)"
             (changeSmoothType)="changeSmoothType($event)"
+            (setToProject)="setToProject()"
           ></sm-graph-settings-bar>
         }
 
         <sm-selectable-grouped-filter-list
-          [list]="scalarList"
-          [checkedList]="selectedMetrics"
-          [searchTerm]="searchTerm$ | ngrxPush"
+          [list]="scalarList()"
+          [checkedList]="selectedMetrics()"
+          [searchTerm]="searchTerm()"
           (itemSelect)="metricSelected($event)"
           (hiddenChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
@@ -38,28 +42,30 @@
     </mat-drawer>
     <mat-drawer-content class="overflow-hidden">
       <div class="graphs-container" [class.maximized]="!minimized">
-        @if ((metricValuesView$ | async) === false && minimized) {
+        @if (metricValuesView() === false && minimized) {
           <div class="hover-button">
-            <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs">
+            <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs" data-id="eyeIcon">
               <mat-icon fontSet="al" fontIcon="al-ico-eye-outline"></mat-icon>
             </button>
           </div>
         }
         <sm-experiment-graphs
-          [class.with-settings]="!!(showSettingsBar$ | async) && minimized"
+          [class.with-settings]="!!showSettingsBar() && minimized"
           #experimentGraphs
-          [isGroupGraphs]="groupBy === 'none'"
-          [metrics]="graphs"
-          [singleValueData]="singleValueData$ | ngrxPush"
-          [experimentName]="experimentName"
-          [hiddenList]="selectedMetrics"
-          [smoothWeight]="smoothWeightDelayed$ | ngrxPush"
-          [smoothType]="smoothType$ | ngrxPush"
+          [isGroupGraphs]="groupBy() === 'none'"
+          [metrics]="graphs()"
+          [list]="scalarList()"
+          [singleValueData]="singleValueData()"
+          [experimentName]="experiment()?.name"
+          [hiddenList]="selectedMetrics()"
+          [smoothWeight]="smoothWeightDelayed()"
+          [smoothSigma]="smoothSigmaDelayed()"
+          [smoothType]="smoothType()"
           [legendStringLength]="minimized ? 14 : 19"
           [minimized]="minimized"
-          [xAxisType]="xAxisType$ | ngrxPush"
-          [groupBy]="groupBy"
-          [splitSize]="splitSize$ | ngrxPush"
+          [xAxisType]="xAxisType()"
+          [groupBy]="groupBy()"
+          [splitSize]="splitSize()"
           [breakPoint]="900"
           [exportForReport]="exportForReport"
           [hoverMode]="'x'"

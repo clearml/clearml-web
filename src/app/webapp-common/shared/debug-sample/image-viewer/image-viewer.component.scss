@@ -132,8 +132,19 @@
 
     .sizeable-container {
       position: absolute;
-      transition: height 0.25s, width 0.25s;
+      transition: height 0.25s, width 0.25s, transform 0.25s;
       transition-timing-function: cubic-bezier(0.43, 0, 0.19, 0.93);
+      &.wheeling{
+        transition: none;
+      }
+
+      &.dragging {
+        transition: height 0.25s, width 0.25s;
+
+        img {
+          cursor: grabbing;
+        }
+      }
 
       img {
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
@@ -141,10 +152,6 @@
         width: 100%;
         height: 100%;
         cursor: grab;
-
-        &.dragging {
-          cursor: grabbing;
-        }
       }
     }
 

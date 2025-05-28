@@ -11,13 +11,14 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
-  selector: 'sm-open-dataset-version-info',
-  templateUrl: './open-dataset-version-info.component.html',
-  styleUrls: [
-    './open-dataset-version-info.component.scss',
-    '../../pipelines-controller/pipeline-controller-info/pipeline-controller-info.component.scss'
-  ],
-  providers: [DagManagerUnsortedService]
+    selector: 'sm-open-dataset-version-info',
+    templateUrl: './open-dataset-version-info.component.html',
+    styleUrls: [
+        './open-dataset-version-info.component.scss',
+        '../../pipelines-controller/pipeline-controller-info/pipeline-controller-info.component.scss'
+    ],
+    providers: [DagManagerUnsortedService],
+    standalone: false
 })
 export class OpenDatasetVersionInfoComponent extends PipelineControllerInfoComponent {
       private dialog = inject(MatDialog);

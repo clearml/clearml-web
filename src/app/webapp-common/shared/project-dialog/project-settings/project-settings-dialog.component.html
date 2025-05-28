@@ -1,0 +1,60 @@
+<sm-dialog-template
+  iconClass="al-ico-projects"
+  [header]="dialogTitle()"
+  headerClass="no-uppercase"
+>
+
+  <mat-tab-group [mat-stretch-tabs]="false" mat-align-tabs="center" class="with-border" [dynamicHeight]="true">
+
+    <mat-tab label="GENERAL">
+      <sm-edit-project-form
+        #generalForm
+        [project]="data.project"
+        (projectUpdated)="updateProject($event)"
+        (cancelClicked)="closeDialog()"
+        class="data-project">
+      </sm-edit-project-form>
+    </mat-tab>
+
+    <mat-tab label="SCALAR VIEW DEFAULTS">
+      <sm-graph-settings-bar
+        class="graph-settings-menu"
+        (click)="$event.stopPropagation()"
+        [verticalLayout]="true"
+        [smoothWeight]="settings()?.smoothWeight"
+        [smoothSigma]="settings()?.smoothSigma"
+        [smoothType]="settings()?.smoothType"
+        [xAxisType]="settings()?.xAxisType"
+        [groupBy]="settings()?.groupBy"
+        [groupByOptions]="groupByOptions"
+        [clearable]="null"
+        (changeWeight)="changeSmoothness($event)"
+        (changeSigma)="changeSigma($event)"
+        (changeXAxisType)="changeXAxisType($event)"
+        (changeGroupBy)="changeGroupBy($event)"
+        (changeSmoothType)="changeSmoothType($event)"
+      ></sm-graph-settings-bar>
+      <div class="list">
+        <div class="d-flex align-items-center">Default Scalars
+          <i class="al-icon al-ico-info-circle sm ms-3"
+             smTooltip="Control which metrics to display by default when viewing project's tasks/models scalars"
+          ></i></div>
+        <sm-selectable-grouped-filter-list
+          [list]="scalarList()"
+          [checkedList]="selectedMetrics()"
+          [searchTerm]="searchTerm()"
+          (hiddenChanged)="hiddenListChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
+        ></sm-selectable-grouped-filter-list>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+
+  <mat-dialog-actions>
+    <button mat-stroked-button (click)="closeDialog()" data-id="Cancel">CANCEL</button>
+    <button mat-flat-button (click)="save()" [disabled]="generalForm.projectForm.invalid || (!scalarSettingsChanged() && !generalChanged() && !hiddenChanged())" data-id="Save">
+      SAVE
+    </button>
+  </mat-dialog-actions>
+</sm-dialog-template>

@@ -7,9 +7,10 @@ import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/da
 import {IReport} from '@common/reports/reports.consts';
 
 @Component({
-  selector: 'sm-search-results-page',
-  templateUrl: './search-results-page.component.html',
-  styleUrls: ['./search-results-page.component.scss']
+    selector: 'sm-search-results-page',
+    templateUrl: './search-results-page.component.html',
+    styleUrls: ['./search-results-page.component.scss'],
+    standalone: false
 })
 export class SearchResultsPageComponent {
   protected readonly searchPages = activeSearchLink;
@@ -71,6 +72,8 @@ export class SearchResultsPageComponent {
       case activeSearchLink.models:
         return 264;
       case activeSearchLink.pipelines:
+      case activeSearchLink.reports:
+      case activeSearchLink.openDatasets:
         return 226;
       default:
         return 250;

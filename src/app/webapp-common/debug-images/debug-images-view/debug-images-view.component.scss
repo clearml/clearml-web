@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 :host {
   display: block;
@@ -73,7 +73,7 @@
 
     .mat-expansion-panel-header-title {
       margin: 10px 0;
-      font-family: $font-family-base, sans-serif;
+      font-family: variables.$font-family-base, sans-serif;
       color: var(--color-on-surface-variant);
 
 

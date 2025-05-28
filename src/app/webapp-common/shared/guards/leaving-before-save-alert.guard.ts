@@ -16,7 +16,6 @@ export const leavingBeforeSaveAlertGuard = (inEditSelector: MemoizedSelector<any
   (component, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState: RouterStateSnapshot) => {
     const store = inject(Store);
     const dialog = inject(MatDialog);
-
     return store.select(inEditSelector)
       .pipe(
         debounceTime(0),

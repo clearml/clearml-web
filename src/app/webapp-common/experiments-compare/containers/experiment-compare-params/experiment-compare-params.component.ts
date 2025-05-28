@@ -12,8 +12,9 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 @Component({
   selector: 'sm-experiment-compare-params',
   templateUrl: './experiment-compare-params.component.html',
-  styleUrls: [ './experiment-compare-params.component.scss', '../../cdk-drag.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['../experiment-compare-base.component.scss', './experiment-compare-params.component.scss', '../../cdk-drag.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
   public showEllipsis = true;
@@ -43,19 +44,19 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
       this.originalExperiments = experiments.reduce((acc, exp) => {
         acc[exp.id] = isParamsConverted(exp.hyperparams) ? this.originalExperiments[exp.id] : exp;
         return acc;
-      }, {} as { [id: string]: IExperimentDetail | ExperimentParams });
+      }, {} as Record<string, IExperimentDetail | ExperimentParams>);
       const experimentList = Object.values(this.originalExperiments).map(experiment => convertExperimentsArraysParams(experiment, this.originalExperiments[experiments[0].id]));
       this.resetComponentState(experimentList);
       this.calculateTree(experimentList);
     });
   }
 
-  buildCompareTree(experiments: Array<ExperimentParams>): ExperimentCompareTree {
+  buildCompareTree(experiments: ExperimentParams[]): ExperimentCompareTree {
     const mergedExperiment = getAllKeysEmptyObject(experiments);
     return experiments
       .reduce((acc, cur) => {
         acc[cur.id] = {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           'hyper-params': this.buildSectionTree(cur, this.entityType === EntityTypeEnum.model? 'design': 'hyperparams', mergedExperiment)
         };
 

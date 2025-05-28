@@ -3,13 +3,12 @@ import {Component, input } from '@angular/core';
 import {CdkScrollable} from '@angular/cdk/overlay';
 
 @Component({
-  selector: 'sm-wizard-dialog-step',
-  templateUrl: './wizard-dialog-step.component.html',
-  styleUrls: ['./wizard-dialog-step.component.scss'],
-  standalone: true,
-  imports: [
-    CdkScrollable
-]
+    selector: 'sm-wizard-dialog-step',
+    templateUrl: './wizard-dialog-step.component.html',
+    styleUrls: ['./wizard-dialog-step.component.scss'],
+    imports: [
+        CdkScrollable
+    ]
 })
 export class WizardDialogStepComponent {
   icon = input<string>();

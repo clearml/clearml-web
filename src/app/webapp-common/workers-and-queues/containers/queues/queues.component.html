@@ -13,7 +13,7 @@
   [gutterSize]=1 [useTransition]="true"
   (transitionEnd)="table.table.resize(); table.afterTableInit()"
 >
-  <as-split-area [size]="50">
+  <as-split-area [size]="selectedQueue() ? 50 : 100">
     <sm-queues-table
       #table
       [queues]="queues()"
@@ -27,7 +27,7 @@
       (queueSelected)="selectQueue($event)"
     ></sm-queues-table>
   </as-split-area>
-  <as-split-area [size]="50" [visible]="!!selectedQueue()">
+  <as-split-area [size]="selectedQueue() ? 50 : 0" [visible]="!!selectedQueue()">
     <sm-queue-info
       [selectedQueue]="selectedQueue()"
       [queues]="queues()"

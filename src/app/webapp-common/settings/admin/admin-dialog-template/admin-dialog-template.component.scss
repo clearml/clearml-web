@@ -1,10 +1,12 @@
-@import "variables";
-$credentialBaseHeight: 252px;
 :host {
+    ::ng-deep .mat-mdc-tab-nav-bar, .mat-mdc-tab-group {
+      --mat-tab-header-divider-height: 1px;
+    }
   display: flex;
   flex-direction: column;
   padding-bottom: 32px;
   min-height: 160px;
+  --mat-tab-header-divider-color: var(--color-surface-container-high);
 
   .label-row {
     padding-bottom: 24px;
@@ -19,26 +21,28 @@ $credentialBaseHeight: 252px;
     .label {
       display: inline-block;
       width: 155px;
+      flex: 0 0 155px;
       padding: 6px 0;
       color: var(--color-outline);
     }
 
     .value {
+      padding: 6px 0;
       color: var(--color-on-surface-variant);
+      word-break: break-all;
     }
+  }
+
+  .credentials {
+    margin-bottom: 24px;
   }
 
   .credentials-and-code {
     overflow: hidden;
     transition: max-height 1s ease;
     .code-container{
-      height: $credentialBaseHeight;
       transition: height 1s ease;
       margin-bottom: 16px;
-
-      &.jupyter{
-        height: $credentialBaseHeight - 50;
-      }
     }
 
     &.small-popup {
@@ -54,7 +58,7 @@ $credentialBaseHeight: 252px;
   }
 
   .instructions {
-    line-height: 1.3;
+    padding: 16px 0 12px;
     color:var(--color-on-surface-variant);
   }
 
@@ -63,9 +67,9 @@ $credentialBaseHeight: 252px;
     line-height: 1.5;
     padding: 16px 16px;
     margin-bottom: 24px;
-    color: var(--color-on-surface-variant);
-    background-color: var(--color-shadow);
+    background-color: var(--color-surface-container-low);
     border-radius: 4px;
+    border: 1px solid var(--color-outline-variant);
 
     &:hover {
       sm-copy-clipboard {
@@ -77,23 +81,22 @@ $credentialBaseHeight: 252px;
       width: 100%;
       font-family: monospace;
       font-size: 12px;
-      color: $blue-100;
     }
 
     .operation {
-      color: #b087e5;
+      color: var(--color-warning);
     }
 
     .string {
-      color: #e6db74;
+      color: var(--color-primary);
     }
 
     .variable {
-      color: #9ed66b;
+      color: var(--color-tertiary);
     }
 
     .comment {
-      color: #384161;
+      color: var(--color-on-surface-variant);
     }
 
     sm-copy-clipboard {

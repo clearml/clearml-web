@@ -3,9 +3,10 @@ import {ActivatedRoute} from '@angular/router';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 @Component({
-  selector: 'sm-queues-menu',
-  templateUrl: './queues-menu.component.html',
-  styleUrls: ['./queues-menu.component.scss']
+    selector: 'sm-queues-menu',
+    templateUrl: './queues-menu.component.html',
+    styleUrls: ['./queues-menu.component.scss'],
+    standalone: false
 })
 export class QueuesMenuComponent  {
   private route = inject(ActivatedRoute);

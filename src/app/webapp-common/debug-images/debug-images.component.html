@@ -1,3 +1,4 @@
+@if (optionalMetricsDic() !== null) {
 <div class="images-container">
   @for (experimentId of experimentIds() | slice :  0 : LIMITED_VIEW_LIMIT; track experimentId) {
     <div class="single-debug-images-container" [class.separator]="experimentIds()?.length > 1">
@@ -55,7 +56,7 @@
           </div>
         }
       </div>
-      @if (shouldShowNoImagesForExperiment(experimentId)) {
+      @if (optionalMetricsDic()?.[experimentId]?.length === 0 && shouldShowNoImagesForExperiment(experimentId)) {
         <div class="no-images no-output">
           <mat-icon fontSet="al" fontIcon="al-ico-debug-samples"></mat-icon>
           <h4>NO DEBUG SAMPLES</h4>
@@ -84,4 +85,4 @@
     </div>
   }
 </div>
-
+}

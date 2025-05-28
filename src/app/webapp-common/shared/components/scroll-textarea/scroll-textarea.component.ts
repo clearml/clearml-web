@@ -6,19 +6,18 @@ import {SearchComponent} from '@common/shared/ui-components/inputs/search/search
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'sm-scroll-textarea',
-  templateUrl: './scroll-textarea.component.html',
-  styleUrls: ['./scroll-textarea.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CopyClipboardComponent,
-    SearchComponent,
-    CdkVirtualScrollViewport,
-    CdkVirtualForOf,
-    MatProgressSpinnerModule,
-    CdkFixedSizeVirtualScroll,
-  ]
+    selector: 'sm-scroll-textarea',
+    templateUrl: './scroll-textarea.component.html',
+    styleUrls: ['./scroll-textarea.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CopyClipboardComponent,
+        SearchComponent,
+        CdkVirtualScrollViewport,
+        CdkVirtualForOf,
+        MatProgressSpinnerModule,
+        CdkFixedSizeVirtualScroll,
+    ]
 })
 export class ScrollTextareaComponent {
   search = '';
@@ -64,7 +63,7 @@ export class ScrollTextareaComponent {
           }
         }
       }
-    this.scroll().scrollToIndex(this.indexes[this.index]);
+    this.scroll().scrollToIndex(this.indexes[this.index] - 3);
   }
 
   resetSearch(value?: string) {

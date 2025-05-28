@@ -1,6 +1,6 @@
-@import "variables";
+@use "variables";
 
-$top-bar-height: $nav-bar-height;
+$top-bar-height: variables.$nav-bar-height;
 
 
 // Projects

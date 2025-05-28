@@ -5,12 +5,17 @@ import {
   OnDestroy,
   ChangeDetectorRef, AfterViewInit, ElementRef, viewChild, input, output } from '@angular/core';
 import {Subscription} from 'rxjs';
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import {last, findIndex} from 'lodash-es';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {last, findLastIndex} from 'lodash-es';
 import Convert from 'ansi-to-html';
 import {Log} from '../../actions/common-experiment-output.actions';
 
 import hasAnsi from 'has-ansi';
+import {DatePipe} from '@angular/common';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton} from '@angular/material/button';
 
 interface LogRow {
   timestamp?: string;
@@ -20,10 +25,20 @@ interface LogRow {
 }
 
 @Component({
-  selector: 'sm-experiment-log-info',
-  templateUrl: './experiment-log-info.component.html',
-  styleUrls: ['./experiment-log-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-experiment-log-info',
+    templateUrl: './experiment-log-info.component.html',
+    styleUrls: ['./experiment-log-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CdkVirtualScrollViewport,
+        CdkVirtualForOf,
+        CdkFixedSizeVirtualScroll,
+        DatePipe,
+        SaferPipe,
+        MatProgressSpinner,
+        MatIcon,
+        MatButton
+    ]
 })
 export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   public orgLogs: Log[];
@@ -57,7 +72,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
       setTimeout(() => this.shouldFocusLog = true, 1000);
     }
     if(!this.hasFilter && filter) {
-      this.locationBeforeFilter = findIndex(this.lines, this.prevLine) + this.prevLineOffset;
+      this.locationBeforeFilter = findLastIndex(this.lines, this.prevLine) + this.prevLineOffset;
     } else if (this.locationBeforeFilter !== null) {
       window.setTimeout(() => {
         this.logContainer()?.scrollToIndex(this.locationBeforeFilter);
@@ -85,7 +100,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     if (autoRefresh && this.atEnd) {
       prevLocation = this.lines.length;
     } else {
-      prevLocation = findIndex(this.lines, this.prevLine) + this.prevLineOffset;
+      prevLocation = findLastIndex(this.lines, this.prevLine) + this.prevLineOffset;
     }
     this.fetchPrev = null;
     if (!this.initial && prevLocation) {
@@ -101,12 +116,15 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
         this.scrolling = true;
         window.setTimeout(() => {
           this.logContainer()?.scrollToIndex(this.lines.length);
+          this.scrolledToBottom.emit();
           this.canRefresh = true;
           window.setTimeout(() => this.scrolling = false, 80);
         }, 10);
       }
     }
   }
+
+  scrolledToBottom = output();
 
   fetchMore = output<{
         direction: string;

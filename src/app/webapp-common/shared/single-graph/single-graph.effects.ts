@@ -14,6 +14,7 @@ import {selectFullScreenChart, selectFullScreenChartIsOpen, selectFullScreenChar
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {concatLatestFrom} from '@ngrx/operators';
 
 
 
@@ -55,14 +56,17 @@ export class SingleGraphEffects {
 
   getNextPlotsForIter$ = createEffect(() => this.actions$.pipe(
     ofType(getNextPlotSample),
-    withLatestFrom(this.store.select(selectPlotViewerScrollId)),
-    switchMap(([action, scrollId]) =>
+    concatLatestFrom(()=> [this.store.select(selectPlotViewerScrollId),
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('models')))
+    ]),
+    switchMap(([action, scrollId, model]) =>
       this.eventsApi.eventsNextPlotSample({
         /* eslint-disable @typescript-eslint/naming-convention */
         task: action.task,
         scroll_id: scrollId,
         navigate_earlier: action.navigateEarlier,
-        ...(action.iteration && {next_iteration: true})
+        ...(action.iteration && {next_iteration: true}),
+        ...(model && {model_events: true})
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(

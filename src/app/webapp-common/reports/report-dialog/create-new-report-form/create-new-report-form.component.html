@@ -27,6 +27,13 @@
     (loadMore)="loadMore($event, true)"
     (createNewSelected)="createNewSelected($event)"
   ></sm-paginated-entity-selector>
+  @if (!reportForm.controls.project.untouched && reportForm.controls.project.errors; as errors) {
+    <div class="extra-errors">
+      @if (errors?.required) {
+        <mat-error>Please select project.</mat-error>
+      }
+    </div>
+  }
 
   <mat-form-field appearance="outline" class="mt-4">
     @if (reportForm.controls.description?.invalid) {

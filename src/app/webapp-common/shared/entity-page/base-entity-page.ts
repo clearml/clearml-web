@@ -4,6 +4,7 @@ import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'r
 import {debounceTime,distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {
+  selectIsArchivedMode,
   selectSelectedProject,
   selectSelectedProjectUsers,
   selectTablesFilterProjectsOptions
@@ -40,8 +41,9 @@ import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {selectProjectId} from '@common/models/reducers';
 
 @Component({
-  selector: 'sm-base-entity-page',
-  template: ''
+    selector: 'sm-base-entity-page',
+    template: '',
+    standalone: false
 })
 export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
   protected entities = [];
@@ -60,7 +62,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public splitInitialSize: number;
   public minimizedView: boolean;
   public footerItems = [] as ItemFooterModel[];
-  public footerState$: Observable<IFooterState<any>>;
+  public footerState$: Observable<IFooterState<{id: string}>>;
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
   private destroy$ = new Subject();
@@ -102,7 +104,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected contextMenuService = inject(HeaderMenuService);
 
   protected projectId$ = this.store.selectSignal(selectProjectId);
-
+  protected isArchivedMode = this.store.selectSignal(selectIsArchivedMode);
   protected constructor() {
 
     this.users$ = this.store.select(selectSelectedProjectUsers);
@@ -141,7 +143,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     this.sub.add(this.refresh.tick
       .pipe(
         withLatestFrom(this.inEditMode$, this.showAllSelectedIsActive$),
-        filter(([, edit, showAllSelectedIsActive]) => !edit && !showAllSelectedIsActive),
+        filter(([tick, edit, showAllSelectedIsActive]) => !tick && !edit && !showAllSelectedIsActive),
         map(([auto]) => auto)
       )
       .subscribe(auto => this.refreshList(auto !== false))
@@ -251,13 +253,13 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     ).pipe(
       takeUntil(this.destroy$),
       debounceTime(100),
-      filter(([selected]) => selected.length > 1 || this.currentSelection?.length > 1),
+      filter(([selected, , showAllSelectedIsActive]) => selected.length > 1 || this.currentSelection?.length > 1 || showAllSelectedIsActive),
       tap(([selected]) => this.currentSelection = selected),
       map(([selected, data, showAllSelectedIsActive, companyTags, projectTags, tagsFilterByProject]) => {
           const _selectionAllHasExample = selectionAllHasExample(selected);
           const _selectionHasExample = selectionHasExample(selected);
           const _selectionExamplesCount = selectionExamplesCount(selected);
-          const isArchive = selectionAllIsArchive(selected);
+          const isArchive = this.isArchivedMode() ?? selectionAllIsArchive(selected);
           return {
             selectionHasExample: _selectionHasExample,
             selectionAllHasExample: _selectionAllHasExample,

@@ -5,9 +5,10 @@ import {isExample} from '@common/shared/utils/shared-utils';
 import {pageSize} from '../../common-projects.consts';
 
 @Component({
-  selector: 'sm-projects-list',
-  templateUrl: './projects-list.component.html',
-  styleUrls: ['./projects-list.component.scss']
+    selector: 'sm-projects-list',
+    templateUrl: './projects-list.component.html',
+    styleUrls: ['./projects-list.component.scss'],
+    standalone: false
 })
 export class ProjectsListComponent {
   isExample = isExample;
@@ -26,6 +27,8 @@ export class ProjectsListComponent {
   moveToClicked = output<Project>();
   createNewProjectClicked = output<Project>();
   projectEditClicked = output<Project>();
+  projectSettingsClicked = output<Project>();
+
 
   protected projectsNames = computed(() => this.projects()?.map(p => p.basename));
   protected totalVirtualCards = computed(() => this.projects()?.[1]?.['isRoot'] ? 2 : 1);

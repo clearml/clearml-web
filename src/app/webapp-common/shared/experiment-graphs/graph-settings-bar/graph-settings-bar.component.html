@@ -1,18 +1,18 @@
-<div class="x-axis-options" [class.vertical-layout]="verticalLayout" [class.short-mode]="shortMode && !verticalLayout" data-id="scalarSettings">
-  <div class="d-flex field justify-content-between" [class.w-100]="verticalLayout">
-    <span class="label-text axis-text-margin-left" data-id="GroupBytext">Group by</span>
+<div class="x-axis-options" [class.vertical-layout]="verticalLayout()" [class.short-mode]="shortMode() && !verticalLayout()" data-id="scalarSettings">
+  <div class="d-flex field" [class.width-100]="verticalLayout()">
+    <span class="label-text" data-id="GroupBytext">Group by</span>
     <mat-form-field appearance="outline" class="group-by-field no-bottom thin" data-id="GroupByField">
-      <mat-select [value]="groupBy" (selectionChange)="groupByChanged($event)">
-        @for (type of groupByOptions; track type) {
+      <mat-select [value]="groupBy()" (selectionChange)="groupByChanged($event)" [hideSingleSelectionIndicator]="true">
+        @for (type of groupByOptions(); track type) {
           <mat-option [value]="type.value">{{ type.name }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex field justify-content-between" [class.w-100]="verticalLayout">
-    <span class="label-text axis-text-margin-left" data-id="HorizontalAxisText">Horizontal Axis</span>
+  <div class="d-flex field" [class.width-100]="verticalLayout()">
+    <span class="label-text" data-id="HorizontalAxisText">Horizontal Axis</span>
     <mat-form-field appearance="outline" class="axis-type-field no-bottom thin" data-id="HorizontalAxisField">
-      <mat-select [value]="xAxisType" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
+      <mat-select [value]="xAxisType()" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme" [hideSingleSelectionIndicator]="true"
                   name="scriptType">
         @for (type of xAxisTypeOption; track type) {
           <mat-option [value]="type.value">{{ type.name }}</mat-option>
@@ -20,39 +20,10 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex smooth-options">
-    <div class="d-flex field">
-      <span class="label-text smoothing-text" data-id="SmoothingText">Smoothing</span>
-      <mat-slider
-        [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
-        [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-        [step]="smoothType === smoothTypeEnum.exponential ? 0.001 : 1"
-        #ngSlider
-      >
-        <input matSliderThumb
-               [ngModel]="smoothWeight"
-               (ngModelChange)="changeWeight.emit($any($event))"
-               [disabled]="smoothType === smoothTypeEnum.any"
-               #ngSliderThumb="matSliderThumb"/>
-      </mat-slider>
-    </div>
-    <mat-form-field appearance="outline" class="smooth-input no-bottom thin" data-id="SmoothingInputField">
-      <input
-        matInput
-        name="minCount"
-        type="number"
-        title=""
-        [disabled]="smoothType === smoothTypeEnum.any"
-        [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-        [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
-        [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
-        [(ngModel)]="smoothWeight"
-        (ngModelChange)="trimToLimits($event)"
-        (blur)="smoothWeight === null && trimToLimits(-1)"
-      />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="smooth-type no-bottom thin">
-      <mat-select [panelClass]="'light-theme wider-options'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
+  <div class="d-flex field divider" [class.width-100]="verticalLayout()" >
+    <span class="label-text" data-id="SmoothingText">Smoothing</span>
+    <mat-form-field appearance="outline" class="smooth-type-field no-bottom thin" data-id="SmoothingInputField">
+      <mat-select [panelClass]="'light-theme'" [value]="smoothType()" (selectionChange)="selectSmoothType($event)" [hideSingleSelectionIndicator]="true">
         @for (smoothTypeOption of smoothTypeEnum | keyvalue; track smoothTypeOption) {
           <mat-option [value]="smoothTypeOption.value">
             {{ smoothTypeOption.value }}
@@ -60,10 +31,70 @@
         }
       </mat-select>
     </mat-form-field>
-    @if (!verticalLayout) {
-      <button mat-icon-button class="ms-3" (click)="toggleSettings.emit()" data-id="CloseScalarSetting">
-        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="al-icon al-ico-dialog-x sm-md pointer close-settings"></mat-icon>
-      </button>
-    }
   </div>
+  @if (smoothType() !== smoothTypeEnum.any) {
+    <div class="d-flex field" [class.width-100]="verticalLayout()">
+      @if (verticalLayout()){
+        <div class="spacer"></div>
+      }
+      @switch (smoothType()) {
+        @case (smoothTypeEnum.gaussian) {
+          <span class="label-text smoothing-label">Kernel</span>
+          <div class="d-flex align-items-center slider">
+            <mat-slider [max]="15" [min]="3" [step]="2">
+              <input matSliderThumb [ngModel]="smoothState().weight()" (ngModelChange)="changeWeight.emit($any($event))"/>
+            </mat-slider>
+            <div class="weight">{{ smoothState().weight() }}</div>
+          </div>
+        }
+        @case (smoothTypeEnum.runningAverage) {
+          <span class="label-text smoothing-label">Window size</span>
+          <div class="d-flex align-items-center slider">
+            <mat-slider [max]="35" [min]="3" [step]="2">
+              <input matSliderThumb [ngModel]="smoothState().weight()" (ngModelChange)="changeWeight.emit($any($event))"/>
+            </mat-slider>
+            <div class="weight">{{ smoothState().weight() }}</div>
+          </div>
+        }
+        @case (smoothTypeEnum.exponential) {
+          <span class="label-text smoothing-label">Alpha</span>
+          <div class="d-flex align-items-center slider">
+            <mat-slider [max]="0.999" [min]="0" [step]="0.001">
+              <input matSliderThumb [ngModel]="smoothState().weight()" (ngModelChange)="changeWeight.emit($any($event))"/>
+            </mat-slider>
+            <div class="weight">{{ smoothState().weight() }}</div>
+          </div>
+        }
+      }
+    </div>
+    @if (smoothType() === smoothTypeEnum.gaussian) {
+      <div class="d-flex field last-elm" [class.width-100]="verticalLayout()">
+        @if (verticalLayout()){
+          <div class="spacer"></div>
+        }
+        <span class="label-text smoothing-label">Sigma</span>
+        <div class="d-flex align-items-center slider">
+          <mat-slider [max]="3" [min]="0.5" [step]="0.1" [disabled]="smoothType() === smoothTypeEnum.any">
+            <input matSliderThumb [(ngModel)]="smoothState().sigma" (ngModelChange)="changeSigma.emit($any($event))"/>
+          </mat-slider>
+          <div class="weight">{{ smoothState().sigma() }}</div>
+        </div>
+      </div>
+    }
+  }
+  @if (!verticalLayout()) {
+    <button mat-icon-button class="close-button" (click)="toggleSettings.emit()" data-id="CloseScalarSetting">
+      <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="al-icon al-ico-dialog-x sm-md pointer close-settings"></mat-icon>
+    </button>
+  }
+  @if (clearable() !== null) {
+    <div
+            class="reset-button me-auto mt-2"
+
+            smTooltip="Apply as default scalar view configuration for this project"><button mat-button
+              [disabled]="!clearable()"
+              (click)="setToProjectLevel()"
+              >Set as default
+    </button></div>
+  }
 </div>

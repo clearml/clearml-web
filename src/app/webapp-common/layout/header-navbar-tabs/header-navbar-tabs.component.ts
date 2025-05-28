@@ -8,21 +8,22 @@ import {CheckPermissionDirective} from '~/shared/directives/check-permission.dir
 import {Router} from '@angular/router';
 import {UpperCasePipe} from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {SafeHtmlPipe} from 'primeng/menu';
 
 
 @Component({
-  selector: 'sm-header-navbar-tabs',
-  templateUrl: './header-navbar-tabs.component.html',
-  styleUrls: ['./header-navbar-tabs.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
+    selector: 'sm-header-navbar-tabs',
+    templateUrl: './header-navbar-tabs.component.html',
+    styleUrls: ['./header-navbar-tabs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatTabGroup,
     MatTab,
     CheckPermissionDirective,
     MatTabLabel,
     UpperCasePipe,
-    TooltipDirective
+    TooltipDirective,
+    SafeHtmlPipe
   ]
 })
 export class HeaderNavbarTabsComponent {

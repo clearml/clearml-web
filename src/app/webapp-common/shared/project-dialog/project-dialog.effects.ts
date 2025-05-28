@@ -23,7 +23,7 @@ export class ProjectDialogEffects {
     private projectsApiService: ApiProjectsService,
     private router: Router,
     private store: Store,
-    private dialog: MatDialog,
+    private dialog: MatDialog
   ) {
   }
 
@@ -48,7 +48,7 @@ export class ProjectDialogEffects {
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
             getAllSystemProjects(),
-            addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been created successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been created successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`)
           ]
         ),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), newProjectActions.setCreationStatus({status: CREATION_STATUS.FAILED})])
@@ -85,7 +85,7 @@ export class ProjectDialogEffects {
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
             getAllSystemProjects(),
-            addMessage(MESSAGES_SEVERITY.SUCCESS, `${action.projectName} has been moved from ${action.fromName} to ${action.toName}`),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${action.projectName} has been moved from ${action.fromName} to ${action.toName}`)
           ]
         ),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Move Failed'), newProjectActions.setCreationStatus({status: CREATION_STATUS.FAILED})])

@@ -1,10 +1,10 @@
 @for (label of items(); track label) {
-  <sm-chips [isDarkBackground]="true" [label]="label" [class.measure]="!readyState().ready()" [class.d-none]="$index > visibleLabelsLen()"></sm-chips>
+  <sm-chips [isDarkBackground]="true" [label]="label" [class.measure]="measure" [class.d-none]="$index > visibleLabelsLen"></sm-chips>
 }
-@if (hiddenLabels().length > 0) {
+@if (hiddenLabels.length > 0) {
   <div
     class="hidden-labels"
-    [smTooltip]="hiddenLabels().join(', ')">
-    +{{hiddenLabels().length}}
+    [smTooltip]="hiddenLabels.join(', ')">
+    +{{hiddenLabels.length}}
   </div>
 }

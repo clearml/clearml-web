@@ -7,16 +7,15 @@ import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
-  selector: 'sm-alert-dialog',
-  templateUrl: './alert-dialog.component.html',
-  styleUrls: ['./alert-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    MatDialogModule,
-    MatButton,
-    MatIcon
-  ]
+    selector: 'sm-alert-dialog',
+    templateUrl: './alert-dialog.component.html',
+    styleUrls: ['./alert-dialog.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        MatDialogModule,
+        MatButton,
+        MatIcon
+    ]
 })
 export class AlertDialogComponent {
 

@@ -1,5 +1,9 @@
 :root {
 
+  .mat-mdc-menu-panel {
+    --mat-app-elevation-shadow-level-2: none;
+  }
+
   .mat-mdc-tooltip {
     --mdc-plain-tooltip-supporting-text-size: 11px;
     --mdc-plain-tooltip-supporting-text-line-height: 14px;
@@ -27,6 +31,7 @@
   }
 
   .multiline-tooltip {
+    white-space: pre-line;
     background-color: var(--mdc-plain-tooltip-container-color, var(--mat-app-inverse-surface));
     color: var(--mdc-plain-tooltip-supporting-text-color, var(--mat-app-inverse-on-surface));
     border-radius: var(--mdc-plain-tooltip-container-shape, var(--mat-app-corner-extra-small));
@@ -37,16 +42,15 @@
     letter-spacing: var(--mdc-plain-tooltip-supporting-text-tracking, var(--mat-app-body-small-tracking));
 
     a {
-      color: var(--mdc-plain-tooltip-supporting-text-color, var(--mat-app-inverse-on-surface));
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.25em;
-      text-decoration: underline;
+      color: var(--color-primary-container, var(--mat-app-inverse-on-surface));
 
       &:hover {
-        color: var(--color-surface-container-lowest);
-        text-decoration: underline;
-        font-weight: 500;
+        color: var(--color-primary-container);
       }
+    }
+
+    > div {
+      text-align: left;
     }
   }
 }

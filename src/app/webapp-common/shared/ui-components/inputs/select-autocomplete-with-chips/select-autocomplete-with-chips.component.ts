@@ -31,19 +31,19 @@ export interface IOption {
 }
 
 @Component({
-  selector: 'sm-select-autocomplete-with-chips',
-  templateUrl: './select-autocomplete-with-chips.component.html',
-  styleUrls: ['./select-autocomplete-with-chips.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectAutocompleteWithChipsComponent),
-      multi: true
-    }],
-  standalone: true,
-  imports: [ClickStopPropagationDirective, ChipsComponent, ReactiveFormsModule, MatChipGrid,
-    MatChipInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatFormField, MatSuffix]
+    selector: 'sm-select-autocomplete-with-chips',
+    templateUrl: './select-autocomplete-with-chips.component.html',
+    styleUrls: ['./select-autocomplete-with-chips.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SelectAutocompleteWithChipsComponent),
+            multi: true
+        }
+    ],
+    imports: [ClickStopPropagationDirective, ChipsComponent, ReactiveFormsModule, MatChipGrid,
+        MatChipInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatFormField, MatSuffix]
 })
 
 export class SelectAutocompleteWithChipsComponent implements ControlValueAccessor {
@@ -215,9 +215,10 @@ export class SelectAutocompleteWithChipsComponent implements ControlValueAccesso
 
   writeValue(val: IOption[] | IOption) {
     if (val) {
+      this.init = false;
       this.selected.set(Array.isArray(val) ? val : [val]);
     }
-    window.setTimeout(() => this.init = true);
+    window.setTimeout(() => this.init = true, 50);
   }
 
   registerOnChange(fn: () => void) {

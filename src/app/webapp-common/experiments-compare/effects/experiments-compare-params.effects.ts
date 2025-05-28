@@ -61,7 +61,7 @@ export class ExperimentsCompareParamsEffects {
             catchError(error => [
                 requestFailed(error),
                 deactivateLoader(action.type),
-                setServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
+                setServerError(error, null, 'The attempt to retrieve your data failed. Refresh your browser and try again.')
               ]
             )
           );

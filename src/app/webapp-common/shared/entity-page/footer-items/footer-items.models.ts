@@ -9,7 +9,7 @@ export interface ItemState {
   disable?: boolean;
   disableDescription?: string;
   emit?: boolean;
-  emitValue?: any;
+  emitValue?: unknown;
   preventCurrentItem?: boolean;
   class?: string;
   wrapperClass?: string;
@@ -24,7 +24,7 @@ export interface IItemFooterState {
   icon?: Partial<IconNames>;
   title?: string;
   description?: string;
-  emitValue?: any;
+  emitValue?: unknown;
   disableDescription?: string;
   disable?: boolean;
   class?: string;
@@ -50,10 +50,10 @@ export abstract class ItemFooterModel {
   tagsFilterByProject$?: Observable<boolean>;
 
   menuItemText = new MenuItemTextPipe();
-  abstract getItemState(state: IFooterState<any>): ItemState;
+  abstract getItemState(state: IFooterState<{id: string}>): ItemState;
 }
 
-export interface IFooterState<T extends any> {
+export interface IFooterState<T extends {id: string}> {
   selectionHasExample: boolean;
   selectionAllHasExample: boolean;
   selected: T[];

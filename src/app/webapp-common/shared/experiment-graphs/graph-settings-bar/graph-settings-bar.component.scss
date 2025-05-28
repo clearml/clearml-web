@@ -1,24 +1,63 @@
-@import "variables";
 :host {
   display: block;
   z-index: 1000;
   width: 100%;
   font-size: 14px;
+  mat-slider {
+    min-width: 60px;
+  }
+  .divider{
+    border-left: 1px solid var(--color-outline-variant);
+    padding-left: 16px;
+    margin-left: 8px;
+  }
 
   .vertical-layout {
+    .divider{
+      border-left: unset;
+      padding-left: unset;
+      margin-left: unset;
+      border-top: 1px solid var(--color-outline-variant);
+      padding-top: 16px;
+    }
     font-size: 14px;
 
     &.x-axis-options {
       flex-direction: column;
       flex-wrap: wrap;
       width: 100%;
-      gap: 12px
+      gap: 16px
+    }
+    .smooth-slide-field {
+      margin-left: auto;
+      width: 204px;
+    }
+    .spacer{
+      flex-grow:1;
+    }
+    .smoothing-label{
+      width: 90px;
+      flex-grow: unset;
+    }
+    .slider{
+      width: 110px;
     }
 
+
+    .weight {
+      min-width: 24px;
+      margin-left: 14px;
+      display: flex;
+      justify-content: end;
+    }
+
+
+
     .group-by-field,
-    .axis-type-field {
-      width: unset;
-      max-width: 200px;
+    .axis-type-field,
+    .smooth-type-field,
+    {
+      width: 200px;
     }
 
     .label-text {
@@ -37,59 +76,27 @@
       display: none;
     }
 
-    .smooth-options {
-      width: 100%;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-top: 1px solid var(--color-surface-container-high);
-      padding-top: 12px;
-      margin-top: 8px;
-
-      mat-slider {
-        min-width: 100px;
-      }
-
-      .field {
-        flex-grow: 1;
-      }
-
-      .smooth-type {
-        max-width: 200px;
-        margin-left: auto;
-        width: 100%;
-      }
-    }
-
-    .smooth-input {
-      margin-left: 0;
-    }
+  }
+  .close-button{
+    margin-left: auto;
   }
 
   &.graph-settings-menu {
     padding: 12px;
-    width: 350px;
   }
 }
 
 .x-axis-options {
   display: flex;
   flex-grow: 1;
-  justify-content: space-between;
+  &.vertical-layout{
+    justify-content: space-between;
+  }
   align-items: center;
   gap: 12px;
 }
 
-.smooth-input {
-  height: 36px;
-  width: 74px;
-  margin-left: 16px;
-}
 
-.smooth-options {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
 
 .label-text {
   padding-right: 6px;
@@ -102,6 +109,9 @@
 
 .smoothing-text {
   padding-right: 16px;
+}
+.smooth-type-field {
+  width: unset;
 }
 
 .smooth-options i {
@@ -121,7 +131,7 @@ mat-form-field {
 
 .smooth-type {
   margin-left: 6px;
-  width: 200px;
+  width: 230px;
 }
 
 .axis-type-field {
@@ -132,12 +142,12 @@ mat-form-field {
   width: 180px;
 }
 
-mat-slider {
-  min-width: 121px;
-}
-
 .field {
   align-items: center;
+}
+.weight {
+  margin-left: 6px;
+  min-width: 24px;
 }
 
 .short-mode {
@@ -155,6 +165,22 @@ mat-slider {
   .smooth-type {
     margin-top: 18px;
   }
+}
+
+.reset-button {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  margin-left: -12px;
+
+  &.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.width-100 {
+  width: 100%;
 }
 
 

@@ -30,3 +30,9 @@ jobs:
 
       - name: Check for production build
         run: test -f build/browser/index.html
+
+      - name: Run widget build
+        run: npm run build-widgets
+
+      - name: Check for widget build
+        run: test -f dist/report-widgets/browser/index.html

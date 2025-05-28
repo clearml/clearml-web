@@ -1,10 +1,10 @@
-@import "../layout/layout.scss";
+@use "../layout/layout.scss";
 
 :host {
 
   .models-body {
     width: 100%;
-    height: calc(100% - #{$project-header-height});
+    height: calc(100% - #{layout.$project-header-height});
     transition: height 0.3s;
   }
 

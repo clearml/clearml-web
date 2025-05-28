@@ -1,8 +1,4 @@
-@import "variables";
-
-$inline-edit-base-width: 93%;
-
-
+@use "variables";
 
 :host {
   --mdc-icon-button-icon-size: 20px;
@@ -16,7 +12,6 @@ $inline-edit-base-width: 93%;
   .inline-edit-form {
     position: relative;
     display: flex;
-    flex-direction: row;
     flex-direction: row;
     align-items: center;
     gap: 12px;
@@ -68,12 +63,10 @@ $inline-edit-base-width: 93%;
     .inline-edit-input {
       // width: 100%;
       padding: 2px 6px;
-      background: transparent;
-      border: none;
       color: var(--color-on-surface);
       background-color: var(--color-surface-container-lowest);
       border: 1px solid color-mix(in srgb, var(--color-outline) 20%, transparent);
-      font-family: $font-family-base, sans-serif;
+      font-family: variables.$font-family-base, sans-serif;
       font-size: 14px;
       font-weight: 500;
       border-radius: 4px;
@@ -89,7 +82,7 @@ $inline-edit-base-width: 93%;
       border: 1px solid var(--color-outline-variant);
       border-radius: 4px;
       color: var(--color-on-surface);
-      font-family: $font-family-base, sans-serif;
+      font-family: variables.$font-family-base, sans-serif;
       font-size: 14px;
       padding: 12px;
       resize: vertical;

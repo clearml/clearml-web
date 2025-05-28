@@ -10,8 +10,8 @@ export const download = (data: string, exportName: string) => {
   downloadAnchorNode.remove();
 };
 
-export const prepareColsForDownload = (cols: ISmCol[], valuesMap?: {[colId: string]: {key: any; value: any}[]}) =>
-  cols.filter(col => col.id !== 'selected' && (col.includeInDownload || !col.hidden))
+export const prepareColsForDownload = (cols: ISmCol[], valuesMap?: Record<string, {key: string; value: unknown}[]>) =>
+  cols.filter(col => col.id !== 'selected' && col.includeInDownload !== false && (col.includeInDownload || !col.hidden))
     .map(col => col.getter && isArray(col.getter) ? col.getter.map(getterKey => ({...col, downloadKey: getterKey})) : col).flat()
     .map(thisCol =>
       ({
@@ -21,3 +21,10 @@ export const prepareColsForDownload = (cols: ISmCol[], valuesMap?: {[colId: stri
       })
     );
 
+const excelFormulaPrefix = ['=', '+', '-', '@', '\r', '\t'];
+export const sanitizeCSVCell = (cell: string) => {
+  if (excelFormulaPrefix.includes(cell[0])) {
+    return `'${cell}`;
+  }
+  return cell;
+}

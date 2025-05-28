@@ -1,10 +1,10 @@
 <div class="login-form" [class]="showBackground() ? 'dark-theme' : 'light-theme'">
   <div class="login-section">
-    @if (loginMode() !== 'error') {
-      <section>
+    @if ([loginModeEnum.password, loginModeEnum.simple, loginModeEnum.ssoOnly].includes(loginMode())) {
+      <section [class.login-section-inner]="!showBackground()">
         <img
           [ngSrc]="showBackground() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
-          [priority]="true" width="130" height="42" class="logo" alt="Clear ML Logo">
+          [priority]="true" width="130" height="42" class="logo" alt="Logo">
         @if (isInvite || showSimpleLogin()) {
           <div class="login-title">{{ loginTitle() }}</div>
         }
@@ -71,15 +71,22 @@
           }
         </form>
       </section>
+    } @else if(errorTemplate()) {
+      <section [class.login-section-inner]="!showBackground()">
+        <img
+          [ngSrc]="showBackground() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
+          [priority]="true" width="130" height="42" class="logo" alt="Logo">
+        <ng-container *ngTemplateOutlet="errorTemplate()"></ng-container>
+      </section>
     } @else {
       <section class="login-error">
         <img
           [ngSrc]="showBackground() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
-          [priority]="true" width="130" height="42" class="logo mb-4" alt="Clear ML Logo">
+          [priority]="true" width="130" height="42" class="logo mb-4" alt="Logo">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48px">
           <path
             d="m100,35.37s0-.03,0-.04c0-1.16-.96-1.97-2.15-2l-95.69-.04h0c-1.19,0-2.15.93-2.15,2.08,0,.01,0,.03,0,.04v25.76s0,.03,0,.04c0,1.15.96,2.08,2.15,2.08h52.55l8-13.86c2.08-3.69,5.87-5.88,10.15-5.88h0c4.28,0,8.08,2.21,10.16,5.91l7.99,13.83h6.84c1.19,0,2.15-.93,2.15-2.08,0-.01,0-.03,0-.04v-25.8Zm-78.78,12.86c0,2.54-2.04,4.61-4.57,4.66h0s0,0,0,0c-.02,0-.05,0-.08,0-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66,4.66,2.09,4.66,4.66h0Zm17.64,0c0,2.57-2.09,4.66-4.66,4.66-.03,0-.05,0-.08,0h.08c-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66,4.66,2.09,4.66,4.66h0Zm61.13,20.31s0,.03,0,.04v10.3l-7.05-12.22h4.9c1.19.03,2.15.72,2.15,1.88ZM0,27.92s0,.03,0,.04C0,29.11.96,30.05,2.15,30.05h95.69c1.19,0,2.15-.93,2.15-2.08,0-.01,0-.03,0-.04V2.16s0-.03,0-.04c0-1.16-.96-2.1-2.15-2.12h0S2.15,0,2.15,0h0C.96,0,0,.93,0,2.08c0,.01,0,.03,0,.04v25.8ZM64.42,11.53c.02-.58.5-1.04,1.08-1.04h20.81c.58,0,1.06.46,1.08,1.04h0s0,6.99,0,6.99c0,.6-.48,1.08-1.08,1.08h-20.81c-.6,0-1.08-.48-1.08-1.08v-6.99Zm-30.3-1.16c2.57,0,4.66,2.09,4.66,4.66-.02,2.56-2.1,4.64-4.66,4.66h.08s-.05,0-.08,0c-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66Zm-17.56,0c2.57,0,4.66,2.09,4.66,4.66h0c0,2.55-2.04,4.61-4.57,4.66h0s0,0,0,0c-.02,0-.05,0-.08,0-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66ZM2.15,66.58h0c-1.19,0-2.15.93-2.15,2.08,0,.01,0,.03,0,.04v25.76s0,.03,0,.04c0,1.15.96,2.08,2.15,2.08h33.32l17.3-29.96-50.62-.04Zm19.07,14.86c0,2.54-2.04,4.61-4.57,4.66h0s0,0,0,0c-.02,0-.05,0-.08,0-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66,4.66,2.09,4.66,4.66h0Zm12.98,4.66s-.05,0-.08,0h.08c-2.57,0-4.66-2.09-4.66-4.66s2.09-4.66,4.66-4.66,4.66,2.09,4.66,4.66h0c0,2.57-2.09,4.66-4.66,4.66Zm43.31-32.34c-2.08-3.74-7.45-3.74-9.52,0l-21.79,38.15c-2.02,3.63.61,8.09,4.76,8.09h43.58c4.15,0,6.78-4.46,4.76-8.09l-21.79-38.15Zm-4.76,38.55c-1.5,0-2.72-1.22-2.72-2.72s1.22-2.72,2.72-2.72,2.72,1.22,2.72,2.72-1.22,2.72-2.72,2.72Zm1.36-12.51c0,1.5-2.72,1.5-2.72,0l-1.37-12.49c0-1.5,1.23-2.72,2.72-2.72s2.72,1.23,2.72,2.72l-1.36,12.49Z"
-            fill="#8492c2"/>
+            fill="var(--color-primary)"/>
         </svg>
         <div>Oops, it seems there's an issue with server login at the moment - please contact your administrator or support</div>
       </section>
@@ -94,7 +101,7 @@
           <i class="al-icon sm al-ico-slack"></i>
           <span class="text">Join our Community on Slack</span>
         </a>
-        <a class="link" href="mailto:support@clear.ml" target="_blank">
+        <a class="link" [href]="'mailto:' + environment().supportEmail" target="_blank">
           <i class="al-icon sm al-ico-email"></i>
           <span class="text">Contact Us</span>
         </a>

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, effect, input, output, viewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash-es';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
@@ -7,63 +7,66 @@ import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 
 
 @Component({
-  selector: 'sm-workers-table',
-  templateUrl: './workers-table.component.html',
-  styleUrls: ['./workers-table.component.scss']
+    selector: 'sm-workers-table',
+    templateUrl: './workers-table.component.html',
+    styleUrls: ['./workers-table.component.scss'],
+    standalone: false
 })
 export class WorkersTableComponent extends BaseTableView {
 
-  public cols: ISmCol[];
-  public readonly WORKERS_TABLE_COL_FIELDS = WORKERS_TABLE_COL_FIELDS;
-  private _workers: WorkerExt[];
+  protected cols = [
+    {
+      id: WORKERS_TABLE_COL_FIELDS.ID,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'AVAILABLE WORKERS',
+      style: {width: '30%', maxWidth: '700px'},
+      sortable: true,
+    },
+    {
+      id: WORKERS_TABLE_COL_FIELDS.TASK,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'CURRENTLY RUNNING TASK',
+      style: {width: '30%', maxWidth: '700px'},
+      sortable: true,
+    },
+    {
+      id: WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'TASK RUNNING TIME',
+      style: {width: '160px', minWidth: '180px', maxWidth: '200px'},
+      sortable: true,
+    },
+    {
+      id: WORKERS_TABLE_COL_FIELDS.TASK_ITERATIONS,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'ITERATION',
+      style: {width: '100px', maxWidth: '150px'},
+      sortable: true,
+    },
+  ] as ISmCol[];
+  protected readonly WORKERS_TABLE_COL_FIELDS = WORKERS_TABLE_COL_FIELDS;
 
-  @Input() set workers(workers) {
-    this._workers = workers;
-    this.table && this.table.focusSelected();
-  }
+  workers = input<WorkerExt[]>();
+  selectedWorker = input<WorkerExt>();
+  workerSelected = output<WorkerExt>();
+  sortedChanged = output<{
+        isShift: boolean;
+        colId: ISmCol['id'];
+    }>();
 
-  get workers() {
-    return this._workers;
-  }
-
-  @Input() selectedWorker: WorkerExt;
-  @Output() workerSelected = new EventEmitter();
-  @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
-
-  @ViewChild('tableContainer', {static: true}) tableContainer;
+  tableContainer = viewChild<HTMLDivElement>('tableContainer');
 
   constructor() {
     super();
-    this.cols = [
-      {
-        id: WORKERS_TABLE_COL_FIELDS.ID,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'AVAILABLE WORKERS',
-        style: {width: '30%', maxWidth: '700px'},
-        sortable: true,
-      },
-      {
-        id: WORKERS_TABLE_COL_FIELDS.TASK,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'CURRENTLY RUNNING TASK',
-        style: {width: '30%', maxWidth: '700px'},
-        sortable: true,
-      },
-      {
-        id: WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'TASK RUNNING TIME',
-        style: {width: '160px', maxWidth: '200px'},
-        sortable: true,
-      },
-      {
-        id: WORKERS_TABLE_COL_FIELDS.TASK_ITERATIONS,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'ITERATION',
-        style: {width: '100px', maxWidth: '150px'},
-        sortable: true,
-      },
-    ];
+    effect(() => {
+      if (this.workers() && this.selectedWorker()) {
+        this.table?.focusSelected();
+        const index = this.workers().findIndex(w => w.id === this.selectedWorker().id)
+        if (index > -1) {
+          this.tables.forEach(table => table.scrollToIndex(index))
+        }
+      }
+    });
   }
 
   getBodyData(rowData: any, col: ISmCol): any {
@@ -75,7 +78,7 @@ export class WorkersTableComponent extends BaseTableView {
   }
 
   override scrollTableToTop() {
-    this.tableContainer.nativeElement.scroll({top: 0});
+    this.tableContainer().scroll({top: 0});
   }
 
   onSortChanged(isShift: boolean, colId: ISmCol['id']) {
@@ -83,13 +86,9 @@ export class WorkersTableComponent extends BaseTableView {
     this.scrollTableToTop();
   }
 
-  override afterTableInit(): void {
-  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  emitSelection(selection: any[]) {
-  }
+  emitSelection(selection: any[]) {}
 
-  openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
-  }
+  openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {}
 }

@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ProjectCardMenuExtendedComponent} from '~/features/projects/containers/project-card-menu-extended/project-card-menu-extended.component';
 import {ProjectCardMenuComponent} from '@common/shared/ui-components/panel/project-card-menu/project-card-menu.component';
 import {PipelineCardMenuComponent} from '@common/pipelines/pipeline-card-menu/pipeline-card-menu.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
@@ -36,11 +35,13 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
+import {PushPipe} from '@ngrx/component';
 
 const _declarations = [
-  ProjectCardMenuExtendedComponent,
-  PipelineCardMenuComponent,
+  PipelinesEmptyStateComponent,
   NestedCardComponent,
+  PipelineCardMenuComponent,
   DatasetEmptyComponent,
   NestedProjectViewPageComponent,
   ProjectsHeaderComponent
@@ -73,14 +74,16 @@ const _declarations = [
     TooltipDirective,
     ButtonToggleComponent,
     ShowTooltipIfEllipsisDirective,
+    PushPipe,
     DotsLoadMoreComponent,
     MatTabGroup,
     MatTab,
+    MatIconButton,
     MatIcon,
-    MatIconButton
+    CommonSearchComponent
   ],
-  declarations: [..._declarations, PipelinesEmptyStateComponent],
-  exports: [..._declarations, PipelinesEmptyStateComponent]
+  declarations: [..._declarations],
+  exports: [..._declarations]
 })
 export class ProjectsSharedModule {
 }

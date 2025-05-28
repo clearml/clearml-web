@@ -1,11 +1,11 @@
-@import "mixins/link";
+@use "mixins/link";
 
 :host-context(.normal-size){
   display: block;
   height: 480px;
 }
 :host {
-  @include link();
+  @include link.link();
 
 
   display: block;

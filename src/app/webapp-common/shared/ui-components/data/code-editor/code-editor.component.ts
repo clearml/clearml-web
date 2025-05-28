@@ -16,16 +16,15 @@ import {MatIcon} from '@angular/material/icon';
 declare const ace;
 
 @Component({
-  selector: 'sm-code-editor',
-  templateUrl: './code-editor.component.html',
-  styleUrls: ['./code-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    ClipboardModule,
-    MatButton,
-    MatIcon
-  ]
+    selector: 'sm-code-editor',
+    templateUrl: './code-editor.component.html',
+    styleUrls: ['./code-editor.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ClipboardModule,
+        MatButton,
+        MatIcon
+    ]
 })
 export class CodeEditorComponent {
   private zone = inject(NgZone);
@@ -67,6 +66,10 @@ export class CodeEditorComponent {
     return this.aceEditor.getSession().getValue();
   }
 
+  get position () {
+    return this.aceEditor.selection.getCursor()
+  }
+
   getEditor() {
     return this.aceEditor;
   }
@@ -80,10 +83,10 @@ export class CodeEditorComponent {
     }
     this.zone.runOutsideAngular(() => {
       const aceEditor = ace.edit(this.aceEditorElement().nativeElement) as Ace.Editor;
-      ace.config.set('basePath', '/node_modules/ace-builds/src-min-noconflict');
       this.aceEditor = aceEditor;
       aceEditor.setOptions({
         readOnly: this.readonly(),
+        highlightGutterLine: !this.readonly(),
         placeholder: this.placeholder(),
         showLineNumbers: false,
         showGutter: false,
@@ -109,10 +112,13 @@ export class CodeEditorComponent {
 
       aceEditor.getSession().setValue(this.code());
       if (this.startPosition()) {
-        this.aceEditor.moveCursorTo(this.startPosition()?.row || 0, this.startPosition()?.column || 0);
-        this.aceEditor.scrollToLine(this.startPosition()?.row || 0, true, false, () => {});
+        setTimeout(() => {
+          this.aceEditor.moveCursorTo(this.startPosition()?.row || 0, this.startPosition()?.column || 0);
+          this.aceEditor.scrollToLine(this.startPosition()?.row || 0, true, false, () => {});
+        });
       }
 
+      aceEditor.focus();
       this.aceEditor = aceEditor;
     });
   }

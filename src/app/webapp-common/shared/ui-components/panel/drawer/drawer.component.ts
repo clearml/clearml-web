@@ -11,14 +11,13 @@ import {
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'al-drawer',
-  templateUrl: './drawer.component.html',
-  styleUrls: ['./drawer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatIcon
-  ]
+    selector: 'al-drawer',
+    templateUrl: './drawer.component.html',
+    styleUrls: ['./drawer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatIcon
+    ]
 })
 export class DrawerComponent {
 

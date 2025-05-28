@@ -1,4 +1,4 @@
-<mat-expansion-panel [expanded]="true">
+<mat-expansion-panel [expanded]="true" (transitionend)="$event.stopPropagation()">
   <mat-expansion-panel-header>
     <div class="expand-header" data-id="expandInfoPanel">{{ controller() ? 'RUN INFO' : stepWithStatus()?.data?.isStage ? 'STAGE INFO' : 'STEP INFO' }}</div>
   </mat-expansion-panel-header>
@@ -95,7 +95,7 @@
       }
       @if (stepWithStatus()?.data?.isStage) {
         <div class="section">
-          <div class="header">Steps status count</div>
+          <div class="header">Step count by status</div>
           @for (status of stepWithStatus().data.statusCount | keyvalue; track $index) {
             @if (status.value > 0) {
               <div class="param">

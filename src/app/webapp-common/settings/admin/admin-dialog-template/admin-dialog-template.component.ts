@@ -11,20 +11,19 @@ import {MatTab, MatTabGroup} from '@angular/material/tabs';
 
 
 @Component({
-  selector: 'sm-admin-dialog-template',
-  templateUrl: './admin-dialog-template.component.html',
-  styleUrls: ['./admin-dialog-template.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CopyClipboardComponent,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatButton,
-    MatTabGroup,
-    MatTab
-  ]
+    selector: 'sm-admin-dialog-template',
+    templateUrl: './admin-dialog-template.component.html',
+    styleUrls: ['./admin-dialog-template.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CopyClipboardComponent,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatButton,
+        MatTabGroup,
+        MatTab
+    ]
 })
 export class AdminDialogTemplateComponent {
   locationStrategy = inject(LocationStrategy);

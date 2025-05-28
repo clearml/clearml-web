@@ -1,9 +1,10 @@
 @use '@angular/material' as mat;
 @use 'sass:map';
 @use "clearml-palette" as palette;
+@use "variables";
 
-@include mat.core();
-$font-family-base: 'Heebo', sans-serif; // Assumes the browser default, typically `16px`
+@include mat.elevation-classes();
+@include mat.app-background();
 
 $_rest: (
   secondary: map.get(palette.$palettes, secondary),
@@ -19,10 +20,12 @@ $theme: mat.define-theme((
     theme-type: light,
     primary: $_primary,
     tertiary: $_tertiary,
+    use-system-variables: true,
+    system-variables-prefix: sys,
   ),
   typography: (
-    plain-family: $font-family-base,
-    brand-family: $font-family-base,
+    plain-family: variables.$font-family-base,
+    brand-family: variables.$font-family-base,
   )
 ));
 
@@ -31,10 +34,16 @@ $dark-theme: mat.define-theme((
     theme-type: dark,
     primary: $_primary,
     tertiary: $_tertiary,
+    use-system-variables: true,
+    system-variables-prefix: sys,
   ),
   typography: (
-    plain-family: $font-family-base,
-    brand-family: $font-family-base,
+    plain-family: variables.$font-family-base,
+    brand-family: variables.$font-family-base,
   )
 ));
 
+::selection {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}

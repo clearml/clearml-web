@@ -6,11 +6,11 @@
   [minimumChars]="0"
   [debounceTime]="0"
   class="underline-search"
-  placeholder="Find scalars"
+  [placeholder]="placeHolder()"
   (valueChanged)="onSearchTermChanged($event)"
 ></sm-search>
 <div class="toggle-all-text">
-  <span (click)="toggleHideAll()">{{checkedList()?.length === 0 ? 'Show all' : 'Hide all'}}</span>
+  <span (click)="toggleHideAll()">{{checkedList()?.length !== 0 ? 'Hide all' : 'Show all'}}</span>
 </div>
 <sm-grouped-selectable-list
   [list]="filteredList()"

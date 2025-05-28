@@ -4,7 +4,7 @@ import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiv
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
-import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {Task} from '~/business-logic/model/tasks/task';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {TASK_TYPES} from '~/app.constants';
@@ -14,18 +14,19 @@ export interface CountAvailableAndIsDisable {
   available: number;
   disable: boolean;
 }
+
 export interface CountAvailableAndIsDisableSelectedFiltered extends CountAvailableAndIsDisable {
   selectedFiltered: any[];
 }
 
 export const countAvailableAndIsDisable = (selectedFiltered: any[]) => ({
   available: selectedFiltered.length,
-  disable:  selectedFiltered.length === 0
+  disable: selectedFiltered.length === 0
 });
 
 export const selectionHasExample = (selectedElements: any[]) => selectedElements.some((exp => isReadOnly(exp)));
 export const selectionAllHasExample = (selectedElements: any[]) => selectedElements.every((exp => isReadOnly(exp)));
-export const selectionAllIsArchive = (selectedElements: any[]) => selectedElements.every( s => s?.system_tags?.includes('archived'));
+export const selectionAllIsArchive = (selectedElements: any[]) => selectedElements.every(s => s?.system_tags?.includes('archived'));
 export const selectionIsArchive = (selectedElements: any) => selectedElements?.system_tags?.includes('archived');
 export const selectionExamplesCount = (selectedElements: any) => selectedElements.filter((exp => isReadOnly(exp)));
 export const canEnqueue = (task: Task): boolean =>
@@ -41,36 +42,36 @@ export const canContinue = (task: Task): boolean =>
   !!(task && [TASKS_STATUS.CREATED, TASKS_STATUS.STOPPED].includes(task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION) && !!task.execution?.queue;
 
 export const selectionDisabledAbort = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter( (_selected) => [TaskStatusEnum.Queued, TaskStatusEnum.InProgress].includes(_selected?.status)  && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter((_selected) => [TaskStatusEnum.Queued, TaskStatusEnum.InProgress].includes(_selected?.status) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledPublishExperiments = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => ([TaskStatusEnum.Stopped, TaskStatusEnum.Closed, 'completed', TaskStatusEnum.Failed].includes(_selected?.status)  && !isReadOnly(_selected)) );
+  const selectedFiltered = selectedElements.filter(_selected => ([TaskStatusEnum.Stopped, TaskStatusEnum.Closed, 'completed', TaskStatusEnum.Failed].includes(_selected?.status) && !isReadOnly(_selected)));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledPublishModels = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => (!isReadOnly(_selected) && !_selected?.ready) );
+  const selectedFiltered = selectedElements.filter(_selected => (!isReadOnly(_selected) && !_selected?.ready));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 
 export const selectionDisabledReset = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => ![TaskStatusEnum.Created, TaskStatusEnum.Published, TaskStatusEnum.Publishing].includes(_selected?.status)  && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => ![TaskStatusEnum.Created, TaskStatusEnum.Published, TaskStatusEnum.Publishing].includes(_selected?.status) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 
 export const selectionDisabledAbortAllChildren = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => [TaskTypeEnum.Controller, TaskTypeEnum.Optimizer].includes(_selected?.type)  && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => [TaskTypeEnum.Controller, TaskTypeEnum.Optimizer].includes(_selected?.type) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledDelete = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected =>  selectionIsArchive(_selected) && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => selectionIsArchive(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledMoveTo = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected =>  !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
-export const selectionDisabledQueue = (selectedElements: {id?: string; status?: string}[]) => {
+export const selectionDisabledQueue = (selectedElements: { id?: string; status?: string }[]) => {
   if (selectedElements.length > 1) {
     return {selectedFiltered: [], disable: true, available: 0};
   }
@@ -92,6 +93,10 @@ export const selectionDisabledEnqueue = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => canEnqueue(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
+export const selectionDisabledPipelineRun = (selectedElements: any[]) => {
+  const selectedFiltered = selectedElements.filter(_selected => !isReadOnly(_selected));
+  return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
+};
 export const selectionDisabledRetry = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => canRetry(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
@@ -109,10 +114,10 @@ export const selectionDisabledTags = (selectedElements: any[]) => {
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 
-export const selectionTags = <T extends {tags?: string[]}>(selectedElements: T[]): string[] => {
+export const selectionTags = <T extends { tags?: string[] }>(selectedElements: T[]): string[] => {
   const _selectedTags = {};
-  selectedElements.forEach( _selected => {
-    _selected?.tags?.forEach( tag => {
+  selectedElements.forEach(_selected => {
+    _selected?.tags?.forEach(tag => {
       if (!_selectedTags[tag]) {
         _selectedTags[tag] = 1;
       } else {
@@ -120,15 +125,15 @@ export const selectionTags = <T extends {tags?: string[]}>(selectedElements: T[]
       }
     });
   });
-  return  Object.entries(_selectedTags)
+  return Object.entries(_selectedTags)
     .filter(([, amount]) => amount === selectedElements.length)
-    .map( ([tag]) => tag);
+    .map(([tag]) => tag);
 };
 
 export enum MenuItems {
   abort = 'abort',
-  abortAllChildren='abortAllChildren',
-  run='runPipeline',
+  abortAllChildren = 'abortAllChildren',
+  run = 'runPipeline',
   archive = 'archive',
   compare = 'compare',
   delete = 'delete',
@@ -144,6 +149,7 @@ export enum MenuItems {
   continue = 'continue',
   retry = 'retry'
 }
+
 export enum MoreMenuItems {
   restore = 'restore'
 }

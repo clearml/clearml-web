@@ -1,5 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
+import {sanitizeCSVCell} from '@common/shared/utils/download';
 import {Store} from '@ngrx/store';
 import {combineLatestWith, distinctUntilChanged, distinctUntilKeyChanged, filter, map, take, tap, throttleTime} from 'rxjs/operators';
 import {isEqual, mergeWith} from 'lodash-es';
@@ -59,6 +68,7 @@ interface tableRow {
   metric: string;
   variant: string;
   firstMetricRow: boolean;
+  lastInGroup: boolean;
   values: Record<string, Task['last_metrics']>;
 }
 
@@ -67,10 +77,11 @@ interface ExtTask extends Task {
 }
 
 @Component({
-  selector: 'sm-experiment-compare-metric-values',
-  templateUrl: './experiment-compare-metric-values.component.html',
-  styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiment-compare-metric-values',
+    templateUrl: './experiment-compare-metric-values.component.html',
+    styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy {
   public experiments: ExtTask[] = [];
@@ -91,7 +102,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   private selectExportTable$: Observable<boolean>;
   public showFilterTooltip = false;
 
-  @ViewChildren(Table) public tableComp: QueryList<Table>;
+  table = viewChild(Table);
   private scrollContainer: HTMLDivElement;
   public scrolled: boolean;
   public filterValue: string;
@@ -208,7 +219,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   private startTableScrollListener() {
-    this.scrollContainer = this.tableComp?.first?.el.nativeElement.getElementsByClassName('p-scroller')[0] ?? this.tableComp?.first?.el.nativeElement.getElementsByClassName('p-datatable-wrapper')[0] as HTMLDivElement;
+    this.scrollContainer = this.table()?.el.nativeElement.getElementsByClassName('p-scroller')[0] ?? this.table()?.el.nativeElement.getElementsByClassName('p-datatable-table-container')[0] as HTMLDivElement;
     if (this.scrollContainer) {
       fromEvent(this.scrollContainer, 'scroll').pipe(throttleTime(150, undefined, {leading: true, trailing: true})).subscribe((e: Event) => {
         this.scrolled = (e.target as HTMLDivElement).scrollLeft > 10;
@@ -253,10 +264,11 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
               variant,
               values: acc.values,
               firstMetricRow: false,
+              lastInGroup: false,
               min: acc.min ? Math.min(acc.min, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.min) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key],
               max: acc.max ? Math.max(acc.max, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.max) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key]
             };
-          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min: number, max: number, values: Record<string, Task['last_metrics']> })
+          }, {values: {}} as { metric, variant, firstMetricRow: boolean, lastInGroup: boolean, min: number, max: number, values: Record<string, Task['last_metrics']> })
         };
       })).flat(1);
 
@@ -288,13 +300,18 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     if (!this.dataTable) {
       return;
     }
-    this.dataTableFiltered = this.dataTable.filter(row => this.settings.selectedMetricsScalar?.includes(row.metric + row.variant)).filter(row => row.metric.includes(value) || row.variant.includes(value));
+    const lowerVal = value.toLowerCase();
+    this.dataTableFiltered = this.dataTable
+      .filter(row => this.settings.selectedMetricsScalar?.includes(row.metric + row.variant))
+      .filter(row => row.metric.toLowerCase().includes(lowerVal) || row.variant.toLowerCase().includes(lowerVal));
     this.showFilterTooltip = true;
-    let previousMetric: string;
-    this.dataTableFiltered.forEach(row => {
-      row.firstMetricRow = row.metric !== previousMetric;
-      previousMetric = row.metric;
+    this.dataTableFiltered.forEach((row, i) => {
+      row.firstMetricRow = row.metric !== this.dataTableFiltered[i - 1]?.metric;
+      row.lastInGroup = row.metric !== this.dataTableFiltered[i + 1]?.metric;
     });
+    if (this.table()) {
+      window.setTimeout(() => this.table().scroller?.setSize(), 50);
+    }
   };
 
   private getExperimentIdsParams(experiments: { id?: string }[]): string {
@@ -327,7 +344,9 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         Metric: row.metric,
         Variant: row.variant,
         ...headers.reduce((acc, header, i) => {
-          acc[header] = values[i];
+          acc[header] = typeof values[i]=== 'string' ?
+            sanitizeCSVCell(values[i].replace(/\r?\n|\r/g, '')) :
+            values[i];
           return acc;
         }, {})
       };

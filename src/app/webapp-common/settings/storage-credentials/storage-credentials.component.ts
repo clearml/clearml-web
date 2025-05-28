@@ -2,45 +2,35 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, s
 import {CredentialsSettingsActions} from '~/features/settings/settings.actions';
 import {Store} from '@ngrx/store';
 import {selectCredentials} from '~/features/settings/settings.selectors';
-import {TitleCasePipe, UpperCasePipe} from '@angular/common';
+import {UpperCasePipe} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {AzureStorageCredentialsComponent} from '@common/settings/storage-credentials/azure-storage-credentials/azure-storage-credentials.component';
 import {GoogleStorageCredentialsComponent} from '@common/settings/storage-credentials/google-storage-credentials/google-storage-credentials.component';
 import {AwsStorageCredentialsComponent} from '@common/settings/storage-credentials/aws-storage-credentials/aws-storage-credentials.component';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import {MatDialogClose} from '@angular/material/dialog';
 
 @Component({
-  selector: 'sm-storage-credentials',
-  templateUrl: './storage-credentials.component.html',
-  styleUrl: './storage-credentials.component.scss',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    AzureStorageCredentialsComponent,
-    GoogleStorageCredentialsComponent,
-    AwsStorageCredentialsComponent,
-    TitleCasePipe,
-    UpperCasePipe,
-    TooltipDirective,
-    MatIconButton,
-    MatIcon,
-    MatButton,
-    MatDialogClose
-  ]
+    selector: 'sm-storage-credentials',
+    templateUrl: './storage-credentials.component.html',
+    styleUrl: './storage-credentials.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        AzureStorageCredentialsComponent,
+        GoogleStorageCredentialsComponent,
+        AwsStorageCredentialsComponent,
+        UpperCasePipe,
+        MatIconButton,
+        MatIcon,
+        MatButton,
+    ]
 })
 export class StorageCredentialsComponent {
 

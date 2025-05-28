@@ -5,9 +5,10 @@ import version from '../../../../../version.json';
 import {getApiVersion} from '@common/core/actions/users.actions';
 
 @Component({
-  selector: 'sm-admin-footer',
-  templateUrl: './admin-footer.component.html',
-  styleUrls: ['./admin-footer.component.scss']
+    selector: 'sm-admin-footer',
+    templateUrl: './admin-footer.component.html',
+    styleUrls: ['./admin-footer.component.scss'],
+    standalone: false
 })
 export class AdminFooterComponent implements OnInit {
 

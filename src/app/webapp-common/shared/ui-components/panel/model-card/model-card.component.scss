@@ -1,14 +1,13 @@
-@import "mixins/common";
-@import "mixins/icon";
+@use "mixins/common";
 
 .top-labels {
-  @include counter-label();
+  @include common.counter-label();
   text-align: left;
   padding-top: 8px;
 }
 
 .sub-title {
-  @include counter-label();
+  @include common.counter-label();
   padding-right: 10px;
 }
 

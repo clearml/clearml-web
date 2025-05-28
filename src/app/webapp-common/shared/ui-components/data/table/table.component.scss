@@ -1,37 +1,13 @@
 :host {
-  ::ng-deep .p-datatable-table {
-    border-collapse: collapse;
-  }
-
-  ::ng-deep th.resize-enabled span.p-column-resizer {
-    width: 8px;
-    z-index: 20;
-
-    &:hover {
-      background: color-mix(in srgb, var(--color-primary), transparent 80%);
-      background-clip: content-box;
-    }
-  }
-
-
   th.resize-disabled {
-    ::ng-deep span.p-column-resizer {
+    ::ng-deep span.p-datatable-column-resizer {
       cursor: auto;
     }
   }
 
-  ::ng-deep .p-column-resizer-helper {
-    background-color: var(--color-primary);
-    z-index: 1000;
-  }
-
-  ::ng-deep .p-icon path {
-    fill: var(--color-primary);
-  }
-
   .has-header {
     ::ng-deep .p-datatable-scrollable, ::ng-deep .p-datatable {
-      & > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
+      & > .p-datatable-table-container .p-datatable-table > .p-datatable-thead {
         z-index: 20;
 
         &:after {
@@ -48,14 +24,14 @@
     }
   }
 
-  ::ng-deep .p-datatable-wrapper {
+  ::ng-deep .p-datatable-table-container {
     .p-datatable-tbody {
       height: calc(100% - var(--table-row-height, 48px));
     }
   }
 
   .card-view {
-    ::ng-deep .p-datatable-wrapper {
+    ::ng-deep .p-datatable-table-container {
       overflow-x: hidden;
     }
   }
@@ -209,6 +185,7 @@
 
       &:hover {
         background-color: var(--row-selected-hover-color);
+        color: var(--row-selected-text-color);
       }
     }
   }
@@ -341,6 +318,9 @@
           }
         }
       }
+      td {
+        border: none;
+      }
     }
   }
 
@@ -348,6 +328,21 @@
   @supports (-moz-appearance:none) {
     tr.cards-table .card-wrapper {
       margin: 6px 12px;
+    }
+
+    tr:not(.cards-table):not(.no-data-row):not(.load-more-wrapper) td:first-child::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      border-bottom: 1px solid var(--row-border-color);
+      bottom: 0;
+    }
+  }
+
+  @supports (-webkit-box-reflect:unset) {
+    ::ng-deep .p-datatable-table {
+      border-collapse: collapse;
     }
   }
 }

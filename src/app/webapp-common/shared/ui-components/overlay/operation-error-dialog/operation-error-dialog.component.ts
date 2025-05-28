@@ -7,16 +7,15 @@ import {MatButton} from '@angular/material/button';
 
 
 @Component({
-  selector: 'sm-operation-error-dialog',
-  templateUrl: './operation-error-dialog.component.html',
-  styleUrls: ['./operation-error-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    MatDialogActions,
-    MatButton,
-    MatDialogClose
-  ]
+    selector: 'sm-operation-error-dialog',
+    templateUrl: './operation-error-dialog.component.html',
+    styleUrls: ['./operation-error-dialog.component.scss'],
+    imports: [
+        DialogTemplateComponent,
+        MatDialogActions,
+        MatButton,
+        MatDialogClose
+    ]
 })
 export class OperationErrorDialogComponent {
   public data = inject<{

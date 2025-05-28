@@ -1,16 +1,21 @@
 import {LocationStrategy} from '@angular/common';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, signal, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  signal,
+  inject,
+  DestroyRef
+} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {setSelectedWorkspaceTab} from '@common/core/actions/users.actions';
 import {selectActiveWorkspace, selectGettingStarted} from '@common/core/reducers/users-reducer';
-import {filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {createCredential, resetCredential} from '@common/core/actions/common-auth.actions';
 import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {GettingStartedContext} from '../../../../environments/base';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
 import {YouTubePlayerModule} from '@angular/youtube-player';
@@ -39,34 +44,31 @@ export interface WelcomeMessageData {
 
 
 @Component({
-  selector: 'sm-welcome-message',
-  templateUrl: './welcome-message.component.html',
-  styleUrls: ['./welcome-message.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    DialogTemplateComponent,
-    CopyClipboardComponent,
-    YouTubePlayerModule,
-    MatCheckbox,
-    MatButton,
-    MatIcon,
-    FormsModule,
-    MatTabGroup,
-    MatTab
-  ]
+    selector: 'sm-welcome-message',
+    templateUrl: './welcome-message.component.html',
+    styleUrls: ['./welcome-message.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DialogTemplateComponent,
+        CopyClipboardComponent,
+        YouTubePlayerModule,
+        MatCheckbox,
+        MatButton,
+        MatIcon,
+        FormsModule,
+        MatTabGroup,
+        MatTab
+    ]
 })
 export class WelcomeMessageComponent {
   private store = inject(Store);
   private dialogRef = inject<MatDialogRef<WelcomeMessageComponent>>(MatDialogRef<WelcomeMessageComponent>);
   public data = inject<WelcomeMessageData>(MAT_DIALOG_DATA);
   protected configService = inject(ConfigurationService);
-  private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
   private locationStrategy = inject(LocationStrategy);
-  public step = signal(this.data?.step ?? 1);
-  accessKey: string;
-  secretKey: string;
-  credentialsCreated = false;
+  protected step = signal(this.data?.step ?? 1);
+  protected credentialsCreated = signal(false);
 
 
   WEB_SERVER_URL = window.location.origin + this.locationStrategy.getBaseHref();
@@ -108,6 +110,9 @@ export class WelcomeMessageComponent {
 
   public workspace = this.store.selectSignal(selectActiveWorkspace);
   private companyGettingStarted = this.store.selectSignal(selectGettingStarted);
+  protected credentials = this.store.selectSignal(selectNewCredential);
+  protected accessKey = computed(() => this.credentials()?.access_key);
+  protected secretKey = computed(() => this.credentials()?.secret_key);
   protected target = signal(0);
   protected credentialsComment = computed(() => this.community() && this.workspace()?.name);
   protected isJupyter = computed(() => this.target() === 1);
@@ -120,7 +125,7 @@ export class WelcomeMessageComponent {
 
     if (this.queue) {
       steps[0].code = `clearml-agent daemon --queue ${this.queue.name}`;
-      steps[0].header = `To assign a worker to the ${this.queue.name} queue, run:`;
+      steps[0].header = `To assign a worker to the ${this.queue.display_name || this.queue.name} queue, run:`;
       steps[1].code = `pip install clearml-agent`;
       steps[2].code = `clearml-agent init`;
     } else {
@@ -142,14 +147,13 @@ export class WelcomeMessageComponent {
       if(this.credentialsLabel) {
         steps[this.queue ? 2 : 1].code += `# ${this.credentialsLabel}\n`;
       }
-      steps[this.queue ? 2 : 1].code += `%env CLEARML_API_ACCESS_KEY=${this.accessKey || '<Your API access key>'}
-%env CLEARML_API_SECRET_KEY=${this.secretKey ||  '<Your API secret key>'}`;
+      steps[this.queue ? 2 : 1].code += `%env CLEARML_API_ACCESS_KEY=${this.accessKey() || '<Your API access key>'}
+%env CLEARML_API_SECRET_KEY=${this.secretKey() ||  '<Your API secret key>'}`;
     }
     return steps;
   });
 
-  constructor(
-  ) {
+  constructor() {
     this.dialogRef.beforeClosed().subscribe(res =>
       this.doNotShowAgain && !res? this.dialogRef.close(this.doNotShowAgain) : false);
 
@@ -157,18 +161,7 @@ export class WelcomeMessageComponent {
       this.loadYoutubeApi(this.data?.newExperimentYouTubeVideoId);
     }
 
-    this.store.select(selectNewCredential)
-      .pipe(
-        takeUntilDestroyed(),
-        filter(credential => credential && Object.keys(credential).length > 0)
-      )
-      .subscribe(credential => {
-        this.accessKey = credential.access_key;
-        this.secretKey = credential.secret_key;
-        this.store.dispatch(resetCredential());
-        this.cdr.markForCheck();
-      });
-
+    this.destroyRef.onDestroy(() => this.store.dispatch(resetCredential()));
   }
 
   closeDialog() {
@@ -181,7 +174,7 @@ export class WelcomeMessageComponent {
   }
 
   createCredentials() {
-    this.credentialsCreated = true;
+    this.credentialsCreated.set(true);
     this.store.dispatch(setSelectedWorkspaceTab({workspace: {id: this.workspace().id}}));
     this.store.dispatch(createCredential({workspace: this.workspace(), label: this.credentialsLabel}));
   }
@@ -215,8 +208,8 @@ export class WelcomeMessageComponent {
       res += `  files_server: ${filesServer}\n`;
     }
     res += `  credentials {
-    "access_key" = "${this.accessKey}"
-    "secret_key" = "${this.secretKey}"
+    "access_key" = "${this.accessKey()}"
+    "secret_key" = "${this.secretKey()}"
   }
 }`;
     return res;

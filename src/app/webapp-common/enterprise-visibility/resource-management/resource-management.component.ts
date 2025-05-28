@@ -4,14 +4,13 @@ import {PageBaseComponent} from '@common/enterprise-visibility/page-base.compone
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-resource-management',
-  standalone: true,
-  imports: [
-    NgOptimizedImage,
-    MatIcon
-  ],
-  templateUrl: './resource-management.component.html',
-  styleUrl: '../pages.scss'
+    selector: 'sm-resource-management',
+    imports: [
+        NgOptimizedImage,
+        MatIcon
+    ],
+    templateUrl: './resource-management.component.html',
+    styleUrl: '../pages.scss'
 })
 export class ResourceManagementComponent extends PageBaseComponent {
 }

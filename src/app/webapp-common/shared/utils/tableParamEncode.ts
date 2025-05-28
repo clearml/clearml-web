@@ -62,7 +62,7 @@ export const decodeOrder = (orders: string[]): SortMeta[] => {
   });
 };
 
-export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
+export const encodeFilters = (filters: Record<string, FilterMetadata>) => {
   if (filters) {
     return Object.keys(filters)
       .filter((key: string) => filters[key].value?.length)
@@ -167,10 +167,10 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   filterType: ColHeaderFilterTypeEnum.durationNumeric,
   header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' ' + getValueTypeName(column.valueType) : ''}`,
   hidden: false,
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   metric_hash: column.metricHash,
   variant_hash: column.variantHash,
-  /* eslint-enable @typescript-eslint/naming-convention */
+
   valueType: column.valueType,
   projectId,
   style: {width: '115px'},
@@ -197,7 +197,7 @@ export const createMetadataCol = (key, projectId): ISmCol => ({
 });
 
 
-export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) => {
+export const createFiltersFromStore = (_tableFilters: Record<string, FilterMetadata>, removeEmptyValues = true) => {
   if (!_tableFilters) {
     return [];
   }

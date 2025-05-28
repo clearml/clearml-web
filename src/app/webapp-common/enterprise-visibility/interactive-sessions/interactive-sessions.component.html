@@ -4,29 +4,47 @@
 </div>
 
 <div class="section">
+  <div class="image" (click)="imageClicked(image4)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-remote-' + theme() + '.png'"
+      #image4
+      width="640"
+      height="360"
+      alt="remote desktop"
+    >
+  </div>
+  <div class="details">
+    <h2>VM Remote Desktop</h2>
+    Launch a full development environment on a remote machine complete with secure, browser based, full remote desktop access. Store, sync, and restore workspaces across sessions.
+  </div>
+</div>
+
+<div class="section">
   <div class="details">
     <h2>SSH</h2>
     Launch a full development environment on a remote machine complete with a detached interactive SSH session. Store, sync, and restore interactive workspaces across sessions.
   </div>
+  <div class="image" (click)="imageClicked(image1)">
   <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-SSH-' + theme() + '.png'"
-    #image1
-    (click)="imageClicked(image1)"
-    width="640"
-    height="360"
-    alt="SSH"
-  >
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-SSH-' + theme() + '.png'"
+      #image1
+      width="640"
+      height="360"
+      alt="SSH"
+    >
+  </div>
 </div>
 
 <div class="section">
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-jupyter-' + theme() + '.png'"
-    #image2
-    (click)="imageClicked(image2)"
-    width="640"
-    height="360"
-    alt="jupyter"
-  >
+  <div class="image" (click)="imageClicked(image2)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-jupyter-' + theme() + '.png'"
+      #image2
+      width="640"
+      height="360"
+      alt="jupyter"
+    >
+  </div>
   <div class="details">
     <h2>Jupyter</h2>
     Launch a Jupyter Lab environment on any remote machine complete with secure, authenticated access. Store, sync, and restore interactive workspaces across sessions.
@@ -36,17 +54,19 @@
 <div class="section">
   <div class="details">
     <h2>VSCode</h2>
-    Launch a VSCode environment on any remote machine complete with secure, authenticated access. Store, sync, and restore interactive workspaces across sessions..
+    Launch a VSCode environment on any remote machine complete with secure, authenticated access. Store, sync, and restore interactive workspaces across sessions.
   </div>
-  <img
-    [ngSrc]="'app/webapp-common/assets/marketing/apps-vscode-' + theme() + '.png'"
-    #image3
-    (click)="imageClicked(image3)"
-    width="640"
-    height="360"
-    alt="vscode"
-  >
+  <div class="image" (click)="imageClicked(image3)">
+    <img
+      [ngSrc]="'app/webapp-common/assets/marketing/apps-vscode-' + theme() + '.png'"
+      #image3
+      width="640"
+      height="360"
+      alt="vscode"
+    >
+  </div>
 </div>
+
 <div class="cta">
   <a href="https://clear.ml/contact-us" target="_blank" class="cta-button">
     <mat-icon fontSet="al" fontIcon="al-ico-bullhorn"></mat-icon>CONTACT CLEARML</a>

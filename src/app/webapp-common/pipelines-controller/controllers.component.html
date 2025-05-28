@@ -1,7 +1,7 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
   [tableCols]="tableMode() === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
-  [isArchived]="isArchived$ | ngrxPush"
+  [isArchived]="isArchivedMode()"
   [metricVariants]="metricsVariants$()"
   [hyperParams]="hyperParams$ | ngrxPush"
   [minimizedView]="minimizedView"
@@ -34,7 +34,7 @@
   <button
     mat-flat-button
     class="tertiary-button me-3"
-    [disabled]="isArchived$ | ngrxPush"
+    [disabled]="isArchivedMode() || isExampleProject"
     (click)="newRun()"
   >
     <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="newRunButton"></mat-icon>

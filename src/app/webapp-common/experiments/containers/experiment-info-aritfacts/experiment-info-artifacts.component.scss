@@ -5,7 +5,7 @@
 
   .no-data {
     text-align: center;
-    color: var(--color-on-surface-variant);
+    color: var(--color-empty-state);
     position: absolute;
     top: 50%;
     left: 50%;
@@ -13,9 +13,7 @@
     display: block;
     h4 {
       font-weight: 500;
-    }
-    .al-icon {
-      color: var(--color-tint-14);
+      font-size: 16px;
     }
   }
 

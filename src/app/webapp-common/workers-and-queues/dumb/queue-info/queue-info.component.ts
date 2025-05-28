@@ -7,9 +7,10 @@ import {SelectQueueComponent} from '@common/experiments/shared/components/select
 import {Task} from '~/business-logic/model/tasks/task';
 
 @Component({
-  selector   : 'sm-queue-info',
-  templateUrl: './queue-info.component.html',
-  styleUrls  : ['./queue-info.component.scss']
+    selector: 'sm-queue-info',
+    templateUrl: './queue-info.component.html',
+    styleUrls: ['./queue-info.component.scss'],
+    standalone: false
 })
 export class QueueInfoComponent implements OnInit {
   private changeDetector = inject(ChangeDetectorRef);

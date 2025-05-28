@@ -8,9 +8,10 @@ import {cloneDeep} from 'lodash-es';
 
 
 @Component({
-  selector: 'sm-redacted-arguments-dialog',
-  templateUrl: './redacted-arguments-dialog.component.html',
-  styleUrls: ['./redacted-arguments-dialog.component.scss']
+    selector: 'sm-redacted-arguments-dialog',
+    templateUrl: './redacted-arguments-dialog.component.html',
+    styleUrls: ['./redacted-arguments-dialog.component.scss'],
+    standalone: false
 })
 export class RedactedArgumentsDialogComponent implements OnInit, OnDestroy {
 

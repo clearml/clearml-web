@@ -1,12 +1,8 @@
-@import "variables";
-
-$tab-width: 15vw;
-
 :host {
   display: flex !important;
   flex-direction: column;
   //width: 100%;
-  overflow: auto;
+  //overflow: auto;
   // padding-top: 20px;
  // background-color: var(--color-surface-container-low);
 

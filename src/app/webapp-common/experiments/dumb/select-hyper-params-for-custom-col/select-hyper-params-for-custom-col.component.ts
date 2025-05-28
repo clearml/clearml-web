@@ -3,15 +3,14 @@ import {GroupedCheckedFilterListComponent, HyperParams} from '@common/shared/ui-
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-select-hyper-params-for-custom-col',
-  templateUrl: './select-hyper-params-for-custom-col.component.html',
-  styleUrls: ['./select-hyper-params-for-custom-col.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    GroupedCheckedFilterListComponent,
-    ClickStopPropagationDirective
-  ],
-  standalone: true
+    selector: 'sm-select-hyper-params-for-custom-col',
+    templateUrl: './select-hyper-params-for-custom-col.component.html',
+    styleUrls: ['./select-hyper-params-for-custom-col.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        GroupedCheckedFilterListComponent,
+        ClickStopPropagationDirective
+    ]
 })
 export class SelectHyperParamsForCustomColComponent {
 

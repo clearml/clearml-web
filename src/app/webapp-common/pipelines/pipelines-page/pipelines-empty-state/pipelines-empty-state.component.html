@@ -5,13 +5,11 @@
 } @else {
   <div class="content">
     <div class="code">
-      <div class="d-flex justify-content-between">
-        <div>
-          Run this code for a quick example (Requires ClearML 1.3 or above)<br>
-          For more details see the <a [class.dark]="createButton()" href="https://clear.ml/docs/latest/docs/pipelines/"
-        target="_blank">documentation</a>
-      </div>
-    </div>
+      <p>
+        Run this code for a quick example (Requires ClearML 1.3 or above)<br>
+        For more details see the <a [class.dark]="createButton()" [href]="confService.configuration().docsLink + '/latest/docs/pipelines'"
+      target="_blank">documentation</a>
+      </p>
     @if (initPipelineCode()) {
       <sm-code-editor [code]="initPipelineCode()" [readonly]="true" [showCopyButton]="true"></sm-code-editor>
     }
@@ -25,13 +23,11 @@
 <ng-template #content>
   <div class="content">
     <div class="code">
-      <div class="d-flex justify-content-between">
-        <div>
+        <p>
           Run this code for a quick example (Requires ClearML 1.3 or above)<br>
-          For more details see the <a [class.dark]="createButton()" href="https://clear.ml/docs/latest/docs/pipelines/"
+          For more details see the <a [class.dark]="createButton()" [href]="confService.configuration().docsLink + '/latest/docs/pipelines'"
         target="_blank">documentation</a>
-      </div>
-    </div>
+        </p>
     @if (initPipelineCode()) {
       <sm-code-editor [code]="initPipelineCode()" [readonly]="true" [showCopyButton]="true"></sm-code-editor>
     }

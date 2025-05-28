@@ -1,4 +1,4 @@
-<mat-expansion-panel [expanded]="true">
+<mat-expansion-panel [expanded]="true" (transitionend)="$event.stopPropagation()">
   <mat-expansion-panel-header>
     <div class="expand-header">VERSION INFO</div>
   </mat-expansion-panel-header>
@@ -14,25 +14,6 @@
         <div class="param">
           <div class="key" data-id="id">ID</div>
           <sm-id-badge [id]="entity().id" (copied)="copyToClipboard()"></sm-id-badge>
-        </div>
-        <div class="param">
-          <div class="key" data-id="parent">Parent</div>
-          <div data-id="parentValue" class="value" [smTooltip]="entity()?.parent?.name" smShowTooltipIfEllipsis>
-            @if (entity()?.parent?.id) {
-              <a
-                class="arr-link"
-                target="_blank"
-                [href]="'/projects/' + entity()?.parent?.project.id + '/experiments/' + entity()?.parent?.id + '/output/execution'">
-                <div class="d-flex-center">
-                  <span class="flex-shrink-1 ellipsis">{{entity()?.parent?.name}}</span>@if (entity()?.parent?.id) {
-                  <i class="al-icon al-ico-export xs"></i>
-                }
-                </div>
-              </a>
-            } @else {
-              -
-            }
-          </div>
         </div>
         <div class="param continue">
           <div class="key" data-id="size">Size</div>
@@ -66,7 +47,7 @@
           <div data-id="removedValue" class="value" [smTooltip]="entity()?.runtime?.ds_change_remove " smShowTooltipIfEllipsis>{{entity()?.runtime?.ds_change_remove ?? '-'}}</div>
         </div>
         <div class="param">
-          <div class="key" data-id="size">Size</div>
+          <div class="key" data-id="size">Size Difference</div>
           @if (entity()?.runtime?.ds_change_size) {
             <div data-id="sizeValue" class="value"
                  [smTooltip]="$any(entity()?.runtime?.ds_change_size) | filesize: fileSizeConfigStorage"

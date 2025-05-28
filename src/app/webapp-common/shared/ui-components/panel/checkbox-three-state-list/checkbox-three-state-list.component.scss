@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   width: 100%;
 
@@ -12,6 +10,11 @@
 
     &.empty {
       height: 100%;
+    }
+
+    .empty-menu {
+      line-height: 32px;
+      padding: 0 12px;
     }
   }
 

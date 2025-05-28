@@ -1,8 +1,6 @@
-@import "mixins/common";
-@import "variables";
+@use "mixins/common";
 
 $reqWidth: 56px;
-$font-size: 18px;
 
 .model-labels {
   background-color: var(--color-warning);
@@ -87,13 +85,13 @@ $font-size: 18px;
     }
 
     .counter {
-      @include vertical-align();
-      @include counter-title();
+      @include common.vertical-align();
+      @include common.counter-title();
     }
   }
 
   .counter-label {
-    @include counter-label();
+    @include common.counter-label();
 
     &.leave-space {
       min-height: 17px;

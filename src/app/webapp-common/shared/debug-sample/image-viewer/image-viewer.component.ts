@@ -1,36 +1,33 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, OnDestroy} from '@angular/core';
+import {IsAudioPipe} from '@common/shared/pipes/is-audio.pipe';
+import {IsVideoPipe} from '@common/shared/pipes/is-video.pipe';
 import {debounceTime, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
-import {BehaviorSubject, interval, Observable, Subscription} from 'rxjs';
-import {Store} from '@ngrx/store';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {BehaviorSubject, interval} from 'rxjs';
 import {selectAppVisible, selectAutoRefresh} from '@common/core/reducers/view.reducer';
 import {BaseImageViewerComponent} from '@common/shared/debug-sample/image-viewer/base-image-viewer.component';
 import {getDebugImageSample, getNextDebugImageSample, setDebugImageViewerScrollId, setViewerEndOfTime} from '@common/shared/debug-sample/debug-sample.actions';
 import {selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 const VIEWER_AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 @Component({
-  selector: 'sm-image-viewer',
-  templateUrl: './image-viewer.component.html',
-  styleUrls: ['./image-viewer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-image-viewer',
+    templateUrl: './image-viewer.component.html',
+    styleUrls: ['./image-viewer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
-export class ImageViewerComponent extends BaseImageViewerComponent implements OnInit, OnDestroy {
+export class ImageViewerComponent extends BaseImageViewerComponent implements OnDestroy {
 
-  public minMaxIterations$: Observable<EventsGetDebugImageIterationsResponse>;
-  public beginningOfTime$: Observable<boolean>;
-  public endOfTime$: Observable<boolean>;
-  private autoRefreshState$: Observable<boolean>;
-  private isAppVisible$: Observable<boolean>;
-  private autoRefreshSub: Subscription;
+  protected minMaxIterations$ = this.store.select(selectMinMaxIterations);
+  protected beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
+  protected endOfTime$ = this.store.select(selectViewerEndOfTime);
+  private autoRefreshState$ = this.store.select(selectAutoRefresh);
+  private isAppVisible$ = this.store.select(selectAppVisible);
   private beginningOfTime = false;
   private endOfTime = false;
-  private begOfTimeSub: Subscription;
-  private endOfTimeSub: Subscription;
   change$: BehaviorSubject<number>;
-  private sub = new Subscription();
   public embedFunction: (DOMRect, metric: string, variant: string) => null;
 
 
@@ -54,64 +51,71 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     }
   }
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public override data: {
-      index: number;
-      isAllMetrics: boolean;
-      snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>;
-      url: string;
-      withoutNavigation: boolean;
-      embedFunction: () => null;
-    },
-    public override dialogRef: MatDialogRef<ImageViewerComponent>,
-    public override changeDetector: ChangeDetectorRef,
-    public override store: Store<any>
-  ) {
-    super(data, dialogRef, changeDetector, store);
-    if(data.url) {
-      this.url = data.url;
-      this.isPlayer = false;
+  constructor() {
+    super();
+    if (this.data.url) {
+      this.url.set(this.data.url);
+      this.isPlayer.set(new IsVideoPipe().transform(this.data.url) || new IsAudioPipe().transform(this.data.url));
       this.change$ = new BehaviorSubject<number>(0);
     } else {
       const reqData = {
-        task: data.snippetsMetaData[data.index].task,
-        metric: data.snippetsMetaData[data.index].metric,
-        variant: data.snippetsMetaData[data.index].variant,
-        iteration: data.snippetsMetaData[data.index].iter,
-        isAllMetrics: data.isAllMetrics
+        task: this.data.snippetsMetaData[this.data.index].task,
+        metric: this.data.snippetsMetaData[this.data.index].metric,
+        variant: this.data.snippetsMetaData[this.data.index].variant,
+        iteration: this.data.snippetsMetaData[this.data.index].iter,
+        isAllMetrics: this.data.isAllMetrics
       };
       this.store.dispatch(getDebugImageSample(reqData));
       this.change$ = new BehaviorSubject<number>(reqData.iteration);
     }
-    this.minMaxIterations$ = this.store.select(selectMinMaxIterations);
-    this.beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
-    this.endOfTime$ = this.store.select(selectViewerEndOfTime);
-    this.autoRefreshState$ = this.store.select(selectAutoRefresh);
-    this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.embedFunction = data.embedFunction;
-    this.autoRefreshSub = interval(VIEWER_AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
-      filter(([, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
-    ).subscribe(() => {
-      if (this.currentDebugImage) {
-        this.store.dispatch(setViewerEndOfTime({endOfTime: false}));
-        this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
-        this.store.dispatch(getDebugImageSample({
-          task: this.currentDebugImage.task,
-          metric: this.currentDebugImage.metric,
-          variant: this.currentDebugImage.variant,
-          iteration: this.currentDebugImage.iter,
-          isAllMetrics: this.data.isAllMetrics
-        }));
-      }
-    });
+    this.embedFunction = this.data.embedFunction;
 
-    this.sub.add(this.change$
+    interval(VIEWER_AUTO_REFRESH_INTERVAL)
       .pipe(
+        takeUntilDestroyed(),
+        withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
+        filter(([, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
+      )
+      .subscribe(() => {
+        if (this.currentDebugImage) {
+          this.store.dispatch(setViewerEndOfTime({endOfTime: false}));
+          this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
+          this.store.dispatch(getDebugImageSample({
+            task: this.currentDebugImage.task,
+            metric: this.currentDebugImage.metric,
+            variant: this.currentDebugImage.variant,
+            iteration: this.currentDebugImage.iter,
+            isAllMetrics: this.data.isAllMetrics
+          }));
+        }
+      });
+
+    this.change$
+      .pipe(
+        takeUntilDestroyed(),
         debounceTime(100),
         distinctUntilChanged()
       )
-      .subscribe(val => this.changeIteration(val)));
+      .subscribe(val => this.changeIteration(val));
+
+    this.beginningOfTime$
+      .pipe(takeUntilDestroyed())
+      .subscribe(beg => {
+        this.beginningOfTime = beg;
+        if (beg) {
+          this.rescale();
+          this.imageLoaded = true;
+        }
+      });
+    this.endOfTime$
+      .pipe(takeUntilDestroyed())
+      .subscribe(end => {
+        this.endOfTime = end;
+        if (end) {
+          this.rescale();
+          this.imageLoaded = true;
+        }
+      });
   }
 
   canGoNext() {
@@ -124,8 +128,6 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
 
   next() {
     if (this.canGoNext() && this.currentDebugImage) {
-      this.imageHeight = null;
-      this.imageWidth = null;
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false}));
     }
@@ -133,8 +135,6 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
 
   previous() {
     if (this.canGoBack() && this.currentDebugImage) {
-      this.imageHeight = null;
-      this.imageWidth = null;
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true}));
     }
@@ -171,34 +171,18 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     }
   }
 
-  override ngOnInit(): void {
-    super.ngOnInit();
-    this.begOfTimeSub = this.beginningOfTime$.subscribe(beg => {
-      this.beginningOfTime = beg;
-      if (beg) {
-        this.fitToScreen();
-        this.imageLoaded = true;
-      }
-    });
-    this.endOfTimeSub = this.endOfTime$.subscribe(end => {
-      this.endOfTime = end;
-      if (end) {
-        this.fitToScreen();
-        this.imageLoaded = true;
-      }
-    });
-  }
-
   override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
-    this.begOfTimeSub.unsubscribe();
-    this.endOfTimeSub.unsubscribe();
-    this.autoRefreshSub?.unsubscribe();
-    this.sub.unsubscribe();
   }
 
-  embedCodeClick($event: MouseEvent) {
-    $event && this.embedFunction(($event?.currentTarget as HTMLElement).getBoundingClientRect(), this.currentDebugImage?.metric, this.currentDebugImage?.variant);
+  embedCodeClick(event: MouseEvent) {
+    if (event) {
+      this.embedFunction(
+        (event?.currentTarget as HTMLElement).getBoundingClientRect(),
+        this.currentDebugImage?.metric,
+        this.currentDebugImage?.variant
+      );
+    }
   }
 }

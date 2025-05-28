@@ -1,4 +1,4 @@
-@import "../../assets/fonts/variables";
+@use "../../assets/fonts/variables" as fonts;
 
 
 @mixin sm-system-tag() {
@@ -6,8 +6,8 @@
     @include system-tag();
 
     &:before {
-      font-family: '#{$icomoon-font-family}';
-      content: $al-ico-users;
+      font-family: '#{fonts.$icomoon-font-family}';
+      content: fonts.$al-ico-users;
       width: 12px;
       font-size: 24px;
       text-align: left;
@@ -33,6 +33,9 @@
     &:before {
       content: '';
     }
+  }
+  ::ng-deep tr.selected .group-rest {
+    color: var(--color-surface);
   }
 }
 

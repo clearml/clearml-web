@@ -3,7 +3,7 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {catchError, mergeMap, map, switchMap, filter} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
-import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../core/actions/layout.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../core/actions/http.actions';
@@ -15,6 +15,7 @@ import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/events
 import {COMPARE_DEBUG_IMAGES_ONLY_FIELDS} from '../experiments-compare/experiments-compare.constants';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {setBeginningOfTime} from '@common/shared/debug-sample/debug-sample.actions';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 export const ALL_IMAGES = '-- All --';
 
@@ -123,7 +124,11 @@ export class DebugImagesEffects {
     switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.tasks, only_fields: COMPARE_DEBUG_IMAGES_ONLY_FIELDS})
       .pipe(
         mergeMap(res => [debugActions.setExperimentsNames({tasks: res.tasks}), deactivateLoader(action.type)]),
-        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(action.type),
+          addMessage(MESSAGES_SEVERITY.WARN, `Fetch debug samples failed`)
+      ])
       )
     )
   ));
@@ -148,7 +153,11 @@ export class DebugImagesEffects {
             deactivateLoader(debugActions.getDebugImagesMetrics.type),
             deactivateLoader(debugActions.refreshDebugImagesMetrics.type),
           ]),
-          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+          catchError(error => [
+            requestFailed(error),
+            deactivateLoader(action.type),
+            addMessage(MESSAGES_SEVERITY.WARN, `Fetch debug samples failed`)
+          ])
         )
     )
   ));

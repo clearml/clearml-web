@@ -1,8 +1,10 @@
-<sm-model-view-network
-  [model]="(selectedModel$ | ngrxPush)"
-  [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
-  [saving]="(saving$ | ngrxPush)"
-  (saveFormData)="saveFormData($event)"
-  (cancelClicked)="cancelClicked()"
-  (activateEditClicked)="activateEditClicked()"
-></sm-model-view-network>
+@if (model() !== null) {
+  <sm-model-view-network
+    [model]="model()"
+    [isSharedAndNotOwner]="isSharedAndNotOwner()"
+    [saving]="saving()"
+    (saveFormData)="saveFormData($event)"
+    (cancelClicked)="cancelClicked()"
+    (activateEditClicked)="activateEditClicked()"
+  ></sm-model-view-network>
+}

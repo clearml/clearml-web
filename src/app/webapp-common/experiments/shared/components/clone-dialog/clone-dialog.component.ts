@@ -25,10 +25,11 @@ export interface CloneDialogData {
 }
 
 @Component({
-  selector: 'sm-clone-dialog',
-  templateUrl: './clone-dialog.component.html',
-  styleUrls: ['./clone-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-clone-dialog',
+    templateUrl: './clone-dialog.component.html',
+    styleUrls: ['./clone-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class CloneDialogComponent implements OnInit, OnDestroy {
   public reference: string;

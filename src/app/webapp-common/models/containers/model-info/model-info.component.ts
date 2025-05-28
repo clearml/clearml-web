@@ -1,34 +1,52 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, model } from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectIsModelInEditMode, selectSelectedModel, selectSelectedTableModel, selectSplitSize} from '../../reducers';
 import {SelectedModel} from '../../shared/models.model';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {groupByCharts, GroupByCharts, setExperimentSettings, toggleMetricValuesView, toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {
+  groupByCharts,
+  GroupByCharts,
+  removeExperimentSettings,
+  setExperimentSettings,
+  toggleMetricValuesView,
+  toggleSettings
+} from '@common/experiments/actions/common-experiment-output.actions';
 import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
-import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
+import {
+  selectIsSharedAndNotOwner,
+  selectSelectedModelSettings,
+} from '~/features/experiments/reducers';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
 import {headerActions} from '@common/core/actions/router.actions';
-import {selectMetricValuesView, selectModelSettingsGroupBy, selectModelSettingsSmoothType, selectModelSettingsSmoothWeight, selectModelSettingsXAxisType, selectSelectedSettingsGroupBy, selectSelectedSettingsSmoothType, selectSelectedSettingsSmoothWeight, selectSelectedSettingsxAxisType} from '@common/experiments/reducers';
-import { SmoothTypeEnum } from '@common/shared/single-graph/single-graph.utils';
-import { ScalarKeyEnum } from '~/business-logic/model/events/scalarKeyEnum';
+import {
+  selectMetricValuesView,
+  selectModelSettingsGroupBy, selectModelSettingsHiddenScalar,
+  selectModelSettingsSmoothSigma, selectModelSettingsSmoothType,
+  selectModelSettingsSmoothWeight,
+  selectModelSettingsXAxisType, selectSelectedModelSettingsIsProjectLevel
+} from '@common/experiments/reducers';
+import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {concatLatestFrom} from '@ngrx/operators';
 
 @Component({
   selector: 'sm-model-info',
   templateUrl: './model-info.component.html',
-  styleUrls: ['./model-info.component.scss']
+  styleUrls: ['./model-info.component.scss'],
+  standalone: false
 })
 export class ModelInfoComponent implements OnInit, OnDestroy {
   private router = inject(Router);
@@ -42,10 +60,13 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   public selectedModel: SelectedModel;
   private sub = new Subscription();
   public isExample: boolean;
-  public smoothWeight$: Observable<number>;
-  public smoothType$: Observable<SmoothTypeEnum>;
-  public xAxisType$: Observable<ScalarKeyEnum>;
-  public groupBy$: Observable<GroupByCharts>;
+  protected smoothWeight = this.store.selectSignal(selectModelSettingsSmoothWeight);
+  protected smoothSigma = this.store.selectSignal(selectModelSettingsSmoothSigma);
+  protected smoothType = this.store.selectSignal(selectModelSettingsSmoothType);
+  protected xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
+  protected groupBy = this.store.selectSignal(selectModelSettingsGroupBy);
+  protected listOfHidden = this.store.selectSignal(selectModelSettingsHiddenScalar);
+
 
   groupByOptions = [
     {
@@ -71,15 +92,10 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   public toMaximize: boolean;
   private modelsFeature: boolean;
 
-  protected scalars$ = this.store.select(selectRouterConfig)
-    .pipe(
-      filter(c => !!c),
-      distinctUntilChanged(),
-      map((config: string[]) => config.includes('scalars'))
-    );
   protected selectedModel$ = this.store.select(selectSelectedModel)
     .pipe(filter(model => !!model));
-  protected routerConfig$ = this.store.select(selectRouterConfig)
+  protected routerConfig = this.store.selectSignal(selectRouterConfig);
+  protected routerParams = this.store.selectSignal(selectRouterParams);
   protected backdropActive$ = this.store.select(selectBackdropActive);
   protected selectedTableModel$ = this.store.select(selectSelectedTableModel);
   protected splitSize$ = this.store.select(selectSplitSize);
@@ -87,15 +103,12 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   protected isModelInEditMode$ = this.store.select(selectIsModelInEditMode);
   protected selectedProject$ = this.store.select(selectSelectedProject);
   protected metricValuesView$ = this.store.select(selectMetricValuesView);
+  private allSettings = this.store.selectSignal(selectSelectedModelSettings);
+  protected isProjectLevel = this.store.selectSignal(selectSelectedModelSettingsIsProjectLevel);
 
-  constructor(
-  ) {
+  projectId = computed(() => this.routerParams().projectId);
 
-    this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
-    this.smoothType$ = this.store.select(selectModelSettingsSmoothType);
-    this.xAxisType$ = this.store.select(selectModelSettingsXAxisType);
-    this.groupBy$ = this.store.select(selectModelSettingsGroupBy);
-
+  constructor() {
     this.modelsFeature = this.route.snapshot.data?.setAllProject;
     if (this.modelsFeature) {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}));
@@ -190,8 +203,8 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   }
 
   setupBreadcrumbsOptions() {
-    this.sub.add(this.selectedProject$.pipe(
-    ).subscribe((selectedProject) => {
+    this.sub.add(this.selectedProject$.pipe(concatLatestFrom(() => [this.store.select(selectRouterParams), this.store.select(selectRouterConfig)])
+    ).subscribe(([selectedProject, params, config]) => {
       if (this.modelsFeature) {
         this.store.dispatch(setBreadcrumbsOptions({
           breadcrumbOptions: {
@@ -212,7 +225,12 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
               filterBaseNameWith: null,
               compareModule: null,
               showSelectedProject: selectedProject?.id !== '*',
-              ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename}})
+              ...(selectedProject && {
+                selectedProjectBreadcrumb: {
+                  name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename,
+                  url: this.getMinimizeURL(params, config), queryParamsHandling: 'preserve', linkLast: true
+                }
+              })
             }
           }
         }));
@@ -220,26 +238,78 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     }));
   }
 
+  getMinimizeURL(params, config): string {
+    return  config.map(item => {
+      switch (item) {
+        case ':projectId':
+          return params.projectId;
+        case ':modelId':
+          return params.modelId;
+          default:
+            return item
+      }
+    }).filter(item => item!=='output').join('/');
+  }
+
   toggleTableView() {
     this.store.dispatch(toggleMetricValuesView());
   }
 
   changeSmoothness($event: number) {
-    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {smoothWeight: $event}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.selectedModel.id,
+      changes: {...this.getSettingsObject(), smoothWeight: $event}
+    }));
+  }
+
+  changeSigma($event: number) {
+    this.store.dispatch(setExperimentSettings({
+      id: this.selectedModel.id,
+      changes: {...this.getSettingsObject(), smoothSigma: $event}
+    }));
   }
 
   changeSmoothType($event: SmoothTypeEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {smoothType: $event}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.selectedModel.id,
+      changes: {...this.getSettingsObject(), smoothType: $event}
+    }));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
-    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {xAxisType: $event}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.selectedModel.id,
+      changes: {...this.getSettingsObject(), xAxisType: $event}
+    }));
   }
 
   changeGroupBy($event: GroupByCharts) {
-    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {groupBy: $event}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.selectedModel.id,
+      changes: {...this.getSettingsObject(), groupBy: $event}
+    }));
   }
 
+  getSettingsObject = () => ({
+    ...(this.groupBy() && {groupBy: this.groupBy()}),
+    ...(this.xAxisType() && {xAxisType: this.xAxisType()}),
+    ...(this.smoothType() && {smoothType: this.smoothType()}),
+    ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
+    ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
+    ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    projectLevel: false
+  });
+
+  setToProject() {
+    this.store.dispatch(setExperimentSettings({
+      changes: {
+        ...this.allSettings(),
+        id: this.projectId(),
+        projectLevel: true
+      }, id: this.projectId()
+    }));
+    this.store.dispatch(removeExperimentSettings({id: this.selectedModel.id}));
+  }
 
 }
 

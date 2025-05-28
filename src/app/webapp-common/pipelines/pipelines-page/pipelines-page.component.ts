@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {pageSize} from '@common/projects/common-projects.consts';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {isExample} from '@common/shared/utils/shared-utils';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {
   addProjectTags,
   getProjectsTags, setBreadcrumbsOptions,
@@ -34,9 +33,10 @@ import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 
 @Component({
-  selector: 'sm-pipelines-page',
-  templateUrl: './pipelines-page.component.html',
-  styleUrls: ['./pipelines-page.component.scss']
+    selector: 'sm-pipelines-page',
+    templateUrl: './pipelines-page.component.html',
+    styleUrls: ['./pipelines-page.component.scss'],
+    standalone: false
 })
 export class PipelinesPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   initPipelineCode = `from clearml import PipelineDecorator
@@ -67,7 +67,6 @@ if __name__ == '__main__':
   pageSize = pageSize;
   protected entityType = ProjectTypeEnum.pipelines;
   isExample = isExample;
-  trackById = trackById;
   public projectsTags$: Observable<string[]>;
   public showExamples$: Observable<boolean>;
   private headerUserFocusSub: Subscription;

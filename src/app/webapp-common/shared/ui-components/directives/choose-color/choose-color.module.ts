@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ChooseColorDirective} from './choose-color.directive';
 import {ColorPickerWrapperComponent} from '../../inputs/color-picker/color-picker-wrapper.component';
-import {ColorPickerModule} from 'ngx-color-picker';
+import {ColorPickerDirective} from 'ngx-color-picker';
 import {StoreModule} from '@ngrx/store';
 import {colorPreferenceReducer} from './choose-color.reducer';
 import {MatButton} from '@angular/material/button';
@@ -25,9 +25,9 @@ const _declarations = [
   declarations   : _declarations,
   imports: [
     CommonModule,
-    ColorPickerModule,
     StoreModule.forFeature('colorsPreference', colorPreferenceReducer),
     MatButton,
+    ColorPickerDirective,
   ],
   exports        : _declarations
 })

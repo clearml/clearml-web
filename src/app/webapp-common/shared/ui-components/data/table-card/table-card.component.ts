@@ -4,13 +4,12 @@ import {NgTemplateOutlet} from '@angular/common';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
-  selector: 'sm-table-card',
-  templateUrl: './table-card.component.html',
-  styleUrls: ['./table-card.component.scss'],
-  standalone: true,
-  imports: [
-    NgTemplateOutlet
-  ]
+    selector: 'sm-table-card',
+    templateUrl: './table-card.component.html',
+    styleUrls: ['./table-card.component.scss'],
+    imports: [
+        NgTemplateOutlet
+    ]
 })
 export class TableCardComponent {
   columns = input<ISmCol[]>();

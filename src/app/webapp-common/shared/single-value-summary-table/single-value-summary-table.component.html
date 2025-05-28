@@ -2,23 +2,21 @@
   <div class="summary-header position-relative">Summary</div>
   <div class="d-flex items-container">
     <div class="wrapper"></div>
-    @for (item of data | sort:'variant'; track item.variant) {
+    @for (item of data() | sort:'variant'; track item.variant) {
       <div class="item">
-        <div class="variant">{{ item.variant }}</div>
-        <div class="value">{{ item.value }}</div>
+        <div class="variant ellipsis" [smTooltip]="item.variant" smShowTooltipIfEllipsis>{{ item.variant }}</div>
+        <div class="value ellipsis" [smTooltip]="item.value" smShowTooltipIfEllipsis>{{ item.value }}</div>
       </div>
     }
   </div>
   <div class="actions">
-    @if (!csvButtonTemplate) {
     <button mat-icon-button data-id="copyEmbedCodeButton" (click)="downloadTableAsCSV()">
-      <mat-icon fontSet="al" fontIcon="al-ico-csv"></mat-icon>
+      @if (!csvButtonTemplate()) {
+        <mat-icon fontSet="al" fontIcon="al-ico-csv"></mat-icon>
+      } @else {
+        <ng-container *ngTemplateOutlet="csvButtonTemplate()"></ng-container>
+      }
     </button>
-    } @else {
-    <div class="csv-svg" (click)="downloadTableAsCSV()" title="Download as CSV">
-      <ng-container *ngTemplateOutlet="csvButtonTemplate"></ng-container>
-    </div>
-    }
     @if (createEmbedCode.observed) {
       <button mat-icon-button data-id="copyEmbedCodeButton" (click)="createEmbedCodeClicked($event)">
         <mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>

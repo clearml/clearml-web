@@ -50,10 +50,10 @@ import {settingsFeatureKey, settingsReducers} from '~/features/settings/settings
 
 @NgModule({
   declarations: [
-    SettingsComponent,
-    UserDataComponent,
-    UserCredentialsComponent,
     AdminFooterActionsComponent,
+    UserDataComponent,
+    SettingsComponent,
+    UserCredentialsComponent,
     AdminCredentialTableComponent,
     AdminFooterComponent,
     ProfileNameComponent,

@@ -32,7 +32,7 @@ export const EXPERIMENTS_STATUS_LABELS = {
   [TaskStatusEnum.Completed]   : 'Completed',
   [TaskStatusEnum.Published]   : 'Published',
   [TaskStatusEnum.Failed]      : 'Failed',
-  [TaskStatusEnum.Stopped]     : 'Completed',
+  [TaskStatusEnum.Stopped]     : 'Aborted',
   [TaskStatusEnum.Closed]      : 'Closed',
   [TaskTypeEnum.Testing]       : 'Testing',
   [TaskTypeEnum.Training]      : 'Training',

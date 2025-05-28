@@ -1,6 +1,6 @@
-<mat-form-field appearance="outline" class="no-bottom">
+<mat-form-field appearance="outline" [class.no-bottom]="!embeddedErrors">
   @if (label(); as label) {
-    <mat-label>{{label}}</mat-label>
+    <mat-label>{{ label }}</mat-label>
   }
   <input #inputRef matInput type="text"
          [matAutocomplete]="auto"
@@ -28,7 +28,7 @@
         "{{ control.value }}" <span class="new">(Create New)</span>
       </mat-option>
     }
-    @for (entity of data() ; track entity.id) {
+    @for (entity of data(); track entity.id) {
       <mat-option [value]="entity.name">
         <div [smSearchText]="control.value">{{ entity[this.displayField()] }}</div>
       </mat-option>
@@ -40,6 +40,6 @@
       </div>
     }
     <sm-dots-load-more [class.hidden]="data() === null || noMoreOptions" [loading]="state().loading()" (loadMore)="loadMoreEntities(control.value)"></sm-dots-load-more>
-    <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
+    <mat-option disabled style="height: 0; min-height: 0; padding:0"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
   </mat-autocomplete>
 </mat-form-field>

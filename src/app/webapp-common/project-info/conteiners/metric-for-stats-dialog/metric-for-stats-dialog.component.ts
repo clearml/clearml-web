@@ -13,10 +13,11 @@ export interface MetricForStatsData {
 
 
 @Component({
-  selector: 'sm-metric-for-stats-dialog',
-  templateUrl: './metric-for-stats-dialog.component.html',
-  styleUrls: ['./metric-for-stats-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-metric-for-stats-dialog',
+    templateUrl: './metric-for-stats-dialog.component.html',
+    styleUrls: ['./metric-for-stats-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class MetricForStatsDialogComponent {
   public variants: MetricVariantResult[];

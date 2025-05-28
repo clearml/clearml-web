@@ -1,17 +1,16 @@
-@import "mixins/common";
-@import "variables";
+@use "mixins/common";
 
 hr {
   margin: 0 !important;
 }
 
 .project-tag {
-  @include card-header-tag();
+  @include common.card-header-tag();
   color: var(--color-tertiary);
 }
 
 .footer-title {
-  @include counter-label();
+  @include common.counter-label();
   text-align: center;
   font-size: 10px;
   padding: 12px

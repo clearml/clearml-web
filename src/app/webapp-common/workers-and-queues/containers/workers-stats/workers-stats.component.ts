@@ -20,10 +20,11 @@ import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 
 @Component({
-  selector: 'sm-workers-graph',
-  templateUrl: './workers-stats.component.html',
-  styleUrls: ['./workers-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-workers-graph',
+    templateUrl: './workers-stats.component.html',
+    styleUrls: ['./workers-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WorkersStatsComponent {
   private store = inject(Store);

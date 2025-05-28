@@ -110,7 +110,6 @@ import {MatButton, MatIconButton} from '@angular/material/button';
     QueuesMenuComponent,
     QueuesMenuExtendedComponent
   ],
-
 })
 export class WorkersAndQueuesModule {
 }

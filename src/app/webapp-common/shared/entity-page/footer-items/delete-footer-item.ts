@@ -1,5 +1,5 @@
 import {ItemFooterModel, IFooterState} from './footer-items.models';
-import {IconNames, ICONS} from '../../../constants';
+import {IconNames, ICONS} from '@common/constants';
 import {MenuItems} from '../items.utils';
 
 export class DeleteFooterItem extends ItemFooterModel {
@@ -12,7 +12,7 @@ export class DeleteFooterItem extends ItemFooterModel {
     this.disableDescription = 'Delete';
   }
 
-  getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+  getItemState(state: IFooterState<{id: string}>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
     return {
       preventCurrentItem: !state.selectionAllIsArchive,
       disable: state.data[this.id]?.disable,

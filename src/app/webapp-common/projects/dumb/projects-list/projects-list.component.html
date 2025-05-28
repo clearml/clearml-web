@@ -1,6 +1,6 @@
 <div class="sm-card-list-layout projects">
   <ng-content></ng-content>
-  @for (project of projects(); track project.id) {
+  @for (project of projects(); track project.id + $index) {
     @if ($index + totalVirtualCards() < projects().length || noMoreProjects() || showLast()) {
       <sm-project-card
         (deleteProjectClicked)="deleteProjectClicked.emit($event)"
@@ -9,6 +9,7 @@
         (projectEditClicked)="projectEditClicked.emit($event)"
         (projectNameChanged)="projectNameChanged.emit({id: project.id, name:$event})"
         (moveToClicked)="moveToClicked.emit($event)"
+        (projectSettingsClicked)="projectSettingsClicked.emit($event)"
         [hideMenu]="['All Tasks'].includes(project.name) || $any(project).isRoot || isExample(project)"
         [project]="project"
         [projectsNames]="projectsNames()"

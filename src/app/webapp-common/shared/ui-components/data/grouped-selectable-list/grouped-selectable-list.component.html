@@ -1,30 +1,36 @@
-<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+<mat-tree [dataSource]="dataSource()" [childrenAccessor]="childrenAccessor">
 <!--  CHILDREN NODES-->
-  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [matTreeNodePaddingIndent]="24">
-    <span [class]="node.parent ? 'child-node' : 'parent-node'"
+  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [matTreeNodePaddingIndent]="24" [class]="node.parent ? 'child' : 'parent'">
+    <span class="panel" [class]="node.parent ? 'child-node' : 'parent-node2'"
           [class.last-child]="node.lastChild">
       <span class="ellipsis flex-grow-1"
-            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList()) : !checkedList().includes(node.name)"
-            [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis
-            (click)="itemSelect.emit(node.parent + node.name)">{{ node.name }}</span>
-      <i (click)="node.parent ? itemCheck.emit( {pathString: node.parent + node.name, parent: node.parent}) :
-         groupCheck(node); $event.stopPropagation()"
-         class=" al-icon sm"
-         [class]="(node.parent ? (node.parent + node.name | stringIncludedInArray: checkedList()) : checkedList().includes(node.name)) ? checkIcon[0] : checkIcon[1]">
-      </i>
+            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList()) : !checkedList()?.includes(node.name)"
+            [smTooltip]="node.displayName ?? node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis
+            (click)="itemSelect.emit(node.parent + node.name)">{{ node.displayName ?? node.name }}</span>
+
+      <button
+        mat-icon-button
+        class="sm me-2"
+        (click)="node.parent ? itemCheck.emit( {pathString: node.parent + node.name, parent: node.parent}) : groupCheck(node); $event.stopPropagation()"
+      >
+        <mat-icon fontSet=al [fontIcon]="(node.parent ? (node.parent + node.name | stringIncludedInArray: checkedList()) : checkedList()?.includes(node.name)) ? checkIcon[0] : checkIcon[1]"></mat-icon>
+      </button>
     </span>
   </mat-tree-node>
   <!--  PARENTS NODES-->
-  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding class="parent">
-    <span matTreeNodeToggle class="parent-node"
-          [class.expanded]="treeControl.isExpanded(node)"
-          [class.unchecked]="!(node.children | arrayIncludedInArray:checkedList())">
-      <i class="al-icon al-ico-caret-right toggle-icon"></i>
-      <span class="ellipsis flex-grow-1" [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{ node.name }}</span>
+  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding [cdkTreeNodeTypeaheadLabel]="node.name" class="parent">
+    <span matTreeNodeToggle class="panel parent-node"
+          [class.expanded]="tree().isExpanded(node)"
+          [class.unchecked]="!(node.childrenNames | arrayIncludedInArray:checkedList())">
+      <i class="me-1 al-icon al-ico-next toggle-icon sm"></i>
+      <span class="ellipsis flex-grow-1 pe-1" [smTooltip]="node.displayName ?? node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{ node.displayName ?? node.name }}</span>
+      <button
+        mat-icon-button
+        class="sm me-2"
+        (click)="groupCheck(node); $event.stopPropagation()"
+      >
+        <mat-icon fontSet=al [fontIcon]="(node.childrenNames | arrayIncludedInArray:checkedList())? checkIcon[0] : checkIcon[1]"></mat-icon>
+      </button>
     </span>
-    <i (click)="groupCheck(node); $event.stopPropagation()"
-       class=" al-icon sm"
-       [class]="(node.children | arrayIncludedInArray:checkedList())? checkIcon[0] : checkIcon[1]">
-    </i>
   </mat-tree-node>
 </mat-tree>

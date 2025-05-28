@@ -1,4 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, Renderer2, signal, viewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  Renderer2,
+  signal,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from '@angular/material/autocomplete';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
@@ -20,34 +34,34 @@ import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {userThemeChanged} from '@common/core/actions/layout.actions';
-import {selectUserTheme} from '@common/core/reducers/view.reducer';
+import {selectDarkTheme, selectUserTheme} from '@common/core/reducers/view.reducer';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage, NgTemplateOutlet} from '@angular/common';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
 
 
 @Component({
-  selector: 'sm-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatAutocompleteTrigger,
-    MatProgressSpinner,
-    MatAutocomplete,
-    MatOption,
-    PushPipe,
-    NtkmeButtonModule,
-    NgOptimizedImage,
-    ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatButton
-  ]
+    selector: 'sm-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatAutocompleteTrigger,
+        MatProgressSpinner,
+        MatAutocomplete,
+        MatOption,
+        PushPipe,
+        NtkmeButtonModule,
+        NgOptimizedImage,
+        ReactiveFormsModule,
+        MatFormField,
+        MatLabel,
+        MatInput,
+        MatButton,
+        NgTemplateOutlet
+    ]
 })
 export class LoginComponent {
   private router = inject(Router);
@@ -65,6 +79,7 @@ export class LoginComponent {
   showSimpleLogin = input<boolean>();
   hideTou = input<boolean>();
   showBackground = input(true);
+  errorTemplate = input<TemplateRef<unknown>>();
   private nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
   private githubButton = viewChild(NtkmeButtonComponent);
   protected environment = this.config.configuration;
@@ -105,10 +120,6 @@ export class LoginComponent {
         name: 'Login',
         type: CrumbTypeEnum.Feature
       }]]}));
-
-    if (!this.environment().communityServer) {
-      this.renderer.addClass(this.ref.nativeElement, 'dark-theme');
-    }
 
     toObservable(this.githubButton)
       .pipe(

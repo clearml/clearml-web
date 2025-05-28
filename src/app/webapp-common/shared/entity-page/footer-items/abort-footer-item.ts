@@ -1,5 +1,5 @@
 import {ItemFooterModel, IFooterState} from './footer-items.models';
-import {IconNames, ICONS} from '../../../constants';
+import {IconNames, ICONS} from '@common/constants';
 import {MenuItems, selectionDisabledAbort} from '../items.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -11,7 +11,7 @@ export class AbortFooterItem extends ItemFooterModel {
     this.emit = true;
     this.icon = ICONS.STOPPED as Partial<IconNames>;
   }
-  getItemState(state: IFooterState<any>) {
+  getItemState(state: IFooterState<{id: string}>) {
     const {available, disable} = selectionDisabledAbort(state.selected);
     return {
       disable,

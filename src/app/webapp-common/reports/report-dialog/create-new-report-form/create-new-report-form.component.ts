@@ -20,23 +20,22 @@ export interface NewReportData {
 }
 
 @Component({
-  selector: 'sm-create-new-report-form',
-  templateUrl: './create-new-report-form.component.html',
-  styleUrls: ['./create-new-report-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatFormField,
-    PaginatedEntitySelectorComponent,
-    StringIncludedInArrayPipe,
-    MatDialogActions,
-    MatDialogClose,
-    MatLabel,
-    MatError,
-    MatInput,
-    MatButton
-  ]
+    selector: 'sm-create-new-report-form',
+    templateUrl: './create-new-report-form.component.html',
+    styleUrls: ['./create-new-report-form.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        ReactiveFormsModule,
+        MatFormField,
+        PaginatedEntitySelectorComponent,
+        StringIncludedInArrayPipe,
+        MatDialogActions,
+        MatDialogClose,
+        MatLabel,
+        MatError,
+        MatInput,
+        MatButton
+    ]
 })
 export class CreateNewReportFormComponent {
   private builder = inject(FormBuilder);
@@ -50,9 +49,6 @@ export class CreateNewReportFormComponent {
     description: '',
     project: [null as string, [Validators.required, Validators.minLength(3)]]
   });
-
-  filterText = '';
-  isAutoCompleteOpen: boolean;
 
   readOnlyProjectsNames = input<string[]>();
   defaultProjectId = input<string>();
@@ -111,7 +107,8 @@ export class CreateNewReportFormComponent {
 
   loadMore(term: string, loadMore: boolean) {
     this.projectsState().loading.set(true);
-    this.filterSearchChanged.emit({value: term || '', loadMore});
+    const value = (term !== this.projectsRoot.name ? term : '') ?? '';
+    this.filterSearchChanged.emit({value: value, loadMore});
   }
 }
 

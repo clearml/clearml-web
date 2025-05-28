@@ -1,10 +1,15 @@
 :host {
   --mat-standard-button-toggle-height: 34px;
-  --mat-standard-button-toggle-label-text-line-height: 32px;
+  --mat-standard-button-toggle-label-text-line-height: 34px;
 
   .label {
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
+    // font-size: 12px;
+    // font-weight: 500;
+    // text-transform: uppercase;
+    display: block;
+  }
+
+  mat-button-toggle {
+    display: block;
   }
 }

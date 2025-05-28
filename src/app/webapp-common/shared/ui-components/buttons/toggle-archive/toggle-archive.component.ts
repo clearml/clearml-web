@@ -5,15 +5,14 @@ import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
-  selector: 'sm-toggle-archive',
-  templateUrl: './toggle-archive.component.html',
-  styleUrls: ['./toggle-archive.component.scss'],
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    MatButton,
-    MatIcon
-  ]
+    selector: 'sm-toggle-archive',
+    templateUrl: './toggle-archive.component.html',
+    styleUrls: ['./toggle-archive.component.scss'],
+    imports: [
+        TooltipDirective,
+        MatButton,
+        MatIcon
+    ]
 })
 export class ToggleArchiveComponent {
   showArchived = input<boolean>();

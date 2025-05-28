@@ -12,29 +12,17 @@
     }
   </div>
 
-  @if (showLogo() && !isLogin()) {
-    <div class="logo-full middle"
-         [class.make-room-for-slogan]="environment().whiteLabelSlogan">
-      @if (!environment().whiteLabelLogo) {
-        <img alt="logo"
-             [priority]="true"
+  @if (hideSideNav()) {
+    <div class="logo-full middle">
+      <div class="logo-full">
+        <img alt="logo" [priority]="true"
              [ngSrc]="darkTheme() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
              width="124" height="42">
-      } @else {
-        <div class="slogan">{{ environment().whiteLabelSlogan }}</div>
-        @if (isLogin()) {
-          <div class="logo-full">
-            <img alt="logo" [priority]="true"
-                 [ngSrc]="darkTheme() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
-                 width="124" height="42">
-          </div>
-        }
-      }
+      </div>
     </div>
   }
-  @if (!showLogo() && !isLogin()) {
-    <sm-header-navbar-tabs
-    ></sm-header-navbar-tabs>
+  @if (!isLogin() && !hideSideNav()) {
+    <sm-header-navbar-tabs></sm-header-navbar-tabs>
   }
 
   @if (isLogin()) {
@@ -43,7 +31,13 @@
 
   @if (!hideMenus()) {
     <div class="right-buttons" data-id="rightSideHeaderpanel">
-      <sm-common-search #search [class.share-view]="isShareMode()"></sm-common-search>
+      @if (!isShareMode()){
+        <button class="me-2" mat-icon-button (click)="openGlobalSearch()" smTooltip="Search all">
+          <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="search Icon" ></mat-icon>
+        </button>}
+      @if (showAutoRefresh()) {
+        <sm-refresh-button (setAutoRefresh)="toggleAutoRefresh($event)" class="refresh-button"></sm-refresh-button>
+      }
       <button mat-icon-button #trigger="matMenuTrigger" class="resources-trigger" [class.menu-opened]="trigger.menuOpen" [matMenuTriggerFor]="resourcesMenu">
           <mat-icon fontSet="al" fontIcon="al-ico-help-outlined" data-id="help Icon"></mat-icon>
       </button>
@@ -79,15 +73,17 @@
           Logout
         </button>
       </mat-menu>
-      <mat-menu #resourcesMenu="matMenu" class="user-menu light-theme" panelClass="light-theme">
+      <mat-menu #resourcesMenu="matMenu" class="user-menu">
         <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
           <mat-icon fontSet="al" fontIcon="al-ico-code-file">Code</mat-icon>
           <span>ClearML Python Package setup</span>
         </button>
-        <a mat-menu-item href="https://www.youtube.com/c/ClearML/featured" target="_blank" data-id="Youtube Option">
+        @if (environment().platformYoutubeChannel) {
+        <a mat-menu-item [href]="environment().platformYoutubeChannel" target="_blank" data-id="Youtube Option">
           <mat-icon fontSet="al" fontIcon="al-ico-youtube">Youtube</mat-icon>
           <span>ClearML on Youtube</span>
         </a>
+        }
         <a mat-menu-item [href]="environment().docsLink" target="_blank" data-id="Online Documentation Option">
           <mat-icon fontSet="al" fontIcon="al-ico-documentation">Docs</mat-icon>
           <span>Online Documentation</span>
@@ -104,17 +100,8 @@
             <span>Version Notifications</span>
           </button>
         }
-        <ng-container *smCheckPermission="'applications'">
-          @if (environment()?.appsYouTubeIntroVideoId && $any(environment()).appAwarenessMenu !== false) {
-            <button mat-menu-item
-                    (click)="openAppsAwareness($event)" data-id="Apps Introduction Option">
-              <mat-icon fontSet="al" fontIcon="al-ico-applications">Introduction</mat-icon>
-              <span>ClearML Apps Introduction</span>
-            </button>
-          }
-        </ng-container>
-        <a mat-menu-item href="mailto:support@clear.ml" data-id="Contact Us">
-          <mat-icon fontSet="al" fontIcon="al-ico-email">lala</mat-icon>
+        <a mat-menu-item [href]="'mailto:' + environment().supportEmail" data-id="Contact Us">
+          <mat-icon fontSet="al" fontIcon="al-ico-email"></mat-icon>
           <span>Contact Us</span>
         </a>
       </mat-menu>

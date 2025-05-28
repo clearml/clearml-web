@@ -7,10 +7,11 @@ import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-p
 
 
 @Component({
-  selector: 'sm-nested-card',
-  templateUrl: './nested-card.component.html',
-  styleUrls: ['./nested-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-nested-card',
+    templateUrl: './nested-card.component.html',
+    styleUrls: ['./nested-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class NestedCardComponent {
 

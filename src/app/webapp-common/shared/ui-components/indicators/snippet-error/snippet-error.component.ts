@@ -9,16 +9,14 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
-  selector: 'sm-snippet-error',
-  templateUrl: './snippet-error.component.html',
-  styleUrls: ['./snippet-error.component.scss'],
-  imports: [
-    ClipboardModule,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective
-],
-  standalone: true
-  // Can't onPush - too many calc in template
+    selector: 'sm-snippet-error',
+    templateUrl: './snippet-error.component.html',
+    styleUrls: ['./snippet-error.component.scss'],
+    imports: [
+        ClipboardModule,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective
+    ]
 })
 export class SnippetErrorComponent {
   private _copyContent: string;

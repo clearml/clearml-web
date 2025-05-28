@@ -11,10 +11,6 @@
     background-color: transparent;
   }
 
-  &.disable-edit {
-    height: unset;
-  }
-
   &.edit-mode {
     z-index: 101;
     border: 1px dashed var(--color-outline);
@@ -57,12 +53,6 @@
     .edit-wrapper {
       opacity: 1;
     }
-  }
-}
-
-:host {
-  ::ng-deep .action-button button {
-    min-width: 70px;
   }
 }
 

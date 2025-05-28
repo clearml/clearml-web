@@ -6,16 +6,15 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-dialog-template',
-  templateUrl: './dialog-template.component.html',
-  styleUrls: ['./dialog-template.component.scss'],
-  imports: [
-    CdkScrollableModule,
-    SaferPipe,
-    MatIcon,
-    MatIconButton
-  ],
-  standalone: true
+    selector: 'sm-dialog-template',
+    templateUrl: './dialog-template.component.html',
+    styleUrls: ['./dialog-template.component.scss'],
+    imports: [
+        CdkScrollableModule,
+        SaferPipe,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class DialogTemplateComponent {
   private dialog = inject<MatDialogRef<DialogTemplateComponent>>(MatDialogRef<DialogTemplateComponent>);

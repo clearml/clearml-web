@@ -8,10 +8,11 @@ import {Subscription} from 'rxjs';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
 @Component({
-  selector   : 'sm-server-notification-dialog-container',
-  templateUrl: './server-notification-dialog-container.component.html',
-  styleUrls  : ['./server-notification-dialog-container.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-server-notification-dialog-container',
+    templateUrl: './server-notification-dialog-container.component.html',
+    styleUrls: ['./server-notification-dialog-container.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServerNotificationDialogContainerComponent implements OnInit, OnDestroy {
   private notificationSubscription: Subscription;

@@ -1,7 +1,7 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
   [tableCols]="filteredTableCols$| ngrxPush"
-  [isArchived]="isArchived$ | ngrxPush"
+  [isArchived]="isArchivedMode()"
   [metricVariants]="metricVariants$ | ngrxPush"
   [hyperParams]="hyperParams$ | ngrxPush"
   [minimizedView]="minimizedView"

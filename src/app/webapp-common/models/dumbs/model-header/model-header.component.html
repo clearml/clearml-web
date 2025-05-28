@@ -15,6 +15,8 @@
       [value]="!noData() && tableMode()"
       [rippleEffect]="rippleEffect()"
       (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
+    <sm-common-search class="ms-3"></sm-common-search>
+
   </div>
   <div class="right-buttons gap-3">
     @if (!minimizedView()) {
@@ -23,15 +25,16 @@
         (clearTableFilters)="clearTableFilters.emit(tableFilters())"
       ></sm-clear-filters-button>
     }
-    <sm-menu
-      iconClass="al-ico-download"
-      buttonTooltip="Download table as CSV"
-      [disabled]="noData()"
-      data-id="downloadCSVButton"
-    >
-      <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
-      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
-    </sm-menu>
+    <div smTooltip="Download table as CSV">
+      <sm-menu
+        iconClass="al-ico-download"
+        [disabled]="noData()"
+        data-id="downloadCSVButton"
+      >
+        <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
+        <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
+      </sm-menu>
+    </div>
     @if (!minimizedView() || sharedView()) {
       <sm-custom-cols-menu
         [sections]="[{name: 'metrics', options: metricVariants(), template: metricsTemplate}, {name: 'metadata', options: metadataKeys(), template: metadataTemplate}]"
@@ -51,6 +54,7 @@
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
     </sm-refresh-button>
+
   </div>
 </div>
 

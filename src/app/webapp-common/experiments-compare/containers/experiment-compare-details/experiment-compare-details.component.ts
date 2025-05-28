@@ -14,8 +14,9 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 @Component({
   selector: 'sm-experiment-compare-details',
   templateUrl: './experiment-compare-details.component.html',
-  styleUrls: ['./experiment-compare-details.component.scss', '../../cdk-drag.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['../experiment-compare-base.component.scss', '../../cdk-drag.scss', './experiment-compare-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   public showEllipsis= true;
@@ -43,7 +44,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
       this.originalExperiments = experiments.reduce((acc, exp) => {
         acc[exp.id] = isDetailsConverted(exp) ? this.originalExperiments[exp.id] : exp;
         return acc;
-      }, {} as { [id: string]: ConfigurationItem });
+      }, {} as Record<string, ConfigurationItem>);
       experiments = Object.values(this.originalExperiments).map(experiment => convertExperimentsArrays(experiment, this.originalExperiments[experiments[0].id], experiments));
       experiments = convertConfigurationFromExperiments(experiments, this.originalExperiments);
       experiments = convertNetworkDesignFromExperiments(experiments, this.originalExperiments);
@@ -55,7 +56,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
     });
   }
 
-  buildCompareTree(experiments: Array<IExperimentDetail>, hasDataFeature?: boolean): ExperimentCompareTree {
+  buildCompareTree(experiments: IExperimentDetail[], hasDataFeature?: boolean): ExperimentCompareTree {
     const mergedExperiment = getAllKeysEmptyObject(experiments);
     return experiments
       .reduce((acc, cur) => {

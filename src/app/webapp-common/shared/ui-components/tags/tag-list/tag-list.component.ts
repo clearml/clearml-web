@@ -16,15 +16,14 @@ export interface Tag {
 }
 
 @Component({
-  selector: 'sm-tag-list',
-  templateUrl: './tag-list.component.html',
-  styleUrls: ['./tag-list.component.scss'],
-  standalone: true,
-  imports: [
-    UserTagComponent,
-    PushPipe,
-],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-tag-list',
+    templateUrl: './tag-list.component.html',
+    styleUrls: ['./tag-list.component.scss'],
+    imports: [
+        UserTagComponent,
+        PushPipe,
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagListComponent {
   private colorService = inject(TagColorService);

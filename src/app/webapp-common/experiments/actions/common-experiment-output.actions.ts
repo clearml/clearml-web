@@ -41,12 +41,12 @@ export const resetOutput = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_OUTPU
 
 export const experimentPlotsRequested = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'EXPERIMENT_PLOTS_REQUESTED',
-  props<{ task: string }>()
+  props<{ task: string; refresh?: boolean}>()
 );
 
 export const experimentScalarRequested  = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'EXPERIMENT_SCALAR_REQUESTED',
-  props<{experimentId: string; model?: boolean, refresh?: boolean}>()
+  props<{experimentId: string; model?: boolean; refresh?: boolean; skipSingleValue?: boolean}>()
 );
 
 export const setHistogram = createAction(
@@ -92,6 +92,11 @@ export const setExperimentMetricsVariantValues = createAction(
 export const setExperimentSettings = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'UPDATE_EXPERIMENT_SETTINGS',
   props<{ id: string; changes: Partial<ExperimentSettings> }>()
+);
+
+export const removeExperimentSettings = createAction(
+  EXPERIMENTS_OUTPUT_PREFIX + 'REMOVE_EXPERIMENT_SETTINGS',
+  props<{ id: string }>()
 );
 
 export const setExperimentMetricsSearchTerm = createAction(

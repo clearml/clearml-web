@@ -60,7 +60,7 @@
 
   <sm-labeled-row label="QUEUE:">
     <a [routerLink]="'/workers-and-queues/queues'" [queryParams]="{id: experiment()?.execution?.queue?.id}" [class.na]="!experiment()?.execution?.queue?.name">
-      {{ experiment()?.execution?.queue?.display_name ?? experiment()?.execution?.queue?.name | NA }}
+      {{ experiment()?.execution?.queue?.display_name || experiment()?.execution?.queue?.name | NA }}
     </a>
   </sm-labeled-row>
 

@@ -9,7 +9,7 @@ import {explicitEffect} from 'ngxtension/explicit-effect';
 export const Colors = {
   dark: {
     font: '#e3e2e6',
-    lines: '#424955',
+    lines: '#282c33',
     tick: '#9ea1a8',
     legend: '#bfc7d5',
     icon: '#a1c9ff',
@@ -17,7 +17,7 @@ export const Colors = {
 },
   light: {
     font: '#1a1c1e',
-    lines: '#d6dae9',
+    lines: '#dee1ed',
     tick: '#666',
     legend: '#666',
     icon: '#0060a8',
@@ -44,6 +44,7 @@ export interface ExtFrame extends Omit<plotly.Frame, 'data' | 'layout'> {
   tags?: string[];
   plot_str?: string;
   colorKey?: string;
+  id?: string;
 }
 
 export interface ExtLegend extends plotly.Legend {
@@ -68,11 +69,15 @@ export interface ExtData extends plotly.PlotData {
   originalMetric?: string;
   fakePlot?: boolean;
   seriesName?: string;
+  originalColor?: string;
+  fullName?: string;
+  x_axis_label?: string;
 }
 
 @Component({
-  selector: 'sm-base-plotly-graph',
-  template: ''
+    selector: 'sm-base-plotly-graph',
+    template: '',
+    standalone: false
 })
 export abstract class PlotlyGraphBaseComponent implements OnDestroy {
 
@@ -85,18 +90,20 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
   public isSmooth = false;
   public shouldRefresh = false;
   protected drawGraph$ = new Subject<{ forceRedraw?: boolean; forceSkipReact?: boolean; noTimer?: boolean }>();
+  public alreadyDrawn = false;
 
   darkTheme = input<boolean>(null);
   @Input() isCompare = false;
 
   theme = this.store.selectSignal(selectThemeMode);
-  protected isDarkTheme = computed(() => this.darkTheme() !== null ? this.darkTheme() : this.theme() === 'dark');
+  protected isDarkTheme = computed(() => this.darkTheme() ?? this.theme() === 'dark');
   protected themeColors = computed(() => this.isDarkTheme() ? Colors.dark : Colors.light);
 
   koko = explicitEffect(
     [this.isDarkTheme],
     () => {
       this.shouldRefresh = true;
+      this.alreadyDrawn = false;
       this.drawGraph$.next({noTimer: true})
     });
 
@@ -104,8 +111,9 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     if (Array.isArray(trace.line?.color) || Array.isArray(trace.marker?.color)) {
       return;
     }
-    const colorString = new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]})
-      .lighten((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString();
+    const colorString = this.isDarkTheme() ?
+      new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]}).darken((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString():
+      new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]}).lighten((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString();
     if (trace.marker) {
       trace.marker.color = colorString;
       if (trace.marker.line) {

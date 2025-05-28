@@ -1,35 +1,41 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {
   GroupedSelectableListComponent
 } from '@common/shared/ui-components/data/grouped-selectable-list/grouped-selectable-list.component';
+import {PlotData} from 'plotly.js';
 
+
+export const buildMetricsListFlat = (metrics: MetricVariantResult[]): GroupedList => {
+  return metrics.reduce((acc, curr) => {
+      acc[`${curr.metric} - ${curr.variant}`] = {};
+    return acc;
+  }, {} as Record<string, Record<string, PlotData>>);
+}
 
 export const buildMetricsList = (metrics: MetricVariantResult[]): GroupedList => {
   return metrics.reduce((acc, curr) => {
     const currMetric = curr.metric;
     if (acc[currMetric]) {
-      acc[currMetric][curr.variant] = {};
+      acc[currMetric][curr.variant] = {} as PlotData;
     } else {
-      acc[currMetric] = {[curr.variant]: {}};
+      acc[currMetric] = {[curr.variant]: {} as PlotData};
     }
     return acc;
-  }, {} as {[metric: string]: {[variant: string]: any}});
-
+  }, {} as Record<string, Record<string, PlotData>>);
 }
 
 @Component({
-  selector: 'sm-selectable-grouped-filter-list',
-  templateUrl: './selectable-grouped-filter-list.component.html',
-  styleUrls: ['./selectable-grouped-filter-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    SearchComponent,
-    GroupedSelectableListComponent
-  ]
+    selector: 'sm-selectable-grouped-filter-list',
+    templateUrl: './selectable-grouped-filter-list.component.html',
+    styleUrls: ['./selectable-grouped-filter-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        SearchComponent,
+        GroupedSelectableListComponent
+    ]
 })
 export class SelectableGroupedFilterListComponent {
 
@@ -37,12 +43,13 @@ export class SelectableGroupedFilterListComponent {
   searchTerm = input<string>();
   checkedList = input<string[]>([]);
   titleLabel = input<string>();
+  placeHolder = input<string>('Find scalars');
 
-  @Output() itemSelect = new EventEmitter<string>();
-  @Output() hiddenChanged = new EventEmitter<string[]>();
-  @Output() searchTermChanged = new EventEmitter<string>();
+  itemSelect = output<string>();
+  hiddenChanged = output<string[]>();
+  searchTermChanged = output<string>();
 
-  filteredList = computed(() => this.filterList(this.list(), this.searchTerm()))
+  filteredList = computed(() => this.filterList(this.list(), this.searchTerm()));
 
   filterList(list: GroupedList, searchTerm: string) {
     if (!searchTerm || searchTerm === '') {
@@ -88,7 +95,7 @@ export class SelectableGroupedFilterListComponent {
   }
 
   public toggleHide({pathString, parent}) {
-    let newCheckedList = this.checkedList().includes(pathString) ? this.checkedList().filter(i => i !== pathString) : [...this.checkedList(), pathString];
+    let newCheckedList = this.checkedList()?.includes(pathString) ? this.checkedList()?.filter(i => i !== pathString) : [...this.checkedList(), pathString];
     if (this.shouldHidePrent(parent, newCheckedList)) {
       newCheckedList = newCheckedList.filter(i => i !== parent);
     } else {
@@ -104,14 +111,16 @@ export class SelectableGroupedFilterListComponent {
   }
 
   toggleHideAll() {
-    if (Object.keys(this.checkedList()).length > 0) {
+    if (Object.keys(this.checkedList() ?? {}).length > 0) {
       this.hiddenChanged.emit([]);
     } else {
       const allValues = [];
       Object.keys(this.list()).forEach(key => {
         allValues.push(key);
         Object.keys(this.list()[key]).forEach(itemKey => {
-          allValues.push(key + itemKey);
+          if (itemKey !== '__displayName') {
+            allValues.push(key + itemKey);
+          }
         });
       });
       this.hiddenChanged.emit(allValues);
@@ -120,17 +129,17 @@ export class SelectableGroupedFilterListComponent {
 
   toggleHideGroup(event) {
     const key = event.key;
-    let allValues = [...this.checkedList()];
+    let allValues = [...this.checkedList() ?? []];
     if (event.hide) {
       allValues = !allValues.includes(key) ? [...allValues, key] : allValues;
       Object.keys(this.list()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
-        if (!allValues.includes(keyItemKey)) {
+        if (!allValues.includes(keyItemKey) && itemKey !== '__displayName') {
           allValues.push(keyItemKey);
         }
       });
     } else {
-      const parentKey = `${key} / `
+      const parentKey = `${key}`
       allValues = allValues.filter(i => !i.startsWith(parentKey) && i !== key);
       Object.keys(this.list()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;

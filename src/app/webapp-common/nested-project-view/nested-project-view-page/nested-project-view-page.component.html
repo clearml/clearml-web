@@ -22,7 +22,7 @@
     </div>
   </sm-projects-header>
   @if (projectsList()?.length !== 0 || searching()) {
-    @for (project of projectsList(); track $index) {
+    @for (project of projectsList(); track project.id + $index + projectsList().length) {
       @if ($index + totalVirtualCards() < projectsList().length || noMoreProjects() || searching()) {
         <sm-nested-card
           [hideMenu]="['All Tasks'].includes(project.name) || project['isRoot'] || isExample(project)"

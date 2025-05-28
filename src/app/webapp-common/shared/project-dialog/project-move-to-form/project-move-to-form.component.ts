@@ -13,17 +13,10 @@ import {Subscription, switchMap} from 'rxjs';
 import {rootProjectsPageSize} from '@common/constants';
 import {MatInputModule} from '@angular/material/input';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
-import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 import {UniqueNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
-import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {InvalidPrefixValidatorDirective} from '@common/shared/ui-components/template-forms-ui/invalid-prefix-validator.directive';
 import {UniquePathValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
-import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {
   PaginatedEntitySelectorComponent
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
@@ -33,32 +26,24 @@ import {MatButton} from '@angular/material/button';
 
 
 @Component({
-  selector: 'sm-project-move-to-form',
-  templateUrl: './project-move-to-form.component.html',
-  styleUrls: ['./project-move-to-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatInputModule,
-    FormsModule,
-    MatAutocompleteModule,
-    StringIncludedInArrayPipe,
-    ClickStopPropagationDirective,
-    TooltipDirective,
-    SearchTextDirective,
-    MatProgressSpinnerModule,
-    ScrollEndDirective,
-    UniqueNameValidatorDirective,
-    UniqueProjectValidator,
-    ShowTooltipIfEllipsisDirective,
-    ShortProjectNamePipe,
-    ProjectLocationPipe,
-    InvalidPrefixValidatorDirective,
-    UniquePathValidatorDirective,
-    DotsLoadMoreComponent,
-    PaginatedEntitySelectorComponent,
-    MatButton,
-  ]
+    selector: 'sm-project-move-to-form',
+    templateUrl: './project-move-to-form.component.html',
+    styleUrls: ['./project-move-to-form.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatInputModule,
+        FormsModule,
+        MatAutocompleteModule,
+        StringIncludedInArrayPipe,
+        MatProgressSpinnerModule,
+        UniqueNameValidatorDirective,
+        ShortProjectNamePipe,
+        ProjectLocationPipe,
+        InvalidPrefixValidatorDirective,
+        UniquePathValidatorDirective,
+        PaginatedEntitySelectorComponent,
+        MatButton,
+    ]
 })
 export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterViewInit {
   public readonly projectsRoot = 'Projects root';

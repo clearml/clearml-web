@@ -25,10 +25,11 @@ import {
 } from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 
 @Component({
-  selector   : 'sm-experiment-info-hyper-parameters-form-container',
-  templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
-  styleUrls  : ['./experiment-info-hyper-parameters-form-container.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-experiment-info-hyper-parameters-form-container',
+    templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
+    styleUrls: ['./experiment-info-hyper-parameters-form-container.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentInfoHyperParametersFormContainerComponent {
   private store = inject(Store);
@@ -78,8 +79,8 @@ export class ExperimentInfoHyperParametersFormContainerComponent {
   }
 
   sectionSaved() {
-    if (this.executionParamsForm().form.length > 0) {
-      this.store.dispatch(saveHyperParamsSection({hyperparams: this.executionParamsForm().form}));
+    if (this.executionParamsForm().form().length > 0) {
+      this.store.dispatch(saveHyperParamsSection({hyperparams: this.executionParamsForm().form()}));
     } else {
       this.store.dispatch(deleteHyperParamsSection({section: this.selectedSection()}));
     }

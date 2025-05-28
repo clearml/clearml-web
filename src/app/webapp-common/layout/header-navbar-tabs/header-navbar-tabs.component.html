@@ -6,17 +6,13 @@
                  [selectedIndex]="index()"
                  (selectedTabChange)="setFeature($event)">
     @for (route of contextNavbar(); track route.header) {
-      <mat-tab
-        *smCheckPermission="route.permissionCheck"
-        [attr.data-id]="route?.id ?? route.header">
+      <mat-tab *smCheckPermission="route.permissionCheck" [labelClass]="'data-id-' + (route?.id ?? route.header)">
         <ng-template mat-tab-label>
-          <div class="label-container">
+          <div class="label-container" [attr.data-id]="route?.id ?? route.header">
             <div>
               <span>{{ route.header | uppercase }}</span>
               @if (route.badge) {
-                <span class="trial-badge" [smTooltip]="route.badgeTooltip" [matTooltipShowDelay]="300">
-                {{ route.badge }}
-              </span>
+                <span class="trial-badge" [smTooltip]="route.badgeTooltip" [matTooltipShowDelay]="300" [innerHTML]="route.badge | safeHtml"></span>
               }
             </div>
             @if (archivedMode()) {

@@ -2,12 +2,12 @@ import {NgModule} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
 import {LoggedOutAlertComponent} from './logged-out-alert/logged-out-alert.component';
 import {ServerNotificationDialogContainerComponent} from './server-notification-dialog-container/server-notification-dialog-container.component';
 import {CommonSearchModule} from '../common-search/common-search.module';
 import {HeaderComponent} from './header/header.component';
 import { UiUpdateDialogComponent } from './ui-update-dialog/ui-update-dialog.component';
-import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
 import {YouTubePlayerModule} from '@angular/youtube-player';
 import {BreadcrumbsComponent} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {HeaderNavbarTabsComponent} from '@common/layout/header-navbar-tabs/header-navbar-tabs.component';
@@ -26,6 +26,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
 import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
+import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
 
 
 @NgModule({
@@ -56,12 +57,14 @@ import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
     HeaderNavbarTabsComponent,
     MatDialogActions,
     MatDialogClose,
-    MatButton
+    MatButton,
+    RefreshButtonComponent,
+    HeaderUserMenuActionsComponent
   ],
   declarations: [
     HeaderComponent, LoggedOutAlertComponent,
     ServerNotificationDialogContainerComponent,
-    UiUpdateDialogComponent, HeaderUserMenuActionsComponent
+    UiUpdateDialogComponent,
   ],
   exports: [HeaderComponent, LoggedOutAlertComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent]
 })

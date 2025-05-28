@@ -1,8 +1,12 @@
 <div class="no-data-center">
-  <mat-icon fontSet="al" fontIcon="al-ico-model-endpoints" class="xxxl"></mat-icon>
-  <span class="message">MODEL ENDPOINTS WILL APPEAR HERE</span>
-  <span class="sub-message">
-    Monitor models deployed with <a href="https://github.com/allegroai/clearml-serving" target="_blank">clearml-serving</a>
-    or the <a href="https://github.com/allegroai/clearml" target="_blank">ClearML</a> HttpRouter class
-  </span>
+  <mat-icon fontSet="al" fontIcon="al-ico-model-endpoints" class="xxl"></mat-icon>
+  @if (isLoading()) {
+    <span class="message">NO MODEL ENDPOINTS CURRENTLY BEING SET UP</span>
+  } @else {
+    <span class="message">NO ACTIVE MODEL ENDPOINTS</span>
+    <span class="sub-message">Monitor models deployed with <a href="https://github.com/allegroai/clearml-serving" target="_blank">
+      clearml-serving</a>
+      or the <a href="https://github.com/allegroai/clearml" target="_blank">ClearML</a> HttpRouter class
+   </span>
+  }
 </div>

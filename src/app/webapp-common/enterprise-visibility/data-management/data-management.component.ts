@@ -4,14 +4,13 @@ import {NgOptimizedImage} from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-data-management',
-  standalone: true,
-  imports: [
-    NgOptimizedImage,
-    MatIcon
-  ],
-  templateUrl: './data-management.component.html',
-  styleUrl: '../pages.scss'
+    selector: 'sm-data-management',
+    imports: [
+        NgOptimizedImage,
+        MatIcon
+    ],
+    templateUrl: './data-management.component.html',
+    styleUrl: '../pages.scss'
 })
 export class DataManagementComponent extends PageBaseComponent {
 }

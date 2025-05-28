@@ -4,9 +4,9 @@ import {Pipe, PipeTransform} from '@angular/core';
   name: 'filterOut',
   standalone: true
 })
-export class FilterOutPipe implements PipeTransform {
+export class FilterOutPipe<T> implements PipeTransform {
 
-  transform(arr: unknown[], field: string, value: string | boolean): unknown[] {
+  transform(arr: T[], field: string, value: string | boolean): T[] {
     if (!arr || !field || value === undefined) {
       return arr;
     }

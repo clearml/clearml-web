@@ -19,7 +19,7 @@ import {setFilterByUser} from '@common/core/actions/users.actions';
 
 export interface DashboardSearchState {
   projects: Project[];
-  experiments: Task[];
+  tasks: Task[];
   models: Model[];
   pipelines: Project[];
   reports: IReport[];
@@ -40,7 +40,7 @@ export const searchInitialState: DashboardSearchState = {
   pipelines: [],
   openDatasets: [],
   users: [],
-  experiments: [],
+  tasks: [],
   models: [],
   reports: [],
   resultsCount: null,
@@ -78,7 +78,7 @@ export const dashboardSearchReducers = [
   })),
   on(setExperimentsResults, (state, action): DashboardSearchState => ({
     ...state,
-    experiments: action.scrollId === state.scrollIds?.[activeSearchLink.experiments] ? state.experiments.concat(action.experiments) : action.experiments,
+    tasks: action.scrollId === state.scrollIds?.[activeSearchLink.experiments] ? state.tasks.concat(action.tasks) : action.tasks,
     scrollIds: {...state.scrollIds, [activeSearchLink.experiments]: action.scrollId}
   })),
   on(setModelsResults, (state, action): DashboardSearchState => ({
@@ -98,6 +98,8 @@ export const dashboardSearchReducers = [
     [activeSearchLink.experiments]: [],
     [activeSearchLink.pipelines]: [],
     [activeSearchLink.projects]: [],
+    [activeSearchLink.openDatasets]: [],
+    [activeSearchLink.reports]: [],
   })),
   on(searchClear, (state): DashboardSearchState => ({...state, ...searchInitialState})),
 ] as ReducerTypes<DashboardSearchState, ActionCreator[]>[];
@@ -109,7 +111,7 @@ export const dashboardSearchReducer = createReducer(
 
 export const selectSearch = createFeatureSelector<DashboardSearchState>('search');
 export const selectProjectsResults = createSelector(selectSearch, (state: DashboardSearchState): Array<Project> => state.projects);
-export const selectExperimentsResults = createSelector(selectSearch, (state: DashboardSearchState): Array<Task> => state.experiments);
+export const selectExperimentsResults = createSelector(selectSearch, (state: DashboardSearchState): Array<Task> => state.tasks);
 export const selectModelsResults = createSelector(selectSearch, (state: DashboardSearchState): Array<Model> => state.models);
 export const selectReportsResults = createSelector(selectSearch, (state: DashboardSearchState): Array<IReport> => state.reports);
 export const selectPipelinesResults = createSelector(selectSearch, (state: DashboardSearchState): Array<Project> => state.pipelines);

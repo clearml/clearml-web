@@ -1,8 +1,8 @@
-@import 'variables';
-@import "mixins/link";
+@use 'variables';
+@use "mixins/link";
 
 :host {
-  @include link();
+  @include link.link();
 
   display: flex;
   flex-direction: column;
@@ -107,10 +107,6 @@
         background-color: var(--color-surface-container-highest);
       }
     }
-
-    &.mat-expanded {
-      margin-bottom: 24px;
-    }
   }
 
   ::ng-deep .mat-expansion-panel-body {
@@ -139,7 +135,7 @@
     align-items: center;
     height: 32px;
     border-radius: 4px;
-    font-family: $font-family-base, sans-serif;
+    font-family: variables.$font-family-base, sans-serif;
     font-size: 12px;
     color: var(--color-on-surface-variant);
     cursor: pointer;

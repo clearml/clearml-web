@@ -1,5 +1,4 @@
 import {ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, take, tap, withLatestFrom} from 'rxjs/operators';
@@ -11,6 +10,7 @@ import {
   getMultiPlotCharts,
   resetExperimentMetrics,
   setExperimentMetricsSearchTerm,
+  setExperimentPlots,
   setExperimentSettings,
   setSelectedExperiments
 } from '../../actions/experiments-compare-charts.actions';
@@ -34,22 +34,22 @@ import {getCustomMetricsPerType} from '@common/experiments/actions/common-experi
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {SelectableFilterListComponent} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
 import {PushPipe} from '@ngrx/component';
 import {HIDDEN_PLOTS_BY_DEFAULT} from '@common/experiments-compare/experiments-compare.constants';
+import {buildMetricsListFlat, SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {GroupedList} from '@common/tasks/tasks.model';
 
 @Component({
-  selector: 'sm-experiment-compare-plots',
-  templateUrl: './experiment-compare-plots.component.html',
-  styleUrls: ['./experiment-compare-plots.component.scss'],
-  imports: [
-    SelectableFilterListComponent,
-    ExperimentGraphsModule,
-    PushPipe
-],
-  standalone: true
+    selector: 'sm-experiment-compare-plots',
+    templateUrl: './experiment-compare-plots.component.html',
+    styleUrls: ['./experiment-compare-plots.component.scss'],
+    imports: [
+        ExperimentGraphsModule,
+        PushPipe,
+        SelectableGroupedFilterListComponent
+    ]
 })
 export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
@@ -60,9 +60,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
-  public graphList: SelectableListItem[] = [];
+  public graphList: GroupedList;
   private taskIds: string[];
-  public graphs: Record<string, ExtFrame[]>;
+  public graphs: Record<string, ExtFrame[]> = undefined;
   public refreshDisabled: boolean;
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
@@ -80,6 +80,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   private originMetrics: MetricVariantResult[];
   private firstTime = true;
   private previousTaskIds: string[];
+  private originalPlotList: { metric: string; variant: string }[];
 
   @HostListener('window:beforeunload', ['$event']) unloadHandler() {
     this.saveSettingsState();
@@ -123,7 +124,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
           return acc;
         }, {} as Record<string, string[]>);
         const newGraphs = convertMultiPlots(merged, tagsLists);
-        if (!this.graphs || !isEqual(newGraphs, this.graphs)) {
+        if (Object.keys(newGraphs).length !== 0 && (!this.graphs || !isEqual(newGraphs, this.graphs))) {
           this.graphs = newGraphs;
         }
         this.changeDetection.detectChanges();
@@ -132,15 +133,16 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         }
       }));
 
-    this.subs.add(this.routerParams$
+    this.subs.add(this.routerParams$.pipe(distinctUntilChanged((prev, curr) => isEqual(prev, curr)))
       .pipe(withLatestFrom(this.store.select(selectMetricVariantsPlots),
         this.store.select(selectSelectedExperiments)))
       .subscribe(([params, metrics, selectedExperiments]) => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           const previousTaskIds = this.taskIds;
+          this.graphs = undefined;
           this.taskIds = params.ids.split(',').sort().filter(id => !!id);
           this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
-          if (metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds)) {
+          if (metrics === null || metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds)) {
             this.store.dispatch(getCustomMetricsPerType({ids: this.taskIds, metricsType: EventTypeEnum.Plot, isModel: this.entityType === EntityTypeEnum.model}));
           }
         }
@@ -166,6 +168,8 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         if (this.firstTime || this.previousSelectedMetrics?.length !== selectedMetrics?.length || this.taskIds.length !== this.previousTaskIds.length) {
           this.firstTime = false;
           this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: variants}));
+        } else if (this.previousSelectedMetrics?.length === 0) {
+          this.graphs = {};
         }
         this.previousSelectedMetrics = selectedMetrics;
         this.previousTaskIds = this.taskIds;
@@ -181,7 +185,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
     this.subs.add(this.selectedMetrics$.pipe(take(1)).subscribe(selectedMetrics => {
       this.originalSettings = selectedMetrics;
-      this.settings = selectedMetrics ? {...this.initialSettings, selectedMetricsPlot: selectedMetrics} : {...this.initialSettings, selectedMetricsPlot: this.graphList.slice(0, 8).map(a => a.name)} as ExperimentCompareSettings;
+      this.settings = selectedMetrics ?
+        {...this.initialSettings, selectedMetricsPlot: selectedMetrics} :
+        {...this.initialSettings, selectedMetricsPlot: this.originalPlotList?.slice(0, 8).map(a => `${a.metric} - ${a.variant}`) ?? []} as ExperimentCompareSettings;
     }));
 
     this.subs.add(this.store.select(selectMetricVariantsPlots)
@@ -190,8 +196,12 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)))
       .subscribe(metrics => {
         this.originMetrics = metrics;
+        this.originalPlotList = metrics.map((plot) => ({
+          metric: plot.metric,
+          variant: plot.variant
+        }));
+        this.graphList = buildMetricsListFlat(metrics)
         const listSorted = sortMetricsList(metrics.map(m => `${m.metric} - ${m.variant}`));
-        this.graphList = listSorted.map(metric => ({name: metric, value: metric}))
         if (this.settings.selectedMetricsPlot?.filter(sm => listSorted.includes(sm)).length === 0 && listSorted.length > 0) {
           this.settings.selectedMetricsPlot = listSorted.filter(name => !HIDDEN_PLOTS_BY_DEFAULT.includes(name)).slice(0, 8);
         }
@@ -201,6 +211,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
           this.selectedVariants = this.buildMetricVariants(selectedMetricsCols)
           if (this.selectedVariants?.length > 0) {
             this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: this.selectedVariants}));
+          } else {
+            this.graphs = {};
+            this.store.dispatch(setExperimentPlots({plots: {}}));
           }
         }
       }));
@@ -226,14 +239,8 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.resetMetrics();
   }
 
-  private prepareList(metricsScalar): SelectableListItem[] {
-    const list = metricsScalar ? Object.keys(metricsScalar) : [];
-    const sortedList = sortMetricsList(list);
-    return sortedList.map((item) => ({name: item, value: item}));
-  }
-
   metricSelected(id) {
-    this.graphsComponent?.scrollToGraph(id);
+    this.graphsComponent?.scrollToGraph(id, true);
   }
 
   selectedListChanged(selectedList) {

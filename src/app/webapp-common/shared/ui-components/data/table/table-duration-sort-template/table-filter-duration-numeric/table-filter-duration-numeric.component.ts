@@ -28,22 +28,20 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
 
 
 @Component({
-  selector: 'sm-table-filter-duration-numeric',
-  templateUrl: './table-filter-duration-numeric.component.html',
-  styleUrls: ['./table-filter-duration-numeric.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    TableFilterDurationErrorComponent,
-    DividerComponent,
-    MatInputModule,
-    ReactiveFormsModule,
-    ClickStopPropagationDirective,
-    KeydownStopPropagationDirective,
-    MatIcon,
-    MatIconButton
-  ],
-  standalone: true
-
+    selector: 'sm-table-filter-duration-numeric',
+    templateUrl: './table-filter-duration-numeric.component.html',
+    styleUrls: ['./table-filter-duration-numeric.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TableFilterDurationErrorComponent,
+        DividerComponent,
+        MatInputModule,
+        ReactiveFormsModule,
+        ClickStopPropagationDirective,
+        KeydownStopPropagationDirective,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent {
   immediate = new ImmediateErrorStateMatcher();

@@ -72,9 +72,6 @@ import {TableComponent} from '@common/shared/ui-components/data/table/table.comp
 import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {SimpleTableComponent} from '@common/shared/ui-components/data/simple-table/simple-table.component';
-import {
-  SelectableFilterListComponent
-} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 import {ToggleArchiveComponent} from '@common/shared/ui-components/buttons/toggle-archive/toggle-archive.component';
 import {
@@ -100,6 +97,8 @@ import {
 import {PushPipe} from '@ngrx/component';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
+import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
 
 
 export const modelSyncedKeys    = [
@@ -152,7 +151,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ModelSharedModule,
     ExperimentSharedModule,
     CommonDeleteDialogModule,
-    FeatureModelsModule,
     AngularSplitModule,
     StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
     EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
@@ -185,7 +183,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
     LabeledRowComponent,
     ButtonToggleComponent,
     SimpleTableComponent,
-    SelectableFilterListComponent,
     EditableSectionComponent,
     ToggleArchiveComponent,
     SelectableGroupedFilterListComponent,
@@ -208,6 +205,8 @@ const getInitState = (userPreferences: UserPreferences) => ({
     MatIconButton,
     MatButton,
     MatIcon,
+    CommonSearchComponent,
+    GraphSettingsBarComponent
   ],
   providers: [
     SmFormBuilderService, DatePipe,

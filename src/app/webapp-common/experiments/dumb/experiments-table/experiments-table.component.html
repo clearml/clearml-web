@@ -54,6 +54,7 @@
         @if (col?.headerType === colHeaderTypeEnum.checkBox) {
           <mat-checkbox
             class="header-checkbox"
+            data-id="Select All Loaded Tasks"
             [disabled]="experiments?.length === 0"
             [formControl]="selectionChecked"
             [indeterminate]="selectionIndeterminate"
@@ -162,6 +163,7 @@
         @case (experimentsTableColFields.SELECTED) {
           <mat-checkbox #cb
                         smClickStopPropagation
+                        data-id="Select All Loaded Tasks"
                         [smTooltip]="selectionReachedLimit && !(checkedExperiments | isRowSelected:experiment)? 'Reached selection limit': null"
                         [disabled]="selectionReachedLimit && !(checkedExperiments | isRowSelected:experiment)"
                         [checked]="checkedExperiments | isRowSelected:experiment"

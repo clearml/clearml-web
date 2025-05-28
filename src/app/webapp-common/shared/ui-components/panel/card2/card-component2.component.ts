@@ -1,10 +1,11 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 @Component({
-  selector       : 'sm-card2',
-  templateUrl    : './card-component2.component.html',
-  styleUrls      : ['./card-component2.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-card2',
+    templateUrl: './card-component2.component.html',
+    styleUrls: ['./card-component2.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class CardComponent2 {
 

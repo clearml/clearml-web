@@ -2,6 +2,14 @@
 
 .mat-drawer-container {
   --mat-sidenav-content-background-color: transparent;
-  --mat-sidenav-container-background-color: color-mix(in srgb, var(--color-surface-container-high), var(--color-on-surface) transparent 80%);
   --mat-sidenav-container-shape: 0;
+  --mat-sidenav-scrim-color: rgba(255,255,255,0.6);
+}
+
+@mixin drawer($theme) {
+  @if mat.get-theme-type($theme) == dark {
+    .mat-drawer-container {
+      --mat-sidenav-scrim-color: rgba(0,0,0,0.4);
+    }
+  }
 }

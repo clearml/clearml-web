@@ -16,13 +16,13 @@
             ]"
       (valueChanged)="!(!!projectId && $event) && toggleNestedView($event)"
     ></sm-button-toggle>
-    <button mat-flat-button (click)="createDataset()">
+    <button mat-flat-button (click)="createDataset()" data-id="New Dataset">
       <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
       NEW DATASET
     </button>
   </sm-projects-header>
   @if (((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush)))||  searching) {
-    @for (project of projectsList$ | ngrxPush; track trackById($index, project); let last = $last) {
+    @for (project of projectsList$ | ngrxPush; track project.id + $index; let last = $last) {
       <sm-open-dataset-card
         [hideMenu]="['All Tasks'].includes(project.name) || project['isRoot'] || isExample(project)"
         [hideProjectPathIcon]="!!projectId"
@@ -38,7 +38,7 @@
   } @else {
     <div class="empty-state">
       <div class="title-icon">
-        <mat-icon fontSet="al" fontIcon="al-ico-datasets" class="xl"></mat-icon>
+        <mat-icon fontSet="al" fontIcon="al-ico-datasets" class="xxl"></mat-icon>
       </div>
       <div class="title">NO DATASETS TO SHOW</div>
       <div class="sub-title">Run your first dataset to see it displayed here

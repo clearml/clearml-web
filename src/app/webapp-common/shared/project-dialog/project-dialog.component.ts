@@ -17,9 +17,10 @@ export const OutputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WI
 
 
 @Component({
-  selector: 'sm-project-create-dialog',
-  templateUrl: './project-dialog.component.html',
-  styleUrls: ['./project-dialog.component.scss']
+    selector: 'sm-project-create-dialog',
+    templateUrl: './project-dialog.component.html',
+    styleUrls: ['./project-dialog.component.scss'],
+    standalone: false
 })
 export class ProjectDialogComponent implements OnInit, OnDestroy {
   protected projects$ = this.store.select(selectTablesFilterProjectsOptions);
@@ -64,10 +65,10 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     const project = this.convertFormToProject(projectForm);
     this.store.dispatch(createNewProjectActions.createNewProject({req: project, dialogId: this.matDialogRef.id}));
   }
-  public updateProject(projectForm) {
-    const project = {project: this.baseProject.id, ...this.convertFormToProject(projectForm)};
-    this.store.dispatch(createNewProjectActions.updateProject({req: project, dialogId: this.matDialogRef.id}));
-  }
+  // public updateProject(projectForm) {
+  //   const project = {project: this.baseProject.id, ...this.convertFormToProject(projectForm)};
+  //   this.store.dispatch(createNewProjectActions.updateProject({req: project, dialogId: this.matDialogRef.id}));
+  // }
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
     this.store.dispatch(createNewProjectActions.moveProject({

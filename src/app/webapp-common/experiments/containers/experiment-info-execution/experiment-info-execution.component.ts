@@ -32,9 +32,10 @@ import {
 } from '@common/experiments/dumb/clear-installed-packges-dialog/clear-installed-packages-dialog.component';
 
 @Component({
-  selector: 'sm-experiment-info-execution',
-  templateUrl: './experiment-info-execution.component.html',
-  styleUrls: ['./experiment-info-execution.component.scss']
+    selector: 'sm-experiment-info-execution',
+    templateUrl: './experiment-info-execution.component.html',
+    styleUrls: ['./experiment-info-execution.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
@@ -195,7 +196,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       data: {
         textData: this.formData?.requirements?.pip,
         readOnly: false,
-        title: 'EDIT Python PACKAGES',
+        title: 'EDIT PYTHON PACKAGES',
       } as EditJsonData
     });
 

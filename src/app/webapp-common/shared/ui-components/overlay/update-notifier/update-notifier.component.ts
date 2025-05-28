@@ -5,14 +5,13 @@ import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
-  selector: 'sm-update-notifier',
-  templateUrl: './update-notifier.component.html',
-  styleUrls: ['./update-notifier.component.scss'],
-  standalone: true,
-  imports: [
-    MatIconButton,
-    MatIcon
-  ]
+    selector: 'sm-update-notifier',
+    templateUrl: './update-notifier.component.html',
+    styleUrls: ['./update-notifier.component.scss'],
+    imports: [
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class UpdateNotifierComponent {
   public active      = signal(false);

@@ -2,14 +2,16 @@ import {Directive, ElementRef, HostListener, Input} from '@angular/core';
 import {colorToString, hexToRgb} from '@common/shared/services/color-hash/color-hash.utils';
 import {Store} from '@ngrx/store';
 import {showColorPicker} from './choose-color.actions';
+import {colorPickerHeight, colorPickerWidth} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 
 @Directive({
-  selector: '[smChooseColor]',
+    selector: '[smChooseColor]',
+    standalone: false
 })
 export class ChooseColorDirective {
   readonly colorTopOffset    = 100;
-  readonly colorPickerWidth  = 230;
-  readonly colorPickerHeight = 460 - this.colorTopOffset;
+  readonly colorPickerWidth  = colorPickerWidth;
+  readonly colorPickerHeight = colorPickerHeight - this.colorTopOffset;
   @Input() colorButtonRef;
   @Input() colorButtonClass: string;
   @Input() stringToColor: string | string[];
@@ -51,13 +53,13 @@ export class ChooseColorDirective {
   constructor(private el: ElementRef, private store: Store) {}
 
   openColorPicker(event: MouseEvent) {
-    let top = event.pageY - (this.colorPickerHeight / 3);
+    let top = Math.max(event.pageY - (this.colorPickerHeight / 3), 30);
     let left = event.pageX;
     if (event.pageY + this.colorPickerHeight >= (window.innerHeight || document.documentElement.clientHeight)) {
-      top = (event.pageY) - this.colorPickerHeight;
+      top = Math.max((event.pageY) - colorPickerHeight, 15);
     }
     if (event.clientX + this.colorPickerWidth >= (window.innerWidth || document.documentElement.clientWidth)) {
-      left = (event.clientX) - this.colorPickerWidth;
+      left = Math.max((event.clientX) - colorPickerWidth, 15);
     }
 
     this.store.dispatch(showColorPicker({

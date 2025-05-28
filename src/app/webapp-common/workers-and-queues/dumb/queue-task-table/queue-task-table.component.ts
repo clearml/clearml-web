@@ -6,9 +6,10 @@ import {TIME_FORMAT_STRING} from '@common/constants';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 
 @Component({
-  selector   : 'sm-queue-task-table',
-  templateUrl: './queue-task-table.component.html',
-  styleUrls  : ['./queue-task-table.component.scss']
+    selector: 'sm-queue-task-table',
+    templateUrl: './queue-task-table.component.html',
+    styleUrls: ['./queue-task-table.component.scss'],
+    standalone: false
 })
 export class QueueTaskTableComponent {
 

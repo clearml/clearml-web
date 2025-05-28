@@ -1,21 +1,24 @@
-@import 'variables';
+@use '../layout/layout';
 
 :host {
-  header {
-    padding: 20px 24px;
-  }
+  display: block;
+  height: 100%;
+    padding-bottom: 12px;
 
   .main {
-    padding: 0 24px;
-  }
-
-  .section {
-    margin: 6px 0 24px;
-    padding-bottom: 12px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100% - 64px);
+    padding-left: 24px;
   }
 
   .title {
-    color: $white;
+    color: var(--color-on-primary-container);
     font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    height: layout.$project-header-height;
   }
 }

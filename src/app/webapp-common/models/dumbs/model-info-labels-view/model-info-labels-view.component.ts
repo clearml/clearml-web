@@ -7,9 +7,10 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'sm-model-info-labels-view',
-  templateUrl: './model-info-labels-view.component.html',
-  styleUrls: ['./model-info-labels-view.component.scss']
+    selector: 'sm-model-info-labels-view',
+    templateUrl: './model-info-labels-view.component.html',
+    styleUrls: ['./model-info-labels-view.component.scss'],
+    standalone: false
 })
 export class ModelInfoLabelsViewComponent {
   public formData: { label: string; id: number }[] = [];

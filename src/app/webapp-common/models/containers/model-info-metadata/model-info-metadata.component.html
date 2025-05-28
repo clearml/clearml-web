@@ -1,7 +1,8 @@
+@if (model() !== null) {
 <sm-editable-section #metadataSection
                      [class.in-edit]="inEdit()"
-                     [editable]="(selectedModel$ | ngrxPush)?.company?.id && ((isSharedAndNotOwner$ |ngrxPush)===false)"
-                     [saving]="saving$ | ngrxPush"
+                     [editable]="selectedModel()?.company?.id && (isSharedAndNotOwner() === false)"
+                     [saving]="saving()"
                      [disableSave]="metadataForm()?.invalid"
                      (cancelClicked)="cancelModelMetaDataChange()"
                      (saveClicked)="saveFormData()"
@@ -13,15 +14,24 @@
         @for (metadataItem of metadata; track metadataItem.id) {
           <div class="d-flex align-items-start me-3 mb-2">
             <mat-form-field [hintLabel]="metadataItemKey.invalid && metadataItemKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
+              @if ($index === 0) {
+                <mat-label>Key</mat-label>
+              }
               <input #metadataItemKey="ngModel"
-                     placeholder="key"
+                     placeholder="Key"
                      required
+                     pattern="^(\s+\S+\s*)*(?!\s).*$"
                      [(ngModel)]="metadataItem.key"
                      [name]="'metadataItemKey-'| uuid"
                      matInput>
-              @if (metadataItemKey.touched && metadataItemKey.invalid && metadataItemKey?.errors?.required) {
+              @if (metadataItemKey?.errors?.required) {
                 <mat-error>
                   Required
+                </mat-error>
+              }
+              @if (metadataItemKey?.errors?.pattern) {
+                <mat-error>
+                  Key can't be empty
                 </mat-error>
               }
               @if (metadataForm?.errors?.uniqueName2 && metadataForm?.errors?.uniqueName2[$index]) {
@@ -31,26 +41,38 @@
             </mat-form-field>
             <mat-form-field [hintLabel]="metadataItemType.invalid && metadataItemType?.errors?.required? '*Required': ''"
                             appearance="outline" class="strength w-100">
+              @if ($index === 0) {
+                <mat-label>Type</mat-label>
+              }
               <input #metadataItemType="ngModel"
                      [(ngModel)]="metadataItem.type"
-                     placeholder="type"
+                     placeholder="Type"
                      required
+                     pattern="^(\s+\S+\s*)*(?!\s).*$"
                      [name]="'metadataItemType-' | uuid"
                      matInput>
-              @if (metadataItemType.touched && metadataItemType.invalid && metadataItemType?.errors?.required) {
+              @if (metadataItemType?.errors?.required) {
                 <mat-error>
                   Required
                 </mat-error>
               }
+              @if (metadataItemType?.errors?.pattern) {
+                <mat-error>
+                  Type can't be empty
+                </mat-error>
+              }
             </mat-form-field>
             <mat-form-field appearance="outline" class="w-100">
+              @if ($index === 0) {
+                <mat-label>Value</mat-label>
+              }
               <input #metadataItemKey="ngModel"
                      [(ngModel)]="metadataItem.value"
-                     placeholder="value"
+                     placeholder="Value"
                      [name]="'metadataItemValue-'| uuid"
                      matInput>
             </mat-form-field>
-            <button mat-icon-button (click)="removeRow($index)" data-id="deleteIcon">
+            <button mat-icon-button (click)="removeRow($index)" data-id="deleteIcon" [class.mt-4]="$index === 0">
               <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
             </button>
           </div>
@@ -75,3 +97,4 @@
   }
 </sm-editable-section>
 
+}

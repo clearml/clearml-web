@@ -1,10 +1,9 @@
-@import "variables";
-@import "../../../../webapp-common/layout/layout.scss";
+@use "../../../../webapp-common/layout/layout.scss";
 
 :host {
   display: block;
-  height: $graph-height;
-  min-height: $graph-height;
+  height: layout.$graph-height;
+  min-height: layout.$graph-height;
   padding: 20px 20px 0;
   background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);

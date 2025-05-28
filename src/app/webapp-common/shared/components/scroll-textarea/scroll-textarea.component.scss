@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 :host {
   .diff-container {
@@ -12,7 +12,7 @@
     position: absolute;
     z-index: 100;
     top: 0;
-    right: 6px;
+    right: 10px;
     display: none;
     gap: 12px;
     padding: 12px;
@@ -35,7 +35,7 @@
         color: var(--color-on-surface-variant);
       }
       overflow-x: scroll;
-      font-family: $font-family-monospace;
+      font-family: variables.$font-family-monospace;
 
       .line {
         height: 20px;

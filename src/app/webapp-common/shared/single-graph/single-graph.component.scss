@@ -27,6 +27,7 @@
   flex: 0 0 10px;
   margin-right: 6px;
   cursor: pointer;
+  pointer-events: all;
 }
 
 sm-tag-list {
@@ -57,22 +58,32 @@ sm-tag-list {
   top: 0;
 }
 
-::ng-deep .legendlines path, ::ng-deep .legendpoints path {
-  cursor: url(../../assets/icons/pallete-cursor.svg) 6 0, pointer;
+::ng-deep g.layers {
+  .legendlines path,
+  .legendpoints path {
+    cursor: url(../../assets/icons/pallete-cursor.svg) 6 0, pointer;
+  }
+
+  .legendlines path {
+    stroke-width: 12px !important;
+    transform: scale(0.7) translate(16px, 2px);
+  }
+
+  .legendpoints path {
+    d: path('M8,8H-8V-8H8Z') !important;
+    transform: scale(.7) translate(28px, 2px);
+  }
+
+  .legendpoints path:not(.scatterpts) {
+    d: path('M8,8H-8V-8H8Z') !important;
+  }
+
+  .legendpoints path.scatterpts {
+    // chrome only
+    d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
+  }
 }
 
-::ng-deep .legendpoints path:not(.scatterpts) {
-  d: path('M8,8H-8V-8H8Z') !important;
-}
-
-::ng-deep .legendlines path {
-  stroke-width: 12px !important;
-}
-
-::ng-deep .legendpoints path.scatterpts {
-  // chrome only
-  d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
-}
 
 .move-title {
   ::ng-deep .infolayer > .g-gtitle > .gtitle {
@@ -82,6 +93,7 @@ sm-tag-list {
 
 ::ng-deep .modebar-container {
   top: 24px;
+
   svg.icon {
     height: 1em;
     width: 1em;
@@ -89,7 +101,7 @@ sm-tag-list {
   }
 }
 
-  // moving legend next to title without text
+// moving legend next to title without text
 ::ng-deep .legend.hide-text {
   .legendtext,
   .legendtoggle {
@@ -192,6 +204,7 @@ sm-tag-list {
 
     svg a {
       fill: var(--color-secondary);
+
       &:hover {
         fill: var(--color-primary);
         text-decoration: underline;
@@ -208,6 +221,7 @@ sm-tag-list {
     .hoverlayer .spikeline:nth-child(even) {
       stroke: var(--color-on-primary-container);
     }
+
     .hoverlayer .spikeline:nth-child(odd) {
       stroke: transparent !important;
     }
@@ -218,8 +232,14 @@ sm-tag-list {
       fill: var(--color-surface-container-lowest) !important;
     }
 
-    .hoverlayer .hovertext .name {
-      fill: var(--color-on-surface) !important;
+    .hovertext {
+      rect {
+        fill: var(--color-surface-bright) !important;
+      }
+
+      .name {
+        fill: var(--color-on-surface) !important;
+      }
     }
 
   }

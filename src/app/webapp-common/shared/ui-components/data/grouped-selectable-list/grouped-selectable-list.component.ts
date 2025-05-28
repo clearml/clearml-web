@@ -1,53 +1,40 @@
-import {ChangeDetectionStrategy, Component, effect, EventEmitter, input, Output} from '@angular/core';
-
+import {ChangeDetectionStrategy, Component, computed, effect, input, viewChild, output } from '@angular/core';
 import {GroupedList} from '@common/tasks/tasks.model';
-import { JsonPipe, KeyValuePipe } from '@angular/common';
-import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/material/tree';
-import {FlatTreeControl} from '@angular/cdk/tree';
+import {MatTree, MatTreeModule} from '@angular/material/tree';
 import {ArrayIncludedInArrayPipe} from '@common/shared/pipes/array-starts-with-in-array.pipe';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
-import {StringStartsWithInArrayPipe} from '@common/shared/pipes/string-starts-with-in-array.pipe';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
 
 
 interface GroupItem {
   data: GroupItem;
   name: string;
+  displayName?: string;
   hasChildren: boolean;
-  children: string[];
+  children: GroupItem[];
+  childrenNames: string[];
   parent: string;
   lastChild: boolean;
-}
-
-interface ExampleFlatNode {
   expandable: boolean;
-  name: string;
-  parent: string;
-  level: number;
-  lastChild: boolean;
-  children: string[];
 }
-
 
 @Component({
-  selector: 'sm-grouped-selectable-list',
-  templateUrl: './grouped-selectable-list.component.html',
-  styleUrls: ['./grouped-selectable-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    KeyValuePipe,
-    SortPipe,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective,
-    MatTreeModule,
-    JsonPipe,
-    ArrayIncludedInArrayPipe,
-    StringIncludedInArrayPipe,
-    StringStartsWithInArrayPipe
-]
+    selector: 'sm-grouped-selectable-list',
+    templateUrl: './grouped-selectable-list.component.html',
+    styleUrls: ['./grouped-selectable-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective,
+        MatTreeModule,
+        ArrayIncludedInArrayPipe,
+        StringIncludedInArrayPipe,
+        MatIcon,
+        MatIconButton
+    ]
 })
 export class GroupedSelectableListComponent {
 
@@ -56,79 +43,66 @@ export class GroupedSelectableListComponent {
   list = input<GroupedList>();
   checkedList = input<string[]>();
 
-  @Output() itemSelect = new EventEmitter<string>();
-  @Output() itemCheck = new EventEmitter<{ pathString: string; parent: string }>();
-  @Output() groupChecked = new EventEmitter<{ key: string; hide: boolean }>();
+  itemSelect = output<string>();
+  itemCheck = output<{
+        pathString: string;
+        parent: string;
+    }>();
+  groupChecked = output<{
+        key: string;
+        hide: boolean;
+    }>();
 
-  private _transformer = (node: GroupItem, level: number) => {
-    return {
-      expandable: node.hasChildren,
-      name: node.name,
-      parent: node.parent,
-      children: node.children,
-      lastChild: node.lastChild,
-      level: level,
-    };
-  };
+  tree = viewChild<MatTree<GroupItem>>(MatTree);
 
-  treeControl = new FlatTreeControl<ExampleFlatNode>(
-    node => node.level,
-    node => node.expandable
-  );
+  dataSource = computed(() => this.buildingNestedList(this.list()));
 
-  treeFlattener = new MatTreeFlattener(
-    this._transformer,
-    node => node.level,
-    node => node.expandable,
-    node => Object.values(node.data)
-  );
+  childrenAccessor = (node: GroupItem) => node.children ?? [];
 
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
-
-  hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
+  hasChild = (_: number, node: GroupItem) => node.expandable;
 
   constructor() {
     effect(() => {
-      if (this.list()) {
-        this.dataSource.data = this.buildingNestedList();
-      }
-    });
-
-    effect(() => {
       if (this.searchTerm()) {
-        this.treeControl.expandAll();
+        this.tree().expandAll();
       } else {
-        this.treeControl.collapseAll();
+        this.tree().collapseAll();
       }
     });
   }
 
-  private buildingNestedList() {
-    return Object.entries(this.list()).map(([parent, children]) => ({
-      data: Object.keys(children).reduce((acc, child, i) => {
-        acc[child] = {
-          name: child,
-          parent,
-          data: children[child],
-          hasChildren: false,
-          lastChild: Object.keys(children).length - 1 === i,
-          children: []
-        };
-        return acc;
-      }, {} as GroupItem),
-      name: parent,
-      parent: '',
-      hasChildren: Object.keys(children).length > 0,
-      children: [parent, ...Object.keys(children).map(child => parent + child)]
-    }) as GroupItem);
+  private buildingNestedList(list) {
+    return Object.entries(list || {}).map(([parent, children]) => {
+      const childrenNames = Object.keys(children).filter((variant) => variant !== '__displayName');
+      return {
+        data: childrenNames.reduce((acc, child, i) => {
+          acc[child] = {
+            name: {name: child},
+            parent,
+            data: children[child],
+            hasChildren: false,
+            lastChild: childrenNames.length - 1 === i,
+            children: [],
+            expanded: false,
+          };
+          return acc;
+        }, {} as GroupItem),
+        name: parent,
+        displayName: list[parent].__displayName ?? parent,
+        parent: '',
+        hasChildren: childrenNames.length > 0,
+        children: childrenNames.map(child => ({name: child, parent})),
+        childrenNames: [parent, ...childrenNames.map(child => parent + child)],
+        expandable: childrenNames.length > 0
+      } as GroupItem
+    });
   }
 
-  isHideAllMode(parent: ExampleFlatNode) {
-    const children = this.treeControl.dataNodes.filter(a => a.parent === parent.name);
-    return parent.expandable ? children.some(child => this.checkedList().includes(parent.name + child.name)) : this.checkedList().includes(parent.name);
+  isHideAllMode(parent: GroupItem) {
+    return parent.expandable ? parent.children.some(child => this.checkedList().includes(parent.name + child.name)) : this.checkedList().includes(parent.name);
   }
 
-  groupCheck(node: ExampleFlatNode) {
+  groupCheck(node: GroupItem) {
     this.groupChecked.emit({key: node.name, hide: !this.isHideAllMode(node)});
   }
 }

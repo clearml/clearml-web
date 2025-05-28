@@ -2,17 +2,15 @@
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized" [autoFocus]="true">
     <div class="list-container">
       @if (plotsList !== undefined) {
-        <sm-selectable-filter-list
-          checkAllIcon="al-ico-show"
-          placeholder="Find plots"
+        <sm-selectable-grouped-filter-list
+          placeHolder="Find plots"
           [list]="plotsList"
           [checkedList]="selectedMetrics"
           [searchTerm]="searchTerm"
           (itemSelect)="metricSelected($event)"
           (hiddenChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
-          >
-        </sm-selectable-filter-list>
+        ></sm-selectable-grouped-filter-list>
       }
     </div>
     @if (minimized) {
@@ -34,6 +32,7 @@
       [isGroupGraphs]="true"
       [hiddenList]="selectedMetrics"
       [metrics]="graphs"
+      [list]="plotsList"
       [legendStringLength]="minimized ? 14 : 19"
       [minimized]="minimized"
       [splitSize]="splitSize$ | ngrxPush"

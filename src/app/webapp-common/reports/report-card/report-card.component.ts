@@ -16,23 +16,22 @@ import {ReportCardMenuComponent} from '@common/reports/report-card-menu/report-c
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-report-card',
-  templateUrl: './report-card.component.html',
-  styleUrls: ['./report-card.component.scss'],
-  standalone: true,
-  imports: [
-    CardComponent,
-    InlineEditComponent,
-    TooltipDirective,
-    CleanProjectPathPipe,
-    ShowTooltipIfEllipsisDirective,
-    ClickStopPropagationDirective,
-    DatePipe,
-    TimeAgoPipe,
-    StatusIconLabelComponent,
-    TagListComponent,
-    ReportCardMenuComponent
-  ]
+    selector: 'sm-report-card',
+    templateUrl: './report-card.component.html',
+    styleUrls: ['./report-card.component.scss'],
+    imports: [
+        CardComponent,
+        InlineEditComponent,
+        TooltipDirective,
+        CleanProjectPathPipe,
+        ShowTooltipIfEllipsisDirective,
+        ClickStopPropagationDirective,
+        DatePipe,
+        TimeAgoPipe,
+        StatusIconLabelComponent,
+        TagListComponent,
+        ReportCardMenuComponent
+    ]
 })
 export class ReportCardComponent {
 

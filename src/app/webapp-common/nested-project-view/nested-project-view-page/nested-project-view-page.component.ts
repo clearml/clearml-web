@@ -10,9 +10,10 @@ export enum ProjectTypeEnum {
 }
 
 @Component({
-  selector: 'sm-nested-project-view-page',
-  templateUrl: './nested-project-view-page.component.html',
-  styleUrls: ['./nested-project-view-page.component.scss']
+    selector: 'sm-nested-project-view-page',
+    templateUrl: './nested-project-view-page.component.html',
+    styleUrls: ['./nested-project-view-page.component.scss'],
+    standalone: false
 })
 export class NestedProjectViewPageComponent {
   isExample = isExample;

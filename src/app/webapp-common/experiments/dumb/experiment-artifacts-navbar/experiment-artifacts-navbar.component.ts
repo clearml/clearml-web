@@ -8,18 +8,17 @@ import {safeAngularUrlParameterPipe} from '@common/shared/pipes/safeAngularUrlPa
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-experiment-artifacts-navbar',
-  templateUrl: './experiment-artifacts-navbar.component.html',
-  styleUrls: ['./experiment-artifacts-navbar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    RouterLink,
-    safeAngularUrlParameterPipe,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-experiment-artifacts-navbar',
+    templateUrl: './experiment-artifacts-navbar.component.html',
+    styleUrls: ['./experiment-artifacts-navbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatExpansionPanel,
+        MatExpansionPanelHeader,
+        RouterLink,
+        safeAngularUrlParameterPipe,
+        MatIcon
+    ]
 })
 export class ExperimentArtifactsNavbarComponent {
   public route = inject(ActivatedRoute);

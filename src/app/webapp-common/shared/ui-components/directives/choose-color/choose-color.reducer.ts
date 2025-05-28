@@ -7,6 +7,9 @@ import {
   showColorPicker
 } from './choose-color.actions';
 
+export const colorPickerHeight = 405;
+export const colorPickerWidth = 260;
+
 export interface ColorPreferenceState {
   colorPreferences: ColorPreference;
   pickerProps: ColorPickerProps;

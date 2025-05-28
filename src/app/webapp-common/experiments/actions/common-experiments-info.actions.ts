@@ -7,9 +7,6 @@ import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem'
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ActivatedRoute} from '@angular/router';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {
-  TasksGetOperationsLogResponseOperations
-} from '~/business-logic/model/tasks/tasksGetOperationsLogResponseOperations';
 
 export enum StepStatusEnum {
   queued = 'queued',
@@ -47,11 +44,6 @@ export const getExperimentInfo = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO',
   props<{ id: string; autoRefresh?: boolean }>()
 );
-export const getExperimentOperationLog = createAction(
-  EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_OPERATION_LOG',
-  props<{ id: string; autoRefresh?: boolean }>()
-);
-
 
 export const resetExperimentInfo = createAction(EXPERIMENTS_INFO_PREFIX + 'RESET_EXPERIMENT_INFO');
 
@@ -73,11 +65,6 @@ export const experimentUpdatedSuccessfully = createAction(
 export const setExperimentInfoData = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_INFO_DATA',
   props<{ experiment: IExperimentInfo }>()
-);
-
-export const setExperimentOperationLog = createAction(
-  EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_OPERATION_LOG',
-  props<{ operationLog: TasksGetOperationsLogResponseOperations[] }>()
 );
 
 export const getExperiment = createAction(

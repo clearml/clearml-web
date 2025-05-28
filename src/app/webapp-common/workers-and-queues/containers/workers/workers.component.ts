@@ -11,10 +11,11 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 const REFRESH_INTERVAL = 30000;
 
 @Component({
-  selector: 'sm-workers',
-  templateUrl: './workers.component.html',
-  styleUrls: ['./workers.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-workers',
+    templateUrl: './workers.component.html',
+    styleUrls: ['./workers.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WorkersComponent {
 

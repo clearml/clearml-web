@@ -7,14 +7,13 @@ import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
-  selector: 'sm-circle-status',
-  templateUrl: './circle-status.component.html',
-  styleUrls: ['./circle-status.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-circle-status',
+    templateUrl: './circle-status.component.html',
+    styleUrls: ['./circle-status.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatIcon
+    ]
 })
 export class CircleStatusComponent {
   protected readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;

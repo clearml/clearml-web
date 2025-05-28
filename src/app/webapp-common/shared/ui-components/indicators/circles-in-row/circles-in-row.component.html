@@ -1,12 +1,12 @@
-@if (!isStagger) {
+@if (!isStagger()) {
   <div class="circles">
-    @for (circle of data | slice : 0 : (limit || data?.length); track $index; ) {
+    @for (circle of data() | slice : 0 : (limit() || data()?.length); track $index; ) {
       <div
         class="circle"
         [class.empty]="!circle.name"
         [class]="circle.class"
         [class.long]="circle.initials?.length > 4"
-        [class.me-2]="$index === 0 && data.length === 1"
+        [class.me-2]="$index === 0 && data().length === 1"
         [style.left.px]="-6 * $index"
         [smTooltip]="circle.name"
       >
@@ -19,10 +19,11 @@
         </div>
       </div>
     }
-    @if (limit && data.length > limit) {
+    @if (limit() && data().length > limit()) {
       <div class="circle rest"
-           [style.left.px]="-6 * (limit)">
-        <div>+{{ data.length - limit }}</div>
+           [smTooltip]="restTooltip()"
+           [style.left.px]="-6 * (limit())">
+        <div>+{{ data().length - limit() }}</div>
       </div>
     }
   </div>
@@ -33,7 +34,7 @@
         class="circle stagger"
         [style.left.px]="-27 * $index"
         [style.zIndex]="staggerArray.length - $index"
-      >{{ $index === 0 ? stagger : '' }}
+      >{{ $index === 0 ? stagger() : '' }}
       </div>
     }
   </div>

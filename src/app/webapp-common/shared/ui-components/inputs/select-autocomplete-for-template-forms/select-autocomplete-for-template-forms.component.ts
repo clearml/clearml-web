@@ -27,28 +27,27 @@ export interface IOption {
 }
 
 @Component({
-  selector: 'sm-select-autocomplete-for-template-forms',
-  templateUrl: './select-autocomplete-for-template-forms.component.html',
-  styleUrls: ['./select-autocomplete-for-template-forms.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatInputModule,
-    MatAutocompleteModule,
-    ReactiveFormsModule
-],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
-      multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
-      multi: true
-    }
-  ]
+    selector: 'sm-select-autocomplete-for-template-forms',
+    templateUrl: './select-autocomplete-for-template-forms.component.html',
+    styleUrls: ['./select-autocomplete-for-template-forms.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatInputModule,
+        MatAutocompleteModule,
+        ReactiveFormsModule
+    ],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
+            multi: true
+        }
+    ]
 })
 
 export class SelectAutocompleteForTemplateFormsComponent implements ControlValueAccessor, Validator  {

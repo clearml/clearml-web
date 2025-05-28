@@ -28,25 +28,24 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-table-filter-sort',
-  templateUrl: './table-filter-sort.component.html',
-  styleUrls: ['./table-filter-sort.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CheckboxThreeStateListComponent,
-    TableFilterDurationNumericComponent,
-    TableFilterDurationComponent,
-    MenuComponent,
-    TooltipDirective,
-    MenuItemComponent,
-    ClickStopPropagationDirective,
-    TableFilterDurationDateTimeComponent,
-    DotsLoadMoreComponent,
-    MatIcon,
-    MatIconButton,
-    MatButton
-  ]
+    selector: 'sm-table-filter-sort',
+    templateUrl: './table-filter-sort.component.html',
+    styleUrls: ['./table-filter-sort.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CheckboxThreeStateListComponent,
+        TableFilterDurationNumericComponent,
+        TableFilterDurationComponent,
+        MenuComponent,
+        TooltipDirective,
+        MenuItemComponent,
+        ClickStopPropagationDirective,
+        TableFilterDurationDateTimeComponent,
+        DotsLoadMoreComponent,
+        MatIcon,
+        MatIconButton,
+        MatButton
+    ]
 })
 export class TableFilterSortComponent {
 
@@ -112,13 +111,13 @@ export class TableFilterSortComponent {
           this.state().loading.set(false);
         }
       }
-    }, {allowSignalWrites: true});
+    });
 
     effect(() => {
       if (this.searchValue() && this.previousSearchValue !== this.searchValue()) {
         this.pageNumber.set(1);
       }
-    }, {allowSignalWrites: true});
+    });
   }
 
   switchSortOrder($event: MouseEvent) {

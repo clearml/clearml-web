@@ -25,12 +25,13 @@ import {ThemeService} from '@common/shared/services/theme.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'sm-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [ThemeService]
+    selector: 'sm-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [ThemeService],
+    standalone: false
 })
 export class AppComponent {
   private router = inject(Router);

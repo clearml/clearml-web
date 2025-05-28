@@ -10,10 +10,11 @@
       <sm-code-editor #editor
         [code]="codeFormGroup.controls.uncommited.value"
         [mode]="shell() ? 'sh' : 'python'"
+        [startPosition]="cursorPosition"
       ></sm-code-editor>
       <div class="buttons justify-content-center">
+        <button mat-stroked-button (click)="closeScript()">CANCEL</button>
         <button mat-flat-button (click)="updateScript(editor.aceCode)">OK</button>
-        <button mat-stroked-button (click)="this.editMode.set(false)">CANCEL</button>
       </div>
     </div>
   } @else {
@@ -82,7 +83,7 @@
               <mat-label>Working Directory</mat-label>
               <input matInput placeholder="src" formControlName="directory">
             </mat-form-field>
-            <mat-radio-group aria-label="Select Binary Type" formControlName="binaryType" class="d-block mt-4">
+            <mat-radio-group aria-label="Select Binary Type" formControlName="binaryType" class="d-block mt-4" (change)="binaryChanged($event.value)">
               <mat-radio-button value="python">Python</mat-radio-button>
               <mat-radio-button value="shell">Shell</mat-radio-button>
             </mat-radio-group>
@@ -128,10 +129,10 @@
                     </mat-form-field>
                     <mat-form-field appearance="outline">
                       <mat-label>Content</mat-label>
-                      <input matInput formControlName="uncommited" [readonly]="true">
-                      <input class="hidden" #fileInput type="file" [accept]="shell() ? '.sh,.zsh,.bash' : '.py'" (change)="updateEntryFromFile($event)">
+                      <textarea matInput formControlName="uncommited" [rows]="1" [readonly]="true"></textarea>
                       <button matSuffix mat-button (click)="editScript()">EDIT</button>
                     </mat-form-field>
+                    <input class="hidden" #fileInput type="file" [accept]="shell() ? '.sh,.zsh,.bash' : '.py'" (change)="updateEntryFromFile($event)">
                   </div>
                 }
               }
@@ -141,7 +142,7 @@
             <!--        </div>-->
             @if (!shell()) {
               <div class="checkbox">
-                <mat-checkbox formControlName="taskInit">Add <code>Task.init</code> call</mat-checkbox>
+                <mat-checkbox formControlName="taskInit">Add <code class="mx-0">Task.init</code> call</mat-checkbox>
               </div>
             }
           </section>
@@ -158,7 +159,7 @@
           <form formArrayName="args">
             <h5>Configuration Hyperparameters Args</h5>
             <section>
-              @for (pair of args.controls; track $index) {
+              @for (pair of args.controls; track pair) {
                 <div [formGroupName]="$index" class="args-inputs">
                   <mat-form-field appearance="outline">
                     <mat-label>Key</mat-label>
@@ -190,40 +191,47 @@
         <form [formGroup]="envFormGroup">
           <h5>Python</h5>
           <section>
-            <div class="checkbox">
+            <h6>Package Manager</h6>
+            <div class="poetry">
               <mat-checkbox formControlName="poetry" (change)="togglePoetry($event.checked)">Use Poetry</mat-checkbox>
             </div>
-            <div class="d-flex gap-3 mb-3">
-              <mat-form-field appearance="outline">
+            <h6 [class.disabled]="envFormGroup.controls.poetry.value">Use Existing Virtual Environment</h6>
+            <div class="venv">
+              <sm-button-toggle
+                [disabled]="envFormGroup.controls.poetry.value"
+                [value]="envFormGroup.controls.venvType.value"
+                [options]="venvOptions"
+                (valueChanged)="venevTypeChange($any($event))"
+              ></sm-button-toggle>
+              <mat-form-field appearance="outline"
+                              [style.visibility]="envFormGroup.controls.venvType.value === 'discover' ? 'hidden' : null"
+              >
                 <mat-label>Preinstalled venv</mat-label>
                 <input matInput placeholder="clearml" formControlName="venv">
               </mat-form-field>
             </div>
-
+            <h6 [class.disabled]="envFormGroup.controls.poetry.value">Additional Packages</h6>
             <mat-radio-group aria-label="Select Requirements Type" formControlName="requirements" class="mt-4">
               <mat-radio-button value="skip">Skip</mat-radio-button>
-              <mat-radio-button value="text">Use <code>requirements.txt</code></mat-radio-button>
+              <mat-radio-button value="text">Use <code class="mx-0">requirements.txt</code></mat-radio-button>
               <mat-radio-button value="manual">Specify packages</mat-radio-button>
             </mat-radio-group>
             @if (envFormGroup.controls.requirements.value === 'manual') {
               <mat-form-field appearance="outline">
                 <mat-label>Requirements</mat-label>
-                <textarea matInput formControlName="pip" class="terminal" rows="8" placeholder="bokeh>=1.4.0
+                <textarea matInput formControlName="pip" class="terminal" rows="8" placeholder="e.g.
+
+bokeh>=1.4.0
 clearml
 matplotlib >= 3.1.1 ; python_version >= '3.6'
 matplotlib >= 2.2.4 ; python_version < '3.6'
-numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826
-pandas
-pillow>=4.0
-plotly
-seaborn
-six"></textarea>
+numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
               </mat-form-field>
             }
           </section>
           <h5>Environment Variables</h5>
           <section formArrayName="vars">
-            @for (pair of vars.controls; track $index) {
+            @for (pair of vars.controls; track pair) {
               <div [formGroupName]="$index" class="args-inputs">
                 <mat-form-field appearance="outline">
                   <mat-label>Variable</mat-label>

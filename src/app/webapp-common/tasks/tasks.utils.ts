@@ -1,6 +1,5 @@
 import {Task} from '~/business-logic/model/tasks/task';
 import {cloneDeep, isEqual, sortBy} from 'lodash-es';
-import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import plotly, {Config, Layout, PlotData} from 'plotly.js';
 import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
@@ -16,9 +15,9 @@ export interface ExtMetricsPlotEvent extends MetricsPlotEvent {
 }
 
 export type IMultiplot = Record<string, Record<number, Record<string, { // experimentId
-        name: string;
-        plots: ExtFrame[];
-      }>>>;
+  name: string;
+  plots: ExtFrame[];
+}>>>;
 
 export const mergeTasks = (tableTask, task) => {
   task.project = tableTask.project;
@@ -28,6 +27,11 @@ export const mergeTasks = (tableTask, task) => {
 };
 
 export const allowedMergedTypes = ['scatter', 'scattergl', 'bar', 'scatter3d', 'box', 'histogram'];
+
+export const checkIfLegendToTitle = (chartItem: ExtFrame) => {
+  return  chartItem && (chartItem.data?.length === 1 || new Set(chartItem.data?.map(c => c.legendgroup)).size === 1 && !chartItem.layout?.title) &&
+    (!chartItem.data?.[0].name || chartItem.data?.[0].name === chartItem.layout?.title || !chartItem.layout?.title) && allowedMergedTypes.includes(chartItem?.data?.[0]?.type);
+}
 
 export const _mergeVariants = (base: any[], variant) => base.slice().concat(variant);
 
@@ -95,7 +99,7 @@ export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): { p
 export const convertPlots = ({plots, id}: { plots: Record<string, MetricsPlotEvent[]>; id: string }): { graphs: Record<string, ExtFrame[]>; parsingError } => {
   let parsingError: boolean;
   return {
-    graphs: Object.entries(plots).reduce((acc, [key, graphs]) => {
+    graphs: Object.entries(plots).sort(([a], [b]) => a.localeCompare(b, undefined, {sensitivity: 'base'})).reduce((acc, [key, graphs]) => {
       acc[key] = graphs?.map(graph => {
         const {plot, hadError} = convertPlot(graph, id);
         parsingError = parsingError || hadError;
@@ -121,8 +125,8 @@ export const convertSplitScalars = (scalars: GroupedList, experimentId: string):
         }],
         {type: 'scalar', title: variant, xaxis: {title: 'Iterations'}, yaxis: {tickformat}},
         {},
-        {metric: key, type: 'scalar', variant, variants: Object.keys(graph)}
-      ))
+        {metric: key, type: 'scalar', variant, variants: [variant]}
+      ));
 
     return acc;
   }, {});
@@ -151,7 +155,7 @@ const getAxisFormat = (chartData: Record<string, PlotData>): '.1e' | undefined =
   const yValues = Object.values(chartData)?.map((trace: ExtData) => (trace.y as number[])).flat() ?? [0];
   const maxY = maxInArray(yValues);
   return maxY >= 1e9 || (maxY < 1e-5 && maxY > 0) ? '.1e' : undefined;
-}
+};
 
 function onlySdkFields(parsePlots: { data: any; layout: any; config?: any; metric: string }[]): Record<string, boolean> {
   const sdkFields = ['mode', 'name', 'text', 'type', 'x', 'y'];
@@ -194,13 +198,6 @@ export const groupIterations = (plots: MetricsPlotEvent[]): Record<string, ExtMe
 export const sortMetricsList = (list: string[]) =>
   list ? sortBy(list, item => item.replace(':', '~').toLowerCase()) : list;
 
-export const preparePlotsList = (groupedPlots: Map<string, any[]>): SelectableListItem[] => {
-  const list = groupedPlots ? Object.keys(groupedPlots) : [];
-  const sortedList = sortMetricsList(list);
-  return sortedList.map((item) => ({name: item, value: item}));
-};
-
-
 export const sortByField = (arr: any[], field: string) =>
   sortBy(arr, item => item[field].replace(':', '~').toLowerCase());
 
@@ -218,13 +215,18 @@ export const mergeMultiMetrics = (metrics): Record<string, ExtFrame[]> => {
     Object.keys(metrics[metric]).forEach(variant => {
       const chartData = Object.entries(metrics[metric][variant])
         .map(([task, data]: [string, ExtData]): ExtData => ({line: {width: 1, ...data.line}, ...data, type: 'scatter', task}));
-      graphsMap[metric + variant] = [prepareGraph(chartData, {
+      const newGraph = prepareGraph(chartData, {
         type: 'multiScalar',
-        title: metric + ' / ' + variant
-      }, {}, {metric, variant})];
+        title: variant
+      }, {}, {metric, variant});
+      if (graphsMap[metric]) {
+        graphsMap[metric].push(newGraph);
+      } else {
+        graphsMap[metric] = [newGraph];
+      }
     });
   });
-  return graphsMap;
+  return graphsMap
 };
 
 export const mergeMultiMetricsGroupedVariant = (metrics): Record<string, ExtFrame[]> => {

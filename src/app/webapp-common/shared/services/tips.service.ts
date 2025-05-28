@@ -60,7 +60,7 @@ export class TipsService {
         takeUntilDestroyed(),
         debounceTime(1000),
         filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos?.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
-        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
+        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr?.[curr?.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');
         if (this.tipsConfig()?.['global'].length || this.tipsConfig()?.[urlConfig]) {

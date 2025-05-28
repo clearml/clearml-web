@@ -40,7 +40,7 @@
     [multiline]="true"
     (textChanged)="commentValueChanged($event)"
     (inlineActiveStateChanged)="editExperimentComment($event)"
-    (cancel)="cancelEdit()"
+    (cancelEdit)="cancelEdit()"
     >
     <span class="preserve-spaces value me-3">{{!model? '-': (model?.comment | NA)}}</span>
   </sm-inline-edit>

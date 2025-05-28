@@ -1,7 +1,7 @@
 <div
   class="color-picker-wrapper"
-  [style.top.px]="props()?.top"
-  [style.left.px]="props()?.left">
+  [style.top.px]="state()?.props?.top"
+  [style.left.px]="state()?.props?.left">
   @if (props()) {
     <div
       [(colorPicker)]="state().color"

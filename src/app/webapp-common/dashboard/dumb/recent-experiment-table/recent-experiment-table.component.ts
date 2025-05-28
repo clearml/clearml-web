@@ -5,9 +5,10 @@ import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {TIME_FORMAT_STRING} from '../../../constants';
 
 @Component({
-  selector   : 'sm-recent-tasks-table',
-  templateUrl: './recent-experiment-table.component.html',
-  styleUrls  : ['./recent-experiment-table.component.scss']
+    selector: 'sm-recent-tasks-table',
+    templateUrl: './recent-experiment-table.component.html',
+    styleUrls: ['./recent-experiment-table.component.scss'],
+    standalone: false
 })
 export class RecentExperimentTableComponent {
 

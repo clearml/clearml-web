@@ -1,4 +1,4 @@
-@import "mixins/common";
+@use "mixins/common";
 
 .view-all {
   font-size: 12px;
@@ -16,8 +16,8 @@
 .sm-card-list-header {
   grid-column: 1 / -1;
   padding: 0;
-  height: unset;
+  height: 38px;
 }
 .recent-title {
-  @include recent-title();
+  @include common.recent-title();
 }

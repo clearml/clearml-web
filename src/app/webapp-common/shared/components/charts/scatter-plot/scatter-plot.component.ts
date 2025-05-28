@@ -17,15 +17,14 @@ Chart.register(zoomPlugin);
 
 
 @Component({
-  selector: 'sm-scatter-plot',
-  templateUrl: './scatter-plot.component.html',
-  styleUrls: ['./scatter-plot.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    MatProgressSpinnerModule,
-    BaseChartDirective
-  ],
-  standalone: true
+    selector: 'sm-scatter-plot',
+    templateUrl: './scatter-plot.component.html',
+    styleUrls: ['./scatter-plot.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatProgressSpinnerModule,
+        BaseChartDirective
+    ]
 })
 export class ScatterPlotComponent {
   public scatterChartType: ChartType = 'scatter';

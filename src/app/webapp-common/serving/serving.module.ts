@@ -47,6 +47,7 @@ import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
 
 
 export const servingSyncedKeys    = [
@@ -128,7 +129,8 @@ const getInitState = (userPreferences: UserPreferences) => ({
     IsRowSelectedPipe,
     FileSizePipe,
     MatIconButton,
-    MatIcon
+    MatIcon,
+    CommonSearchComponent
   ],
   providers: [
     SmFormBuilderService, DatePipe,

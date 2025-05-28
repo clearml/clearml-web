@@ -48,16 +48,19 @@ export interface Environment {
   showSurvey: boolean;
   plotlyURL: string;
   slackLink: string;
-  docsLink: string;
+  docsLink?: string;
+  supportEmail?: string;
   useFilesProxy: boolean;
   branding?: {faviconUrl?: string; logo?: string; logoSmall?: string};
   gettingStartedContext?: GettingStartedContext;
   serverDownMessage?: string;
   legal: Legal;
   loginPopup?: string;
+  platformYoutubeChannel: string;
   appsYouTubeIntroVideoId?: string;
   newExperimentYouTubeVideoId: string;
   baseHref?: string;
+  loginFallback?: 'password-less' | 'error'; // defaults to 'password-less'
   displayTips: boolean;
   onlyPasswordLogin: boolean;
   blockUserScript?: boolean;
@@ -97,10 +100,12 @@ export const BASE_ENV = {
   plotlyURL: 'app/webapp-common/assets/plotly-2.35.0.min.js',
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',
+  supportEmail: 'support@clear.ml',
   branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/small-logo-white.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +
     'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors',
+  platformYoutubeChannel: 'https://www.youtube.com/c/ClearML/featured',
   newExperimentYouTubeVideoId: 's3k9ntmQmD4',
   displayTips: true,
 } as Environment;

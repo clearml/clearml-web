@@ -3,14 +3,13 @@ import {ProfilePreferencesComponent} from '@common/settings/admin/profile-prefer
 import {ProfileKeyStorageComponent} from '@common/settings/admin/profile-key-storage/profile-key-storage.component';
 
 @Component({
-  selector: 'sm-webapp-configuration',
-  standalone: true,
-  imports: [
-    ProfilePreferencesComponent,
-    ProfileKeyStorageComponent,
-  ],
-  templateUrl: './webapp-configuration.component.html',
-  styleUrl: './webapp-configuration.component.scss'
+    selector: 'sm-webapp-configuration',
+    imports: [
+        ProfilePreferencesComponent,
+        ProfileKeyStorageComponent,
+    ],
+    templateUrl: './webapp-configuration.component.html',
+    styleUrl: './webapp-configuration.component.scss'
 })
 export class WebappConfigurationComponent {
 

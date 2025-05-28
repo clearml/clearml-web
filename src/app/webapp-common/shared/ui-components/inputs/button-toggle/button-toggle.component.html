@@ -2,25 +2,26 @@
   [formControl]="formControl"
   [hideSingleSelectionIndicator]="true"
   [vertical]="vertical()"
+  (change)="$event.value !== undefined && valueChanged.emit($event.value)"
   name="fontStyle"
   aria-label="Font Style">
   @for (option of options(); track option.value) {
-    <mat-button-toggle
-      [value]="option.value"
-      [disabled]="disabled()"
-      appearance="legacy"
-      [attr.data-id]="option.value"
-      (click)="valueChanged.emit(option.value)"
-      [smTooltip]="option.icon ? option.label : ''"
-      matTooltipShowDelay="500"
-      [appendComponentOnTopElement]="option.ripple && rippleEffect()"
-      [componentToAppend]="rippleComponent"
+    <div [smTooltip]="option.icon ? option.label : ''"
+         matTooltipShowDelay="500">
+      <mat-button-toggle
+        [value]="option.value"
+        [disabled]="disabled()"
+        appearance="legacy"
+        [attr.data-id]="option.value"
+        [appendComponentOnTopElement]="option.ripple && rippleEffect()"
+        [componentToAppend]="rippleComponent"
       >
-      @if (option.icon) {
-        <mat-icon fontSet="al" [fontIcon]="option.icon"></mat-icon>
-      } @else {
-        <span class="label">{{option.label}}</span>
-      }
-    </mat-button-toggle>
+        @if (option.icon) {
+          <mat-icon fontSet="al" [fontIcon]="option.icon"></mat-icon>
+        } @else {
+          <span class="label">{{ option.label }}</span>
+        }
+      </mat-button-toggle>
+    </div>
   }
 </mat-button-toggle-group>

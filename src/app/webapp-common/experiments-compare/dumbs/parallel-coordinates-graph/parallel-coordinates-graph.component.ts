@@ -5,7 +5,7 @@ import {
   ExtLayout,
   PlotlyGraphBaseComponent
 } from '@common/shared/single-graph/plotly-graph-base';
-import { SlicePipe } from '@angular/common';
+import {SlicePipe} from '@angular/common';
 import {debounceTime, filter, take} from 'rxjs/operators';
 import {from} from 'rxjs';
 import {cloneDeep, get, isEqual, max, min, uniq} from 'lodash-es';
@@ -54,19 +54,17 @@ interface ParaPlotData {
 
 
 @Component({
-  selector: 'sm-parallel-coordinates-graph',
-  templateUrl: './parallel-coordinates-graph.component.html',
-  styleUrls: ['./parallel-coordinates-graph.component.scss'],
-  imports: [
-    SlicePipe,
-    TooltipDirective,
-    ChooseColorModule,
-    MetricVariantToNamePipe,
-    ShowTooltipIfEllipsisDirective,
-    MatIconButton,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-parallel-coordinates-graph',
+    templateUrl: './parallel-coordinates-graph.component.html',
+    styleUrls: ['./parallel-coordinates-graph.component.scss'],
+    imports: [
+        SlicePipe,
+        TooltipDirective,
+        ChooseColorModule,
+        ShowTooltipIfEllipsisDirective,
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit, OnChanges {
   private metricVariantToPathPipe = new MetricVariantToPathPipe();
@@ -156,7 +154,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       .pipe(
         debounceTime(75),
         filter(() => !!this.parallelGraph)
-      ).subscribe(() => this.drawChart()))
+      ).subscribe(() => this.drawChart()));
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -227,7 +225,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
           const splitted = parameter.split('.');
           const newParameter = [splitted.shift(), splitted.join('.'), 'value'];
           parameter = `${parameter}.value`;
-          const allValuesIncludingNull = this.experiments.map(experiment =>  get(experiment.hyperparams, newParameter));
+          const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.hyperparams, newParameter));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
           const textVal = {} as Record<string, number>;
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
@@ -326,19 +324,21 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   getLayout(setDimentiosn = true, margins?) {
     return {
-      margin: margins ? margins : {l: 120, r: 120},
+      margin: margins ? margins : {l: 120, r: 120, b: this.container.nativeElement.clientHeight < 350 ? 40 : 60},
       ...(setDimentiosn && {
-        height: 500,
+        height: Math.min(Math.max(this.container.nativeElement.clientHeight - this.legend.nativeElement.offsetHeight - 40, 300), 600),
         width: this.parallelGraph.nativeElement.offsetWidth
       }),
-      ...(this.isDarkTheme() ? {
-        paper_bgcolor: 'transparent',
+      ...(this.reportMode && {
         height: this.parallelGraph.nativeElement.parentElement.offsetHeight - this.legend.nativeElement.offsetHeight - 40,
-        margin: {l: 120, r: 120, b: 20},
+        margin: {l: 120, r: 120, b: 20}
+      }),
+      ...(this.isDarkTheme() && {
+        paper_bgcolor: 'transparent',
         font: {
           color: Colors.dark.tick
         }
-      } : {})
+      })
     } as ExtLayout;
   }
 
@@ -453,7 +453,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
           data: this.data as unknown as ExtData[],
           layout: {
             ...this.getLayout(false, {l: 120, r: 120, t: 150, b: 40}),
-            title: ''
+            title: 'Parallel coordinates',
           },
           config: {
             displaylogo: false,

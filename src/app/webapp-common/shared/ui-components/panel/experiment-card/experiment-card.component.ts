@@ -12,20 +12,19 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 
 
 @Component({
-  selector: 'sm-experiment-card',
-  templateUrl: './experiment-card.component.html',
-  styleUrls: ['./experiment-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CardComponent,
-    TooltipDirective,
-    CopyClipboardComponent,
-    CircleStatusComponent,
-    DatePipe,
-    TimeAgoPipe,
-    ShowTooltipIfEllipsisDirective
-  ]
+    selector: 'sm-experiment-card',
+    templateUrl: './experiment-card.component.html',
+    styleUrls: ['./experiment-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CardComponent,
+        TooltipDirective,
+        CopyClipboardComponent,
+        CircleStatusComponent,
+        DatePipe,
+        TimeAgoPipe,
+        ShowTooltipIfEllipsisDirective
+    ]
 })
 export class ExperimentCardComponent {
   protected isEmpty = isEmpty;

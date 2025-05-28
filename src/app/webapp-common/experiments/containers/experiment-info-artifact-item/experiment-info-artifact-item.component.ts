@@ -7,10 +7,11 @@ import {selectDownloadingArtifact, selectExperimentModelInfoData} from '../../re
 
 
 @Component({
-  selector: 'sm-experiment-info-artifact-item',
-  templateUrl: './experiment-info-artifact-item.component.html',
-  styleUrls: ['./experiment-info-artifact-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-experiment-info-artifact-item',
+    templateUrl: './experiment-info-artifact-item.component.html',
+    styleUrls: ['./experiment-info-artifact-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentInfoArtifactItemComponent {
   private store = inject(Store);

@@ -15,18 +15,17 @@ import {createReport} from '@common/reports/reports.actions';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 
 @Component({
-  selector: 'sm-dashboard-reports',
-  standalone: true,
-  imports: [
-    ReportCardComponent,
-    PlusCardComponent,
-    MatIcon,
-    MatButton,
-    MatAnchor,
-    RouterLink
-  ],
-  templateUrl: './dashboard-reports.component.html',
-  styleUrl: './dashboard-reports.component.scss'
+    selector: 'sm-dashboard-reports',
+    imports: [
+        ReportCardComponent,
+        PlusCardComponent,
+        MatIcon,
+        MatButton,
+        MatAnchor,
+        RouterLink
+    ],
+    templateUrl: './dashboard-reports.component.html',
+    styleUrl: './dashboard-reports.component.scss'
 })
 export class DashboardReportsComponent {
   private store = inject(Store);

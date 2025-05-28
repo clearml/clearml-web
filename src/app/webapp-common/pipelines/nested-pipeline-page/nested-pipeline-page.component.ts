@@ -4,7 +4,6 @@ import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-p
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {showExamplePipelines} from '@common/projects/common-projects.actions';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import { AsyncPipe } from '@angular/common';
 import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
@@ -14,20 +13,18 @@ import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-nested-pipeline-page',
-  templateUrl: './nested-pipeline-page.component.html',
-  styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
-  imports: [
-    ProjectsSharedModule,
-    AsyncPipe,
-    CircleCounterComponent,
-    TagListComponent,
-    ClickStopPropagationDirective,
-    PushPipe,
-    MatButton,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-nested-pipeline-page',
+    templateUrl: './nested-pipeline-page.component.html',
+    styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
+    imports: [
+        ProjectsSharedModule,
+        CircleCounterComponent,
+        TagListComponent,
+        ClickStopPropagationDirective,
+        PushPipe,
+        MatButton,
+        MatIcon
+    ]
 })
 export class NestedPipelinePageComponent extends PipelinesPageComponent {
   circleTypeEnum = CircleTypeEnum;

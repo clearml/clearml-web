@@ -15,16 +15,16 @@
         @if (errors?.required) {
           Please add name.
         }
-        @if (errors?.uniqueProject) {
+        @else if (errors?.uniqueProject) {
           Project name in this path already exists.
         }
-        @if (errors?.minlength) {
+        @else if (errors?.minlength) {
           Project name should contain more than 3 characters.
         }
-        @if (errors?.emptyName && !errors?.minlength) {
+        @else if (errors?.emptyName && !errors?.minlength) {
           Project name can't contain only spaces.
         }
-        @if (errors?.pattern &&  !errors?.minlength) {
+        @else if (errors?.pattern &&  !errors?.minlength) {
           Project name can't contain slash (/)
         }
       </mat-error>
@@ -35,7 +35,6 @@
   <input matInput
          name="parent"
          formControlName="parent"
-         [disabled]="true"
   >
 </mat-form-field>
 
@@ -45,7 +44,6 @@
            matInput
            name="default_output_destination"
            formControlName="default_output_destination"
-           [disabled]="true"
     >
     @if (projectForm.controls.default_output_destination.invalid && projectForm.controls.default_output_destination.errors; as errors) {
       <mat-error>
@@ -55,10 +53,4 @@
       </mat-error>
     }
   </mat-form-field>
-    <div class="actions">
-      <button mat-stroked-button (click)="cancelClicked.emit()" data-id="Cancel">CANCEL</button>
-      <button mat-flat-button [disabled]="projectForm.invalid" (click)="send()" data-id="Save">
-        SAVE
-      </button>
-    </div>
 </form>

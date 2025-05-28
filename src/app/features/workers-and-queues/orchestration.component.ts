@@ -9,7 +9,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 @Component({
   selector: 'sm-orchestration',
   templateUrl: './orchestration.component.html',
-  styleUrls: ['./orchestration.component.scss']
+  styleUrls: ['./orchestration.component.scss'],
+  standalone: false
 })
 export class OrchestrationComponent {
   private store = inject(Store);

@@ -19,6 +19,7 @@
             ]"
         (valueChanged)="!archive() && !(!!projectId() && $event) && toggleNestedView.emit($any($event))"
       ></sm-button-toggle>
+      <sm-common-search class="ms-3"></sm-common-search>
     </div>
   }
   <div class="d-flex-center gap">

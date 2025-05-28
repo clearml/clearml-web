@@ -9,9 +9,10 @@ import {
 import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 
 @Component({
-  selector   : 'sm-model-header',
-  templateUrl: './model-header.component.html',
-  styleUrls  : ['./model-header.component.scss']
+    selector: 'sm-model-header',
+    templateUrl: './model-header.component.html',
+    styleUrls: ['./model-header.component.scss'],
+    standalone: false
 })
 export class ModelHeaderComponent extends BaseEntityHeaderComponent {
 

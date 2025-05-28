@@ -11,18 +11,17 @@ import {MetricValueTypeStrings} from '@common/shared/utils/tableParamEncode';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
-  selector: 'sm-metric-variant-selector',
-  standalone: true,
-  imports: [
-    MenuComponent,
-    ExperimentCompareSharedModule,
-    MetricVariantToNamePipe,
-    TooltipDirective,
-    SelectMetricForCustomColComponent,
-    ShowTooltipIfEllipsisDirective
-  ],
-  templateUrl: './metric-variant-selector.component.html',
-  styleUrl: './metric-variant-selector.component.scss'
+    selector: 'sm-metric-variant-selector',
+    imports: [
+        MenuComponent,
+        ExperimentCompareSharedModule,
+        MetricVariantToNamePipe,
+        TooltipDirective,
+        SelectMetricForCustomColComponent,
+        ShowTooltipIfEllipsisDirective
+    ],
+    templateUrl: './metric-variant-selector.component.html',
+    styleUrl: './metric-variant-selector.component.scss'
 })
 export class MetricVariantSelectorComponent {
   public metricVariantsSet: MetricVariantResult[];

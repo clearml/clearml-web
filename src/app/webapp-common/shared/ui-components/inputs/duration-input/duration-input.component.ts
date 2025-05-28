@@ -3,20 +3,20 @@ import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/template
 import {FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 @Component({
-  selector: 'sm-duration-input',
-  templateUrl: './duration-input.component.html',
-  styleUrls: ['./duration-input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DurationInputComponent),
-      multi: true
-    }]
+    selector: 'sm-duration-input',
+    templateUrl: './duration-input.component.html',
+    styleUrls: ['./duration-input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule
+    ],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DurationInputComponent),
+            multi: true
+        }
+    ]
 })
 export class DurationInputComponent extends TemplateFormSectionBaseDirective {
   public ms = '0';

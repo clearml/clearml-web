@@ -10,19 +10,18 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'sm-entity-footer',
-  templateUrl: './entity-footer.component.html',
-  styleUrls: ['./entity-footer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    TooltipDirective,
-    MatMenuModule,
-    TagsMenuComponent,
-    MatButton,
-    MatIconButton,
-    MatIcon
-  ],
-  standalone: true
+    selector: 'sm-entity-footer',
+    templateUrl: './entity-footer.component.html',
+    styleUrls: ['./entity-footer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TooltipDirective,
+        MatMenuModule,
+        TagsMenuComponent,
+        MatButton,
+        MatIconButton,
+        MatIcon
+    ]
 })
 export class EntityFooterComponent<E extends {id: string}> extends BaseContextMenuComponent {
 

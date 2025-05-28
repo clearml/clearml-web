@@ -12,22 +12,21 @@ import {MatIcon} from '@angular/material/icon';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-nested-datasets-page',
-  templateUrl: './nested-datasets-page.component.html',
-  styleUrls: [
-    '../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss',
-    '../../../webapp-common/datasets/open-datasets/open-datasets.component.scss'
-  ],
-  imports: [
-    ProjectsSharedModule,
-    AsyncPipe,
-    CircleCounterComponent,
-    TagListComponent,
-    MatButton,
-    MatIcon,
-    ClickStopPropagationDirective
-],
-  standalone: true
+    selector: 'sm-nested-datasets-page',
+    templateUrl: './nested-datasets-page.component.html',
+    styleUrls: [
+        '../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss',
+        '../../../webapp-common/datasets/open-datasets/open-datasets.component.scss'
+    ],
+    imports: [
+        ProjectsSharedModule,
+        AsyncPipe,
+        CircleCounterComponent,
+        TagListComponent,
+        MatButton,
+        MatIcon,
+        ClickStopPropagationDirective
+    ]
 })
 export class NestedDatasetsPageComponent extends CommonProjectsPageComponent {
   entityTypeEnum = ProjectTypeEnum;

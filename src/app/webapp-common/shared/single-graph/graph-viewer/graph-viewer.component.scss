@@ -34,6 +34,7 @@
       align-items: center;
     }
 
+
     .load-spinner {
       display: inline-block;
       vertical-align: middle;
@@ -57,38 +58,36 @@
       height: 10px;
       margin-right: 6px;
       cursor: pointer;
+      border: 1px solid var(--color-on-surface-variant);
     }
   }
 
   .smooth-options {
     margin-left: 24px;
+    .weight{
+      display: inline-flex;
+      width: 36px;
+    }
 
     &.separator {
       border-left: 1px solid var(--color-outline-variant);
-      padding-left: 24px;
+      padding-left: 12px;
     }
   }
-  .smooth-input {
-    width: 76px;
-    margin-left: 16px;
-  }
+
   .smooth-selector {
-    margin-left: 12px;
-    width: 265px;
+    margin-right: 12px;
+    width: 180px;
   }
 
-  .smooth-type {
-    width: 170px;
-    margin-left: 6px;
-  }
 
   .axis-type-field {
-    width: 180px;
+    width: 142px;
   }
 
   .graph-container {
     padding-top: 16px;
-    @media (max-width: 1520px) {
+    @media (max-width: 1540px) {
       padding-top: 24px;
     }
 
@@ -139,8 +138,10 @@
     z-index: 1;
     top: 64px;
     display: flex;
-    align-items: center;
     padding: 8px 24px 8px 80px;
+    .mat-mdc-slider{
+      min-width: 50px;
+    }
 
     .label-text {
       white-space: nowrap;
@@ -149,7 +150,7 @@
     .smooth-options .label-text {
       padding-right: 16px;
     }
-    @media (max-width: 1520px) {
+    @media (max-width: 1540px) {
       top: 64px;
       padding: 0 24px;
     }
@@ -163,7 +164,7 @@
 
   .field {
     align-items: center;
-    @media (max-width: 1520px) {
+    @media (max-width: 1540px) {
       align-items: unset;
       flex-direction: column;
       .label-text {

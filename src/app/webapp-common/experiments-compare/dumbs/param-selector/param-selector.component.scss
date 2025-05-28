@@ -19,8 +19,9 @@
     }
   }
 
-  .selected-parameter {
+  .selected-parameters .selected-parameter {
     color: var(--color-on-surface-variant);
+    padding: 4px 8px;
 
     &:hover {
       background-color: var(--color-surface-container-low);
@@ -53,7 +54,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 8px;
   border-radius: 4px;
   background-color: transparent;
 

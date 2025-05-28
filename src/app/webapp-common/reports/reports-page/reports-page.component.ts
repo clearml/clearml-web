@@ -45,9 +45,10 @@ import {Project} from '~/business-logic/model/projects/project';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 
 @Component({
-  selector: 'sm-reports-page',
-  templateUrl: './reports-page.component.html',
-  styleUrls: ['./reports-page.component.scss']
+    selector: 'sm-reports-page',
+    templateUrl: './reports-page.component.html',
+    styleUrls: ['./reports-page.component.scss'],
+    standalone: false
 })
 export class ReportsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   public reports$: Observable<IReport[]>;

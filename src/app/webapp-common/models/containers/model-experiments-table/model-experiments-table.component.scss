@@ -1,6 +1,4 @@
-@import "variables";
-
-@import 'variables';
+@use 'variables';
 
 :host {
   .search-experiment-for-compare {
@@ -15,7 +13,7 @@
   .hide-table {
     height: 0;
     overflow: hidden;
-    transition: $transition-fast;
+    transition: variables.$transition-fast;
 
     &.show-table {
       height: calc(100% - 30px);
@@ -25,7 +23,7 @@
   }
 
   ::ng-deep sm-table p-table {
-    .p-datatable-hoverable-rows .p-selectable-row .cursor-default{
+    .p-datatable-hoverable-rows .p-datatable-selectable-row  .cursor-default{
       cursor: pointer;
     }
   }

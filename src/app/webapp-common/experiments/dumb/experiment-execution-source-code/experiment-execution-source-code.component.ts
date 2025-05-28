@@ -12,16 +12,18 @@ import {debounceTime, filter, map, startWith} from 'rxjs/operators';
 import {pairwise} from 'rxjs';
 
 @Component({
-  selector   : 'sm-experiment-execution-source-code',
-  templateUrl: './experiment-execution-source-code.component.html',
-  styleUrls  : ['./experiment-execution-source-code.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ExperimentExecutionSourceCodeComponent),
-      multi: true
-    }]
+    selector: 'sm-experiment-execution-source-code',
+    templateUrl: './experiment-execution-source-code.component.html',
+    styleUrls: ['./experiment-execution-source-code.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ExperimentExecutionSourceCodeComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class ExperimentExecutionSourceCodeComponent implements ControlValueAccessor {
   private formBuilder = inject(FormBuilder);

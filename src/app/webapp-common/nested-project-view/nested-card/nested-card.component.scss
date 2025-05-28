@@ -1,4 +1,4 @@
-@import "mixins/common";
+@use "mixins/common";
 
 .card-name {
   height: 32px;
@@ -6,12 +6,12 @@
 }
 
 .project-tag {
-  @include card-header-tag();
+  @include common.card-header-tag();
   color: var(--color-tertiary);
 }
 
 .footer-title {
-  @include counter-label();
+  @include common.counter-label();
   text-align: center;
   font-size: 10px;
   padding: 12px

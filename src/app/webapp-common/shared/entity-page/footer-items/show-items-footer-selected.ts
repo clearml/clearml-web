@@ -1,4 +1,4 @@
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items.models';
 import {MenuItems} from '../items.utils';
 
@@ -12,7 +12,7 @@ export class ShowItemsFooterSelected extends ItemFooterModel {
 
   }
 
-  getItemState(state: IFooterState<any>) {
+  getItemState(state: IFooterState<{id: string}>) {
     return {
       title: state.showAllSelectedIsActive ?
         `SHOW ALL ${this.entitiesType.toUpperCase()}S` :

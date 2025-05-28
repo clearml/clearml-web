@@ -1,60 +1,40 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
-import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
-import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
+import {convertPlots, ExtMetricsPlotEvent, groupIterations} from '@common/tasks/tasks.utils';
 import {Store} from '@ngrx/store';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'rxjs/operators';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {
-  experimentPlotsRequested,
-  resetExperimentMetrics,
-  setExperimentMetricsSearchTerm,
-  setExperimentSettings
-} from '../../actions/common-experiment-output.actions';
-import {
-  selectExperimentInfoPlots,
-  selectExperimentMetricsSearchTerm,
-  selectIsExperimentInProgress,
-  selectSelectedSettingsHiddenPlot,
-  selectSplitSize
-} from '../../reducers';
+import {experimentPlotsRequested, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings} from '../../actions/common-experiment-output.actions';
+import {selectExperimentInfoPlots, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedSettingsHiddenPlot, selectSplitSize} from '../../reducers';
+import {GroupedList} from '@common/tasks/tasks.model';
 
 @Component({
-  selector: 'sm-experiment-output-plots',
-  templateUrl: './experiment-output-plots.component.html',
-  styleUrls: ['./experiment-output-plots.component.scss', '../experiment-output-scalars/shared-experiment-output.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-experiment-output-plots',
+    templateUrl: './experiment-output-plots.component.html',
+    styleUrls: ['./experiment-output-plots.component.scss', '../experiment-output-scalars/shared-experiment-output.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isDatasetVersionPreview = false;
-  @Input() selected: {id: string};
+  @Input() selected: { id: string };
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
-  public plotsList: Array<SelectableListItem>;
+  public plotsList: GroupedList;
   private experimentId: string;
-  private routerParams$: Observable<{[para: string]: string}>;
-  public listOfHidden$: Observable<Array<string>>;
+  private routerParams$: Observable<Record<string, string>>;
+  public listOfHidden$: Observable<string[]>;
   public searchTerm$: Observable<string>;
-  public minimized: boolean = false;
-  public graphs: { [key: string]: ExtFrame[] };
+  public minimized = false;
+  public graphs: Record<string, ExtFrame[]>;
   public refreshDisabled: boolean;
   public selectIsExperimentPendingRunning: Observable<boolean>;
   public splitSize$: Observable<number>;
@@ -62,6 +42,8 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   private subs = new Subscription();
   private plots$: Observable<MetricsPlotEvent[]>;
   public selectedMetrics: string[];
+  private originalPlotList: { metric: string; variant: string }[];
+  public plotsListLength: number;
 
 
   constructor(
@@ -76,6 +58,12 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenPlot);
     this.plots$ = this.store.select(selectExperimentInfoPlots).pipe(
       filter((metrics) => !!metrics),
+      tap((list: MetricsPlotEvent[]) => {
+        this.originalPlotList = list.map((plot) => ({
+          metric: plot.metric,
+          variant: plot.variant
+        }));
+      })
     );
 
     this.routerParams$ = this.store.select(selectRouterParams)
@@ -88,7 +76,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes.selected && this.experimentId !== changes.selected.currentValue.id ){
+    if (changes.selected && this.experimentId !== changes.selected.currentValue.id) {
       this.dark = true;
       this.experimentId = changes.selected.currentValue.id;
       this.refresh();
@@ -101,15 +89,19 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
       .pipe(
         distinctUntilChanged(),
         filter(metrics => !!metrics),
-        map(plots => this.isDatasetVersionPreview ? plots.filter(plot => !plot.metric.startsWith('_')).filter(plot=> !['Execution Flow', 'Execution Details'].includes(plot.variant)) : plots),
+        map(plots => this.isDatasetVersionPreview ? plots.filter(plot => !plot.metric.startsWith('_')).filter(plot => !['Execution Flow', 'Execution Details'].includes(plot.variant)) : plots)
       )
       .subscribe(metricsPlots => {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
-        this.plotsList = this.preparePlotsList(groupedPlots);
+        this.plotsList = this.getPlotsList(groupedPlots);
+        this.plotsListLength = metricsPlots.length;
+
         const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: this.experimentId});
         this.graphs = graphs;
-        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
+        if (parsingError) {
+          this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
+        }
         this.changeDetection.markForCheck();
       }));
 
@@ -139,18 +131,27 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.subs.add(this.refreshService.tick
       .pipe(filter(autoRefresh => autoRefresh !== null && !!this.experimentId))
       .subscribe(() => {
-        this.refresh();
+        this.refresh(true);
         this.changeDetection.markForCheck();
       })
     );
 
     this.subs.add(combineLatest([this.listOfHidden$, this.plots$])
       .subscribe(([hiddenList]) => {
-        this.selectedMetrics = hiddenList.length === 0 ?
-          this.plotsList.map( name => name.name) :
-          this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric));
+        const selectedMetrics = hiddenList.length === 0 ?
+          [...this.originalPlotList] :
+          this.originalPlotList.filter(({metric, variant}) => !hiddenList.includes(`${metric}${variant}`));
+
+        const metricsWithoutVariants = selectedMetrics
+          .map(({metric}) => metric)
+          .filter(m => !!m);
+
+        this.selectedMetrics = Array.from(new Set([
+          ...selectedMetrics.map(({metric, variant}) => `${metric}${variant}`),
+          ...metricsWithoutVariants
+        ]));
         this.changeDetection.markForCheck();
-    }));
+      }));
   }
 
   ngOnDestroy() {
@@ -159,10 +160,20 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.resetMetrics();
   }
 
-  private preparePlotsList(groupedPlots: { [title: string]: MetricsPlotEvent[] }): Array<SelectableListItem> {
-    const list = groupedPlots ? Object.keys(groupedPlots) : [];
-    const sortedList = sortMetricsList(list);
-    return sortedList.map((item) => ({name: item, value: item}));
+  getPlotsList(groupedPlots: Record<string, ExtMetricsPlotEvent[]>) {
+    return Object.keys(groupedPlots)
+      .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}))
+      .reduce((acc, metric) => {
+        if (groupedPlots[metric].length < 2) {
+          acc[metric + groupedPlots[metric][0].variant] = {__displayName: metric} as any;
+        } else {
+          acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
+            acc2[plot.variant] = {};
+            return acc2;
+          }, {});
+        }
+        return acc;
+      }, {} as GroupedList);
   }
 
   metricSelected(id: string) {
@@ -170,15 +181,20 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   hiddenListChanged(hiddenList: string[]) {
+    const metrics = this.originalPlotList.map(metric => metric.metric);
+    const variants = this.originalPlotList.map(metric => `${metric.metric}${metric.variant}`)
     this.store.dispatch(setExperimentSettings({
       id: this.experimentId,
-      changes: {hiddenMetricsPlot: this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric))}}));
+      changes: {
+        hiddenMetricsPlot:  Array.from(new Set([...metrics, ...variants].filter(metric => !hiddenList.includes(metric))))
+      }
+    }));
   }
 
-  refresh() {
+  refresh(autorefresh?: boolean) {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(experimentPlotsRequested({task: this.experimentId}));
+      this.store.dispatch(experimentPlotsRequested({task: this.experimentId, refresh: autorefresh}));
     }
   }
 

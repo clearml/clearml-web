@@ -7,24 +7,33 @@
     display: flex;
     flex-direction: column;
     margin: 0 auto;
+    color: var(--color-empty-state);
+    text-align: center;
 
     .title-icon {
-      color: var(--color-tint-14);
-      text-align: center;
-      margin-bottom: 24px;
+      .al-icon {
+        margin: 0 auto;
+      }
+    }
+
+    .mat-icon {
+      margin: 0 auto;
     }
 
     .title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 500;
-      color: var(--color-on-surface);
-      margin-bottom: 6px;
-      text-align: center;
+      margin: 24px 0 6px;
     }
 
     .sub-title {
+      color: var(--color-on-surface);
       text-align: center;
-      margin-bottom: 64px;
+      margin-bottom: 24px;
+
+      button {
+        margin-top: 18px;
+      }
     }
   }
 }

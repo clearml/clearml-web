@@ -14,5 +14,5 @@
       [disableAdd]="!((selectedExperiment$ | ngrxPush)?.status === 'created')"
     ></sm-experiment-hyper-params-navbar>
   </as-split-area>
-  <as-split-area><router-outlet></router-outlet></as-split-area>
+  <as-split-area [visible]="hyperParamsInfo$| ngrxPush"><router-outlet></router-outlet></as-split-area>
 </as-split>

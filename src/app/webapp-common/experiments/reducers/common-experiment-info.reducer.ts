@@ -8,7 +8,7 @@ import {
   downloadSuccess,
   experimentDataUpdated,
   experimentDetailsUpdated,
-  getExperimentArtifacts,
+  getExperimentArtifacts, getExperimentInfo,
   getExperimentUncommittedChanges,
   resetExperimentInfo,
   saveExperiment,
@@ -20,7 +20,6 @@ import {
   setExperimentErrors,
   setExperimentFormErrors,
   setExperimentInfoData,
-  setExperimentOperationLog,
   setExperimentSaving,
   setExperimentUncommittedChanges,
   setSelectedPipelineStep,
@@ -32,9 +31,6 @@ import {experimentSections, experimentSectionsEnum} from '~/features/experiments
 import {set} from 'lodash-es';
 import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
 import {ActionCreator, createReducer, on, ReducerTypes} from '@ngrx/store';
-import {
-  TasksGetOperationsLogResponseOperations
-} from '~/business-logic/model/tasks/tasksGetOperationsLogResponseOperations';
 
 
 export interface CommonExperimentInfoState {
@@ -52,7 +48,6 @@ export interface CommonExperimentInfoState {
   artifactsExperimentId: string;
   downloading: boolean;
   downloadingExperimentOperationLog: boolean;
-  operationLog: TasksGetOperationsLogResponseOperations[];
 }
 
 export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
@@ -75,7 +70,6 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
   artifactsExperimentId: null,
   downloading: false,
   downloadingExperimentOperationLog: false,
-  operationLog: null
 };
 
 export const commonExperimentInfoReducers = [
@@ -101,7 +95,6 @@ export const commonExperimentInfoReducers = [
   on(downloadSuccess, downloadFailed, (state): CommonExperimentInfoState => ({...state, downloading: false})),
   on(setExperimentErrors, (state, action): CommonExperimentInfoState => ({...state, errors: {...state.errors, ...action}})),
   on(resetExperimentInfo, (state): CommonExperimentInfoState => ({...state, infoData: null})),
-  on(setExperimentOperationLog, (state, action): CommonExperimentInfoState => ({...state, operationLog: action.operationLog})),
   on(setExperimentInfoData, (state, action): CommonExperimentInfoState => ({
     ...state,
     infoData: {

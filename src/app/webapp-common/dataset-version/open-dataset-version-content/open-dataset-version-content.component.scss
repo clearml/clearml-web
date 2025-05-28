@@ -1,5 +1,4 @@
-@import 'variables';
-@import "../../../webapp-common/assets/fonts/variables.scss";
+@use "../../../webapp-common/assets/fonts/variables.scss" as fonts;
 
 :host {
   display: block;
@@ -14,9 +13,9 @@
 
   ::ng-deep sm-table {
     [filetype]::before {
-      content: $al-ico-file; // fallback icon (file)
+      content: fonts.$al-ico-file; // fallback icon (file)
       color: #596c71;
-      font-family: #{$icomoon-font-family};
+      font-family: #{fonts.$icomoon-font-family};
       font-size: 24px;
       margin-right: 12px;
       vertical-align: middle;
@@ -32,7 +31,7 @@
     [filetype="jpg"]::before,
     [filetype="jpeg"]::before,
     [filetype="gif"]::before {
-      content: $al-ico-image;
+      content: fonts.$al-ico-image;
       color: #3a7777;
     }
 
@@ -41,7 +40,7 @@
     [filetype="mov"]::before,
     [filetype="wmv"]::before,
     [filetype="avi"]::before {
-      content: $al-ico-video;
+      content: fonts.$al-ico-video;
       color: #846300;
     }
 
@@ -49,40 +48,40 @@
     [filetype="mp3"]::before,
     [filetype="aac"]::before,
     [filetype="wav"]::before {
-      content: $al-ico-audio;
+      content: fonts.$al-ico-audio;
       color: #833e65;
     }
 
     [filetype="csv"]::before {
-      content: $al-ico-csv;
+      content: fonts.$al-ico-csv;
       color: #145f82;
     }
 
     [filetype="txt"]::before {
-      content: $al-ico-txt;
+      content: fonts.$al-ico-txt;
       color: #803d3d;
     }
 
     [filetype="zip"]::before,
     [filetype="gz"]::before {
-      content: $al-ico-zip;
+      content: fonts.$al-ico-zip;
       color: #615555;
     }
 
     [filetype="pkl"]::before {
-      content: $al-ico-pkl;
+      content: fonts.$al-ico-pkl;
       color: #48507f;
     }
 
     [filetype="py"]::before {
-      content: $al-ico-py;
+      content: fonts.$al-ico-py;
       color: #d1902e;
     }
 
     [filetype="html"]::before,
     [filetype="yaml"]::before,
     [filetype="json"]::before {
-      content: $al-ico-code-file;
+      content: fonts.$al-ico-code-file;
       color: #a35151;
     }
   }

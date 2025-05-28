@@ -4,10 +4,11 @@ import {experimentOutputReducer, ExperimentOutputState, experimentOutputInitStat
 import {experimentsViewReducer, ExperimentsViewState, experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {IExperimentInfo} from '../shared/experiment-info.model';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {selectSelectedModel} from '@common/models/reducers';
+import {selectModelId, selectSelectedModel} from '@common/models/reducers';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
+import { selectSelectedProjectId } from '@common/core/reducers/projects.reducer';
 
 export interface ExperimentState {
   view: ExperimentsViewState;
@@ -60,6 +61,12 @@ export const selectExperimentFormValidity = createSelector(selectExperimentInfoD
     return !error;
   });
 
-export const selectSelectedModelSettings = createSelector(experimentOutput, selectSelectedModel,
-  (output, currentModel): ExperimentSettings =>
-    output.settingsList && output.settingsList.find((setting) => currentModel && setting.id === currentModel.id));
+export const selectOutputSettings = createSelector(experimentOutput, state => state.settingsList);
+export const selectSelectedModelSettings = createSelector(experimentOutput, selectModelId, selectSelectedProjectId,
+  (output, modelId, projectId): Partial<ExperimentSettings> => {
+    if (output.settingsList && modelId) {
+      return output.settingsList.find((setting) => setting.id === modelId) ?? output.settingsList.find((setting) => setting.id === projectId) ?? {};
+    } else {
+      return null;
+    }
+  });

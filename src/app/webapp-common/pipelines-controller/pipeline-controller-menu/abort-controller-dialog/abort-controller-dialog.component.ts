@@ -5,17 +5,16 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-abort-controller-dialog',
-  templateUrl: './abort-controller-dialog.component.html',
-  styleUrls: ['./abort-controller-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    DialogTemplateComponent,
-    MatDialogActions,
-    MatButton,
-    MatDialogClose
-  ],
-  standalone: true
+    selector: 'sm-abort-controller-dialog',
+    templateUrl: './abort-controller-dialog.component.html',
+    styleUrls: ['./abort-controller-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        DialogTemplateComponent,
+        MatDialogActions,
+        MatButton,
+        MatDialogClose
+    ]
 })
 export class AbortControllerDialogComponent {
   protected data = inject<{

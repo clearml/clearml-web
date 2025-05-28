@@ -68,7 +68,7 @@ export const searchExperiments = createAction(
 
 export const setExperimentsResults = createAction(
   SEARCH_PREFIX + 'SET_EXPERIMENTS',
-  props<{ experiments: Task[]; scrollId: string }>()
+  props<{ tasks: Task[]; scrollId: string }>()
 );
 
 export const searchModels = createAction(

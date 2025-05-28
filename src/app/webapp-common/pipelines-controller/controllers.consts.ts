@@ -61,7 +61,7 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     header: 'STATUS',
-    style: {width: '115px'},
+    style: {width: '130px', minWidth: '130px'},
     showInCardFilters: true
   },
   {

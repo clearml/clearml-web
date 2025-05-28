@@ -26,9 +26,10 @@ import {
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
 @Component({
-  selector: 'sm-experiment-info-artifacts-model',
-  templateUrl: './experiment-info-artifacts.component.html',
-  styleUrls: ['./experiment-info-artifacts.component.scss']
+    selector: 'sm-experiment-info-artifacts-model',
+    templateUrl: './experiment-info-artifacts.component.html',
+    styleUrls: ['./experiment-info-artifacts.component.scss'],
+    standalone: false
 })
 export class ExperimentInfoArtifactsComponent implements OnDestroy {
   public backdropActive$: Observable<boolean>;

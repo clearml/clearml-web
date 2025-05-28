@@ -2,12 +2,17 @@ import {createFeature, createReducer, createSelector, on} from '@ngrx/store';
 import {ServingActions, servingLoadingTableColFields, servingTableColFields} from './serving.actions';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
-import {SearchState} from '@common/common-search/common-search.reducer';
+import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {ISmCol, TABLE_SORT_ORDER} from '@common/shared/ui-components/data/table/table.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {TableFilter} from '@common/shared/utils/tableParamEncode';
-import {servingLoadingTableCols, servingTableCols, sortAndFilterEndpoints} from '@common/serving/serving.consts';
+import {
+  filterEndpoints,
+  servingLoadingTableCols,
+  servingTableCols,
+  sortAndFilterEndpoints
+} from '@common/serving/serving.consts';
 import {Topic} from '@common/shared/utils/statistics';
 import {ServingGetEndpointDetailsResponse} from '~/business-logic/model/serving/servingGetEndpointDetailsResponse';
 import {TIME_INTERVALS} from '@common/workers-and-queues/workers-and-queues.consts';
@@ -106,7 +111,7 @@ export const reducer = createReducer(
     })),
   on(ServingActions.setServingEndpoints, (state, action): State =>
     ({...state, endpoints: action.servingEndpoints})),
-  on(ServingActions.setLoadingServingEndpoints, (state, action): State =>
+  on(ServingActions.setLoadingEndpoints, (state, action): State =>
     ({...state, loadingEndpoints: action.servingEndpoints})),
   on(ServingActions.setServingEndpointsInPlace, (state, action): State =>
     ({
@@ -119,7 +124,7 @@ export const reducer = createReducer(
   on(ServingActions.setServingEndpointDetails, (state, action): State =>
     ({...state, endpointDetails: action.endpoint})),
   on(ServingActions.globalFilterChanged, (state, action): State =>
-    ({...state, globalFilter: action as ReturnType<typeof ServingActions.globalFilterChanged>})),
+    ({...state, globalFilter: action})),
   on(ServingActions.resetGlobalFilter, (state): State =>
     ({...state, globalFilter: initialState.globalFilter})),
   on(ServingActions.toggleColHidden, (state, action): State =>
@@ -263,21 +268,24 @@ export const servingFeature = createFeature({
           order: TABLE_SORT_ORDER.DESC
         }]
     );
-    const modelNamesOptions = createSelector(selectEndpoints, (endpoints) =>
-      Array.from(new Set(endpoints?.map(endpoint => endpoint.model).filter(i => !!i) ?? [])))
+    const modelNamesOptions = createSelector(selectEndpoints,endpoints =>
+      Array.from(new Set(endpoints?.map(endpoint => endpoint.model).filter(i => !!i) ?? [])));
     const modelLoadingNamesOptions = createSelector(selectLoadingEndpoints, (endpoints) =>
-      Array.from(new Set(endpoints?.map(endpoint => endpoint.model).filter(i => !!i) ?? [])))
+      Array.from(new Set(endpoints?.map(endpoint => endpoint.model).filter(i => !!i) ?? [])));
     const inputTypesOptions = createSelector(selectLoadingEndpoints, (endpoints) =>
-      Array.from(new Set(endpoints?.map(endpoint => endpoint.input_type).filter(i => !!i) ?? [])))
+      Array.from(new Set(endpoints?.map(endpoint => endpoint.input_type).filter(i => !!i) ?? [])));
     const preprocessArtifactOptions = createSelector(selectLoadingEndpoints, (endpoints) =>
-      Array.from(new Set(endpoints?.map(endpoint => endpoint.preprocess_artifact).filter(i => !!i) ?? [])))
-    const selectSortedFilteredEndpoints = createSelector(selectEndpoints, selectColumnFilters, selectTableSortFields1, (endpoints, filters, sortFields) => {
-      return sortAndFilterEndpoints(endpoints, filters, sortFields);
-    })
-    const selectLoadingSortedFilteredEndpoints = createSelector(selectLoadingEndpoints, selectLoadingColumnFilters, selectLoadingTableSortFields1, (endpoints, filters, sortFields) => {
-      return sortAndFilterEndpoints(endpoints, filters, sortFields);
-    })
+      Array.from(new Set(endpoints?.map(endpoint => endpoint.preprocess_artifact).filter(i => !!i) ?? [])));
+    const selectSortedFilteredEndpoints = createSelector(selectEndpoints, selectColumnFilters, selectTableSortFields1, selectSearchQuery,
+      (endpoints, filters, sortFields, sq) =>
+        filterEndpoints(sortAndFilterEndpoints(endpoints, filters, sortFields), sq)
+    );
+    const selectLoadingSortedFilteredEndpoints = createSelector(selectLoadingEndpoints, selectLoadingColumnFilters, selectLoadingTableSortFields1, selectSearchQuery,
+      (endpoints, filters, sortFields, sq) =>
+        filterEndpoints(sortAndFilterEndpoints(endpoints, filters, sortFields), sq)
+    );
     const selectStatsFormMetric = (metricType: MetricTypeEnum) => createSelector(selectStats, (stats) => stats?.[metricType]);
+    const selectAllSeriesLegends = createSelector(selectStats, (stats) =>  Array.from(new Set(Object.values(stats).flat().map(a => a.topicName))));
     return {
       selectServingTableColumns,
       selectLoadingServingTableColumns,
@@ -290,7 +298,8 @@ export const servingFeature = createFeature({
       inputTypesOptions,
       preprocessArtifactOptions,
       selectSortedFilteredEndpoints,
-      selectLoadingSortedFilteredEndpoints
+      selectLoadingSortedFilteredEndpoints,
+      selectAllSeriesLegends
     };
   }
 });

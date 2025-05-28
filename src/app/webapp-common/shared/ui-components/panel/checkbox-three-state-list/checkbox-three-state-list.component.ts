@@ -28,18 +28,17 @@ export enum CheckboxState {
 }
 
 @Component({
-  selector: 'sm-checkbox-three-state-list',
-  templateUrl: './checkbox-three-state-list.component.html',
-  styleUrls: ['./checkbox-three-state-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    MatCheckboxModule,
-    TooltipDirective,
-    ShowTooltipIfEllipsisDirective,
-    MatProgressSpinnerModule,
-    MatMenuModule
-]
+    selector: 'sm-checkbox-three-state-list',
+    templateUrl: './checkbox-three-state-list.component.html',
+    styleUrls: ['./checkbox-three-state-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatCheckboxModule,
+        TooltipDirective,
+        ShowTooltipIfEllipsisDirective,
+        MatProgressSpinnerModule,
+        MatMenuModule
+    ]
 })
 export class CheckboxThreeStateListComponent {
   @Input() options: { label: string; value: string; tooltip?: string }[];

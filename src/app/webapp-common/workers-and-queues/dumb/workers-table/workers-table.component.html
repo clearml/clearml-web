@@ -1,7 +1,7 @@
 <div #tableContainer class="worker-container">
   <sm-table #table
-    [tableData]="workers"
-    [selection]="selectedWorker"
+    [tableData]="workers()"
+    [selection]="selectedWorker()"
     [reorderableColumns]="false"
     [resizableColumns]="false"
     [scrollable]="true"

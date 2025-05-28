@@ -1,3 +1,7 @@
-<div class="load-more" title="Load more" (smScrollEnd)="!loading && loadMore.emit()">
+@defer (on viewport) {
+  <div class="load-more" title="Load more" (smScrollEnd)="!loading && loadMore.emit()">
   <div class="load-more__dot"></div>
 </div>
+} @placeholder {
+  <div></div>
+}

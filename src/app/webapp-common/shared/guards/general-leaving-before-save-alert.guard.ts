@@ -1,13 +1,18 @@
-import {inject} from '@angular/core';
+import {inject, Signal} from '@angular/core';
 import {CanDeactivateFn} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {map} from 'rxjs/operators';
 
-export const generalLeavingBeforeSaveAlertGuard: CanDeactivateFn<any> = (component) => {
+export interface DirtyState {
+  isDirty: Signal<boolean>
+}
+
+
+export const generalLeavingBeforeSaveAlertGuard: CanDeactivateFn<DirtyState> = (component) => {
   const dialog = inject(MatDialog);
 
-  if (!component.isDirty) {
+  if (!component.isDirty()) {
     return true;
   }
 

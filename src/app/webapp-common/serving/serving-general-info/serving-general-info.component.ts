@@ -13,10 +13,11 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 
 @Component({
-  selector: 'sm-serving-general-info',
-  templateUrl: './serving-general-info.component.html',
-  styleUrls: ['./serving-general-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-serving-general-info',
+    templateUrl: './serving-general-info.component.html',
+    styleUrls: ['./serving-general-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServingGeneralInfoComponent {
   private store = inject(Store);

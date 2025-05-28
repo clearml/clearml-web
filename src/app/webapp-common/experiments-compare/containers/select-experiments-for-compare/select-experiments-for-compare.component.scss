@@ -1,5 +1,4 @@
-@import "variables";
-
+@use "variables";
 
 :host {
 
@@ -9,9 +8,9 @@
   }
 
   .hide-table {
-    height: 0px;
+    height: 0;
     overflow: hidden;
-    transition: $transition-fast;
+    transition: variables.$transition-fast;
 
     &.show-table {
       height: calc(100% - 60px);
@@ -47,7 +46,7 @@
   }
   ::ng-deep sm-table p-table {
 
-    .p-datatable-hoverable-rows .p-selectable-row {
+    .p-datatable-hoverable-rows .p-datatable-selectable-row  {
       cursor: default;
     }
   }

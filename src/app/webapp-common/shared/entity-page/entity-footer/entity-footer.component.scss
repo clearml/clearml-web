@@ -1,4 +1,4 @@
-@import "../../../layout/layout";
+@use "../../../layout/layout";
 
 :host {
   position: fixed;
@@ -16,7 +16,7 @@
     border-top:solid 2px var(--color-primary);
     position: fixed;
     left: 0;
-    height: $project-footer-height;
+    height: layout.$project-footer-height;
     width: 100%;
     padding-left: 76px;
     background-color: var(--color-surface-container-low);

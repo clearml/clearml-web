@@ -23,12 +23,13 @@ import {NotifierNotificationComponent} from './notifier-notification.component';
  * strategy onPush, which means that we handle change detection manually in order to get the best performance. (#perfmatters)
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
-  host: {
-    class: 'notifier__container'
-  },
-  selector: 'notifier-container',
-  templateUrl: './notifier-container.component.html'
+    changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
+    host: {
+        class: 'notifier__container'
+    },
+    selector: 'notifier-container',
+    templateUrl: './notifier-container.component.html',
+    standalone: false
 })
 export class NotifierContainerComponent implements OnDestroy, OnInit {
 

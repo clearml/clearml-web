@@ -15,9 +15,10 @@ import {
 } from '@common/dataset-version/open-dataset-version-menu/open-dataset-version-menu.component';
 
 @Component({
-  selector: 'sm-open-dataset-versions',
-  templateUrl: './open-dataset-versions.component.html',
-  styleUrls: ['./open-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss']
+    selector: 'sm-open-dataset-versions',
+    templateUrl: './open-dataset-versions.component.html',
+    styleUrls: ['./open-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss'],
+    standalone: false
 })
 export class OpenDatasetVersionsComponent extends ControllersComponent implements OnInit {
   override contextMenu = viewChild.required(OpenDatasetVersionMenuComponent);

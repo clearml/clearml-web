@@ -8,15 +8,14 @@ import {FormsModule} from '@angular/forms';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
-  selector: 'sm-profile-key-storage',
-  templateUrl: './profile-key-storage.component.html',
-  styleUrls: ['./profile-key-storage.component.scss'],
-  standalone: true,
-  imports: [
-    S3AccessComponent,
-    FormsModule,
-    TooltipDirective
-  ]
+    selector: 'sm-profile-key-storage',
+    templateUrl: './profile-key-storage.component.html',
+    styleUrls: ['./profile-key-storage.component.scss'],
+    imports: [
+        S3AccessComponent,
+        FormsModule,
+        TooltipDirective
+    ]
 })
 export class ProfileKeyStorageComponent {
   externalCredentials = input<Credentials[]>([]);

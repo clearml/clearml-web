@@ -1,11 +1,14 @@
 <div class="lineage-container">
   <header class="d-flex align-items-center pb-3">
-    <h4 class="m-0">CREATED BY</h4> <a class="ms-3"
-  target="_blank" [routerLink]="selectedModelCreatingTaskLink$ | ngrxPush">{{(selectedModel$ | ngrxPush)?.task?.name}}</a>
-  @if ((selectedModel$ | ngrxPush)?.task?.id) {
-    <sm-id-badge class="ms-3" [id]="(selectedModel$ | ngrxPush)?.task?.id"
-    (copied)="copyToClipboard()"></sm-id-badge>
+    <h4 class="m-0">CREATED BY</h4>
+    <a class="ms-3"
+       target="_blank" [routerLink]="selectedModelCreatingTaskLink()">{{ selectedModel()?.task?.name }}
+    </a>
+    @if (selectedModel()?.task?.id) {
+      <sm-id-badge class="ms-3" [id]="selectedModel()?.task?.id" (copied)="copyToClipboard()"></sm-id-badge>
+    }
+  </header>
+  @if (model() !== null) {
+    <sm-model-experiments-table></sm-model-experiments-table>
   }
-</header>
-<sm-model-experiments-table></sm-model-experiments-table>
 </div>

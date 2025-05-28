@@ -1,17 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  Component, computed,
-  effect,
-  forwardRef,
-  input,
-  output, signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, forwardRef, input, output, signal} from '@angular/core';
 import {
   ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
   FormControl,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
-  NG_VALIDATORS, ValidationErrors, Validator, Validators
+  ValidationErrors,
+  Validator,
+  Validators
 } from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
@@ -21,6 +17,7 @@ import {SearchTextDirective} from '@common/shared/ui-components/directives/searc
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {rootProjectsPageSize} from '@common/constants';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {uniqueNameValidator} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 
 export interface baseEntity {
   id?: string;
@@ -28,32 +25,31 @@ export interface baseEntity {
 }
 
 @Component({
-  selector: 'sm-paginated-entity-selector',
-  templateUrl: './paginated-entity-selector.component.html',
-  styleUrls: ['./paginated-entity-selector.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => PaginatedEntitySelectorComponent),
-        multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => PaginatedEntitySelectorComponent),
-      multi: true
-    }
-  ],
-  imports: [
-    MatInputModule,
-    MatAutocompleteModule,
-    ReactiveFormsModule,
-    ClickStopPropagationDirective,
-    SearchTextDirective,
-    MatProgressSpinner,
-    DotsLoadMoreComponent,
-  ],
+    selector: 'sm-paginated-entity-selector',
+    templateUrl: './paginated-entity-selector.component.html',
+    styleUrls: ['./paginated-entity-selector.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => PaginatedEntitySelectorComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => PaginatedEntitySelectorComponent),
+            multi: true
+        }
+    ],
+    imports: [
+        MatInputModule,
+        MatAutocompleteModule,
+        ReactiveFormsModule,
+        ClickStopPropagationDirective,
+        SearchTextDirective,
+        MatProgressSpinner,
+        DotsLoadMoreComponent,
+    ]
 })
 export class PaginatedEntitySelectorComponent implements ControlValueAccessor, Validator {
   protected control = new FormControl<string>(null);
@@ -66,7 +62,11 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   label = input();
   placeHolder = input('');
   createNewSuffix = input<boolean>(false);
-  isRequired = input<boolean>(false)
+  isRequired = input<boolean>(false);
+  minLength = input<number>();
+  emptyNameValidator = input<boolean>();
+  embeddedErrors = input<boolean>(false);
+
 
   getEntities = output<string>();
   loadMore = output<string>();
@@ -98,6 +98,16 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
         this.control.addValidators([Validators.required]);
       } else {
         this.control.removeValidators([Validators.required]);
+      }
+      if(this.minLength()) {
+        this.control.addValidators([Validators.minLength(this.minLength())]);
+      } else {
+        this.control.removeValidators([Validators.minLength(this.minLength())]);
+      }
+      if(this.emptyNameValidator()) {
+        this.control.addValidators([uniqueNameValidator([])]);
+      } else {
+        this.control.removeValidators([uniqueNameValidator([])]);
       }
       this.control.updateValueAndValidity();
     });
@@ -141,7 +151,10 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   }
 
   validate(/*control: AbstractControl*/): ValidationErrors | null {
-    return this.isRequired() && !this.control.value ? {required: true} : null;
+    return this.isRequired() && !this.control.value ? {required: true} :
+      (this.minLength() && this.control.value.length< this.minLength() ? { minlength: true} :
+      (this.emptyNameValidator() && this.control.value?.length > 0 && this.control.value.trim().length === 0 ? { emptyName: true}
+        : null));
   }
 
   registerOnValidatorChange(fn) {

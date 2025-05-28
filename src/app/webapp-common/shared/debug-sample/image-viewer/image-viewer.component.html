@@ -2,7 +2,7 @@
   <div class="viewer-header">
     <div class="image-title third">
       <h1 [smTooltip]="currentDebugImage?.metric? (currentDebugImage?.metric + ' - ' + currentDebugImage?.variant) : ''"
-      smShowTooltipIfEllipsis data-id="debugSampleName">{{currentDebugImage?.metric ? (currentDebugImage?.metric + ' - ' + currentDebugImage?.variant) : ''}}</h1>
+          smShowTooltipIfEllipsis data-id="debugSampleName">{{ currentDebugImage?.metric ? (currentDebugImage?.metric + ' - ' + currentDebugImage?.variant) : '' }}</h1>
       <input #fakeInput name="Don't remove - it take the autofocus from slider" class="hide-me">
     </div>
     <div class="third viewer-iteration">
@@ -11,7 +11,7 @@
           <div data-id="iterationPanel">
             @if (minMaxIterations.max_iteration !== minMaxIterations.min_iteration || minMaxIterations.min_iteration > 0) {
               <span>
-                Iteration <span class="number" data-id="iterationCount">{{iteration}}</span>
+                Iteration <span class="number" data-id="iterationCount">{{ iteration }}</span>
               </span>
             }
             @if (minMaxIterations.max_iteration !== minMaxIterations.min_iteration) {
@@ -21,13 +21,13 @@
                 [step]="1"
                 (mouseup)="fakeInput.focus()"
                 discrete
-                class="indicator-position-bottom"
-                >
+                class="ms-4 indicator-position-bottom"
+              >
                 <input matSliderThumb
-                  [ngModel]="iteration"
-                  data-id="iterationSlider"
-                  (ngModelChange)="this.change$.next(ngSliderThumb.value)"
-                  #ngSliderThumb="matSliderThumb"/>
+                       [ngModel]="iteration"
+                       data-id="iterationSlider"
+                       (ngModelChange)="this.change$.next(ngSliderThumb.value)"
+                       #ngSliderThumb="matSliderThumb"/>
               </mat-slider>
             }
           </div>
@@ -36,84 +36,100 @@
     </div>
     <div class="d-flex third actions">
       <div (click)="embedCodeClick($event)"
-        smTooltip="Copy embed code" data-id="copyEmbedCodeButton" class="icon-container"
-        [style.visibility]="embedFunction ? 'visible' : 'hidden'">
+           smTooltip="Copy embed code" data-id="copyEmbedCodeButton" class="icon-container"
+           [style.visibility]="embedFunction ? 'visible' : 'hidden'">
         <i class="al-icon al-ico-code-square"></i>
       </div>
-      <div (click)="downloadImage()" [smTooltip]="isFileserverUrl(url) ? 'Download' : 'Open in a new tab'" data-id="downloadButton" class="icon-container">
-        <i class="al-icon" [class]="isFileserverUrl(url) ? 'al-ico-download' : 'al-ico-export sm-md'"></i>
+      <div (click)="downloadImage()" [smTooltip]="isFileserverUrl(url()) ? 'Download' : 'Open in a new tab'" data-id="downloadButton" class="icon-container">
+        <i class="al-icon" [class]="isFileserverUrl(url()) ? 'al-ico-download' : 'al-ico-export sm-md'"></i>
       </div>
       <div (click)="closeImageViewer()" smTooltip="Close" data-id="closeButton" class="icon-container">
         <i class="al-icon al-ico-dialog-x"></i>
       </div>
     </div>
   </div>
-  <div class="debug-image-container" data-id="fullScreenContainer" #imageContainer>
-    <div #sizeCont class="sizeable-container"
+  <div class="debug-image-container" data-id="fullScreenContainer" #imageContainer (wheel)="wheelZoomOutside($event)">
+    <div
+      class="sizeable-container"
       (dragstart)="disableNativeDrag()"
       (mousemove)="dragImage($event)"
-      (wheel)="wheelZoom($event)"
-      [style.height.px]="imageHeight"
-      [style.transform]="'translate(' +imageTranslateX +'px, '+ imageTranslateY + 'px)'"
-      [style.width.px]="imageWidth" [style.top.px]="this.imageTop" [style.left.px]="this.imageLeft"
-      [style.visibility]="isPlayer || !imageLoaded ? 'hidden' : 'visible'">
-      <img #debugImage [src]="url" data-id="SampleSource" (mousemove)="changeCords($event)"
-        (load)="fitToScreen(); resetDrag(); showImage()" (mousedown)="setDragging(true)"
-        (mouseup)="setDragging(false)" (mouseout)="setDragging(false); resetCords()" [class.dragging]="dragging">
+      (wheel)="wheelZoomHandler($event); $event.stopPropagation();"
+      [style.height.px]="imageHeight()"
+      [style.transform]="translate()"
+      [style.width.px]="imageWidth()" [style.top.px]="this.imageTop" [style.left.px]="this.imageLeft"
+      [style.visibility]="isPlayer() || !imageLoaded ? 'hidden' : 'visible'"
+      [class.dragging]="dragging"
+      [class.wheeling]="wheeling"
+    >
+      <img #debugImage
+           [src]="url()" data-id="SampleSource"
+           (load)="initialiseFitToScreen(); showImage()"
+           (mousemove)="changeCords($event)"
+           (mousedown)="setDragging(true)"
+           (mouseup)="setDragging(false)"
+           (mouseout)="setDragging(false); resetCords()"
+      >
     </div>
-    <video #debugVideo class="w-100 h-100" [src]="url" autoplay controls
-    [style.visibility]="isPlayer ? 'visible' : 'hidden'"></video>
+    <video #debugVideo
+           class="w-100 h-100"
+           [src]="url()" autoplay controls
+           [style.visibility]="isPlayer() ? 'visible' : 'hidden'"
+    ></video>
     <div class="controllers"
-      [style.visibility]="isPlayer ? 'hidden' : 'visible'">
+         [style.visibility]="isPlayer() ? 'hidden' : 'visible'">
       <div (click)="fitToScreen()"
-        class="fit-to-screen controller icon-container"
-        smTooltip="Fit to window" data-id="fitToScreenButton" matTooltipPosition="left"
-        [class.disabled]="scale===autoFitScale">
+           class="fit-to-screen controller icon-container"
+           smTooltip="Fit to window" data-id="fitToScreenButton" matTooltipPosition="left"
+           [class.disabled]="scaleOffset().scale === autoFitScale">
         <i class="al-icon al-ico-fit" data-id="fitToScreen"></i>
       </div>
-
       <div class="zoom controller">
-        <div class="icon-container">
-          <i class="al-icon al-ico-plus" (click)="calculateNewScale(true)" smTooltip="Zoom in"
-          matTooltipPosition="left" data-id="ZoomInButton"></i>
+        <div class="icon-container" [class.disabled]="maxScale <= scaleOffset()?.scale">
+          <i class="al-icon al-ico-plus"  (click)="calculateNewScale(true)" smTooltip="Zoom in"
+             matTooltipPosition="left" data-id="ZoomInButton"></i>
         </div>
         <div class="d-flex flex-column justify-content-around align-items-center icon-container" (click)="resetScale()"
-          smTooltip="Zoom to 1:1" matTooltipPosition="left"
-          [class.disabled]="scale===1">
+             smTooltip="Zoom to 1:1" matTooltipPosition="left"
+             [class.disabled]="scaleOffset().scale === 1">
           <i class="al-icon al-ico-zoom-1-to-1 sm-md" data-id="zoomTo1:1Ratio"></i>
         </div>
         <div class="icon-container">
           <div class="al-icon al-ico-minus" (click)="calculateNewScale(false)"
-          smTooltip="Zoom out" matTooltipPosition="left" data-id="zoomOutButton"></div>
+               smTooltip="Zoom out" matTooltipPosition="left" data-id="zoomOutButton"></div>
         </div>
       </div>
     </div>
     @if (!data.withoutNavigation) {
       <div class="navigation">
         <div class="icon-container controller next"
-          (click)="canGoNext() && next()" [class.disabled]="endOfTime$ | ngrxPush">
+             (click)="canGoNext() && next()" [class.disabled]="endOfTime$ | ngrxPush">
           <i class="al-icon al-ico-next" data-id="nextButton"></i></div>
-          <div class="icon-container controller previous"
-            (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime$ | ngrxPush">
-            <i class="al-icon al-ico-previous" data-id="previousButton"></i></div>
-          </div>
-        }
+        <div class="icon-container controller previous"
+             (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime$ | ngrxPush">
+          <i class="al-icon al-ico-previous" data-id="previousButton"></i></div>
       </div>
+    }
+  </div>
 
-      <div class="footer-info"
-        [style.visibility]="isPlayer ? 'hidden' : 'visible'">
-        <div class="d-flex justify-content-center params" smTooltip="Image Width & Height in pixels">
-          <div class="single-parameter"><label>w: </label>{{debugImage.naturalWidth}}</div>
-          <div class="single-parameter"><label>h: </label>{{debugImage.naturalHeight}}</div>
-        </div>
-        <div class="d-flex justify-content-center params" smTooltip="Tracks cursor coordinates" data-id="coordiantesPanel">
-          <div class="single-parameter" data-id="xPositionCoordinate"><label>x: </label> <span
-        [style.visibility]="dragging?'hidden':'visible'">{{xCord}}</span></div>
-        <div class="single-parameter" data-id="yPositionCoordinate"><label>y: </label><span
-      [style.visibility]="dragging?'hidden':'visible'">{{yCord}}</span></div>
+  <div class="footer-info"
+       [style.visibility]="isPlayer() ? 'hidden' : 'visible'">
+    <div class="d-flex justify-content-center params" smTooltip="Image Width & Height in pixels">
+      <div class="single-parameter"><label>w: </label>{{ debugImage.naturalWidth }}</div>
+      <div class="single-parameter"><label>h: </label>{{ debugImage.naturalHeight }}</div>
+    </div>
+    <div class="d-flex justify-content-center params" smTooltip="Tracks cursor coordinates" data-id="coordiantesPanel">
+      <div class="single-parameter" data-id="xPositionCoordinate">
+        x:
+        <span [style.visibility]="dragging ? 'hidden' : 'visible'">{{ xCord }}</span>
+      </div>
+      <div class="single-parameter" data-id="yPositionCoordinate">
+        y:
+        <span [style.visibility]="dragging?'hidden':'visible'">{{ yCord }}</span></div>
     </div>
     <div class="d-flex justify-content-center params" smTooltip="Image zoom" data-id="Zoomdescription">
-      <div class="double-parameter"><label>Zoom: </label>{{this.scale | toPercentage}}%</div>
+      <div class="double-parameter">
+        Zoom: {{ this.scaleOffset().scale | toPercentage }}%
+      </div>
     </div>
   </div>
 </div>

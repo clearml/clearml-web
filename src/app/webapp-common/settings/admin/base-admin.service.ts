@@ -15,6 +15,7 @@ import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
 import {getBucketAndKeyFromSrc, isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
+import {selectCompanyPreSignServices} from '~/core/reducers/auth.reducers';
 
 const LOCAL_SERVER_PORT = 27878;
 const FOUR_DAYS = 60 * 60 * 24 * 4;
@@ -28,8 +29,9 @@ export class BaseAdminService {
 
   public s3Services: Record<string, S3Client> = {};
   private revokeSucceed = this.store.selectSignal(selectRevokeSucceed);
+  protected preSignServices = this.store.selectSignal(selectCompanyPreSignServices);
   private environment = this.confService.configuration;
-  private credentials = this.getCredentialsObservable()
+  private credentials = this.getCredentials();
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
   private localServerWorking = false;
 
@@ -52,7 +54,7 @@ export class BaseAdminService {
       });
   }
 
-  protected getCredentialsObservable() {
+  protected getCredentials() {
     return this.store.selectSignal(selectS3BucketCredentialsBucketCredentials);
   }
 
@@ -85,6 +87,13 @@ export class BaseAdminService {
       return of({type: 'sign', signed: this.redirectToLocalServer(url), expires: Number.MAX_VALUE});
     }
 
+    if (this.preSignServices().length > 0) {
+      const signed = this.redirectToSignServer(url);
+      if (signed !== url) {
+        return of({type: 'sign', signed, expires: Number.MAX_VALUE});
+      }
+    }
+
     if (this.isAzureUrl(url)) {
       const azureBucket = this.credentials().find((b) => b.Bucket && b.Bucket.toLowerCase() == 'azure');
       if (azureBucket) {
@@ -105,7 +114,7 @@ export class BaseAdminService {
         return from(getSignedUrl(s3, command, {
           expiresIn: FOUR_DAYS,
           unhoistableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
-          unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
+          unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id'])
         }))
           .pipe(map(signed => ({type: 'sign', signed, expires: (new Date()).getTime() + FOUR_DAYS * 1000})));
       } else if (isGoogleCloudUrl(url) && !previousSignedUrl?.signed) {
@@ -120,9 +129,9 @@ export class BaseAdminService {
   }
 
   findS3CredentialsInStore(bucketKeyEndpoint: Credentials) {
-    const endpoint = bucketKeyEndpoint.Endpoint?.replace(HTTP_REGEX,'') ?? '';
+    const endpoint = bucketKeyEndpoint.Endpoint?.replace(HTTP_REGEX, '') ?? '';
     return this.credentials()
-      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && (bucket?.Endpoint?.replace(HTTP_REGEX,'') ?? '') === endpoint);
+      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && (bucket?.Endpoint?.replace(HTTP_REGEX, '') ?? '') === endpoint);
   }
 
   findOrInitBucketS3(bucketKeyEndpoint: Credentials) {
@@ -140,7 +149,7 @@ export class BaseAdminService {
 
   createS3Service(set) {
     // const [hostPort, path] = set.Endpoint?.split('/');
-    const [hostname, port] = set.Endpoint?.replace(HTTP_REGEX,'')?.split(':') || ['', ''];
+    const [hostname, port] = set.Endpoint?.replace(HTTP_REGEX, '')?.split(':') || ['', ''];
     const config = {
       region: set.Region || DEFAULT_REGION,
       credentials: {
@@ -153,11 +162,11 @@ export class BaseAdminService {
           protocol: set.Endpoint?.startsWith('https') ? 'https:' : 'http:',
           hostname,
           ...(!['80', '443'].includes(port) && {port}),
-          path: '',
+          path: ''
         },
         forcePathStyle: true,
-        tls: false,
-      }),
+        tls: false
+      })
     } as S3ClientConfig;
     return new S3Client(config);
   }
@@ -173,6 +182,10 @@ export class BaseAdminService {
   // Uses Allegro Chrome extension injecting patch_local_link function to window - hack to get local files.
   redirectToLocalServer(url: string): string {
     return `http://localhost:${LOCAL_SERVER_PORT}${url.replace('file://', '/')}`;
+  }
+
+  redirectToSignServer(url: string): string {
+    return url;
   }
 
   isLocalFile(url: string): boolean {
@@ -195,7 +208,7 @@ export class BaseAdminService {
   }
 
   signGoogleCloudUrl(url: string): string {
-    let result =  url.slice(5);
+    let result = url.slice(5);
     if (result.search(/[ !"#$&'()*+,;<=>?@\[\\\]^]/) > -1) {
       result = result.split('/').map(part => encodeURIComponent(part)).join('/');
     }
@@ -254,7 +267,7 @@ export class BaseAdminService {
     try {
       const parsed = new URL(url);
       parsed.searchParams.append('X-Amz-Date', `${timestamp}`);
-      return  parsed.toString();
+      return parsed.toString();
     } catch {
       return url;
     }

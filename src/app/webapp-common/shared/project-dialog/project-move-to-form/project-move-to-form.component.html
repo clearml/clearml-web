@@ -28,27 +28,28 @@
     smUniqueNameValidator [existingNames]="[projectName | projectLocation]"
     smInvalidPrefixValidator [invalidPrefix]="projectName"
     required minlength="3"
-  >
-  </sm-paginated-entity-selector>
+  ></sm-paginated-entity-selector>
   @if (projectInput.touched && projectInput?.errors; as errors) {
-    @if (errors?.required) {
-      <mat-error>Please provide a Project</mat-error>
-    }
-    @if (errors?.minlength) {
-      <mat-error>Project name should be at least 3 characters long</mat-error>
-    }
-    @if (errors?.uniqueName && !projectInput?.errors?.required) {
-      <mat-error>Can't move a project to its current location</mat-error>
-    }
-    @if (errors?.invalidPrefix) {
-      <mat-error>Can't move a project to its nested projects</mat-error>
-    }
-    @if (errors?.uniquePath) {
-      <mat-error>{{ projectInput.value }} already contains a project named {{ projectName | shortProjectName }}</mat-error>
-    }
-    @if (errors?.emptyName && !errors?.minlength) {
-      <mat-error>Project name can't contain only spaces.</mat-error>
-    }
+    <div class="extra-errors">
+      @if (errors?.required) {
+        <mat-error>Please provide a Project</mat-error>
+      }
+      @if (errors?.minlength) {
+        <mat-error>Project name should be at least 3 characters long</mat-error>
+      }
+      @if (errors?.uniqueName && !projectInput?.errors?.required) {
+        <mat-error>Can't move a project to its current location</mat-error>
+      }
+      @if (errors?.invalidPrefix) {
+        <mat-error>Can't move a project to its nested projects</mat-error>
+      }
+      @if (errors?.uniquePath) {
+        <mat-error>{{ projectInput.value }} already contains a project named {{ projectName | shortProjectName }}</mat-error>
+      }
+      @if (errors?.emptyName && !errors?.minlength) {
+        <mat-error>Project name can't contain only spaces.</mat-error>
+      }
+    </div>
   }
 </form>
 <div class="mt-5 d-flex justify-content-center gap-3">

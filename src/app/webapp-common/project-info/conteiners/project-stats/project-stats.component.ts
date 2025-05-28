@@ -31,10 +31,11 @@ import {presetColors} from '@common/shared/ui-components/inputs/color-picker/col
 import {selectMetricVariants} from '@common/experiments/reducers';
 
 @Component({
-  selector: 'sm-project-stats',
-  templateUrl: './project-stats.component.html',
-  styleUrls: ['./project-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-project-stats',
+    templateUrl: './project-stats.component.html',
+    styleUrls: ['./project-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ProjectStatsComponent implements OnDestroy {
   private store = inject(Store);

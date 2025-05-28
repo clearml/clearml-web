@@ -16,17 +16,18 @@ import {IsAudioPipe} from '../../pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../pipes/is-video.pipe';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {isHtmlPage} from '@common/shared/utils/is-html-page';
 import {isTextFileURL} from '@common/shared/utils/is-text-file';
 import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
 import {selectBlockUserScript} from '@common/core/reducers/projects.reducer';
+import {isHtmlOrText} from '@common/shared/utils/shared-utils';
 
 // import {Event} from '@common/debug-images/debug-images-types';
 
 @Component({
-  selector: 'sm-debug-image-snippet',
-  templateUrl: './debug-image-snippet.component.html',
-  styleUrls: ['./debug-image-snippet.component.scss']
+    selector: 'sm-debug-image-snippet',
+    templateUrl: './debug-image-snippet.component.html',
+    styleUrls: ['./debug-image-snippet.component.scss'],
+    standalone: false
 })
 export class DebugImageSnippetComponent implements OnDestroy{
   public type: 'image' | 'player' | 'html';
@@ -42,7 +43,7 @@ export class DebugImageSnippetComponent implements OnDestroy{
           if (new IsVideoPipe().transform(signed) ||
             new IsAudioPipe().transform(signed)) {
             this.type = 'player';
-          } else if (isHtmlPage(signed) || isTextFileURL(signed)) {
+          } else if (isHtmlOrText(signed) || isTextFileURL(signed)) {
             this.type = 'html';
           } else {
             this.type = 'image';

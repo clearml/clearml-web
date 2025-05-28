@@ -1,5 +1,4 @@
-@use "sass:math";
-@use "sass:meta";
+@use "sass:map";
 
 // colors
 $white: #fff;
@@ -131,7 +130,7 @@ $chart-background: $black;
 // padding
 $spacer: 1rem; // TODO:
 $spacers: (); // TODO:
-$spacers: map-merge((// TODO:
+$spacers: map.merge((// TODO:
   0: 0,
   1: ($spacer * .25),
   2: ($spacer * .5),
@@ -142,7 +141,7 @@ $spacers: map-merge((// TODO:
 
 //sizes
 $sizes: (); // TODO:
-$sizes: map-merge((// TODO:
+$sizes: map.merge((// TODO:
   25: 25%,
   50: 50%,
   75: 75%,

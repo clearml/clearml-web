@@ -25,9 +25,10 @@ export interface RunPipelineResult {
 }
 
 @Component({
-  selector: 'sm-run-pipeline-controller-dialog',
-  templateUrl: './run-pipeline-controller-dialog.component.html',
-  styleUrls: ['./run-pipeline-controller-dialog.component.scss']
+    selector: 'sm-run-pipeline-controller-dialog',
+    templateUrl: './run-pipeline-controller-dialog.component.html',
+    styleUrls: ['./run-pipeline-controller-dialog.component.scss'],
+    standalone: false
 })
 export class RunPipelineControllerDialogComponent implements OnDestroy {
   public dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef<ConfirmDialogComponent>);

@@ -9,19 +9,18 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
-  selector: 'sm-menu-item',
-  templateUrl: './menu-item.component.html',
-  styleUrls: ['./menu-item.component.scss'],
-  imports: [
-    TooltipDirective,
-    MatMenuModule,
-    ShowTooltipIfEllipsisDirective,
-    MatIcon,
-    ClickStopPropagationDirective,
-    MatCheckbox,
-    MatIconButton
-  ],
-  standalone: true
+    selector: 'sm-menu-item',
+    templateUrl: './menu-item.component.html',
+    styleUrls: ['./menu-item.component.scss'],
+    imports: [
+        TooltipDirective,
+        MatMenuModule,
+        ShowTooltipIfEllipsisDirective,
+        MatIcon,
+        ClickStopPropagationDirective,
+        MatCheckbox,
+        MatIconButton
+    ]
 })
 export class MenuItemComponent {
   removable = input(false);

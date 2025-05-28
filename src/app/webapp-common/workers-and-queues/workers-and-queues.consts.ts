@@ -17,24 +17,14 @@ export const WORKERS_TABLE_COL_FIELDS = {
   TASK_ITERATIONS  : 'task.last_iteration'
 };
 
-export const SOURCES_TABLE_COL_FIELDS = {
-  ID               : 'id',
-  KEY              : 'key',
-  GPU              : 'avgGpuUtil',
-  CPU              : 'avgCpuLoad',
-  RAM_TOTAL        : 'ramTotal',
-  RAM_FREE         : 'ramFree',
-  HOME_FREE        : 'homeFree',
-  WORKERS_COUNT    : 'workerCount',
-  NETWORK          : 'network',
-};
+
 
 const MiB                            = 1024 * 1024;
 export const WORKER_STATS_PARAM_INFO = {
-  cpu_usage      : {title: 'CPU Usage', multiply: 1},
-  gpu_usage      : {title: 'GPU Usage', multiply: 1},
+  cpu_usage      : {title: 'CPU', multiply: 1, suffix: 'Usage' },
+  gpu_usage      : {title: 'GPU', multiply: 1, suffix: 'Usage' },
   memory_used    : {title: 'Memory Used', multiply: MiB},
-  gpu_memory_used: {title: 'GPU Memory', multiply: MiB},
+  gpu_memory_used: {title: 'GPU', multiply: MiB, suffix: 'Memory' },
   network_rx     : {title: 'Network Receive', multiply: MiB},
   network_tx     : {title: 'Network Transmit', multiply: MiB}
 };

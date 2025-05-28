@@ -15,15 +15,24 @@
           @if (breadcrumb.url && !(lastCrumb && lastGroup)) {
             <a class="crumb url"
               [class.first]="firstCrumb && firstGroup"
-              [routerLink]="breadcrumb.url">
+              [routerLink]="breadcrumb.url"
+               [queryParamsHandling]="breadcrumb.queryParamsHandling"
+            >
             {{breadcrumb.name}}</a>
             @if (breadcrumb.badge) {
               <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
             }
           } @else {
             <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
-              <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
-              >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</div>
+              @if (lastGroup && lastCrumb && breadcrumb.linkLast){
+                <a class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis [routerLink]="breadcrumb.linkLast && breadcrumb.url"
+                   [queryParamsHandling]="breadcrumb.queryParamsHandling"
+                >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</a>
+              } @else {
+                <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
+                >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</div>
+              }
+
               @if (breadcrumb.id) {
                 <sm-id-badge [short]="true" [id]="breadcrumb.id" (copied)="copyToClipboard()"></sm-id-badge>
               }

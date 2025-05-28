@@ -1,5 +1,5 @@
-@import "variables";
-@import "mixins/empty";
+@use "variables";
+@use "mixins/empty";
 
 :host {
   display: block;
@@ -29,7 +29,7 @@
   }
 
   sm-projects-header {
-    height: $nav-bar-height;
+    height: variables.$nav-bar-height;
     grid-column: 1 / -1;
     position: sticky;
     top: 0;
@@ -38,7 +38,7 @@
     margin-bottom: -12px;
   }
 
-  @include empty-card-mixin();
+  @include empty.empty-card-mixin();
 }
 
 .content {

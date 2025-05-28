@@ -59,7 +59,6 @@
       ></mat-icon>
     </div>
   </mat-slide-toggle>
-  <div class="d-flex">
     <mat-slide-toggle
       (change)="hideSpecificContainerArguments($event)"
       [checked]="!!hideRedactedArguments()"
@@ -73,6 +72,4 @@
         <button class="ms-2" mat-button data-id="editButton" (click)="editHideSpecificContainerArguments()">Edit</button>
       </div>
     </mat-slide-toggle>
-  </div>
-
 </div>

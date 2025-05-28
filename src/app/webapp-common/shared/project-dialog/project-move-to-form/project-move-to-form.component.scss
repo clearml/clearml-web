@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   .creat-new-suffix {
     display: inline-block;
@@ -60,4 +58,10 @@
       min-height: 68px;
     }
   }
+}
+
+.extra-errors {
+  position: relative;
+  top: -18px;
+  left: 6px;
 }

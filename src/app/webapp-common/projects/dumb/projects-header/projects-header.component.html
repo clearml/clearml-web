@@ -11,8 +11,9 @@
       <sm-main-pages-header-filter [allTags]="tags()"></sm-main-pages-header-filter>
     }
     <ng-content select="[left-items]"></ng-content>
+    <sm-common-search class="ms-3" #search></sm-common-search>
   </div>
-  <div>
+  <div class="right-buttons">
     <ng-content></ng-content>
   </div>
 </div>

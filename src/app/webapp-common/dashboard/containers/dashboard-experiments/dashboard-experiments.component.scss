@@ -1,4 +1,4 @@
-@import "mixins/common";
+@use "mixins/common";
 
 :host {
   .recent-header {
@@ -15,6 +15,6 @@
   }
 
   .recent-title {
-    @include recent-title();
+    @include common.recent-title();
   }
 }

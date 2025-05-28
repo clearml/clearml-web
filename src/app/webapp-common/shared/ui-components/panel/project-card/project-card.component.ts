@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, output, ViewChild, input } from '@angular/core';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
@@ -7,7 +7,6 @@ import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} fr
 import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {BreadcrumbsEllipsisPipe} from '@common/shared/pipes/breadcrumbs-ellipsis.pipe';
-import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
@@ -15,29 +14,27 @@ import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.m
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
+import {ProjectCardMenuExtendedComponent} from '~/features/projects/containers/project-card-menu-extended/project-card-menu-extended.component';
 
 
 @Component({
-  selector: 'sm-project-card',
-  templateUrl: './project-card.component.html',
-  styleUrls: ['./project-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'sm-project-card',
+    templateUrl: './project-card.component.html',
+    styleUrls: ['./project-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CdkVirtualScrollViewport,
     CardComponent,
     TooltipDirective,
     BreadcrumbsEllipsisPipe,
-    InlineEditComponent,
     ShowTooltipIfEllipsisDirective,
     ProjectsSharedModule,
     CircleCounterComponent,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
     ClickStopPropagationDirective,
-    MultiLineTooltipComponent
-],
-  standalone: true
+    ProjectCardMenuExtendedComponent,
+  ]
 })
 export class ProjectCardComponent {
   private _project: ProjectsGetAllResponseSingle;
@@ -46,7 +43,7 @@ export class ProjectCardComponent {
   trackById = trackById;
   readonly circleTypeEnum = CircleTypeEnum;
 
-  @Input() projectsNames: string[];
+  projectsNames = input<string[]>();
 
   @Input() set project(data: Project) {
     this._project = data;
@@ -58,15 +55,16 @@ export class ProjectCardComponent {
     return this._project;
   }
 
-  @Input() isRootProject;
-  @Input() hideProjectPathIcon = false;
-  @Input() hideMenu = false;
-  @Output() projectCardClicked = new EventEmitter<Project>();
-  @Output() projectNameChanged = new EventEmitter();
-  @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() moveToClicked = new EventEmitter<Project>();
-  @Output() newProjectClicked = new EventEmitter<Project>();
-  @Output() projectEditClicked = new EventEmitter<Project>();
+  isRootProject = input();
+  hideProjectPathIcon = input(false);
+  hideMenu = input(false);
+  projectCardClicked = output<Project>();
+  projectNameChanged = output<string>();
+  deleteProjectClicked = output<Project>();
+  moveToClicked = output<Project>();
+  newProjectClicked = output<Project>();
+  projectEditClicked = output<Project>();
+  projectSettingsClicked = output<Project>();
   @ViewChild('projectName', {static: true}) projectName;
 
 

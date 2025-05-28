@@ -9,10 +9,10 @@
 <sm-pipeline-info [entity]="selected$ | ngrxPush" [project]="projectId$ | ngrxPush" [step]="selectedEntity()" data-id="pipelineInfo"></sm-pipeline-info>
 
 <div class="console-button">
-  <button mat-flat-button (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
-    <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
-    DETAILS
-  </button>
+    <button mat-flat-button (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
+      <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
+      DETAILS
+    </button>
   @if (!focusOnStageId() && hasStages()) {
     <button
       mat-stroked-button
@@ -83,6 +83,7 @@
         <span>{{ (selected$ | ngrxPush)?.name }}</span>
       </div>
       <sm-button-toggle
+        class="t-btns"
         [value]="detailsPanelMode()"
         [options]="[
         {label: 'PREVIEW', value: statusOption.preview},
@@ -118,7 +119,7 @@
             <sm-code-editor [code]="stepDiff()" [readonly]="true"></sm-code-editor>
           } @else {
             <div class="no-code" data-id="noCode">
-              <i class="icon no-output-icon i-no-code-dark"></i>
+              <mat-icon fontSet="al" fontIcon="al-ico-no-data-code" class="xxl"></mat-icon>
               <h4>NO CODE</h4>
             </div>
           }

@@ -58,6 +58,11 @@ export const setSelectedProject = createAction(
   props<{ project: Project }>()
 );
 
+export const setSelectedProjectSimple = createAction(
+  PROJECTS_PREFIX + 'SET_SELECTED_PROJECT_SIMPLE',
+  props<{ project: Project }>()
+);
+
 export const setProjectAncestors = createAction(
   PROJECTS_PREFIX + 'SET_PROJECT_ANCESTORS',
   props<{ projects: Project[] }>()

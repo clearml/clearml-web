@@ -14,9 +14,10 @@ import {CARDS_IN_ROW} from '../../common-dashboard.const';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
-  selector   : 'sm-dashboard-projects',
-  templateUrl: './dashboard-projects.component.html',
-  styleUrls  : ['./dashboard-projects.component.scss']
+    selector: 'sm-dashboard-projects',
+    templateUrl: './dashboard-projects.component.html',
+    styleUrls: ['./dashboard-projects.component.scss'],
+    standalone: false
 })
 export class DashboardProjectsComponent {
   private store = inject(Store);

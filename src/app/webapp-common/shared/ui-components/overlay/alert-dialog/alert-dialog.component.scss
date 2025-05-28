@@ -1,4 +1,5 @@
-@import "variables";
+@use "variables";
+
 :host {
   --dialog-icon-color: var(--color-warning);
 }
@@ -9,7 +10,7 @@
   padding: 0;
   min-width: 400px;
   max-width: 500px;
-  font-family: $font-family-monospace;
+  font-family: variables.$font-family-monospace;
   font-size: 12px;
   border: none;
   overflow: hidden;

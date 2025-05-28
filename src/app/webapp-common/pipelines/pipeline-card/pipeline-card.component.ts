@@ -17,29 +17,28 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
-  selector: 'sm-pipeline-card',
-  templateUrl: './pipeline-card.component.html',
-  styleUrls: ['./pipeline-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    CircleCounterComponent,
-    CardComponent,
-    CdkVirtualScrollViewport,
-    CdkVirtualForOf,
-    TooltipDirective,
-    BreadcrumbsEllipsisPipe,
-    CdkFixedSizeVirtualScroll,
-    InlineEditComponent,
-    ShortProjectNamePipe,
-    CleanProjectPathPipe,
-    ProjectsSharedModule,
-    DatePipe,
-    TimeAgoPipe,
-    TagListComponent,
-    ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective,
-]
+    selector: 'sm-pipeline-card',
+    templateUrl: './pipeline-card.component.html',
+    styleUrls: ['./pipeline-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        CircleCounterComponent,
+        CardComponent,
+        CdkVirtualScrollViewport,
+        CdkVirtualForOf,
+        TooltipDirective,
+        BreadcrumbsEllipsisPipe,
+        CdkFixedSizeVirtualScroll,
+        InlineEditComponent,
+        ShortProjectNamePipe,
+        CleanProjectPathPipe,
+        ProjectsSharedModule,
+        DatePipe,
+        TimeAgoPipe,
+        TagListComponent,
+        ClickStopPropagationDirective,
+        ShowTooltipIfEllipsisDirective,
+    ]
 })
 export class PipelineCardComponent extends ProjectCardComponent {
   protected readonly timeFormatString = TIME_FORMAT_STRING;

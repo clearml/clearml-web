@@ -3,11 +3,11 @@
   <sm-editable-section #parameterSection
     class="light-theme"
     [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection())"
-    [disableSave]="!executionParamsForm?.hyperParameters()?.form?.valid"
+    [disableSave]="!executionParamsForm?.hyperParameters()?.form?.valid || !executionParamsForm?.hyperParameters()?.form?.dirty"
     [saving]="saving$ | ngrxPush"
     [forceButtons]="!!searchedText"
     (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
-    (saveClicked)="sectionSaved()"
+    (saveClicked)="sectionSaved(); executionParamsForm?.hyperParameters()?.form.markAsPristine()"
     (activateEditClicked)="activateEditChanged('hyperparams')">
     <sm-section-header [label]="(selectedSection() | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
     <sm-search search-button

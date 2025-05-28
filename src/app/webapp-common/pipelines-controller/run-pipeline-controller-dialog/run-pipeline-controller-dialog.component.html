@@ -4,7 +4,7 @@
   <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
     <input #fakeInput name="Don't remove - it take the autofocus dropdown" style="opacity: 0; height: 0; width: 0">
     @if (params?.length > 0) {
-      <div class="section-title">Parameters</div>
+      <div class="section-title first">Parameters</div>
     }
     @for (param of params; track param.name) {
       <div class="param-line">

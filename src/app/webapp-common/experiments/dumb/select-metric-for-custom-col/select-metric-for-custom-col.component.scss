@@ -1,4 +1,4 @@
-@import "mixins/link";
+@use "mixins/link";
 
 
 :host-context(.normal-size) {
@@ -7,7 +7,7 @@
 }
 
 :host {
-  @include link();
+  @include link.link();
 
   .actions {
     display: block;
@@ -52,10 +52,6 @@
     align-items: center;
     height: 36px;
 
-    mat-checkbox{
-      transform: scale(0.8);
-    }
-
     .var-label {
       color: var(--mat-menu-item-label-text-color);
       letter-spacing: var(--mat-menu-item-label-text-tracking);
@@ -71,7 +67,7 @@
     font-size: 11px;
     font-weight: bold;
     mat-checkbox {
-      transform: scale(0.8);
+      transform: scale(0.9);
     }
   }
 

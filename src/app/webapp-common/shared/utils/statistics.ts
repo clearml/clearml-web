@@ -36,6 +36,7 @@ export function addStats(current: Topic[], data, maxPoints: number,
     [key: string]: {
       title: string;
       multiply: number;
+      suffix?: string;
     };
   }) {
   const topicIDs = new Proxy({}, defaultMaxValHandler);
@@ -55,12 +56,25 @@ export function addStats(current: Topic[], data, maxPoints: number,
       if (!paramData) {
         return;
       }
-      const dates: number[] = paramData.dates;
       const param = paramData.metric;
-      paramData.stats.forEach(aggData => {
+      const stats = paramData.stats.reduce((acc, obj) => {
+        acc.push({...obj}); // Push the main object
+        if (Array.isArray(obj.resource_series)) {
+          acc.push(...obj.resource_series.map(item => ({ ...item, aggregation: item.name, isSingleResource: true, dates: obj.dates }))); // Push nested objects
+        }
+        return acc;
+      }, []);
+      let dates: number[] = paramData.dates;
+      stats.forEach(aggData => {
+        if (aggData.dates){
+          dates= aggData.dates;
+        }
         const aggregation = aggData.aggregation ? ` (${aggData.aggregation})` : '';
         const topicID     = `${entity} ${param}${aggregation}`;
-        const topicName   = `${paramInfo[param].title}${aggregation}${shouldAddEntity && entity ? ' for ' + entity : ''}`;
+        const topicName   = aggData.isSingleResource?
+          `${paramInfo[param].title}${aggregation} ${paramInfo[param].suffix}`:
+          `${paramInfo[param].title} ${paramInfo[param].suffix ?? ''}${aggregation}`
+          + `${shouldAddEntity && entity ? ' for ' + entity : ''}`;
         let topic: Topic = dataByTopic.find(topic => topic.topicID === topicID);
         if (!topic) {
           topic = {topicName, topicID, topic: topicIDs[topicID], dates: [] as DataPoint[]};
@@ -90,7 +104,7 @@ export function addStats(current: Topic[], data, maxPoints: number,
       const item = dataByTopic.find((topic: Topic) => topic.topicID.indexOf(reqParam.key) > -1);
       if (!item) {
         const topicID   = `${entity} ${reqParam.key} avg`;
-        const topicName = `${paramInfo[reqParam.key].title} (avg) ${shouldAddEntity && entity ? 'for ' + entity : ''}`;
+        const topicName = `${paramInfo[reqParam.key].title} ${paramInfo[reqParam.key].suffix ?? ''} (avg) ${shouldAddEntity && entity ? 'for ' + entity : ''}`;
         const topic     = {topicName: topicName, topicID: topicID, topic: topicIDs[topicID], dates: [] as DataPoint[]};
         dataByTopic.push(topic);
       }

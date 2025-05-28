@@ -5,14 +5,13 @@ import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.compon
 
 
 @Component({
-  selector: 'sm-project-card-menu',
-  templateUrl: './project-card-menu.component.html',
-  styleUrls: ['./project-card-menu.component.scss'],
-  standalone: true,
-  imports: [
-    MenuItemComponent,
-    MenuComponent
-  ]
+    selector: 'sm-project-card-menu',
+    templateUrl: './project-card-menu.component.html',
+    styleUrls: ['./project-card-menu.component.scss'],
+    imports: [
+        MenuItemComponent,
+        MenuComponent
+    ]
 })
 export class ProjectCardMenuComponent {
   deleteProjectClicked = output<Project>();
@@ -20,5 +19,6 @@ export class ProjectCardMenuComponent {
   newProjectClicked = output<Project>();
   projectNameInlineActivated = output();
   projectEditClicked = output<Project>();
+  projectSettingsClicked = output<Project>();
   project = input<Project>();
 }

@@ -9,10 +9,10 @@
           [ngModel]="currentParam()"
           (ngModelChange)="chartParamChange($event)"
           name="chart-param"
-          >
+        >
           @for (chartParam of chartParamOptions; track chartParam.label) {
             <mat-option [value]="chartParam.value">
-              {{chartParam.label}}
+              {{ chartParam.label }}
             </mat-option>
           }
         </mat-select>
@@ -26,7 +26,7 @@
     <mat-select [ngModel]="currentTimeFrame()" (ngModelChange)="timeFrameChange($event)" name="time-frame">
       @for (timeFrame of timeFrameOptions; track timeFrame.label) {
         <mat-option [value]="timeFrame.value">
-          {{timeFrame.label}}
+          {{ timeFrame.label }}
         </mat-option>
       }
     </mat-select>
@@ -35,6 +35,7 @@
 <div #chart class="line-chart-container">
   <sm-line-chart
     class="h-100"
+    [colorScheme]="['#a4a1fb', '#ff8a15', '#1da9ff', '#a5dcff', '#3f3f3f','#464b37','#848871','#52489f','#4c7273', '#ffd4a8' ]"
     [showLoadingOverlay]="chartState().refreshChart()"
     [data]="chartData()"
     [yLabel]="yAxisLabel()"

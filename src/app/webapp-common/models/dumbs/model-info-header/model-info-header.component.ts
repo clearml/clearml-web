@@ -22,10 +22,11 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {selectModelsTags} from '@common/models/reducers';
 
 @Component({
-  selector   : 'sm-model-info-header',
-  templateUrl: './model-info-header.component.html',
-  styleUrls  : ['./model-info-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sm-model-info-header',
+    templateUrl: './model-info-header.component.html',
+    styleUrls: ['./model-info-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ModelInfoHeaderComponent {
   private store = inject(Store);

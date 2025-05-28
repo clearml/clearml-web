@@ -10,7 +10,7 @@ import {
   TemplateRef,
   input, computed, model, effect, viewChild, inject, contentChildren, output, Output, EventEmitter
 } from '@angular/core';
-import {get, isArray, isString} from 'lodash-es';
+import {get} from 'lodash-es';
 import {MenuItem, PrimeTemplate, ScrollerOptions, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ContextMenu, ContextMenuModule} from 'primeng/contextmenu';
@@ -29,7 +29,7 @@ import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {mkConfig, download, generateCsv, asString} from 'export-to-csv';
-import {prepareColsForDownload} from '@common/shared/utils/download';
+import {prepareColsForDownload, sanitizeCSVCell} from '@common/shared/utils/download';
 import {NgTemplateOutlet} from '@angular/common';
 import {ResizableColumnDirective} from '@common/shared/ui-components/data/table/resizable-column.directive';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
@@ -45,22 +45,21 @@ export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSel
 }
 
 @Component({
-  selector: 'sm-table',
-  templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    TableModule,
-    ResizableColumnDirective,
-    MenuComponent,
-    MenuItemComponent,
-    ContextMenuModule,
-    NgTemplateOutlet,
-    DotsLoadMoreComponent,
-    MatIcon,
-    MatButton
-  ]
+    selector: 'sm-table',
+    templateUrl: './table.component.html',
+    styleUrls: ['./table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TableModule,
+        ResizableColumnDirective,
+        MenuComponent,
+        MenuItemComponent,
+        ContextMenuModule,
+        NgTemplateOutlet,
+        DotsLoadMoreComponent,
+        MatIcon,
+        MatButton
+    ]
 })
 export class TableComponent<D extends { id: string }> implements AfterContentInit, OnDestroy {
   private element = inject(ElementRef);
@@ -94,6 +93,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   private waitForClick: number;
   search: string;
 
+  scrollHeight = input('flex');
   autoLoadMore = input(false);
   columnResizeMode = input('expand' as 'fit' | 'expand');
   expandableRows = input(false);
@@ -204,6 +204,12 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     });
 
     effect(() => {
+      if (this.virtualScroll() && this.table() && this.tableData()) {
+        window.setTimeout(() => this.table().scroller?.setSize(), 50);
+      }
+    });
+
+    effect(() => {
       if (this.table()) {
         // In order to know if we should reset first to 0 on filter input.
         this.active = true;
@@ -234,7 +240,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   }
 
   gotTable = () => {
-      this.scrollContainer = this.table().el.nativeElement.getElementsByClassName('p-datatable-wrapper')[0] as HTMLDivElement;
+      this.scrollContainer = this.table().el.nativeElement.getElementsByClassName('p-datatable-table-container')[0] as HTMLDivElement;
       if (this.scrollContainer) {
         this.scrollContainer.onscroll = () => {
           if (!this.waiting) {
@@ -565,18 +571,25 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     this.lastRowExpanded = expanded && expandedIndex === this.currRowsNumber() - 1;
   }
 
+  preProcessRows(cols: any[]) {
+    return this.tableData().map(row =>
+      cols.reduce((acc, dCol) => {
+        const val = get(row, dCol.field, '') as unknown;
+        acc[dCol.name] = Array.isArray(val) ?
+          val.toString() :
+          typeof val === 'string' ?
+            sanitizeCSVCell(val.replace(/\r?\n|\r/g, '')) :
+            val;
+        return acc;
+      }, {})
+    );
+  }
+
   getTableCopy() {
     const colsOrder = this.columnsOrder() ?? this.visibleColumns().map(col => col.id);
     const sortedAllColumns = colsOrder.map(sortCol => this.columns().find(col => col.id === sortCol))
     const downloadCols = prepareColsForDownload(sortedAllColumns);
-    const rows = this.tableData().map(row =>
-      downloadCols.reduce((acc, dCol) => {
-        const val = get(row, dCol.field, '');
-        acc[dCol.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
-          , '') : val;
-        return acc;
-      }, {})
-    );
+    const rows = this.preProcessRows(downloadCols);
     const csvConfig = mkConfig({useKeysAsHeaders: true});
     return asString(generateCsv(csvConfig)(rows));
   }
@@ -593,14 +606,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     const rest = this.columns().filter(col => !colsOrder.includes(col.id));
     const downloadCols = prepareColsForDownload([...sortedAllColumns, ...rest]);
     options.columnHeaders = downloadCols.map(dCol => dCol.name);
-    const rows = this.tableData().map(row =>
-      downloadCols.reduce((acc, dCol) => {
-        const val = get(row, dCol.field, '');
-        acc[dCol.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
-          , '') : val;
-        return acc;
-      }, {})
-    );
+    const rows = this.preProcessRows(downloadCols);
 
     const csv = generateCsv(options)(rows);
     download(options)(csv);

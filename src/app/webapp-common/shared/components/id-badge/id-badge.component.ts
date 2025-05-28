@@ -5,15 +5,14 @@ import {ClipboardModule} from 'ngx-clipboard';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector: 'sm-id-badge',
-  templateUrl: './id-badge.component.html',
-  styleUrls: ['./id-badge.component.scss'],
-  standalone: true,
-  imports: [
-    TooltipDirective,
-    ClipboardModule,
-    ClickStopPropagationDirective
-  ]
+    selector: 'sm-id-badge',
+    templateUrl: './id-badge.component.html',
+    styleUrls: ['./id-badge.component.scss'],
+    imports: [
+        TooltipDirective,
+        ClipboardModule,
+        ClickStopPropagationDirective
+    ]
 })
 export class IdBadgeComponent {
   trigger = viewChild.required(MatMenuTrigger);
