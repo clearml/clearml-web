@@ -47,6 +47,8 @@ import {shellBinaryValidator} from '@common/shared/validators/shell-binary.valid
 import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {Ace} from 'ace-builds';
+import {containedInList} from '@common/shared/validators/containedInList.validator';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 const venvOptions = [
   {label: 'Discover', value: 'discover'},
@@ -140,6 +142,7 @@ export class CreateExperimentDialogComponent {
   private codeEditor = viewChild(CodeEditorComponent);
 
   protected queues = this.store.selectSignal(selectQueuesList);
+  private queueNames = computed(() => this.queues()?.map(q => q.name));
   protected filteredQueues = computed(() => this.queueVal() ?
       this.queues()
         .filter(queue => queue.name.toLowerCase().includes(this.queueVal().toLowerCase()) || queue.display_name?.toLowerCase().includes(this.queueVal().toLowerCase())) :
@@ -154,7 +157,7 @@ export class CreateExperimentDialogComponent {
   ];
 
   codeFormGroup = this.formBuilder.group({
-    name: [null, [Validators.required, Validators.minLength(3)]],
+    name: [null, [Validators.required, minLengthTrimmed(3)]],
     repo: [null as string],
     type: ['branch'],
     branch: ['master'],
@@ -187,7 +190,7 @@ export class CreateExperimentDialogComponent {
     script: ['']
   });
   queueFormGroup = this.formBuilder.group({
-    queue: [null, Validators.required],
+    queue: [null as string, Validators.required],
     output: ['']
   })
 
@@ -214,6 +217,12 @@ export class CreateExperimentDialogComponent {
         this.codeFormGroup.controls.binary.setValidators([Validators.required]);
       }
       this.codeFormGroup.controls.binary.updateValueAndValidity();
+    });
+
+    effect(() => {
+      if(this.queueNames()) {
+        this.queueFormGroup.controls.queue.setValidators([Validators.required, containedInList(this.queueNames())])
+      }
     });
   }
 

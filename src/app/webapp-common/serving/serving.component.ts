@@ -94,7 +94,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
         .pipe(
           filter(queryParams => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, ...queryParamsWithoutSearch} = queryParams;
+            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
             const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
             prevQueryParams = queryParamsWithoutSearch;
             return !equal;
@@ -108,7 +108,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
               const orders = decodeOrder(params.order);
               this.store.dispatch(ServingActions.setTableSort({orders}));
             }
-            if (params.filter) {
+            if (params.filter != null) {
               const filters = decodeFilter(params.filter);
               this.store.dispatch(ServingActions.setTableFilters({filters}));
             } else {

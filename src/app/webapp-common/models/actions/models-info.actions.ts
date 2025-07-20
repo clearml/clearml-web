@@ -86,12 +86,7 @@ export const setPlots = createAction(
   props<{plots: MetricsPlotEvent[]}>()
 );
 
-// export const getScalars = createAction(
-//   MODELS_PREFIX + '[get scalars]',
-//   props<{id: string}>()
-// );
-//
-// export const setScalars = createAction(
-//   MODELS_PREFIX + '[set scalars]',
-//   props<{scalars: any[]; axisType: ScalarKeyEnum}>()
-// );
+export const setLastModelsTab = createAction(
+  MODELS_PREFIX + 'set last tab',
+  props<{ projectId: string; lastTab: string }>()
+);

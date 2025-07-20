@@ -4,10 +4,9 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 @Directive({
   selector : '[smNotAllowedStringsValidator]',
   providers: [{provide: NG_VALIDATORS, useExisting: NotAllowedStringsValidatorValidatorDirective, multi: true}],
-  standalone: true,
 })
 export class NotAllowedStringsValidatorValidatorDirective implements Validator {
-  @Input() smNotAllowedStringsValidator: Array<string>;
+  @Input() smNotAllowedStringsValidator: string[];
 
   validate(control: AbstractControl): ValidationErrors | null {
     return this.smNotAllowedStringsValidator ? dontAllowStringsValidator(this.smNotAllowedStringsValidator)(control) : null;
@@ -15,7 +14,7 @@ export class NotAllowedStringsValidatorValidatorDirective implements Validator {
 }
 
 export function dontAllowStringsValidator(notAllowedStrings): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
+  return (control: AbstractControl): Record<string, any> | null => {
     const forbidden = control.value && notAllowedStrings.some(el => control.value.includes(el));
     return forbidden ? {'smNotAllowedStringsValidator': {value: control.value}} : null;
   };

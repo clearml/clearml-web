@@ -12,9 +12,11 @@ import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'r
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {experimentPlotsRequested, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings} from '../../actions/common-experiment-output.actions';
+import {experimentPlotsRequested, resetExperimentMetrics, setChartSettings, setExperimentMetricsSearchTerm, setExperimentSettings} from '../../actions/common-experiment-output.actions';
 import {selectExperimentInfoPlots, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedSettingsHiddenPlot, selectSplitSize} from '../../reducers';
 import {GroupedList} from '@common/tasks/tasks.model';
+import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 
 @Component({
     selector: 'sm-experiment-output-plots',
@@ -28,6 +30,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   @Input() selected: { id: string };
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   public plotsList: GroupedList;
   private experimentId: string;
   private routerParams$: Observable<Record<string, string>>;
@@ -214,4 +217,9 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
       ...event
     });
   }
+
+  changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {
+    this.store.dispatch(setChartSettings({...$event, projectId: this.projectId()}));
+  }
+
 }

@@ -1,9 +1,8 @@
 import {AfterViewInit, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ExtFrame, ExtLegend} from '../plotly-graph-base';
+import {ChartPreferences, ExtFrame, ExtLegend} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {Observable, Subject, Subscription} from 'rxjs';
-import {cloneDeep} from 'lodash-es';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatSelectChange} from '@angular/material/select';
 import {debounceTime, filter, map, take} from 'rxjs/operators';
@@ -18,21 +17,21 @@ import {
 } from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
-import {AxisType, Color} from 'plotly.js';
+import {Color, LayoutAxis} from 'plotly.js';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
-import {ChartHoverModeEnum, SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
+import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 
 export interface GraphViewerData {
   chart: ExtFrame;
   id: string;
   xAxisType?: 'iter' | 'timestamp' | 'iso_time';
-  yAxisType?: AxisType;
+  chartSettings?: ChartPreferences;
   smoothWeight?: number;
   smoothType?: SmoothTypeEnum;
-  hoverMode?: ChartHoverModeEnum;
   hideNavigation: boolean;
   isCompare: boolean;
   moveLegendToTitle: boolean;
+  showOrigin: boolean;
   embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
   legendConfiguration: Partial<ExtLegend>;
   darkTheme?: boolean;
@@ -63,17 +62,18 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   public currentPlotEvent$: Observable<any>;
   private iterationChanged$ = new Subject<number>();
   private isForward = true;
+  protected reportWidget = false;
   private charts: ExtFrame[];
   public index: number = null;
   public embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
-  public yAxisType: AxisType;
   public showSmooth: boolean;
   protected readonly smoothTypeEnum = smoothTypeEnum;
   public smoothType: SmoothTypeEnum;
+  public showOrigin: boolean;
   private _chart: ExtFrame;
   public title: string;
   public checkIfLegendToTitle = checkIfLegendToTitle;
-  private range: { xaxis: any[]; yaxis: any[] };
+  private range: { xaxis: LayoutAxis[]; yaxis: LayoutAxis[] };
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -99,7 +99,9 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize() {
-    this.singleGraph.shouldRefresh = true;
+    if (this.singleGraph) {
+      this.singleGraph.shouldRefresh = true;
+    }
     this.width = this.modalContainer.nativeElement.clientWidth;
     this.height = this.modalContainer.nativeElement.clientHeight - 80;
   }
@@ -154,14 +156,15 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     this.store.dispatch(setGraphDisplayFullDetailsScalarsIsOpen({isOpen: true}));
     this.isCompare = data.isCompare;
-    this.yAxisType = data.yAxisType ?? 'linear';
     this.showSmooth = ['multiScalar', 'scalar'].includes(data.chart.layout.type);
-    this.isFullDetailsMode = this.showSmooth && !this.isCompare;
+    this.reportWidget = this.data.id === 'report-widget';
+    this.isFullDetailsMode = this.showSmooth && !this.isCompare && !this.reportWidget;
     this.id = data.id;
     this.embedFunction = data.embedFunction;
     this.disableNavigation = data.hideNavigation;
     this.smoothWeight = data.smoothWeight ?? 0;
     this.smoothType = data.smoothType ?? smoothTypeEnum.exponential;
+    this.showOrigin = data.showOrigin;
 
     const reqData = {
       task: this.data.chart.task,
@@ -170,8 +173,17 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     };
     if (this.isFullDetailsMode) {
       this.store.dispatch(setGraphDisplayFullDetailsScalars({data: data.chart}));
-    } else if (this.isCompare || this.disableNavigation) {
+    } else if (this.isCompare || this.disableNavigation || this.reportWidget) {
       this.chart = data.chart;
+      this.plotLoaded = true;
+      setTimeout(() => {
+        if (this.chart.layout.xaxis) {
+          this.chart.layout.xaxis.autorange = true;
+        }
+        if (this.chart.layout.yaxis) {
+          this.chart.layout.yaxis.autorange = true;
+        }
+      });
     } else {
       this.store.dispatch(getPlotSample(reqData));
       this.range = {xaxis: data.chart.layout.xaxis.range, yaxis: data.chart.layout.yaxis.range};
@@ -278,7 +290,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         if (this.singleGraph) {
           this.singleGraph.shouldRefresh = true;
         }
-        this.chart = cloneDeep(chart);
+        this.chart = {...chart, layout: {...chart.layout, yaxis: {...chart.layout.yaxis, autorange: true}, xaxis: {...chart.layout.xaxis, autorange: true}}};
+
         this.cdr.markForCheck();
       }));
     this.sub.add(this.iterationChanged$

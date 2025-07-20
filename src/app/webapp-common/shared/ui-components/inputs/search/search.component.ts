@@ -19,18 +19,17 @@ import {HesitateDirective} from '@common/shared/ui-components/directives/hesitat
 
 
 @Component({
-    selector: 'sm-search',
-    templateUrl: './search.component.html',
-    styleUrls: ['./search.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        MatIcon,
-        MatIconButton,
-        HesitateDirective
-    ]
+  selector: 'sm-search',
+  templateUrl: './search.component.html',
+  styleUrls: ['./search.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatIcon,
+    MatIconButton,
+    HesitateDirective
+  ]
 })
 export class SearchComponent implements OnInit, OnChanges, OnDestroy {
-
   public value$ = new Subject();
   public empty = signal(true);
   public active = true;
@@ -42,6 +41,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   placeholder = input<string>('Type to search');
   hideIcons = input<boolean>(false);
   expandOnHover = input(false);
+  disableAnimation = input(false);
   enableNavigation = input(false);
   searchResultsCount = input<number>(null);
   searchCounterIndex = input(-1);
@@ -59,8 +59,8 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.subs.add(this.value$.pipe(
       tap((val: string) => this.empty.set(val?.length === 0)),
-      distinctUntilChanged(),
       debounce((val: string) => val.length > 0 ? timer(this.debounceTime()) : timer(0)),
+      filter((val) => val !== this.value()),
       filter(val => val.length >= this.minimumChars() || val.length === 0)
     )
       .subscribe((value: string) => {

@@ -12,6 +12,7 @@ import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in
 import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
 import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 export interface NewReportData {
   name: string;
@@ -45,9 +46,9 @@ export class CreateNewReportFormComponent {
 
   // public reportsNames: string[];
   protected reportForm = this.builder.group({
-    name: [null as string, [Validators.required, Validators.minLength(3)]],
+    name: [null as string, [Validators.required, minLengthTrimmed(3)]],
     description: '',
-    project: [null as string, [Validators.required, Validators.minLength(3)]]
+    project: [null as string, [Validators.required, minLengthTrimmed(3)]]
   });
 
   readOnlyProjectsNames = input<string[]>();

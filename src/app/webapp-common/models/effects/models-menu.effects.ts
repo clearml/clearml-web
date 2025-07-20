@@ -1,11 +1,10 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import * as infoActions from '../actions/models-info.actions';
-import {updateModelDetails} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import * as menuActions from '../actions/models-menu.actions';
 import {addTag, removeTag} from '../actions/models-menu.actions';
@@ -29,16 +28,13 @@ import * as projectsActions from '@common/core/actions/projects.actions';
 
 @Injectable()
 export class ModelsMenuEffects {
+      private actions$ = inject(Actions);
+      private store = inject(Store);
+      private apiModels = inject(ApiModelsService);
+      private apiTasks = inject(ApiTasksService);
+      private router = inject(Router);
+      private readonly route = inject(ActivatedRoute);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store,
-    private apiModels: ApiModelsService,
-    private apiTasks: ApiTasksService,
-    private router: Router,
-    private readonly route: ActivatedRoute
-  ) {
-  }
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(menuActions.archiveSelectedModels, menuActions.publishModelClicked,
@@ -77,7 +73,7 @@ export class ModelsMenuEffects {
         return this.apiModels.modelsMove({
           ids: action.selectedModels.map(model => model.id),
           project: action.project.id,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           project_name: action.project.name
         })
           .pipe(
@@ -101,7 +97,7 @@ export class ModelsMenuEffects {
 
   publishModelFailedText(error, model) {
     if (model.task && error?.error?.meta?.result_subcode == 110) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       return this.apiTasks.tasksGetAllEx({id: [model.task.id], only_fields: ['id', 'name', 'project']}).pipe(
         map((tasks) => {
           const task = tasks.tasks[0];
@@ -159,18 +155,13 @@ export class ModelsMenuEffects {
 
   removeTag$ = createEffect(() => this.actions$.pipe(
     ofType(removeTag),
-    switchMap((action) =>
-      action.models.map(model => {
-        if (model.tags.includes(action.tag)) {
-          return updateModelDetails({
-            id: model.id,
-            changes: {tags: model.tags.filter(tag => tag !== action.tag)}
-          });
-        } else {
-          return null;
-        }
-      }).filter(update => update !== null)
-        .concat(addMessage('success', `“${action.tag}” tag has been removed from “${action.models[0]?.name}” model`, [
+    switchMap(action => this.apiModels.modelsUpdateTags({
+      ids: action.models.map(e=> e.id),
+      remove_tags: [action.tag]
+    }).pipe(
+      switchMap(() => [
+        menuActions.removeTagSuccess({models: action.models.map(e => e.id), tag: action.tag}),
+        addMessage('success', `“${action.tag}” tag has been removed from “${action.models[0]?.name}” model`, [
             {
               name: 'Undo',
               actions: [
@@ -183,8 +174,12 @@ export class ModelsMenuEffects {
               ]
             }
           ]
-        ) as any)
-    )
+        ) as any
+        ]),
+      catchError(err => {
+        return of(requestFailed(err));
+      }),
+    )),
   ));
 
   archiveModels = createEffect(() => this.actions$.pipe(

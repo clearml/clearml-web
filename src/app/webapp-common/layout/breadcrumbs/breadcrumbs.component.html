@@ -4,18 +4,18 @@
     <i class="al-icon al-ico-slash"></i>
   }
 
-  @for (breadcrumbGroup of breadcrumbs() ; track $index; let lastGroup = $last; let
-    firstGroup = $first) {
+  @for (breadcrumbGroup of breadcrumbs() ; track $index; let lastGroup = $last; let firstGroup = $first) {
     @if (!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable)) {
-      @for (breadcrumb of breadcrumbGroup ; track (breadcrumb.name+breadcrumb.url); let index= $index; let lastCrumb = $last; let firstCrumb = $first) {
+      @for (breadcrumb of breadcrumbGroup; track (breadcrumb.name + breadcrumb.url); let lastCrumb = $last; let firstCrumb = $first) {
         <span class="sub-projects-breadcrumbs" [class.last]="lastCrumb && lastGroup">
           @if (breadcrumb.hidden) {
             <i class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
           }
           @if (breadcrumb.url && !(lastCrumb && lastGroup)) {
             <a class="crumb url"
-              [class.first]="firstCrumb && firstGroup"
-              [routerLink]="breadcrumb.url"
+               [class.first]="firstCrumb && firstGroup"
+               [routerLink]="breadcrumb.url"
+               [queryParams]="breadcrumb.urlParams"
                [queryParamsHandling]="breadcrumb.queryParamsHandling"
             >
             {{breadcrumb.name}}</a>
@@ -40,7 +40,9 @@
                 <sm-tag-list [tags]="breadcrumb.tags"></sm-tag-list>
               }
               @if (breadcrumb.badge) {
-                <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
+                <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300"
+                      [matBadge]="breadcrumb.badgeWarn ? 1 : null" matBadgeSize="small" matBadgePosition="below after"
+                >{{breadcrumb.badge}}</span>
               }
             </div>
           }
@@ -114,7 +116,7 @@
       </mat-menu>
     </div>
     @if (archive()) {
-      <div data-id="Archive Label" class="archive"><i class="al-icon xs al-ico-archive me-1"></i>Archive
+      <div data-id="Archive Label" class="archive"><mat-icon fontSet="al" fontIcon="al-ico-archive" class="xs me-1"></mat-icon>Archive
     </div>
   }
 </div>

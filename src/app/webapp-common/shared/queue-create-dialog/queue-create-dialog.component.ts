@@ -43,8 +43,8 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
   }
 
   public createQueue(queue) {
-    if (queue.id) {
-      this.store.dispatch(createNewQueueActions.updateQueue({queue: {queue: queue.id, name: queue.name, display_name: queue.display_name}}));
+    if (this.queue.id) {
+      this.store.dispatch(createNewQueueActions.updateQueue({queue: {queue: this.queue.id, name: queue.name, display_name: queue.display_name}}));
     } else {
       this.store.dispatch(createNewQueueActions.createNewQueue(queue));
     }

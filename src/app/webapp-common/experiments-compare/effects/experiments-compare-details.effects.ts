@@ -92,11 +92,11 @@ export class ExperimentsCompareDetailsEffects {
     return entity === EntityTypeEnum.model ? this.fetchModelDetails$(ids) : this.fetchExperimentDetails$(ids, hasDataFeature);
   }
 
-  fetchExperimentDetails$(ids, hasDataFeature: boolean): Observable<Array<IExperimentDetail>> {
+  fetchExperimentDetails$(ids, hasDataFeature: boolean): Observable<IExperimentDetail[]> {
     return ids.length > 0 ?
       this.tasksApi.tasksGetAllEx({
         id: ids,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         only_fields: getCompareDetailsOnlyFields(hasDataFeature)
       }).pipe(
         map(res => this.experimentDetailsReverter.revertExperiments(ids, res.tasks))
@@ -104,12 +104,12 @@ export class ExperimentsCompareDetailsEffects {
       : of([]);
   }
 
-  fetchModelDetails$(ids: string[]): Observable<Array<IExperimentDetail>> {
+  fetchModelDetails$(ids: string[]): Observable<{id?: string}[]> {
     return ids.length > 0 ?
       forkJoin([
         this.modelsApi.modelsGetAllEx({
         id: ids,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         only_fields: ['company', 'created', 'last_update', 'last_iteration', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'task.project', 'uri', 'user.name', 'parent', 'project.name', 'metadata']
       }),
         this.tasksApi.tasksGetAllEx({

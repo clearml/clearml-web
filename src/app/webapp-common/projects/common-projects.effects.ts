@@ -112,7 +112,7 @@ export class CommonProjectsEffects {
               return forkJoin([
                 // projects list
                 this.projectsApi.projectsGetAllEx({
-                  ...(!nested && mainPageTagsFilter?.length > 0 && {
+                  ...(!projectsView && !nested && mainPageTagsFilter?.length > 0 && {
                     filters: {
                       tags: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter),
                     }

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output, signal} from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClipboardModule} from 'ngx-clipboard';
@@ -28,10 +28,13 @@ export class CopyClipboardComponent {
   copyIcon = input<string>();
   tooltipPosition = input<TooltipPosition>('above');
   smallIcon = input(false);
+  isStroked = input(false);
+  copySuccess = output();
 
   public copied = signal(false);
 
   copyToClipboard() {
+    this.copySuccess.emit();
     this.copied.set(true);
     setTimeout(() => {
       this.copied.set(false);

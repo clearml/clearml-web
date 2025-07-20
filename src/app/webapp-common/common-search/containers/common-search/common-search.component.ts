@@ -1,10 +1,15 @@
-import {ChangeDetectionStrategy, Component, inject, input, OnDestroy, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnDestroy, viewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {resetSearch, setSearching, setSearchQuery} from '../../common-search.actions';
-import {selectIsSearching, selectPlaceholder, selectSearchQuery} from '../../common-search.reducer';
+import {
+  selectIsSearching,
+  selectPlaceholder,
+  selectSearchQuery,
+  selectSearchQueryRegex
+} from '../../common-search.reducer';
 import {Observable, timer} from 'rxjs';
-import {debounce, distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {debounce, filter} from 'rxjs/operators';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {PushPipe} from '@ngrx/component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -12,6 +17,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {concatLatestFrom} from '@ngrx/operators';
 
 @Component({
   selector: 'sm-common-search',
@@ -34,13 +40,14 @@ export class CommonSearchComponent implements OnDestroy {
 
   public searchActive = input(false);
 
-  public regExp = false;
   private closeTimer: number;
   protected minChars = 3;
   protected regexError: boolean;
-  protected searchQuery$ = this.store.select(selectSearchQuery).pipe(tap(searchQuery => this.regExp = searchQuery?.regExp));
-  protected isSearching = this.store.selectSignal(selectIsSearching);
+  protected searchQuery$ = this.store.select(selectSearchQuery);
+  protected regExp = this.store.selectSignal(selectSearchQueryRegex);
+  protected searching = this.store.selectSignal(selectIsSearching);
   protected searchPlaceholder = this.store.selectSignal(selectPlaceholder);
+  protected isSearching = computed(() => this.searching() || this.searchActive());
 
   protected searchElem = viewChild(SearchComponent);
   private waitForRegex = false
@@ -53,27 +60,28 @@ export class CommonSearchComponent implements OnDestroy {
       .pipe(
         takeUntilDestroyed(),
         filter(event => event instanceof NavigationEnd),
-        distinctUntilChanged((pe: NavigationEnd, ce: NavigationEnd) => {
-          const pURL = new URLSearchParams(pe.url.split('?')?.[1]);
+        concatLatestFrom(() => this.store.select(selectSearchQuery)),
+        filter(([ce, storedQuery]) => {
           const cURL = new URLSearchParams(ce.url.split('?')?.[1]);
-          return pURL.get('q') === cURL.get('q') && pURL.get('qreg') === cURL.get('qreg');
+          return storedQuery?.query !== (cURL.get('q') ?? '') || storedQuery?.regExp !== (cURL.get('qreg') === 'true');
         })
-      ).subscribe(() => {
-      const query = this.route.snapshot.queryParams?.q ?? '';
-      const qregex = this.route.snapshot.queryParams?.qreg === 'true';
-      this.store.dispatch(setSearchQuery({
-        query: qregex ? query : query.trim(),
-        regExp: qregex,
-        original: query
-      }));
-      if (query) {
-        this.openSearch();
-      } else {
-        if (document.activeElement !== this.searchElem()?.searchBarInput().nativeElement) {
-          this.store.dispatch(setSearching({payload: false}));
+      )
+      .subscribe(() => {
+        const query = this.route.snapshot.queryParams?.q ?? '';
+        const qregex = this.route.snapshot.queryParams?.qreg === 'true';
+        this.store.dispatch(setSearchQuery({
+          query: qregex ? query : query.trim(),
+          regExp: qregex,
+          original: query
+        }));
+        if (query) {
+          this.openSearch();
+        } else {
+          if (document.activeElement !== this.searchElem()?.searchBarInput().nativeElement) {
+            this.store.dispatch(setSearching({payload: false}));
+          }
         }
-      }
-    });
+      });
     if (this.route.snapshot.queryParams.q) {
       const query = this.route.snapshot.queryParams?.q ?? '';
       const qregex = this.route.snapshot.queryParams?.qreg ?? false;
@@ -94,7 +102,7 @@ export class CommonSearchComponent implements OnDestroy {
 
   public search(query: string) {
     try {
-      if (this.regExp) {
+      if (this.regExp()) {
         new RegExp(query);
       }
       this.regexError = null;
@@ -104,7 +112,7 @@ export class CommonSearchComponent implements OnDestroy {
         queryParamsHandling: 'merge',
         queryParams: {
           q: query || undefined,
-          qreg: this.regExp ? this.regExp : undefined
+          ...(this.regExp() && {qreg: true})
         }
       });
 
@@ -115,35 +123,32 @@ export class CommonSearchComponent implements OnDestroy {
 
   openSearch() {
     window.clearTimeout(this.closeTimer);
-    this.searchElem().searchBarInput().nativeElement.focus();
+    this.searchElem()?.searchBarInput().nativeElement.focus();
     this.store.dispatch(setSearching({payload: true}));
   }
 
   onSearchFocusOut() {
     window.clearTimeout(this.closeTimer);
-    if (!this.waitForRegex && !this.searchElem().searchBarInput().nativeElement.value) {
+    if (!this.waitForRegex && !this.searchElem()?.searchBarInput().nativeElement.value) {
       this.closeTimer = window.setTimeout(() => this.store.dispatch(setSearching({payload: false})), 200);
     }
   }
 
 
   clearSearch() {
-    this.searchElem().clear();
+    this.searchElem()?.clear();
     this.store.dispatch(setSearching({payload: false}));
     document.body.focus();
     setTimeout(() => this.searchElem().searchBarInput().nativeElement.blur(), 100);
   }
 
   toggleRegExp() {
-    this.regExp = !this.regExp;
-    if (this.searchElem().searchBarInput().nativeElement.value) {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        replaceUrl: true,
-        queryParamsHandling: 'merge',
-        queryParams: {qreg: this.regExp ? this.regExp : undefined}
-      });
-    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParamsHandling: 'merge',
+      queryParams: {qreg: !this.regExp() ? true : undefined}
+    });
     this.waitForRegex = true;
     window.setTimeout(() => this.waitForRegex = false, 200);
     this.searchElem().searchBarInput().nativeElement.focus();

@@ -40,6 +40,9 @@ import {PushPipe} from '@ngrx/component';
 import {HIDDEN_PLOTS_BY_DEFAULT} from '@common/experiments-compare/experiments-compare.constants';
 import {buildMetricsListFlat, SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {GroupedList} from '@common/tasks/tasks.model';
+import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
+import {setChartSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 
 @Component({
     selector: 'sm-experiment-compare-plots',
@@ -53,6 +56,7 @@ import {GroupedList} from '@common/tasks/tasks.model';
 })
 export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   private routerParams$: Observable<Params>;
   private selectedMetrics$: Observable<string[]>;
   public plots$: Observable<ReportsApiMultiplotsResponse>;
@@ -281,5 +285,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     if (!isEqual(this.settings.selectedMetricsPlot, this.originalSettings)) {
       this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedMetricsPlot: this.settings.selectedMetricsPlot}}));
     }
+  }
+
+  changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {
+    this.store.dispatch(setChartSettings({...$event, projectId: this.projectId()}));
   }
 }

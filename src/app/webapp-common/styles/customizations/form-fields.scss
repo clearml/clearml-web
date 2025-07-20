@@ -41,7 +41,7 @@
 
   .mdc-text-field--outlined {
     padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
-    padding-right: max(12px, var(--mdc-outlined-text-field-container-shape));
+    padding-right: max(8px, var(--mdc-outlined-text-field-container-shape));
   }
 
   .mat-mdc-form-field-hint-wrapper,
@@ -85,7 +85,7 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
     margin-top: 20px;
     padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
-    padding-right: max(12px, var(--mdc-outlined-text-field-container-shape));
+    padding-right: max(8px, var(--mdc-outlined-text-field-container-shape));
 
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {

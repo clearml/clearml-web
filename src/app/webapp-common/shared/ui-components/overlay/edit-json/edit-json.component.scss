@@ -1,45 +1,15 @@
-:host {
-  .data-text {
-    margin: 0 -32px;
-    width: 70vw;
-    height: calc(90vh - 200px);
-    overflow: auto;
-    background-color: var(--color-surface-container);
-    border-radius: 4px;
-    resize: none;
-  }
-
-  ::ng-deep {
-    .ace_marker-layer {
-      .ace_selection,
-      .ace_selected-word {
-        border: none;
-      }
-      .ace_selection {
-        background-color: var(--color-tertiary-container);
-        color: var(--color-on-tertiary-container);
-      }
-      .ace_selected-word {
-        background-color: var(--color-secondary-container);
-        color: var(--color-on-secondary-container);
-      }
-    }
-  }
-
-  .buttons {
-    display: flex;
-    justify-content: center;
-    margin-top: 32px;
-
-    button {
-      margin: 0 6px;
-    }
-  }
+.data-text {
+  width: 70vw;
+  height: calc(90vh - 200px);
+  resize: none;
 }
 
-.sub-title {
-  margin-left: -32px;
-  margin-bottom: 12px;
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+
+  button {
+    margin: 0 6px;
+  }
 }
-
-

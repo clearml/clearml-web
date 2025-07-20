@@ -84,7 +84,7 @@ export class AppComponent implements OnInit {
   public hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   protected signIsNeeded$ = this.store.selectSignal(appFeature.selectSignIsNeeded);
   protected noPermissions$ = this.store.selectSignal(appFeature.selectNoPermissions);
-  private tasksData = this.store.selectSignal(appFeature.selectTaskData);
+  protected tasksData = this.store.selectSignal(appFeature.selectTaskData);
   public isDarkTheme = false;
   public externalTool = false;
   public parcoordsData: { experiments: ExtraTask[]; params: string[]; metrics: SelectedMetricVariant[] };
@@ -472,9 +472,9 @@ export class AppComponent implements OnInit {
       switch (type) {
         case 'single':
         case 'scalar':
-          return 'output/metrics/scalar';
+          return 'output/scalars';
         case 'plot':
-          return 'output/metrics/plots';
+          return 'output/plots';
         case 'sample':
           return 'output/debugImages';
       }

@@ -8,7 +8,7 @@ import {
   downloadSuccess,
   experimentDataUpdated,
   experimentDetailsUpdated,
-  getExperimentArtifacts, getExperimentInfo,
+  getExperimentArtifacts,
   getExperimentUncommittedChanges,
   resetExperimentInfo,
   saveExperiment,
@@ -22,6 +22,7 @@ import {
   setExperimentInfoData,
   setExperimentSaving,
   setExperimentUncommittedChanges,
+  setLastTasksTab,
   setSelectedPipelineStep,
   updateExperimentAtPath,
   updateExperimentInfoData
@@ -29,7 +30,7 @@ import {
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {experimentSections, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {set} from 'lodash-es';
-import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
+import {removeTagSuccess, setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
 import {ActionCreator, createReducer, on, ReducerTypes} from '@ngrx/store';
 
 
@@ -44,10 +45,10 @@ export interface CommonExperimentInfoState {
   saving: boolean;
   currentActiveSectionEdit: string;
   infoDataFreeze: IExperimentInfo;
-  userKnowledge: Map<experimentSectionsEnum, boolean>;
   artifactsExperimentId: string;
   downloading: boolean;
   downloadingExperimentOperationLog: boolean;
+  lastTab: Record<string, string>;
 }
 
 export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
@@ -64,12 +65,10 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
   saving: false,
   currentActiveSectionEdit: null,
   infoDataFreeze: null,
-  userKnowledge: {
-    [experimentSections.MODEL_INPUT]: false
-  } as any,
   artifactsExperimentId: null,
   downloading: false,
   downloadingExperimentOperationLog: false,
+  lastTab: null
 };
 
 export const commonExperimentInfoReducers = [
@@ -91,6 +90,7 @@ export const commonExperimentInfoReducers = [
   on(setControllerForStartPipelineDialog, (state, action): CommonExperimentInfoState => ({...state, pipelineRunDialogTask: action.task})),
   on(updateExperimentAtPath, (state, action): CommonExperimentInfoState => ({...state, infoData: set(state.infoData, action.value, action.path) as IExperimentInfo})),
   on(getExperimentArtifacts, (state): CommonExperimentInfoState => ({...state, saving: false})),
+  on(setLastTasksTab, (state, {projectId, lastTab}): CommonExperimentInfoState => ({...state, lastTab: {...state.lastTab, [projectId]: lastTab}})),
   on(downloadArtifacts, (state): CommonExperimentInfoState => ({...state, downloading: true})),
   on(downloadSuccess, downloadFailed, (state): CommonExperimentInfoState => ({...state, downloading: false})),
   on(setExperimentErrors, (state, action): CommonExperimentInfoState => ({...state, errors: {...state.errors, ...action}})),
@@ -125,6 +125,13 @@ export const commonExperimentInfoReducers = [
       model :(action as ReturnType<typeof actions.setExperimentArtifacts>).model,
     },
     artifactsExperimentId: (action as ReturnType<typeof actions.setExperimentArtifacts>).experimentId
+  })),
+  on(removeTagSuccess, (state, action): CommonExperimentInfoState => ({
+    ...state,
+    ...(action.experiments.includes(state.selectedExperiment.id) && {selectedExperiment: {
+        ...state.selectedExperiment,
+        tags: state.selectedExperiment.tags?.filter(tag => tag !== action.tag)
+      }})
   }))
 ] as ReducerTypes<CommonExperimentInfoState, ActionCreator[]>[];
 

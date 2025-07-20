@@ -102,12 +102,6 @@ import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-
 
 
 export const modelSyncedKeys    = [
-  'view.projectColumnsSortOrder',
-  'view.projectColumnFilters',
-  'view.projectColumnsWidth',
-  'view.hiddenProjectTableCols',
-  'view.colsOrder',
-  'view.metadataCols'
 ];
 
 export const MODELS_CONFIG_TOKEN =

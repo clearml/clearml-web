@@ -93,11 +93,15 @@ export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace ca
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',
-  (severity: MessageSeverityEnum, msg: string, userActions?: {
-    actions: Action[];
-    name: string
-  }[], suppressNextMessages?: boolean) =>
-    ({severity, msg, userActions, suppressNextMessages})
+  (
+    severity: MessageSeverityEnum,
+    msg: string,
+    userActions?: {
+      actions: Action[];
+      name: string
+    }[],
+    suppressNextMessages?: boolean
+  ) => ({severity, msg, userActions, suppressNextMessages})
 );
 
 export const removeMessage = createAction(VIEW_PREFIX + '[remove message]');

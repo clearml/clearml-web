@@ -5,9 +5,6 @@
            formControlName="name"
            matInput
            autocomplete="off"
-           smUniqueProjectValidator
-           [parent]="parentProjectPath()"
-           [allowedPath]="project().name"
            pattern="^[^\/]*$"
     >
     @if (projectForm.controls.name.invalid && projectForm.controls.name.errors; as errors) {

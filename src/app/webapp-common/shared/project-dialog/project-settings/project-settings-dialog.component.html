@@ -27,12 +27,14 @@
         [xAxisType]="settings()?.xAxisType"
         [groupBy]="settings()?.groupBy"
         [groupByOptions]="groupByOptions"
+        [showOrigin]="settings()?.showOriginals"
         [clearable]="null"
         (changeWeight)="changeSmoothness($event)"
         (changeSigma)="changeSigma($event)"
         (changeXAxisType)="changeXAxisType($event)"
         (changeGroupBy)="changeGroupBy($event)"
         (changeSmoothType)="changeSmoothType($event)"
+        (changeShowOrigin)="changeShowOriginals($event)"
       ></sm-graph-settings-bar>
       <div class="list">
         <div class="d-flex align-items-center">Default Scalars
@@ -53,7 +55,7 @@
 
   <mat-dialog-actions>
     <button mat-stroked-button (click)="closeDialog()" data-id="Cancel">CANCEL</button>
-    <button mat-flat-button (click)="save()" [disabled]="generalForm.projectForm.invalid || (!scalarSettingsChanged() && !generalChanged() && !hiddenChanged())" data-id="Save">
+    <button mat-flat-button (click)="save()" [disabled]="generalForm.projectForm.controls.default_output_destination.invalid || generalForm.projectForm.invalid || (!scalarSettingsChanged() && !generalChanged() && !hiddenChanged())" data-id="Save">
       SAVE
     </button>
   </mat-dialog-actions>

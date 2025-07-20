@@ -5,7 +5,6 @@ import {ChangeDetectionStrategy, Component, input} from '@angular/core';
   templateUrl: './number-counter.component.html',
   styleUrls  : ['./number-counter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
 })
 export class NumberCounterComponent {
   counter = input();

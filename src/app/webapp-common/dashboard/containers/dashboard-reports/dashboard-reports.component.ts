@@ -36,10 +36,6 @@ export class DashboardReportsComponent {
   recentList = this.store.selectSignal(selectRecentReports);
   protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
 
-  constructor() {
-    this.store.dispatch(getRecentReports());
-  }
-
   openCreateDialog() {
     this.dialog.open<ReportDialogComponent, unknown, IReportsCreateRequest>(ReportDialogComponent)
       .afterClosed()

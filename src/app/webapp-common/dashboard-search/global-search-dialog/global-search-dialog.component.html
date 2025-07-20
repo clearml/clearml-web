@@ -1,12 +1,12 @@
 <sm-dialog-template>
   <div class="content">
     <div class="search-container">
-      <div></div>
       <sm-search
         #searchComponent
         class="outline"
         [class.regex-error]="regexError"
         [value]="(searchQuery$ | ngrxPush)?.query"
+        [disableAnimation]="true"
         [hideIcons]="true"
         [minimumChars]="3"
         (valueChanged)="search($event)"
@@ -24,7 +24,6 @@
           <mat-icon fontSet="al" fontIcon="al-ico-regex" data-id="enableRegexButton"></mat-icon>
         </button>
       </sm-search>
-        <sm-show-only-user-work></sm-show-only-user-work>
     </div>
     <sm-dashboard-search (itemSelected)="closeDialog()"></sm-dashboard-search>
   </div>

@@ -114,15 +114,13 @@ export abstract class TableDurationSortBaseComponent {
   hasTimeError = false;
   private isFirstTimeUpdate = true;
   public updateValue(value: Array<string | number | null>): void {
-
-    if(value === undefined || value?.length === 0) {
+    if (!hasValue(value) || value.length === 0) {
       this.greaterThan = emptyDuration;
       this.lessThan = emptyDuration;
-      this.isFirstTimeUpdate = true;
-      this._updateValue();
-      return;
+      this.isFirstTimeUpdate = true; // Reset the flag for the next real value
+      return; // <-- The crucial change: DO NOT call _updateValue()
     }
-
+    // This part now only runs when a valid, non-empty value is received for the first time
     if (this.isFirstTimeUpdate) {
       this.isFirstTimeUpdate = false;
       const data = DataInputOutputHelper.decodeFromServerData(value, {greaterThan: this.greaterThan, lessThan: this.lessThan}, this.parseServerDataFunction);
@@ -130,9 +128,7 @@ export abstract class TableDurationSortBaseComponent {
       this.lessThan    = data.lessThan;
       this._updateValue();
     }
-
   }
-
   abstract _updateValue(): void;
 
   get isFiltered(): boolean {

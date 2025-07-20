@@ -1,8 +1,8 @@
-<div class="tab-nav" [class.minimized]="minimized">
+<div class="tab-nav" [class.minimized]="minimized()">
   <span></span>
   <sm-router-tab-nav-bar
-    [links]="links"
-    [splitSize]="splitSize"
+    [links]="links()"
+    [splitSize]="splitSize()"
   ></sm-router-tab-nav-bar>
   <ng-content select="[refresh]"></ng-content>
 </div>

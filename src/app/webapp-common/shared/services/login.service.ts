@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, filter, map, retry, switchMap, take, tap} from 'rxjs/operators';
+import {catchError, filter, map, retry, switchMap, tap} from 'rxjs/operators';
 import {HTTP} from '~/app.constants';
 import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
@@ -9,7 +9,6 @@ import {EMPTY, Observable, of, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
-import {clone} from 'lodash-es';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {ConfigurationService} from './configuration.service';
 import {USER_PREFERENCES_KEY, UserPreferences} from '@common/user-preferences';
@@ -52,7 +51,6 @@ export class BaseLoginService {
   private companyID: string;
   private _loginModeTTL = 0;
   private _loginMode: LoginMode;
-  private _guestUser: LoginModeResponse['basic']['guest'];
   protected environment = this.configService.configuration;
   protected darkTheme = this.store.selectSignal(selectDarkTheme);
   private state = computed(() => ({
@@ -64,9 +62,6 @@ export class BaseLoginService {
     return this.state().signupMode;
   }
 
-  get guestUser() {
-    return clone(this._guestUser);
-  }
   protected _authenticated: boolean;
   get authenticated(): boolean {
     return this._authenticated;
@@ -115,7 +110,6 @@ export class BaseLoginService {
           filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
             this._authenticated = res.authenticated;
-            this._guestUser = res.basic.guest;
             this._loginMode = this.calcLoginMode(res);
             this._loginModeTTL = new Date().getTime() + TIME_IN_MILLI.ONE_MIN * 10;
           }),
@@ -274,35 +268,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
           redirectUrl = pathname + window.location.search;
         }
 
-        if (
-          !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
-          (this.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)
-        ) {
-          if (this.guestUser?.enabled) {
-            this.passwordLogin(this.guestUser.username, this.guestUser.password)
-              .pipe(
-                take(1),
-                switchMap(() => this.userPreferences.loadPreferences())
-              )
-              .subscribe(() => {
-                this.store.dispatch(fetchCurrentUser());
-                resolve(null);
-              });
-          } else if (ConfigurationService.globalEnvironment.autoLogin) {
-            const name = `${(new Date()).getTime().toString()}`;
-            this.autoLogin(name)
-              .pipe(
-                take(1),
-                switchMap(() => this.userPreferences.loadPreferences())
-              )
-              .subscribe(() => {
-                this.store.dispatch(fetchCurrentUser());
-                resolve(null)
-              });
-          } else {
-            resolve(null);
-          }
-        } else if (!extraParam && !['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
+        if (!extraParam && !['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
           const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login' + '/' + extraParam;
           window.history.replaceState(window.history.state, '', targetUrl);
         }

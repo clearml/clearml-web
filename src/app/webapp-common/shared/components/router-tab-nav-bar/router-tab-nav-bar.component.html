@@ -1,5 +1,5 @@
-<nav #nav [tabPanel]="panel" mat-tab-nav-bar mat-stretch-tabs="false" mat-align-tabs="center">
-  @for (link of links(); track link.url.join(',')) {
+<nav [tabPanel]="panel" mat-tab-nav-bar mat-stretch-tabs="false" mat-align-tabs="center">
+  @for (link of links(); track link.name) {
     <a mat-tab-link
       [routerLink]="link.url"
       queryParamsHandling="merge"
@@ -10,4 +10,4 @@
     >{{link.name | uppercase}}</a>
   }
 </nav>
-<span #panel></span>
+<mat-tab-nav-panel  #panel></mat-tab-nav-panel >

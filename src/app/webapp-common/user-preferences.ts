@@ -1,13 +1,13 @@
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
-import {cloneDeep, isEqual} from 'lodash-es';
+import {cloneDeep, isEqual, get, set} from 'lodash-es';
 import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
 import {Injectable} from '@angular/core';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export const enum USER_PREFERENCES_KEY {
   firstLogin = 'firstLogin',
 }
@@ -15,13 +15,15 @@ export const enum USER_PREFERENCES_KEY {
 @Injectable()
 export class UserPreferences {
 
-  private preferences: { [key: string]: any };
+  private preferences: Record<string, any>;
+  private timer: number;
+  private prefsQueue: Record<string, any> = {};
 
   constructor(private userService: ApiUsersService) {
-      this.removeFromLocalStorage();
+    this.removeFromLocalStorage();
   }
 
-  loadPreferences(): Observable<{ [key: string]: any }> {
+  loadPreferences(): Observable<Record<string, any>> {
     return this.userService.usersGetPreferences({})
       .pipe(
         map(res => res.preferences),
@@ -29,6 +31,7 @@ export class UserPreferences {
           this.preferences = pref;
           this.checkIfFirstTimeLoginAndSaveData(pref);
           this.cleanPreferencesInPreferences(pref);
+          this.migrateArrayPreferencesToObjects(pref);
           let prefsString = JSON.stringify(pref);
           prefsString = prefsString.split('--DOT--').join('.');
           pref = JSON.parse(prefsString);
@@ -43,16 +46,26 @@ export class UserPreferences {
           }
 
         }),
-        tap(preferences => this.preferences = preferences),
+        tap(preferences => this.preferences = preferences)
       );
   }
 
-  public setPreferences(key: string, value: any) {
-    if (this.preferences && !isEqual(this.preferences[key], value)) {
-      const prefs = {[key]: cloneDeep(value)};
-      this.preferences = {...this.preferences, ...{[key]: value}};
-      this.replaceDots(prefs);
-      this.saveToServer(prefs);
+  public setPreferences(path: string | string[], value: any) {
+    if (this.preferences && !isEqual(get(this.preferences, path), value)) {
+      const clonedValue = cloneDeep(value);
+      this.preferences = set(this.preferences, path, value);
+      this.replaceDots(clonedValue);
+      if (Array.isArray(path)) {
+        path = path.map(p => p.replace('.', '--DOT--')).join('.');
+      }
+      this.prefsQueue[path] = clonedValue;
+
+
+      clearTimeout(this.timer);
+      this.timer = window.setTimeout(() => {
+        this.saveToServer(this.prefsQueue);
+        this.prefsQueue = {};
+      }, 2000);
       return;
     }
   }
@@ -90,15 +103,47 @@ export class UserPreferences {
     }
   }
 
+  private migrateArrayPreferencesToObjects(pref) {
+    if (Array.isArray(pref.experiments?.output?.settingsList)) {
+      this.setPreferences('experiments.output.settingsList', pref.experiments?.output?.settingsList.reduce((acc, settingRow) => {
+        const {id, ...withoutId} = settingRow;
+        acc[settingRow.id] = withoutId;
+        return acc;
+      }, {}));
+    }
+
+    const pathsToMigrate = [
+      'experiments.view.metricsCols',
+      'datasets.metadataCols',
+      'models.view.metadataCols',
+      'models.view.metricsCols'
+    ]
+
+    pathsToMigrate.forEach((path) => {
+      const oldData = get(pref, path);
+      if (oldData && Array.isArray(oldData)) {
+        this.setPreferences(path, oldData.reduce((acc, metricsCol) => {
+          if (acc[metricsCol.projectId]) {
+            acc[metricsCol.projectId].push(metricsCol);
+          } else {
+            acc[metricsCol.projectId] = [metricsCol];
+          }
+          return acc;
+        }, {}));
+      }
+    })
+  }
+
   private removeFromLocalStorage() {
     localStorage.removeItem(USER_PREFERENCES_STORAGE_KEY);
   }
 
-  private saveToServer(partialPreferences: { [key: string]: any }) {
-    this.userService.usersSetPreferences({preferences: partialPreferences} as UsersSetPreferencesRequest).subscribe();
+  private saveToServer(partialPreferences: Record<string, any>) {
+    this.userService.usersSetPreferences({preferences: partialPreferences, return_updated: false} as UsersSetPreferencesRequest).subscribe(() => {
+    });
   }
 
-  private cleanPreferencesInPreferences(pref: { [key: string]: any }) {
+  private cleanPreferencesInPreferences(pref: Record<string, any>) {
     if (pref.preferences) {
       this.setPreferences('preferences', null);
     }

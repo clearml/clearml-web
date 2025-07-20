@@ -1,6 +1,7 @@
 <span class="search-input-container"
       [class.expand]="true"
       [class.active]="active"
+      [class.animate]="!disableAnimation()"
       [class.with-counter]="enableNavigation()"
       [class.with-results]="searchResultsCount() > 0 && !empty()"
       [class.focused]="focused"

@@ -39,6 +39,7 @@ export class RouterEffects {
           ...(action.columns && {columns: uniq(action.columns)}),
           ...(action.orders && {order: encodeOrder(action.orders)}),
           ...(action.filters && {filter: encodeFilters(action.filters)}),
+          ...(action.gsFilters && {gsfilter: encodeFilters(action.gsFilters)}),
           ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
           ...(action.isDeep && {deep: true}),
           ...(action.version && {version: action.version}),

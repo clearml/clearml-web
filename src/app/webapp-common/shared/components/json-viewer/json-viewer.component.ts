@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
-import {MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/material/tree';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, viewChild} from '@angular/core';
+import {MatTree, MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatButtonModule} from '@angular/material/button';
 import {NgTemplateOutlet} from '@angular/common';
@@ -53,9 +53,9 @@ export class JsonViewerComponent {
 
   @Input() set searchIndex(value: number) {
     this._searchIndex = value;
-    window.setTimeout(() =>
-      this.ref.nativeElement.getElementsByClassName('current').item(0)?.scrollIntoView({behavior: 'smooth'})
-    );
+    window.setTimeout(() => {
+      this.ref.nativeElement.getElementsByClassName('current').item(0)?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    });
   }
   get search() {
     return this._search;
@@ -79,6 +79,7 @@ export class JsonViewerComponent {
   @Input() testLink?: (str: string) => boolean;
   @Output() linkAction = new EventEmitter<string>();
   @Output() searchCounterChanged = new EventEmitter<number>();
+  private tree = viewChild(MatTree);
 
   private _search: string = null;
   public isArray: boolean;

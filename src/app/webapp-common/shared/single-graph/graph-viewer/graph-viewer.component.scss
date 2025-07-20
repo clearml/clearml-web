@@ -64,6 +64,8 @@
 
   .smooth-options {
     margin-left: 24px;
+    align-items: center;
+
     .weight{
       display: inline-flex;
       width: 36px;
@@ -87,7 +89,7 @@
 
   .graph-container {
     padding-top: 16px;
-    @media (max-width: 1540px) {
+    @media (max-width: 1740px) {
       padding-top: 24px;
     }
 
@@ -150,9 +152,13 @@
     .smooth-options .label-text {
       padding-right: 16px;
     }
-    @media (max-width: 1540px) {
+    @media (max-width: 1740px) {
       top: 64px;
       padding: 0 24px;
+
+      .smooth-slide-field {
+        line-height: 36px;
+      }
     }
   }
 
@@ -164,7 +170,7 @@
 
   .field {
     align-items: center;
-    @media (max-width: 1540px) {
+    @media (max-width: 1740px) {
       align-items: unset;
       flex-direction: column;
       .label-text {

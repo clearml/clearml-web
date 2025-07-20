@@ -38,6 +38,8 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
 
 export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSelectEvent, 'index'> {
   single?: boolean;
@@ -49,17 +51,18 @@ export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSel
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        TableModule,
-        ResizableColumnDirective,
-        MenuComponent,
-        MenuItemComponent,
-        ContextMenuModule,
-        NgTemplateOutlet,
-        DotsLoadMoreComponent,
-        MatIcon,
-        MatButton
-    ]
+  imports: [
+    TableModule,
+    ResizableColumnDirective,
+    MenuComponent,
+    MenuItemComponent,
+    ContextMenuModule,
+    NgTemplateOutlet,
+    DotsLoadMoreComponent,
+    MatIcon,
+    MatButton,
+    MultiLineTooltipComponent
+  ]
 })
 export class TableComponent<D extends { id: string }> implements AfterContentInit, OnDestroy {
   private element = inject(ElementRef);
@@ -80,6 +83,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   private readonly isChrome = navigator.userAgent.indexOf('Chrome') > -1;
   public lastRowExpanded: boolean;
   public noDataTop: number;
+  protected rightClicked: boolean;
 
 
   readonly colHeaderTypeEnum = ColHeaderTypeEnum;
@@ -155,7 +159,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   rowCollapsed = output<TableRowCollapseEvent>();
   firstChanged = output<number>();
   loadMoreClicked = output();
-  @Output() rowRightClick = new EventEmitter<{ e: Event; rowData; single?: boolean }>();
+  @Output() rowRightClick = new EventEmitter<{ e: MouseEvent; rowData; single?: boolean }>();
   colReordered = output<string[]>();
   columnResized = output<{
         columnId: string;
@@ -411,8 +415,9 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
 
   openContext({originalEvent, data, single}: TableContextMenuSelectEventExt) {
     if (this.rowRightClick.observed) {
-      this.rowRightClick.emit({e: originalEvent, rowData: data, single});
+      this.rowRightClick.emit({e: originalEvent as MouseEvent, rowData: data, single});
       if (this.table()) {
+        this.rightClicked = !single;
         this.table().contextMenuSelection = null;
       }
       window.setTimeout(() => this.menu().hide());

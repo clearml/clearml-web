@@ -48,8 +48,7 @@
     </button>
   }
 </ng-template>
-<div class="experiment-body"
-     [class.footer-visible]="(checkedExperiments$ | ngrxPush)?.length > 1 || (showAllSelectedIsActive$ | ngrxPush)">
+<div class="experiment-body">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -112,6 +111,7 @@
         (clearAllFilters)="clearTableFiltersHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
         (closePanel)="closePanel()"
+        (resetFilterOptions)="resetTablesFilterOptions()"
       >
       </sm-experiments-table>
     </as-split-area>
@@ -127,6 +127,7 @@
 </div>
 
 <sm-entity-footer
+  [class.footer-visible]="(experiments$ | ngrxPush) && (checkedExperiments$ | ngrxPush)?.length > 1 || (showAllSelectedIsActive$ | ngrxPush)"
   [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"

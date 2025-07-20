@@ -55,6 +55,8 @@ import {OrchestrationComponent} from '~/features/workers-and-queues/orchestratio
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
+import {ClipboardModule} from 'ngx-clipboard';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
 
 @NgModule({
   imports: [
@@ -94,7 +96,9 @@ import {MatButton, MatIconButton} from '@angular/material/button';
     MatIcon,
     MatIconButton,
     MatTab,
-    MatButton
+    MatButton,
+    ClipboardModule,
+    CommonSearchComponent
   ],
   declarations: [
     OrchestrationComponent,

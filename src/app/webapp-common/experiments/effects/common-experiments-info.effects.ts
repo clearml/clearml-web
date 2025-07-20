@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
@@ -6,6 +6,7 @@ import {catchError, filter, map, mergeMap, shareReplay, switchMap, take, tap} fr
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {getExperimentInfoOnlyFields} from '~/features/experiments/experiments.consts';
 import {
+  experimentInfo,
   selectExperimentFormValidity,
   selectExperimentInfoData,
   selectExperimentInfoDataFreeze,
@@ -36,7 +37,7 @@ import {
   saveExperimentConfigObj,
   saveExperimentSection,
   saveHyperParamsSection,
-  setExperimentSaving,
+  setExperimentSaving, setLastTasksTab,
   TreeStep
 } from '../actions/common-experiments-info.actions';
 import {getTags, updateExperiment} from '../actions/common-experiments-view.actions';
@@ -56,7 +57,7 @@ import {emptyAction} from '~/app.constants';
 import {ReplaceHyperparamsEnum} from '~/business-logic/model/tasks/replaceHyperparamsEnum';
 import {Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {cloneDeep} from 'lodash-es';
+import {cloneDeep, get} from 'lodash-es';
 import {CommonExperimentReverterService} from '../shared/services/common-experiment-reverter.service';
 import {resetOutput} from '../actions/common-experiment-output.actions';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -75,12 +76,14 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {Task} from '~/business-logic/model/tasks/task';
 import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {UserPreferences} from '@common/user-preferences';
 
 
 @Injectable()
 export class CommonExperimentsInfoEffects {
   private previousSelectedLastUpdate: Date = null;
   private previousSelectedId: string;
+  private userPreferences = inject(UserPreferences);
 
 
   constructor(
@@ -101,6 +104,24 @@ export class CommonExperimentsInfoEffects {
     filter(action => !action?.['autoRefresh']),
     map(action => activeLoader(action.type))
   ));
+
+
+  private getPathsFromAction(action): string[] {
+    switch (action.type) {
+      case setLastTasksTab.type:
+        return [`experiments.info.lastTab.${action.projectId}`];
+    }
+    return [];
+  }
+
+  setUserPreferences = createEffect(() => this.actions$.pipe(
+    ofType(setLastTasksTab),
+    concatLatestFrom(() => this.store.select(experimentInfo)),
+    map(([action, state]) => {
+      const paths = this.getPathsFromAction(action);
+      paths.forEach(path => this.userPreferences.setPreferences(path, get(state, path.split('.').slice(2).join('.'))));
+    })), {dispatch: false});
+
 
   getExperimentConfigurationNames$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentConfigurationNames),

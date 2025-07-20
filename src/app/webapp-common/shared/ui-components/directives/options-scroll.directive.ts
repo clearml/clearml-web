@@ -10,7 +10,6 @@ export interface IAutoCompleteScrollEvent {
 }
 
 @Directive({
-  standalone: true,
   selector: '[smOptionsScroll]'
 })
 export class OptionsScrollDirective {
@@ -32,8 +31,8 @@ export class OptionsScrollDirective {
     if (this.thresholdPercent === undefined) {
       this.smOptionsScroll.emit({ autoComplete: this.autoComplete, scrollEvent: event });
     } else {
-      const threshold = this.thresholdPercent * 100 * (<HTMLInputElement>event.target).scrollHeight / 100;
-      const current = (<HTMLInputElement>event.target).scrollTop + (<HTMLInputElement>event.target).clientHeight;
+      const threshold = this.thresholdPercent * 100 * (event.target as HTMLInputElement).scrollHeight / 100;
+      const current = (event.target as HTMLInputElement).scrollTop + (event.target as HTMLInputElement).clientHeight;
 
       if (current > threshold) {
         this.smOptionsScroll.emit({ autoComplete: this.autoComplete, scrollEvent: event });

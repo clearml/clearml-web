@@ -6,8 +6,10 @@
       (click)="selectVariant()"
       [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
     >
-      <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
-      <span class="ellipsis">{{variantDisplay}}</span>
+      <div class="d-flex-center label">
+        <mat-icon fontSet="al" fontIcon="al-ico-plus" class="me-2"></mat-icon>
+        <span class="flex-grow-1 ellipsis">{{variantDisplay}}</span>
+      </div>
     </button>
     <mat-icon
       fontSet="al" fontIcon="al-ico-info-circle" class="info"

@@ -79,6 +79,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   @Output() columnsReordered = new EventEmitter<string[]>();
   @Output() cardsCollapsedChanged = new EventEmitter();
   @Output() closePanel = new EventEmitter();
+  @Output() resetFilterOptions = new EventEmitter();
   @ViewChildren(TableComponent) tables: QueryList<TableComponent<{id: string}>>;
 
   ngAfterViewInit(): void {
@@ -195,6 +196,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   abstract emitSelection(selection: any[]);
 
   ngOnDestroy(): void {
+    this.resetFilterOptions.emit();
     this.table = null;
   }
 

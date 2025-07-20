@@ -114,7 +114,7 @@
             >{{ row.name }}</span>
           }
           @case ('value') {
-            @if (row.section === 'Datasets' && row.value.length === 36) {
+            @if (row.section === 'Datasets' && row.value.length === 32) {
               <a
                 (click)="$event.preventDefault(); navigateToDataset(row.value)"
                 href="" target="_blank"

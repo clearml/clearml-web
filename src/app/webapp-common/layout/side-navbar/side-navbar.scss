@@ -58,6 +58,11 @@ $item-margin: 20px;
     display: flex;
     flex-direction: column;
     margin-top: auto;
+
+    .item {
+      background-repeat: no-repeat;
+      background-position: center;
+    }
   }
 
   .i-slack-mark-color {

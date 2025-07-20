@@ -1,6 +1,7 @@
 import {Component, inject, output, input } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
+import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 
 @Component({
     selector: 'sm-queues-menu',
@@ -8,7 +9,7 @@ import {Queue} from '@common/workers-and-queues/actions/queues.actions';
     styleUrls: ['./queues-menu.component.scss'],
     standalone: false
 })
-export class QueuesMenuComponent  {
+export class QueuesMenuComponent extends BaseContextMenuComponent{
   private route = inject(ActivatedRoute);
 
   protected queuesManager = this.route.snapshot.data.queuesManager;

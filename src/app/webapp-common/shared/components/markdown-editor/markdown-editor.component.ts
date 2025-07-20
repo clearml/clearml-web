@@ -33,20 +33,20 @@ const BREAK_POINT = 990;
 
 
 @Component({
-    selector: 'sm-markdown-editor',
-    templateUrl: './markdown-editor.component.html',
-    styleUrls: ['./markdown-editor.component.scss'],
-    imports: [
-        TooltipDirective,
-        LMarkdownEditorModule,
-        FormsModule,
-        MatMenuModule,
-        BaseNamePipe,
-        ClickStopPropagationDirective,
-        MatButton,
-        MatIcon,
-        MatIconButton
-    ]
+  selector: 'sm-markdown-editor',
+  templateUrl: './markdown-editor.component.html',
+  styleUrls: ['./markdown-editor.component.scss'],
+  imports: [
+    TooltipDirective,
+    LMarkdownEditorModule,
+    FormsModule,
+    MatMenuModule,
+    BaseNamePipe,
+    ClickStopPropagationDirective,
+    MatButton,
+    MatIcon,
+    MatIconButton
+  ]
 })
 export class MarkdownEditorComponent {
   private store = inject(Store);
@@ -79,7 +79,7 @@ export class MarkdownEditorComponent {
         '<div>You can enable it in under <a href="/settings/webapp-configuration">User Preferences</a>.</div>' +
         '</div>';
     }
-    return DOMPurify.sanitize(dirty, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'], FORBID_ATTR: ['action'] })
+    return DOMPurify.sanitize(dirty, {ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'], FORBID_ATTR: ['action']});
   };
   protected state = computed(() => ({
     data: this.data(),
@@ -105,9 +105,9 @@ export class MarkdownEditorComponent {
   readOnly = input<boolean>();
   handleUpload = input<(files: File[]) => Promise<UploadResult[]>>();
   resources = input([] as {
-        unused: boolean;
-        url: string;
-    }[]);
+    unused: boolean;
+    url: string;
+  }[]);
   blockUserScripts = input(false);
   saveInfo = output<string>();
   @Output() editModeChanged = new EventEmitter();
@@ -115,6 +115,7 @@ export class MarkdownEditorComponent {
   deleteResource = output<string>();
   imageMenuOpened = output<string>();
   editorComponent = viewChild(MDComponent);
+
   @HostListener('window:resize', ['$event'])
   updateEditorVisibility() {
     if (!this.ready) {
@@ -142,7 +143,7 @@ export class MarkdownEditorComponent {
     window['marked'] = marked;
     this.editMode = false;
 
-    const widgetOrigin = this.reportService.getUrl().toString()
+    const widgetOrigin = this.reportService.getUrl().toString();
     DOMPurify.addHook(
       'uponSanitizeElement',
       (currentNode, hookEvent) => {
@@ -184,7 +185,13 @@ export class MarkdownEditorComponent {
   }
 
   cancelClicked() {
-    this.getData.set(this.data());
+    if (this.getData() === this.data()) {
+      // Force to rerender preview panel when dirty and same text
+      this.getData.set('');
+      setTimeout(() => this.getData.set(this.data()));
+    } else {
+      this.getData.set(this.data());
+    }
     this.editMode = false;
     this.isDirty = false;
     this.updateEditorVisibility();
@@ -195,7 +202,7 @@ export class MarkdownEditorComponent {
     this.ace.container.style.lineHeight = '1.8em';
     this.ace.setOptions({
       fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-      fontSize: 12,
+      fontSize: 12
     });
     this.ready = true;
     this.preview = document.querySelector('.preview-container');
@@ -222,7 +229,7 @@ export class MarkdownEditorComponent {
 
     if (this.getData().indexOf('```language') > -1) {
       const manager = this.ace.session.getUndoManager();
-      const range = this.ace.find('```language',{
+      const range = this.ace.find('```language', {
         wrap: true,
         caseSensitive: true,
         wholeWord: true,

@@ -11,8 +11,10 @@
         [editable]="true"
         (inlineActiveStateChanged)="active.set($event)"
         (textChanged)="nameChange($event, currentUser())">
-        <div class="me-2">{{ currentUser().name }}</div>
-        <sm-id-badge caption="Copy user ID" [short]="true" [id]="currentUser().id" (copied)="copyToClipboard()"></sm-id-badge>
+        <div class="d-flex-center">
+          <div class="me-2">{{ currentUser().name }}</div>
+          <sm-id-badge caption="Copy user ID" [short]="true" [id]="currentUser().id" (copied)="copyToClipboard()"></sm-id-badge>
+        </div>
       </sm-inline-edit>
     </div>
     @if (currentUser().email) {

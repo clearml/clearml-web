@@ -1,13 +1,12 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
-import {flatten, isEqual} from 'lodash-es';
+import {flatten, get, isEqual} from 'lodash-es';
 import {EMPTY, of} from 'rxjs';
-import {auditTime, catchError, expand, filter, map, mergeMap, reduce, switchMap, tap,} from 'rxjs/operators';
+import {auditTime, catchError, expand, filter, map, mergeMap, reduce, switchMap, tap} from 'rxjs/operators';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {BlModelsService} from '~/business-logic/services/models.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {downloadForGetAll, getFilteredUsers, setProjectUsers} from '../../core/actions/projects.actions';
@@ -22,7 +21,7 @@ import {setMetadataKeys, setSelectedModelsDisableAvailable} from '../actions/mod
 import {MODELS_PAGE_SIZE, MODELS_TABLE_COLS} from '../models.consts';
 import * as modelsSelectors from '../reducers';
 import {
-  selectModelsList,
+  selectModelsList, selectModelsView,
   selectSelectedModels,
   selectTableFilters,
   selectTableMode,
@@ -58,18 +57,18 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {sortByField} from '@common/tasks/tasks.utils';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {prepareColsForDownload} from '@common/shared/utils/download';
+import {UserPreferences} from '@common/user-preferences';
 
 @Injectable()
 export class ModelsViewEffects {
-
-  constructor(
-    private actions$: Actions, private store: Store, private apiModels: ApiModelsService,
-    private projectsApi: ApiProjectsService, private modelBl: BlModelsService, private router: Router,
-    private route: ActivatedRoute, private orgApi: ApiOrganizationService
-  ) {
-  }
-
-  /* eslint-disable @typescript-eslint/naming-convention */
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private apiModels = inject(ApiModelsService);
+  private projectsApi = inject(ApiProjectsService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private orgApi = inject(ApiOrganizationService);
+  private userPreferences = inject(UserPreferences);
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(actions.getNextModels, actions.globalFilterChanged, actions.fetchModelsRequested, actions.selectAllModels),
@@ -77,28 +76,68 @@ export class ModelsViewEffects {
     map(() => activeLoader('Fetch Models'))
   ));
 
+  private getPathsFromAction(action): string[] {
+    switch (action.type) {
+      case actions.setTableSort.type:
+        return [`models.view.projectColumnsSortOrder.${action.projectId}`];
+      case actions.removeMetricCol.type:
+        return [
+          `models.view.metadataCols.${action.projectId}`,
+          `models.view.projectColumnsSortOrder.${action.projectId}`,
+          `models.view.projectColumnsWidth.${action.projectId}`,
+          `models.view.colsOrder.${action.projectId}`
+        ];
+      case actions.setTableFilters.type:
+        return [`models.view.projectColumnFilters.${action.projectId}`];
+      case actions.setColumnWidth.type:
+        return [`models.view.projectColumnsWidth.${action.projectId}`];
+      case actions.toggleColHidden.type:
+        return [`models.view.hiddenProjectTableCols.${action.projectId}`];
+      case actions.removeCol.type:
+        return [
+          `models.view.colsOrder.${action.projectId}`,
+          `models.view.metadataCols.${action.projectId}`
+        ];
+      case actions.setColsOrderForProject.type:
+        return [`models.view.colsOrder.${action.projectId}`];
+      case actions.addColumn.type:
+      case actions.setExtraColumns.type:
+        return [`models.view.metadataCols.${action.projectId}`];
+    }
+    return [];
+  }
+
+  setUserPreferences = createEffect(() => this.actions$.pipe(
+    ofType(actions.setTableSort, actions.removeMetricCol, actions.setTableFilters, actions.setColumnWidth, actions.toggleColHidden, actions.removeCol,
+      actions.setColsOrderForProject, actions.addColumn, actions.setExtraColumns),
+    concatLatestFrom(() => this.store.select(selectModelsView)),
+    map(([action, state]) => {
+      const paths = this.getPathsFromAction(action);
+      paths.forEach(path => this.userPreferences.setPreferences(path, get(state, path.split('.').slice(2).join('.'))));
+    })), {dispatch: false});
+
   tableSortChange = createEffect(() => this.actions$.pipe(
     ofType(actions.tableSortChanged),
     concatLatestFrom(() => this.store.select(selectTableSortFields)),
-    switchMap(([action, oldOrders]) => {
+    map(([action, oldOrders]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
-      return [setURLParams({orders, update: true})];
+      return setURLParams({orders, update: true});
     })
   ));
 
   tableFilterChange = createEffect(() => this.actions$.pipe(
     ofType(actions.tableFilterChanged),
     concatLatestFrom(() => this.store.select(selectTableFilters)),
-    switchMap(([action, oldFilters]) =>
-      [setURLParams({
+    map(([action, oldFilters]) =>
+      setURLParams({
         filters: {
           ...oldFilters,
           ...action.filters.reduce((acc, updatedFilter) => {
             acc[updatedFilter.col] = {value: updatedFilter.value, matchMode: updatedFilter.filterMatchMode};
             return acc;
-          }, {} as { [col: string]: FilterMetadata })
+          }, {} as Record<string, FilterMetadata>)
         }, update: true
-      })]
+      })
     )
   ));
 
@@ -118,14 +157,14 @@ export class ModelsViewEffects {
         map((data: ProjectsGetModelMetadataValuesResponse) => {
           const values = data.values.filter(x => hasValue(x) && x !== '');
           return actions.setMetadataColValuesOptions({col: action.col, values});
-        }),
+        })
       );
     })
   ));
 
   reFetchModels = createEffect(() => this.actions$.pipe(
     ofType(
-      actions.fetchModelsRequested, actions.getNextModelsWithPageSize, actions.globalFilterChanged, actions.showSelectedOnly,
+      actions.fetchModelsRequested, actions.getNextModelsWithPageSize, actions.globalFilterChanged, actions.showSelectedOnly
     ),
     switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
       filter(ready => ready),
@@ -154,12 +193,12 @@ export class ModelsViewEffects {
   getFrameworksEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getFrameworks, actions.getAllProjectsFrameworks),
     concatLatestFrom(() =>
-      this.store.select(selectRouterParams).pipe(map(params => params?.projectId ?? '*')),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId ?? '*'))
     ),
     switchMap(([action, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' && action.type !== actions.getAllProjectsFrameworks.type ? [projectId] : []})
       .pipe(
         mergeMap(res => [
-          actions.setFrameworks({frameworks: res.frameworks.concat(null)}),
+          actions.setFrameworks({frameworks: res.frameworks.concat(null)})
         ]),
         catchError(error => [
           requestFailed(error),
@@ -247,7 +286,7 @@ export class ModelsViewEffects {
             addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{
               name: 'More info',
               actions: [setServerError(error, null, 'Fetch custom metrics failed')]
-            }]),
+            }])
           ])
         )
     )
@@ -320,7 +359,7 @@ export class ModelsViewEffects {
             actions.setNoMoreModels({payload: (res.models.length < MODELS_PAGE_SIZE)}),
             ...addModelsAction,
             actions.setCurrentScrollId({scrollId: res.scroll_id}),
-            deactivateLoader('Fetch Models'),
+            deactivateLoader('Fetch Models')
           ];
         }),
         catchError(error => [
@@ -342,7 +381,7 @@ export class ModelsViewEffects {
       this.store.select(selectIsArchivedMode),
       this.store.select(modelsSelectors.selectGlobalFilter),
       this.store.select(modelsSelectors.selectTableFilters),
-      this.store.select(selectIsDeepMode),
+      this.store.select(selectIsDeepMode)
     ]),
     switchMap(([action, projectId, archived, globalSearch, tableFilters, deep]) => {
       const pageSize = 1000;
@@ -431,7 +470,7 @@ export class ModelsViewEffects {
 
   prepareTableForDownload = createEffect(() => this.actions$.pipe(
     ofType(actions.prepareTableForDownload),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode),
@@ -475,7 +514,7 @@ export class ModelsViewEffects {
     searchQuery: SearchState['searchQuery'];
     archived: boolean;
     orderFields: SortMeta[];
-    filters: { [key: string]: FilterMetadata };
+    filters: Record<string, FilterMetadata>;
     selectedIds: string[];
     deep: boolean;
     pageSize?: number;
@@ -515,7 +554,7 @@ export class ModelsViewEffects {
       only_fields,
       ...(tagsFilter?.length > 0 && {
         filters: {
-          tags: getTagsFilters(tagsFilterAnd, tagsFilter),
+          tags: getTagsFilters(tagsFilterAnd, tagsFilter)
         }
       }),
       ...(frameworkFilter?.length > 0 && {framework: frameworkFilter}),
@@ -525,7 +564,7 @@ export class ModelsViewEffects {
   }
 
 
-  fetchModels$(scrollId1: string, refreshScroll: boolean = false, pageSize = MODELS_PAGE_SIZE) {
+  fetchModels$(scrollId1: string, refreshScroll = false, pageSize = MODELS_PAGE_SIZE) {
     return of(scrollId1)
       .pipe(
         concatLatestFrom(() => [
@@ -566,7 +605,7 @@ export class ModelsViewEffects {
           [MenuItems.archive]: selectionDisabledArchive(payload),
           [MenuItems.moveTo]: selectionDisabledMoveTo(payload),
           [MenuItems.delete]: selectionDisabledDelete(payload),
-          [MenuItems.tags]: selectionDisabledTags(payload),
+          [MenuItems.tags]: selectionDisabledTags(payload)
         };
         return [setSelectedModelsDisableAvailable({selectedModelsDisableAvailable})];
       })
@@ -582,13 +621,12 @@ export class ModelsViewEffects {
     while (activeChild.firstChild) {
       activeChild = activeChild.firstChild;
     }
-    const activeChildUrl = activeChild?.url?.[0]?.path ?? 'general';
     let baseUrl = this.route;
     while (baseUrl.snapshot.routeConfig?.path !== 'models') {
       baseUrl = baseUrl.firstChild;
     }
     selectedModel ?
-      this.router.navigate([selectedModel.id, activeChildUrl], {
+      this.router.navigate([selectedModel.id], {
         queryParamsHandling: 'preserve',
         relativeTo: baseUrl
       }) :

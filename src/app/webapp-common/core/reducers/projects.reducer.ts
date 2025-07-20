@@ -100,7 +100,7 @@ const initRootProjects: RootProjects = {
 };
 
 export const projects = state => state.rootProjects as RootProjects;
-export const selectRouterProjectId = createSelector(selectRouterParams, params => params?.projectId);
+export const selectRouterProjectId = createSelector(selectRouterParams, params => params?.projectId as string);
 export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
 export const selectSelectedBreadcrumbSubFeature = createSelector(projects, state => state.selectedSubFeature);
 export const selectBreadcrumbOptions = createSelector(projects, state => state.breadcrumbOptions);
@@ -255,7 +255,8 @@ export const projectsReducer = createReducer(
   })),
   on(projectsActions.resetTablesFilterProjectsOptions, (state): RootProjects => ({
     ...state,
-    tablesFilterProjectsOptions: null
+    tablesFilterProjectsOptions: null,
+    projectsOptionsScrollId: null
   })),
   on(projectsActions.setTablesFilterProjectsOptions, (state, action): RootProjects => ({
     ...state,

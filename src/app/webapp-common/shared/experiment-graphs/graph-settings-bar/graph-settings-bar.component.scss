@@ -3,23 +3,26 @@
   z-index: 1000;
   width: 100%;
   font-size: 14px;
+
   mat-slider {
     min-width: 60px;
   }
-  .divider{
+
+  .divider {
     border-left: 1px solid var(--color-outline-variant);
     padding-left: 16px;
     margin-left: 8px;
   }
 
   .vertical-layout {
-    .divider{
+    .divider {
       border-left: unset;
       padding-left: unset;
       margin-left: unset;
       border-top: 1px solid var(--color-outline-variant);
       padding-top: 16px;
     }
+
     font-size: 14px;
 
     &.x-axis-options {
@@ -28,18 +31,32 @@
       width: 100%;
       gap: 16px
     }
+
     .smooth-slide-field {
       margin-left: auto;
-      width: 204px;
+      width: 200px;
+
+        ::ng-deep .mdc-form-field {
+          width: 100%;
+          justify-content: space-between;
+
+          label {
+            padding-left: 0;
+            margin-left: 0;
+          }
+        }
     }
-    .spacer{
-      flex-grow:1;
+
+    .spacer {
+      flex-grow: 1;
     }
-    .smoothing-label{
+
+    .smoothing-label {
       width: 90px;
       flex-grow: unset;
     }
-    .slider{
+
+    .slider {
       width: 110px;
     }
 
@@ -50,7 +67,6 @@
       display: flex;
       justify-content: end;
     }
-
 
 
     .group-by-field,
@@ -77,7 +93,8 @@
     }
 
   }
-  .close-button{
+
+  .close-button {
     margin-left: auto;
   }
 
@@ -89,13 +106,14 @@
 .x-axis-options {
   display: flex;
   flex-grow: 1;
-  &.vertical-layout{
+
+  &.vertical-layout {
     justify-content: space-between;
   }
+
   align-items: center;
   gap: 12px;
 }
-
 
 
 .label-text {
@@ -110,6 +128,7 @@
 .smoothing-text {
   padding-right: 16px;
 }
+
 .smooth-type-field {
   width: unset;
 }
@@ -145,6 +164,7 @@ mat-form-field {
 .field {
   align-items: center;
 }
+
 .weight {
   margin-left: 6px;
   min-width: 24px;
@@ -176,6 +196,11 @@ mat-form-field {
   &.hidden {
     opacity: 0;
     visibility: hidden;
+  }
+
+  &.divider {
+    width: 100%;
+    border-top: 1px solid var(--color-outline-variant);
   }
 }
 

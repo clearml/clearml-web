@@ -7,10 +7,9 @@ export enum ScrollEndDirection {
 
 @Directive({
   selector: '[smScrollEnd]',
-  standalone: true,
 })
 export class ScrollEndDirective implements OnInit, OnDestroy {
-  @Output() smScrollEnd: EventEmitter<any> = new EventEmitter();
+  @Output() smScrollEnd = new EventEmitter<any>();
 
   @Input() rootMargin = '0px 0px 0px 0px';
   @Input() desiredDirection: ScrollEndDirection = ScrollEndDirection.down;
@@ -32,6 +31,7 @@ export class ScrollEndDirective implements OnInit, OnDestroy {
           ? ScrollEndDirection.down : ScrollEndDirection.up;
 
         if (!this.previousEntry?.isIntersecting && entry.isIntersecting && this.scrollDirection === this.desiredDirection) {
+          // TODO: The 'emit' function requires a mandatory any argument
           this.smScrollEnd.emit();
         }
 
@@ -52,7 +52,6 @@ export class ScrollEndDirective implements OnInit, OnDestroy {
 
 @Directive({
   selector: '[smScrollEndRoot]',
-  standalone: true,
 })
 export class ScrollEndRootDirective {
   constructor(

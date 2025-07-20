@@ -43,7 +43,3 @@ $dark-theme: mat.define-theme((
   )
 ));
 
-::selection {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}

@@ -3,8 +3,6 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {ApiAuthService} from '~/business-logic/api-services/auth.service';
-import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
@@ -25,19 +23,21 @@ import {refreshExperiments} from '../actions/common-experiments-view.actions';
 import {EventsGetTaskLogResponse} from '~/business-logic/model/events/eventsGetTaskLogResponse';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {EMPTY} from 'rxjs';
-import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {experimentOutput, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {EventsGetTaskPlotsResponse} from '~/business-logic/model/events/eventsGetTaskPlotsResponse';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
+import {UserPreferences} from '@common/user-preferences';
+import {get} from 'lodash-es';
+import * as actions from '@common/experiments/actions/common-experiment-output.actions';
 
 
 @Injectable()
 export class CommonExperimentOutputEffects {
 
   constructor(
-    private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
-    private modelsApi: ApiModelsService,
-    private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService
+    private actions$: Actions, private store: Store, private userPreferences: UserPreferences, private apiTasks: ApiTasksService,
+    private modelsApi: ApiModelsService, private eventsApi: ApiEventsService
   ) {
   }
 
@@ -46,6 +46,29 @@ export class CommonExperimentOutputEffects {
     filter(action => !action?.['refresh']),
     map(action => activeLoader(action.type))
   ));
+
+  private getPathsFromAction(action): string[][] {
+    switch (action.type) {
+      case outputActions.toggleMetricValuesView.type:
+        return [['experiments','output','metricValuesView']];
+      case outputActions.setExperimentSettings.type:
+        return [['experiments','output','settingsList',action.id]];
+      case outputActions.removeExperimentSettings.type:
+        return [['experiments','output','settingsList']];
+      case outputActions.setChartSettings.type:
+        return [['experiments','output','chartSettingsPerProject', action.projectId, action.id]];
+    }
+    return [];
+  }
+
+  setUserPreferences = createEffect(() => this.actions$.pipe(
+    ofType(outputActions.toggleMetricValuesView, outputActions.setExperimentSettings, actions.setChartSettings, outputActions.removeExperimentSettings),
+    concatLatestFrom(() => this.store.select(experimentOutput)),
+    map(([action, state]) => {
+      const paths = this.getPathsFromAction(action);
+      paths.forEach(path => this.userPreferences.setPreferences(path, get(state, path.slice(2))));
+    })), {dispatch: false});
+
 
   getLog$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.getExperimentLog),

@@ -1,5 +1,5 @@
 <sm-model-general-info
-  [model]="selectedModel"
-  [editable]="!isExample"
+  [model]="selectedModel()"
+  [editable]="!isExample()"
   (commentChanged)="commentChanged($event)"
 ></sm-model-general-info>

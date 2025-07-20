@@ -68,13 +68,17 @@ export const encodeFilters = (filters: Record<string, FilterMetadata>) => {
       .filter((key: string) => filters[key].value?.length)
       .map((key: string) => {
         const val = filters[key] as FilterMetadata;
-        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${encodeURIComponent(val.value.join('+$+'))}`;
+        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${encodeURIComponent(val?.value.join('+$+'))}`;
       }).join(',');
   }
   return null;
 };
 
-export const decodeFilter = (filters: string): TableFilter[] => filters.split(',').map((filter: string) => {
+export const decodeFilter = (filters: string): TableFilter[] => {
+  if (filters === '') {
+    return [];
+  }
+  return filters.split(',').map((filter: string) => {
   let mode: string;
   const index = filter.indexOf(':AND');
   if (index > -1) {
@@ -87,7 +91,7 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
   //   parts[1] = parts[2];
   // }
   return {col, filterMatchMode: mode, value: decodeURIComponent(values)?.split('+$+').map(x => x === '' ? null : x)};
-});
+})}
 
 export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
 
@@ -222,3 +226,22 @@ export const decodeURIComponentSafe = (value: string) => {
     }
   }
 };
+
+export const convertFiltersToRecord = (filters: TableFilter[]
+): Record<string, FilterMetadata> => {
+  // Start with an empty object as the initial value for the accumulator.
+  const initialValue: Record<string, FilterMetadata> = {};
+
+  // Use reduce to transform the array into a single record object.
+  return filters.reduce((accumulator, currentFilter) => {
+    // Only process filters that have a 'col' property to use as a key.
+    if (currentFilter.col) {
+      accumulator[currentFilter.col] = {
+        value: currentFilter.value,
+        matchMode: currentFilter.filterMatchMode,
+      };
+    }
+    // Return the updated accumulator for the next iteration.
+    return accumulator;
+  }, initialValue);
+}

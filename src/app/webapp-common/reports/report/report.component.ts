@@ -254,7 +254,15 @@ export class ReportComponent implements OnInit, OnDestroy {
           this.calculateUnusedResources();
           this.example = isExample(report);
           this.archived = report?.system_tags?.includes('archived');
-          this.router.navigate(['.'], {relativeTo: this.route, queryParams: {...(this.archived && {archive: this.archived})}});
+          if (this.archived) {
+            window.setTimeout(() => {
+              this.router.navigate(['.'], {
+                relativeTo: this.route,
+                skipLocationChange: true,
+                queryParams: {archive: this.archived}
+              });
+            }, 50);
+          }
           this.draft = this.report.status !== ReportStatusEnum.Published;
           this.cdr.detectChanges();
         })

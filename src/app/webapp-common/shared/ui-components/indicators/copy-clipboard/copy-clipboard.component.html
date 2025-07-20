@@ -1,18 +1,40 @@
-<button
-  mat-button
-  smTooltip="{{tooltipText()}}"
-  [matTooltipPosition]="tooltipPosition()"
-  [matTooltipShowDelay]="500"
-  type="button"
-  ngxClipboard
-  smClickStopPropagation
-  [class.icon-only]="!label()"
-  [cbContent]="clipboardText()"
-  [disabled]="disabled()"
-  (cbOnSuccess)="copyToClipboard()"
-  data-id="copyToClipboard"
-  [class.sm]="smallIcon()"
->
-  <mat-icon fontSet="al" [fontIcon]="copied() ? 'al-ico-success' : copyIcon() || 'al-ico-copy-to-clipboard'"></mat-icon>
-  <span>{{label()}}</span>
-</button>
+
+@if (isStroked()) {
+  <button
+    mat-stroked-button
+    smTooltip="{{tooltipText()}}"
+    [matTooltipPosition]="tooltipPosition()"
+    [matTooltipShowDelay]="500"
+    type="button"
+    ngxClipboard
+    smClickStopPropagation
+    [class.icon-only]="!label()"
+    [cbContent]="clipboardText()"
+    [disabled]="disabled()"
+    (cbOnSuccess)="copyToClipboard()"
+    data-id="copyToClipboard"
+    [class.sm]="smallIcon()"
+  >
+    <mat-icon fontSet="al" [fontIcon]="copied() ? 'al-ico-success' : copyIcon() || 'al-ico-copy-to-clipboard'"></mat-icon>
+    <span>{{label()}}</span>
+  </button>
+} @else {
+  <button
+    mat-button
+    smTooltip="{{tooltipText()}}"
+    [matTooltipPosition]="tooltipPosition()"
+    [matTooltipShowDelay]="500"
+    type="button"
+    ngxClipboard
+    smClickStopPropagation
+    [class.icon-only]="!label()"
+    [cbContent]="clipboardText()"
+    [disabled]="disabled()"
+    (cbOnSuccess)="copyToClipboard()"
+    data-id="copyToClipboard"
+    [class.sm]="smallIcon()"
+  >
+    <mat-icon fontSet="al" [fontIcon]="copied() ? 'al-ico-success' : copyIcon() || 'al-ico-copy-to-clipboard'"></mat-icon>
+    <span>{{label()}}</span>
+  </button>
+}

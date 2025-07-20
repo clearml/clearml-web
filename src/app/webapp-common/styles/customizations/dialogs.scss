@@ -39,9 +39,13 @@ html.cdk-global-scrollblock {
 
 @mixin dialogs($theme) {
   @if mat.get-theme-type($theme) == light {
-    --mdc-dialog-container-color: var(--color-surface-container-lowest);
+    .mat-mdc-dialog-surface {
+      --mdc-dialog-container-color: var(--color-surface-container-lowest);
+    }
   } @else {
-    --mdc-dialog-container-color: var(--color-surface-container-low);
+    .mat-mdc-dialog-surface {
+      --mdc-dialog-container-color: var(--color-surface-container-low);
+    }
   }
 }
 

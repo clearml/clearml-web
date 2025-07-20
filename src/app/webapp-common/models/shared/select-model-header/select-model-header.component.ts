@@ -50,6 +50,6 @@ export class SelectModelHeaderComponent {
   // }
 
   onSearchFocusOut() {
-    if (!this.searchElem.searchBarInput.nativeElement.value) {}
+    if (!this.searchElem.searchBarInput().nativeElement.value) {}
   }
 }

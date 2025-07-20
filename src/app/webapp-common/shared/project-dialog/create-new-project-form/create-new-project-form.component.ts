@@ -3,23 +3,22 @@ import {
   Component, computed, effect, inject,
   input, output
 } from '@angular/core';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {Project} from '~/business-logic/model/projects/project';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {rootProjectsPageSize} from '@common/constants';
 import {MatInputModule} from '@angular/material/input';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {
-  UniqueNameValidatorDirective
-} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
-import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
+import {uniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
 import {
   PaginatedEntitySelectorComponent
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.component';
 import {MatButton} from '@angular/material/button';
-import {minLengthNoSpaces} from '@common/shared/validators/minLengthNoSpaces';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
+import {MatError} from '@angular/material/form-field';
 
 export interface NewProjectResults {
   name?: string;
@@ -38,27 +37,25 @@ export interface NewProjectResults {
     MatInputModule,
     StringIncludedInArrayPipe,
     MatProgressSpinnerModule,
-    UniqueNameValidatorDirective,
-    UniqueProjectValidator,
     PaginatedEntitySelectorComponent,
     ReactiveFormsModule,
     MatButton,
+    MatError,
   ]
 })
 export class CreateNewProjectFormComponent {
+  private readonly projectsApi = inject(ApiProjectsService);
   private readonly formBuilder = inject(FormBuilder);
 
   public readonly projectsRoot = 'Projects root';
 
   projectForm = this.formBuilder.group({
-    name: ['', [Validators.required, minLengthNoSpaces(3)]],
+    name: ['', [Validators.required, minLengthTrimmed(3)]],
     description: [''],
-
     default_output_destination: [null, [Validators.pattern(OutputDestPattern)]],
-
     system_tags: [[]],
-    parent: [null as string, [Validators.required, Validators.minLength(3)]]
-  });
+    parent: [null as string, [Validators.required, minLengthTrimmed(3)]]
+  }, {asyncValidators: [uniqueProjectValidator(this.projectsApi)], updateOn: 'change'});
 
   public loading: boolean;
   public noMoreOptions: boolean;
@@ -99,6 +96,14 @@ export class CreateNewProjectFormComponent {
         this.initiated = true;
       }
     });
+
+    this.projectForm.controls.parent.valueChanges
+      .pipe(
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        this.projectForm.controls.name.setErrors(null);
+      });
   }
 
   send() {

@@ -1,4 +1,4 @@
-import {Directive, Input} from '@angular/core';
+import {Directive, input } from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
 
 export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): ValidatorFn =>
@@ -21,12 +21,12 @@ export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): Vali
   standalone: true
 })
 export class UniqueNameValidatorDirective implements Validator {
-  @Input() existingNames: Array<string>;
-  @Input() forbiddenPrefix: string;
-  @Input() valuePrefix: string;
+  existingNames = input<string[]>();
+  forbiddenPrefix = input<string>();
+  valuePrefix = input<string>();
 
   validate(control: AbstractControl): ValidationErrors | null {
-    return this.existingNames ? uniqueNameValidator(this.existingNames, this.forbiddenPrefix, this.valuePrefix)(control) : null;
+    return this.existingNames() ? uniqueNameValidator(this.existingNames()!, this.forbiddenPrefix(), this.valuePrefix())(control) : null;
   }
 }
 

@@ -122,10 +122,6 @@ export const setVisibleColumnsForProject = createAction(
   EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS_FOR_PROJECT',
   props<{ visibleColumns: string[]; projectId: string }>()
 );
-export const setHiddenCols = createAction(
-  EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS',
-  props<{ hiddenCols: { [key: string]: boolean } }>()
-);
 
 export const setParents = createAction(
   EXPERIMENTS_PREFIX + '[set project experiment parents]',
@@ -252,7 +248,7 @@ export const setColumnWidth = createAction(
 
 export const setColsOrderForProject = createAction(
   EXPERIMENTS_PREFIX + ' [set cols order]',
-  props<{ cols: string[]; project: string }>()
+  props<{ cols: string[]; projectId: string }>()
 );
 
 export const clearHyperParamsCols = createAction(

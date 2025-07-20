@@ -5,7 +5,6 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
   templateUrl: './ripple-button.component.html',
   styleUrls: ['./ripple-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
 })
 export class RippleButtonComponent {
   @Input() top = 0;

@@ -18,34 +18,37 @@ export interface ExperimentOutputState {
   experimentLog: Log[];
   totalLogLines: number;
   beginningOfLog: boolean;
-  settingsList: Array<ExperimentSettings>;
+  settingsList: Record<string, ExperimentSettings | Partial<ExperimentSettings>>;
+  chartSettingsPerProject: Record<string, Record<string, Partial<ExperimentSettings>>>;
   searchTerm: string;
   logFilter: string;
   logLoading: boolean;
   showSettings: boolean;
   metricValuesView: boolean;
-  scalarSingleValue: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  scalarSingleValue: EventsGetTaskSingleValueMetricsResponseValues[];
   lastMetrics: Task['last_metrics'];
   graphsPerRow: number;
 }
 
 export interface ExperimentSettings {
   id: string;
-  hiddenMetricsScalar: Array<string>;
-  hiddenMetricsPlot: Array<string>;
+  hiddenMetricsScalar: string[];
+  hiddenMetricsPlot: string[];
   selectedMetricTable: string[];
-  selectedMetricsScalar: Array<string>;
-  selectedMetricsPlot: Array<string>;
-  selectedHyperParams: Array<string>;
+  selectedMetricsScalar: string[];
+  selectedMetricsPlot: string[];
+  selectedHyperParams: string[];
   selectedMetric: string;
   smoothWeight: number;
   smoothSigma: number;
   smoothType: SmoothTypeEnum;
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
+  showOriginals: boolean;
   lastModified?: number;
   valueType?: 'min_value' | 'max_value' | 'value';
   projectLevel?: boolean;
+  log?: boolean;
 }
 
 export const experimentOutputInitState: ExperimentOutputState = {
@@ -56,8 +59,9 @@ export const experimentOutputInitState: ExperimentOutputState = {
   experimentLog: null,
   totalLogLines: null,
   beginningOfLog: false,
-  settingsList: [],
-  scalarSingleValue:[],
+  settingsList: {},
+  chartSettingsPerProject: {},
+  scalarSingleValue: [],
   lastMetrics: null,
   searchTerm: '',
   logFilter: null,
@@ -69,15 +73,15 @@ export const experimentOutputInitState: ExperimentOutputState = {
 
 export const experimentOutputReducer = createReducer(
   experimentOutputInitState,
-  on(actions.resetOutput, state  => ({
+  on(actions.resetOutput, (state): ExperimentOutputState => ({
     ...state,
     experimentLog: experimentOutputInitState.experimentLog,
     metricsMultiScalarsCharts: experimentOutputInitState.metricsMultiScalarsCharts,
     metricsHistogramCharts: experimentOutputInitState.metricsHistogramCharts,
     metricsPlotsCharts: experimentOutputInitState.metricsPlotsCharts
   })),
-  on(actions.getExperimentLog, (state, action) => ({...state, logLoading: !action.autoRefresh})),
-  on(actions.setExperimentLogLoading, (state, action) => ({...state, logLoading: action.loading})),
+  on(actions.getExperimentLog, (state, action): ExperimentOutputState => ({...state, logLoading: !action.autoRefresh})),
+  on(actions.setExperimentLogLoading, (state, action): ExperimentOutputState => ({...state, logLoading: action.loading})),
   on(actions.setExperimentLog, (state, action) => {
     const events = Array.from(action?.events || []).reverse();
     let currLog: any[];
@@ -94,7 +98,7 @@ export const experimentOutputReducer = createReducer(
           currLog = currLog.slice(0, 300);
         }
       } else {
-        currLog = sortBy( state.experimentLog?.concat(events), 'timestamp');
+        currLog = sortBy(state.experimentLog?.concat(events), 'timestamp');
         if (currLog.length > 300) {
           currLog = currLog.slice(currLog.length - 300, currLog.length);
         }
@@ -110,35 +114,62 @@ export const experimentOutputReducer = createReducer(
       logLoading: false
     };
   }),
-  on(actions.setExperimentLogAtStart, (state, action) => ({...state, beginningOfLog: action.atStart, logLoading: false})),
-  on(actions.setExperimentMetricsSearchTerm, (state, action) => ({...state, searchTerm: action.searchTerm})),
-  on(actions.setHistogram, (state, action) => ({...state, metricsHistogramCharts: action.histogram, cachedAxisType: action.axisType})),
-  on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
-  on(actions.setExperimentScalarSingleValue, (state, action) => ({...state, scalarSingleValue: action.values})),
-  on(actions.setExperimentMetricsVariantValues, (state, action) => ({...state, lastMetrics: action.lastMetrics})),
-  on(actions.removeExperimentSettings, (state, action) => ({
-    ...state,
-    settingsList: state.settingsList.filter(setting => setting.id !== action.id),
-  })),
-  on(actions.setExperimentSettings, (state, action) => {
-    let newSettings: ExperimentSettings[];
-    const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
-    const experimentExists = state.settingsList.find(setting => setting.id === action.id);
+  on(actions.setExperimentLogAtStart, (state, action): ExperimentOutputState => ({...state, beginningOfLog: action.atStart, logLoading: false})),
+  on(actions.setExperimentMetricsSearchTerm, (state, action): ExperimentOutputState => ({...state, searchTerm: action.searchTerm})),
+  on(actions.setHistogram, (state, action): ExperimentOutputState => ({...state, metricsHistogramCharts: action.histogram, cachedAxisType: action.axisType})),
+  on(actions.setExperimentPlots, (state, action): ExperimentOutputState => ({...state, metricsPlotsCharts: action.plots})),
+  on(actions.setExperimentScalarSingleValue, (state, action): ExperimentOutputState => ({...state, scalarSingleValue: action.values})),
+  on(actions.setExperimentMetricsVariantValues, (state, action): ExperimentOutputState => ({...state, lastMetrics: action.lastMetrics})),
+  on(actions.removeExperimentSettings, (state, action): ExperimentOutputState => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {[action.id]: _, ...settingsWithout} = state.settingsList;
+    return {
+      ...state,
+      settingsList: settingsWithout
+    };
+  }),
+  on(actions.setExperimentSettings, (state, action): ExperimentOutputState => {
+    const changesWithTimestamp = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
     const discardBefore = new Date();
     discardBefore.setMonth(discardBefore.getMonth() - 2);
-    if (experimentExists) {
-      newSettings = state.settingsList
-        .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
-        .map(setting => setting.id === action.id ? {...setting, ...changes} : setting);
-    } else {
-      newSettings = [
-        ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
-        {id: action.id, ...changes}
-      ];
-    }
-    return {...state, settingsList: newSettings};
+    const discardBeforeTime = discardBefore.getTime();
+
+    const filteredOldSettings = Object.entries(
+      state.settingsList)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([id, setting]) => setting.lastModified >= discardBeforeTime)
+      .reduce((acc, [id, setting]) => {
+        acc[id] = setting as ExperimentSettings;
+        return acc;
+      }, {} as Record<string, ExperimentSettings>);
+
+    const newSettingsList: Record<string, ExperimentSettings> = {
+      ...filteredOldSettings,
+      [action.id]: {
+        ...(state.settingsList[action.id] || {}),
+        ...changesWithTimestamp
+      }
+    };
+    return {
+      ...state,
+      settingsList: newSettingsList
+    };
   }),
-  on(actions.resetExperimentMetrics, state => ({
+  on(actions.setChartSettings, (state, action): ExperimentOutputState => ({
+      ...state,
+      chartSettingsPerProject: {
+        ...state.chartSettingsPerProject,
+        [action.projectId]: {
+          ...(state.chartSettingsPerProject[action.projectId] || {}),
+          [action.id]: {
+            ...(state.chartSettingsPerProject[action.projectId]?.[action.id] || {}),
+            ...action.changes
+          }
+        }
+      }
+    })
+  ),
+  on(actions.resetExperimentMetrics, (state): ExperimentOutputState => ({
     ...state,
     metricsMultiScalarsCharts: experimentOutputInitState.metricsMultiScalarsCharts,
     metricsHistogramCharts: experimentOutputInitState.metricsHistogramCharts,
@@ -146,9 +177,9 @@ export const experimentOutputReducer = createReducer(
     cachedAxisType: experimentOutputInitState.cachedAxisType,
     searchTerm: ''
   })),
-  on(actions.setLogFilter, (state, action) => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
-  on(actions.resetLogFilter, state => ({...state, logFilter: null})),
-  on(actions.toggleSettings, state => ({...state, showSettings: !state.showSettings})),
-  on(actions.toggleMetricValuesView, state => ({...state, metricValuesView: !state.metricValuesView})),
-  on(actions.setGraphsPerRow, (state, action) => ({...state, graphsPerRow: action.graphsPerRow})),
+  on(actions.setLogFilter, (state, action): ExperimentOutputState => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
+  on(actions.resetLogFilter, (state): ExperimentOutputState => ({...state, logFilter: null})),
+  on(actions.toggleSettings, (state): ExperimentOutputState => ({...state, showSettings: !state.showSettings})),
+  on(actions.toggleMetricValuesView, (state): ExperimentOutputState => ({...state, metricValuesView: !state.metricValuesView})),
+  on(actions.setGraphsPerRow, (state, action): ExperimentOutputState => ({...state, graphsPerRow: action.graphsPerRow}))
 );

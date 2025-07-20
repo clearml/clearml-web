@@ -6,11 +6,6 @@
   // padding-top: 20px;
  // background-color: var(--color-surface-container-low);
 
-
-  header {
-    padding: 20px 0;
-  }
-
   .main {
     padding: 0;
   }
@@ -78,7 +73,7 @@
   .title {
     display: flex;
     align-items: center;
-    color: var(--color-on-surface);
+    color: var(--color-on-primary-container);
     font-size: 16px;
     i {
       color: var(--color-outline);

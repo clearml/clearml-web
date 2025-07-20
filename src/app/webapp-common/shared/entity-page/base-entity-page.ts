@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild, viewChildren} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
-import {debounceTime,distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {
   selectIsArchivedMode,
@@ -23,7 +23,7 @@ import {
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {
   getTablesFilterProjectsOptions,
-  resetProjectSelection,
+  resetProjectSelection, resetTablesFilterProjectsOptions,
   setTablesFilterProjectsOptions
 } from '@common/core/actions/projects.actions';
 import {MatDialog} from '@angular/material/dialog';
@@ -39,13 +39,21 @@ import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {selectProjectId} from '@common/models/reducers';
+import {resetTablesFilterParentsOptions} from '@common/experiments/actions/common-experiments-view.actions';
 
 @Component({
-    selector: 'sm-base-entity-page',
-    template: '',
-    standalone: false
+  selector: 'sm-base-entity-page',
+  template: '',
+  standalone: false
 })
 export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
+  protected store = inject(Store);
+  protected route = inject(ActivatedRoute);
+  protected router = inject(Router);
+  protected dialog = inject(MatDialog);
+  protected refresh = inject(RefreshService);
+  protected contextMenuService = inject(HeaderMenuService);
+
   protected entities = [];
   protected entityType: EntityTypeEnum;
   public selectedProject$: Observable<Project>;
@@ -62,7 +70,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public splitInitialSize: number;
   public minimizedView: boolean;
   public footerItems = [] as ItemFooterModel[];
-  public footerState$: Observable<IFooterState<{id: string}>>;
+  public footerState$: Observable<IFooterState<{ id: string }>>;
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
   private destroy$ = new Subject();
@@ -80,6 +88,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   private allProjects: boolean;
   public cardsCollapsed$: Observable<boolean>;
   protected minimizedView$: Observable<boolean>;
+  protected selectSplitSize: number;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -95,13 +104,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   get selectedProjectId() {
     return this.route.parent.snapshot.params.projectId;
   }
-
-  protected store = inject(Store);
-  protected route = inject(ActivatedRoute);
-  protected router = inject(Router);
-  protected dialog = inject(MatDialog);
-  protected refresh = inject(RefreshService);
-  protected contextMenuService = inject(HeaderMenuService);
 
   protected projectId$ = this.store.selectSignal(selectProjectId);
   protected isArchivedMode = this.store.selectSignal(selectIsArchivedMode);
@@ -132,9 +134,12 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     this.selectSplitSize$?.pipe(filter(x => !!x), take(1))
       .subscribe(x => this.splitInitialSize = x);
 
-    this.sub.add(this.minimizedView$.subscribe( minimized => {
+    this.sub.add(this.minimizedView$.subscribe(minimized => {
         if (this.split && this.minimizedView === true && !minimized) {
-          this.splitInitialSize = this.splitAreas()[1].size() as number;
+          this.splitInitialSize = this.selectSplitSize;
+        }
+        if (this.selectSplitSize === 99) {
+          this.store.dispatch(this.setSplitSizeAction({splitSize: this.splitInitialSize}));
         }
         this.minimizedView = minimized;
       }
@@ -149,6 +154,11 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       .subscribe(auto => this.refreshList(auto !== false))
     );
     this.setupBreadcrumbsOptions();
+
+
+    // please refactor to signals
+    this.selectSplitSize$?.pipe(takeUntil(this.destroy$))
+      .subscribe(size => this.selectSplitSize = size);
   }
 
   ngAfterViewInit() {
@@ -334,11 +344,15 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public setupBreadcrumbsOptions() {
   }
 
-  public setupContextMenu(entitiesType) {
-    this.contextMenuService.setupProjectContextMenu(entitiesType, this.projectId);
+  public setupContextMenu(entitiesType: string, archive: boolean) {
+    this.contextMenuService.setupProjectContextMenu(entitiesType, this.projectId, archive);
   }
 
   cardsCollapsedToggle() {
-    this.store.dispatch(toggleCardsCollapsed({entityType: this.entityType}))
+    this.store.dispatch(toggleCardsCollapsed({entityType: this.entityType}));
+  }
+  resetTablesFilterOptions() {
+    this.store.dispatch(resetTablesFilterProjectsOptions());
+    this.store.dispatch(resetTablesFilterParentsOptions());
   }
 }

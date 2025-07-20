@@ -1,4 +1,6 @@
 .labeled-row {
+  --label-font-size: 11px;
+  --label-width: 155px;
   min-height: 36px;
   display: flex;
   align-items: center;
@@ -6,11 +8,11 @@
   border-bottom: 1px solid var(--color-surface-container-high);
 
   .label-container {
-    width: 155px;
-    flex: 0 0 155px;
+    width: var(--label-width);
+    flex: 0 0 var(--label-width);
     font-weight: 500;
     color: color-mix(in srgb, var(--color-on-surface-variant), transparent 20%);
-    font-size: 11px;
+    font-size: var(--label-font-size);
     padding-right: 24px;
     text-overflow: ellipsis;
     overflow: hidden;

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {emptyAction} from '~/app.constants';
 import * as layoutActions from '../actions/layout.actions';
@@ -13,11 +13,13 @@ import {NotifierService} from '../../angular-notifier';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {Action} from '@ngrx/store';
+import {ErrorService} from '@common/shared/services/error.service';
 
 const ERROR_AGGREGATION = 600000;
 
 @Injectable()
 export class LayoutEffects {
+  protected error = inject(ErrorService);
 
   private alertDialogRef: MatDialogRef<AlertDialogComponent, any>;
   private errors = {};
@@ -66,11 +68,7 @@ export class LayoutEffects {
         }
         this.errors[customMessage] = now;
       }
-      let resultMessage: string;
-      const subcode = action.serverError?.error?.meta?.result_subcode;
-      if (subcode || subcode === 0) {
-        resultMessage = `Error ${subcode} : ${action.serverError?.error?.meta?.result_msg}`;
-      }
+      const resultMessage = this.error.getErrorMsg(action.serverError.error);
       this.alertDialogRef = this.dialog.open(AlertDialogComponent, {
         data: {alertMessage: 'Error', alertSubMessage: customMessage, resultMessage}
       });
@@ -122,13 +120,13 @@ export class LayoutEffects {
       case 'tasks':
         return this.taskService.tasksGetAllEx({
           id: ids,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           only_fields: ['name', 'project', 'system_tags']
         });
       case 'models':
         return this.modelService.modelsGetAllEx({
           id: ids,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           only_fields: ['name', 'project']
         });
       default:

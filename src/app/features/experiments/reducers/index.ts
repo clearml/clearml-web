@@ -62,10 +62,11 @@ export const selectExperimentFormValidity = createSelector(selectExperimentInfoD
   });
 
 export const selectOutputSettings = createSelector(experimentOutput, state => state.settingsList);
-export const selectSelectedModelSettings = createSelector(experimentOutput, selectModelId, selectSelectedProjectId,
-  (output, modelId, projectId): Partial<ExperimentSettings> => {
-    if (output.settingsList && modelId) {
-      return output.settingsList.find((setting) => setting.id === modelId) ?? output.settingsList.find((setting) => setting.id === projectId) ?? {};
+
+export const selectSelectedModelSettings = createSelector(selectOutputSettings, selectModelId, selectSelectedProjectId,
+  (settingsList, modelId, projectId): Partial<ExperimentSettings> => {
+    if (settingsList && modelId) {
+      return settingsList[modelId] ?? settingsList[projectId] ?? {};
     } else {
       return null;
     }

@@ -1,13 +1,10 @@
-@use "./../layout/layout.scss";
+@use "./../layout/layout";
 
 :host {
   .experiment-body {
     width: 100%;
     height: calc(100% - #{layout.$project-header-height});
     transition: height 0.3s;
-    &.footer-visible {
-      height: calc(100% - #{layout.$project-header-height + layout.$project-footer-height});
-    }
   }
 
   .info-disabled {

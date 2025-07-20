@@ -1,20 +1,7 @@
-:host {
-  .create-queue-form {
-    width: 400px;
-    display: block;
-  }
+.create-queue-form {
+  width: 400px;
+}
 
-  .create-queue-button {
-    width: 100%;
-    padding: 32px 12px 0;
-  }
-
-  small.text-danger {
-    position: absolute !important;
-    top: -15px;
-  }
-
-  #queue-description {
-    max-height: 250px;
-  }
+.mat-mdc-form-field {
+  width: 100%;
 }

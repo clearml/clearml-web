@@ -1,4 +1,4 @@
-@use "../../../../webapp-common/layout/layout.scss";
+@use "../../../../webapp-common/layout/layout";
 
 :host {
   display: block;
@@ -16,6 +16,7 @@
     .title {
       font-size: 15px;
       text-transform: uppercase;
+      color: var(--color-on-secondary-container);
     }
 
     .time-selector {

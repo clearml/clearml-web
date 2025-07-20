@@ -4,10 +4,9 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 @Directive({
   selector : '[smForceInvalidValidator]',
   providers: [{provide: NG_VALIDATORS, useExisting: ForceInvalidValidatorDirective, multi: true}],
-  standalone: true,
 })
 export class ForceInvalidValidatorDirective implements Validator {
-  @Input('forceInvalid') forceInvalid: boolean;
+  @Input() forceInvalid: boolean;
 
   validate(control: AbstractControl): ValidationErrors | null {
     return this.forceInvalid ? forceInvalidValidator(this.forceInvalid)(control) : null;
@@ -16,7 +15,7 @@ export class ForceInvalidValidatorDirective implements Validator {
 
 
 export function forceInvalidValidator(forceInvalid): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
+  return (control: AbstractControl): Record<string, any> | null => {
     const forbidden = forceInvalid;
     return forbidden ? {'forceInvalid': {value: control.value}} : null;
   };

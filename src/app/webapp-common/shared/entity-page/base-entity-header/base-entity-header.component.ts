@@ -7,7 +7,6 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 @Component({
   selector: 'sm-base-entity-header',
   template: '',
-  standalone: true,
 })
 export class BaseEntityHeaderComponent {
   private breakpointObserver = inject(BreakpointObserver)
@@ -18,6 +17,6 @@ export class BaseEntityHeaderComponent {
   downloadTableAsCSV = output();
   downloadFullTableAsCSV = output();
 
-  protected isSmallScreen$ = this.breakpointObserver.observe('(max-width: 1450px)');
+  protected isSmallScreen$ = this.breakpointObserver.observe('(max-width: 1100px)');
   protected maxDownloadItems$ = this.store.select(selectMaxDownloadItems);
 }

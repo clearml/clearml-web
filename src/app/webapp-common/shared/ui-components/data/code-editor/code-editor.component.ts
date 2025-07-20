@@ -13,6 +13,9 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {ClipboardModule} from 'ngx-clipboard';
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {fromEvent} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 declare const ace;
 
 @Component({
@@ -20,11 +23,12 @@ declare const ace;
     templateUrl: './code-editor.component.html',
     styleUrls: ['./code-editor.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        ClipboardModule,
-        MatButton,
-        MatIcon
-    ]
+  imports: [
+    ClipboardModule,
+    MatButton,
+    MatIcon,
+    TooltipDirective
+  ]
 })
 export class CodeEditorComponent {
   private zone = inject(NgZone);
@@ -43,6 +47,17 @@ export class CodeEditorComponent {
   private aceReady = this.store.selectSignal(selectAceReady);
 
   constructor() {
+    ace.config.loadModule('ace/ext/searchbox');
+
+    fromEvent(document, 'keyup')
+      .pipe(takeUntilDestroyed())
+      .subscribe((event: KeyboardEvent) => {
+        if (event.ctrlKey && event.code === 'KeyF') {
+          event.stopPropagation();
+          this.openSearch();
+        }
+      });
+
     effect(() => {
       if (this.aceReady() && this.aceEditorElement()) {
         this.initAceEditor();
@@ -92,7 +107,7 @@ export class CodeEditorComponent {
         showGutter: false,
         fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
         fontSize: 13,
-        highlightActiveLine: false,
+        highlightActiveLine: true,
         highlightSelectedWord: false,
         showPrintMargin: false,
         useWorker: true,
@@ -132,5 +147,9 @@ export class CodeEditorComponent {
 
   copySuccess() {
     this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Code copied to clipboard'));
+  }
+
+  openSearch() {
+    this.aceEditor.execCommand('find');
   }
 }

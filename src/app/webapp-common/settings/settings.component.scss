@@ -99,6 +99,10 @@
       --mat-expansion-header-indicator-color: var(--color-on-surface);
     }
   }
+
+  ::ng-deep sm-table .actions button {
+    background: var(--color-surface-container-lowest);
+  }
 }
 
 .title {

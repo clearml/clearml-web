@@ -42,24 +42,26 @@ export const routes: Routes = [
           {path: 'experiments', redirectTo: 'tasks'},
           {
             path: 'tasks',
+            data: {autoSearchTab: 'tasks'},
             loadChildren: () => import('./features/experiments/experiments.module').then(m => m.ExperimentsModule),
             canDeactivate: [resetContextMenuGuard]
           },
           {
             path: 'models',
+            data: {autoSearchTab: 'models'},
             loadChildren: () => import('./webapp-common/models/models.module').then(m => m.ModelsModule),
             canDeactivate: [resetContextMenuGuard]
           },
           {path: 'compare-experiments', redirectTo: 'compare-tasks'},
           {
             path: 'compare-tasks',
-            data: {entityType: EntityTypeEnum.experiment, search: false},
+            data: {entityType: EntityTypeEnum.experiment, search: false, autoSearchTab: 'tasks'},
             loadChildren: () =>
               import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
           {
             path: 'compare-models',
-            data: {entityType: EntityTypeEnum.model},
+            data: {entityType: EntityTypeEnum.model, autoSearchTab: 'models' },
             loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
         ]
@@ -68,12 +70,12 @@ export const routes: Routes = [
   },
   {
     path: 'pipelines',
-    data: {search: true},
+    data: {search: true, autoSearchTab: 'pipelines'},
     loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule),
   },
   {
     path: 'pipelines',
-    data: {search: true},
+    data: {search: true, autoSearchTab: 'pipelines'},
     children: [
       {
         path: ':projectId',
@@ -106,11 +108,12 @@ export const routes: Routes = [
   },
   {
     path: 'datasets',
-    data: {search: true},
+    data: {search: true, autoSearchTab: 'datasets'},
     loadChildren: () => import('./features/datasets/datasets.module').then(m => m.DatasetsModule)
   },
   {
     path: 'reports',
+    data: {autoSearchTab: 'reports'},
     loadChildren: () => import('./webapp-common/reports/reports.module').then(m => m.ReportsModule)
   },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},

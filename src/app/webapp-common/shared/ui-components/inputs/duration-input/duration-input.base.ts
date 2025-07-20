@@ -4,7 +4,6 @@ import {TIME_IN_MILLI} from '../../../utils/time-util';
 
 @Component({
   template: '',
-  standalone: true,
 })
 export abstract class DurationInputBase  extends TemplateFormSectionBaseDirective {
   public ms = '000';

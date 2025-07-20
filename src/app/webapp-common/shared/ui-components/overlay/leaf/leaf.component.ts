@@ -4,7 +4,6 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
   selector: 'sm-leaf',
   templateUrl: './leaf.component.html',
   styleUrls: ['./leaf.component.scss'],
-  standalone: true,
 })
 export class LeafComponent {
   @Input() codeOpen = false;

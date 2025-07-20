@@ -3,7 +3,7 @@ import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-na
 export const PROJECTS_FEATURES = ['models',' experiments', 'overview'];
 
 export const PROJECT_ROUTES = [
-  {header: 'overview', subHeader: '', id: 'overviewTab'},
-  {header: 'tasks', subHeader: '(ARCHIVED)', id: 'experimentsTab'},
-  {header: 'models', subHeader: '(ARCHIVED)', id: 'modelsTab'}
+  {header: 'overview', id: 'overviewTab'},
+  {header: 'tasks', id: 'experimentsTab'},
+  {header: 'models', id: 'modelsTab'}
 ] as HeaderNavbarTabConfig[];

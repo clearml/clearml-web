@@ -59,7 +59,7 @@
   </div>
   @if (showSmooth || smoothWeight) {
     <div class="graph-controls">
-      @if (!isCompare) {
+      @if (!isCompare && !reportWidget) {
         <div class="d-flex field">
           <span class="label-text axis-text-margin-left" data-id="HorizontalAxisText">Horizontal Axis</span>
           <mat-form-field appearance="outline" class="axis-type-field no-bottom">
@@ -75,7 +75,7 @@
           </mat-form-field>
         </div>
       }
-      <div class="d-flex smooth-options" [class.separator]="!isCompare">
+      <div class="d-flex smooth-options" [class.separator]="!isCompare && !reportWidget">
         <div class="d-flex field">
           <span class="label-text axis-text-margin-left">Smoothing</span>
           <mat-form-field appearance="outline" class="smooth-selector no-bottom">
@@ -90,7 +90,7 @@
         </div>
         @if (smoothType && smoothType !== smoothTypeEnum.any) {
           <div class="d-flex field">
-        <span class="label-text axis-text-margin-left">
+        <span class="label-text axis-text-margin-left slider-label">
           {{
             smoothType === smoothTypeEnum.gaussian ? 'Kernel size:' :
               smoothType === smoothTypeEnum.runningAverage ? 'Window size:' :
@@ -113,7 +113,7 @@
         }
         @if (smoothType === smoothTypeEnum.gaussian) {
           <div class="d-flex field">
-            <span class="label-text axis-text-margin-left">Sigma:</span>
+            <span class="label-text axis-text-margin-left slider-label">Sigma:</span>
             <div class="smooth-fields">
               <mat-slider
                 [max]="3"
@@ -126,6 +126,12 @@
               </mat-slider>
               <span class="weight ms-3">{{ sigma }}</span>
             </div>
+          </div>
+        }
+        @if (smoothType && smoothType !== smoothTypeEnum.any) {
+          <div class="d-flex field  ms-3">
+            <span class="label-text axis-text-margin-left">Show Originals:</span>
+            <mat-slide-toggle class="smooth-slide-field" [(ngModel)]="showOrigin" labelPosition="after"></mat-slide-toggle>
           </div>
         }
       </div>
@@ -142,7 +148,6 @@
         [smoothWeight]="smoothWeight"
         [smoothSigma]="sigma"
         [smoothType]="smoothType"
-        [hoverMode]="data.hoverMode"
         [hideTitle]="true"
         [hideMaximize]="'hide'"
         [height]="height"
@@ -151,21 +156,22 @@
         [identifier]="id"
         [isCompare]="isCompare"
         [xAxisType]="xAxisType"
-        [yAxisType]="yAxisType"
+        [chartSettings]="data.chartSettings"
         [moveLegendToTitle]="checkIfLegendToTitle(chart) && (!chart.layout.showlegend || (chart.data.length === 1 && !chart.data[0].showlegend))"
         [legendConfiguration]="this.data.legendConfiguration || {}"
         [graphsNumber]="9999"
         [exportForReport]="!!embedFunction"
         [darkTheme]="data.darkTheme"
+        [showOriginals]="showOrigin"
         (createEmbedCode)="embedFunction($event)"
       >
       </sm-single-graph>
-      @if (!isFullDetailsMode && !isCompare && !disableNavigation) {
+      @if (!isFullDetailsMode && !isCompare && !disableNavigation && !reportWidget) {
         <div class="navigation">
-          <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
+          <div class="icon-container controller d-flex-center next"
                (click)="canGoNext() && next()" [class.disabled]="endOfTime">
             <i class="al-icon al-ico-next "></i></div>
-          <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
+          <div class="icon-container controller d-flex-center previous"
                (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
             <i class="al-icon al-ico-previous "></i></div>
         </div>

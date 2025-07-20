@@ -4,7 +4,7 @@ import {
   ElementRef,
   EventEmitter,
   forwardRef, input,
-  Output, signal, viewChild,
+  Output, signal, viewChild
 } from '@angular/core';
 import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -31,19 +31,29 @@ export interface IOption {
 }
 
 @Component({
-    selector: 'sm-select-autocomplete-with-chips',
-    templateUrl: './select-autocomplete-with-chips.component.html',
-    styleUrls: ['./select-autocomplete-with-chips.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => SelectAutocompleteWithChipsComponent),
-            multi: true
-        }
-    ],
-    imports: [ClickStopPropagationDirective, ChipsComponent, ReactiveFormsModule, MatChipGrid,
-        MatChipInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatFormField, MatSuffix]
+  selector: 'sm-select-autocomplete-with-chips',
+  templateUrl: './select-autocomplete-with-chips.component.html',
+  styleUrls: ['./select-autocomplete-with-chips.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SelectAutocompleteWithChipsComponent),
+      multi: true
+    }
+  ],
+  imports: [
+    ClickStopPropagationDirective,
+    ChipsComponent,
+    ReactiveFormsModule,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    MatChipGrid,
+    MatChipInput,
+    MatOption,
+    MatFormField,
+    MatSuffix
+  ]
 })
 
 export class SelectAutocompleteWithChipsComponent implements ControlValueAccessor {
@@ -82,7 +92,7 @@ export class SelectAutocompleteWithChipsComponent implements ControlValueAccesso
       const selectedLabels = this.selected()?.map(item => item.label) as string[] ?? [];
       return !itemsLabels.includes(value) && !selectedLabels.includes(value);
     } else {
-      return false
+      return false;
     }
   });
 
@@ -104,7 +114,7 @@ export class SelectAutocompleteWithChipsComponent implements ControlValueAccesso
     effect(() => {
       const selection = this.selected();
       if (this.init && !isEqual(this.selected(), this.prevSelected())) {
-        if(this.onChange) {
+        if (this.onChange) {
           this.onChange(selection);
         }
         if (this.onTouched) {

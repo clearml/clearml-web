@@ -10,7 +10,9 @@ $search-font-size: 14px;
     min-width: 32px;
     width: 36px;
     overflow: hidden;
-    transition: width 0.4s ease;
+    &.animate{
+      transition: width 0.4s ease;
+    }
     border-radius: 4px 4px 0 0;
 
     &.active {

@@ -84,14 +84,14 @@
   } @else {
     <sm-table
       class="h-100"
-      [columns]="cols"
+      [columns]="calcCols$ | ngrxPush"
       [tableData]="metadata"
       [resizableColumns]="false"
       [scrollable]="true"
       [selectionMode]="null"
     >
       <ng-template let-col let-row="rowData" pTemplate="body">
-        {{ row?.[col.id] }}
+        <div class="ellipsis" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</div>
       </ng-template>
     </sm-table>
   }

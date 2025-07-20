@@ -13,13 +13,13 @@ import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} fr
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {NgTemplateOutlet} from '@angular/common';
-import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 import {PushPipe} from '@ngrx/component';
 import {MatButton} from '@angular/material/button';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
 import {injectResize} from 'ngxtension/resize';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 
 @Component({
@@ -27,16 +27,16 @@ import {injectResize} from 'ngxtension/resize';
     templateUrl: './virtual-grid.component.html',
     styleUrls: ['./virtual-grid.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CdkFixedSizeVirtualScroll,
-        CdkVirtualForOf,
-        CdkVirtualScrollViewport,
-        NgTemplateOutlet,
-        ScrollEndDirective,
-        PushPipe,
-        MatButton,
-        MatProgressSpinner
-    ]
+  imports: [
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    CdkVirtualScrollViewport,
+    NgTemplateOutlet,
+    PushPipe,
+    MatButton,
+    MatProgressSpinner,
+    DotsLoadMoreComponent
+  ]
 })
 export class VirtualGridComponent {
   private store = inject(Store);

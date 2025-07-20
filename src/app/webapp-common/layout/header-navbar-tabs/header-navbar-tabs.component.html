@@ -1,7 +1,6 @@
 @if (contextNavbar() !== null) {
   <mat-tab-group mat-stretch-tabs="false"
                  mat-align-tabs="center"
-                 disablePagination
                  disableRipple
                  [selectedIndex]="index()"
                  (selectedTabChange)="setFeature($event)">
@@ -15,8 +14,16 @@
                 <span class="trial-badge" [smTooltip]="route.badgeTooltip" [matTooltipShowDelay]="300" [innerHTML]="route.badge | safeHtml"></span>
               }
             </div>
-            @if (archivedMode()) {
-              <div>{{ route.subHeader }}</div>
+            @if (route.subHeader) {
+              <div class="sub-header">{{ route.subHeader }}</div>
+            } @else if (route.counters) {
+              <span class="counter">
+                <span class="counter__data">
+                  @for (counter of route.counters; track counter) {
+                    <span [smTooltip]="counter.tooltip" [matTooltipClass]="'break-line'">{{counter.value}}@if(counter.icon){<i class="al-icon xs" [class]="counter.icon"></i>}</span>
+                  }
+                </span>
+              </span>
             }
           </div>
         </ng-template>

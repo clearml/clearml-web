@@ -6,6 +6,8 @@
     (deleteQueue)="deleteQueue.emit($event)"
     (renameQueue)="renameQueue.emit($event)"
     (clearQueue)="clearQueue.emit($event)"
+    (menuOpened)="menuOpen.set(true)"
+    (menuClosed)="menuOpen.set(false)"
   ></sm-queues-menu-extended>
   <sm-table
     #table
@@ -19,6 +21,8 @@
     [virtualScroll]="true"
     [columnResizeMode]="'fit'"
     [selection]="selectedQueue()"
+    [contextMenuOpen]="menuOpen()"
+    [activeContextRow]="contextQueue"
     (rowSelectionChanged)="onRowClicked($event)"
     (rowRightClick)="openContextMenu($event)"
   >
@@ -37,20 +41,28 @@
             <div class="queue-name" [smTooltip]="queue?.caption" smShowTooltipIfEllipsis>{{queue?.caption}}</div>
             <div class="copy-btn">
               <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.id">
-                <div class="d-flex flex-column m-1">
-                  <sm-copy-clipboard
-                    [clipboardText]="queue?.id"
-                    [smallIcon]="true"
-                    label="ID"
-                    tooltipText="Copy Queue ID"
-                  ></sm-copy-clipboard>
-                  <sm-copy-clipboard
-                    [clipboardText]="queue?.name"
-                    [smallIcon]="true"
-                    label="Name"
-                    tooltipText="Copy Queue Resource Name"
-                  ></sm-copy-clipboard>
-                </div>
+                <button
+                  mat-menu-item
+                  smTooltip="Copy Queue ID"
+                  [matTooltipShowDelay]="500"
+                  ngxClipboard
+                  [cbContent]="queue?.id"
+                  (cbOnSuccess)="copySuccess.emit('ID')"
+                >
+                  <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
+                  ID
+                </button>
+                <button
+                  mat-menu-item
+                  smTooltip="Copy Queue Resource Name"
+                  [matTooltipShowDelay]="500"
+                  ngxClipboard
+                  [cbContent]="queue?.name"
+                  (cbOnSuccess)="copySuccess.emit('name')"
+                >
+                  <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
+                  Name
+                </button>
               </sm-menu>
             </div>
           </div>

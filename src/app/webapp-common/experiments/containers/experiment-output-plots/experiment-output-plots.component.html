@@ -42,7 +42,8 @@
         [isDarkTheme]="dark"
         (resetGraphs)="resetMetrics()"
         (createEmbedCode)="createEmbedCode($event)"
-        [hoverMode]="'x unified'"
+        [defaultHoverMode]="'x unified'"
+        (chartSettingsChanged)="changeChartSettings($event)"
         >
       </sm-experiment-graphs>
     </div>

@@ -71,9 +71,9 @@
               [checkedList]="value() ?? []"
               (filterChanged)="emitFilterChanged($event)"
             ></sm-checkbox-three-state-list>
-            @if (options !== null && column().paginatedFilterPageSize && !noMoreOptions() && !searching) {
+            @if (options() !== null && !noMoreOptions()) {
               <sm-dots-load-more
-                [loading]="state().loading()"
+                [loading]="loading()"
                 (loadMore)="loadMore()"
                 class="mx-auto my-2"
               ></sm-dots-load-more>

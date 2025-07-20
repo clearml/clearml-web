@@ -62,8 +62,8 @@ export class DynamicLabelListComponent {
             totalWidth += itemsLengths[len];
             len++;
           }
-          this.visibleLabelsLen = len - 2;
-          this.hiddenLabels = this.items().slice(len - 1);
+          this.visibleLabelsLen = Math.max(len - 2, 0);
+          this.hiddenLabels = this.items()?.slice(len - 1) ?? [];
           this.measure = false;
           this.cdr.markForCheck();
         }

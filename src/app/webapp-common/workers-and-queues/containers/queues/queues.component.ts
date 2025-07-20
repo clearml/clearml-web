@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, untracked} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject} from '@angular/core';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -16,6 +16,11 @@ import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {QueueCreateDialogComponent} from '@common/shared/queue-create-dialog/queue-create-dialog.component';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {combineLatest, interval} from 'rxjs';
+import {selectSearchQuery} from '@common/common-search/common-search.reducer';
+import {escapeRegExp, get} from 'lodash-es';
+import {initSearch} from '@common/common-search/common-search.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 const REFRESH_INTERVAL = 30000;
 
@@ -38,6 +43,8 @@ export class QueuesComponent {
   selectedQueueId = this.store.selectSignal(selectSelectedQueueId);
   selectedQueue = this.store.selectSignal(selectSelectedQueue);
   tableSortFields = this.store.selectSignal(selectQueuesTableSortFields);
+  private searchQuery = this.store.selectSignal(selectSearchQuery);
+  protected filteredData = computed(() => !this.searchQuery()?.query ? this.queues() : this.filteredQueues());
 
   protected shortScreen$ = this.breakpointObserver.observe(['(max-height: 750px)'])
     .pipe(map(res => res.matches));
@@ -45,6 +52,7 @@ export class QueuesComponent {
 
   constructor() {
     this.queuesManager = this.route.snapshot.data.queuesManager;
+    this.store.dispatch(initSearch({payload: 'Search for queues'}));
     this.store.dispatch(queueActions.getQueues({}));
 
     combineLatest([interval(REFRESH_INTERVAL),
@@ -60,13 +68,6 @@ export class QueuesComponent {
 
     this.destroy.onDestroy(() => {
       this.store.dispatch(queueActions.resetQueues());
-    });
-
-    effect(() => {
-      if (this.selectedQueueId() !== this.selectedQueue()?.id) {
-        const queue = this.queues()?.find(queue => queue.id === this.selectedQueueId());
-        untracked(() => this.store.dispatch(queueActions.setSelectedQueue({queue})));
-      }
     });
   }
 
@@ -130,8 +131,8 @@ export class QueuesComponent {
     this.store.dispatch(queueActions.moveExperimentToOtherQueue({task: $event.task.id, queueId: $event.queue.id, queueName: $event.queue.name}));
   }
 
-  moveExperimentInQueue({task, count}) {
-    this.store.dispatch(queueActions.moveExperimentInQueue({task, count}));
+  moveExperimentInQueue({task, current, previous}) {
+    this.store.dispatch(queueActions.moveExperimentInQueue({queueId: this.selectedQueueId(), task, current, previous}));
   }
 
   addQueue() {
@@ -145,4 +146,19 @@ export class QueuesComponent {
       });
   }
 
+  private compareCols = ['id', 'name', 'display_name'];
+  filteredQueues() {
+    let query = this.searchQuery().query.toLowerCase();
+    if (!this.searchQuery().regExp) {
+      query = escapeRegExp(query)
+    }
+    const exp = new RegExp(query, 'ig')
+    return this.queues()?.filter(queue =>
+      this.compareCols.some(col => exp.test(get(queue, col) as unknown as string))
+    );
+  }
+
+  copySuccess(key: string) {
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, `Queue ${key} copied to clipboard`));
+  }
 }

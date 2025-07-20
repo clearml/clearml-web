@@ -19,6 +19,24 @@
         opacity: 0.2;
       }
     }
+    &.sm {
+      @include mat.button-overrides((
+        filled-container-height: 24px,
+        filled-horizontal-padding: 8px,
+        outlined-container-height: 24px,
+        outlined-horizontal-padding: 8px,
+        text-container-height: 24px,
+      ));
+    }
+    &.xs {
+      @include mat.button-overrides((
+        filled-container-height: 20px,
+        filled-horizontal-padding: 4px,
+        outlined-container-height: 20px,
+        outlined-horizontal-padding: 4px,
+        text-container-height: 20px,
+      ));
+    }
   }
 
   .mat-mdc-unelevated-button {
@@ -66,6 +84,9 @@
         --mat-outlined-button-icon-offset: 0;
         --mat-outlined-button-icon-spacing: 0;
       }
+    }
+    &.sm {
+      --mat-outlined-button-icon-offset: 0;
     }
   }
 

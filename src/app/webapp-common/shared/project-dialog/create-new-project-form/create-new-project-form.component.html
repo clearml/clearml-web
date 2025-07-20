@@ -1,14 +1,10 @@
 <form [formGroup]="projectForm" class="d-flex flex-column">
-  <mat-form-field appearance="outline" class="mat-light">
+  <mat-form-field appearance="outline">
     <mat-label>Project name</mat-label>
     <input name="projectName"
            formControlName="name"
            matInput
            autocomplete="off"
-           smUniqueProjectValidator
-           smUniqueNameValidator
-           [existingNames]="[]"
-           [parent]="projectForm.controls.parent.value"
            pattern="^[^\/]*$"
     >
     @if (projectForm.controls.name.invalid && projectForm.controls.name.errors; as errors) {
@@ -32,26 +28,28 @@
     }
   </mat-form-field>
 
-  <sm-paginated-entity-selector
-    formControlName="parent"
-    [data]="allProjects()"
-    label="Create in"
-    placeHolder="Search for project path"
-    [isRequired]="true"
-    [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
-    (getEntities)="loadMore($event, false)"
-    (loadMore)="loadMore($event, true)"
-  ></sm-paginated-entity-selector>
-  @if (!projectForm.controls.parent.untouched && projectForm.controls.parent.errors; as errors) {
-    <div class="extra-errors">
-      @if (errors?.required) {
-        <mat-error>Please add name.</mat-error>
-      }
-      @if (errors?.minlength) {
-        <mat-error>Project name should contain more than 3 characters.</mat-error>
-      }
-    </div>
-  }
+  <div class="position-relative">
+    <sm-paginated-entity-selector
+      formControlName="parent"
+      [data]="allProjects()"
+      label="Create in"
+      placeHolder="Search for project path"
+      [isRequired]="true"
+      [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
+      (getEntities)="loadMore($event, false)"
+      (loadMore)="loadMore($event, true)"
+    ></sm-paginated-entity-selector>
+    @if (!projectForm.controls.parent.untouched && projectForm.controls.parent.errors; as errors) {
+      <div class="extra-errors">
+        @if (errors?.required) {
+          <mat-error>Please add name.</mat-error>
+        }
+        @else if (errors?.minlength) {
+          <mat-error>Project name should contain more than 3 characters.</mat-error>
+        }
+      </div>
+    }
+  </div>
 
   <mat-form-field appearance="outline">
     <mat-label>Description</mat-label>
@@ -83,7 +81,7 @@
   </mat-form-field>
 
   <div class="w-100 create-project-button">
-    <button mat-flat-button data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+    <button mat-flat-button data-id="Create Project" [disabled]="projectForm.controls.default_output_destination.invalid || projectForm.invalid" (click)="send()">CREATE PROJECT
     </button>
   </div>
 </form>

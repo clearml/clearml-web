@@ -1,4 +1,4 @@
-<sm-dialog-template [header]="title" headerClass="no-uppercase">
+<sm-dialog-template class="neat" [header]="title" headerClass="no-uppercase">
   <div class="data-text">
     <sm-code-editor
       [code]="textData"
@@ -8,19 +8,12 @@
       [startPosition]="position()"
     ></sm-code-editor>
   </div>
-  <div>
-    @if (this.showErrors) {
-      <small
-        class="text-danger">*Not a valid json.
-      </small>
-    }
-  </div>
-  <div class="buttons">
-    @if (!readOnly) {
+</sm-dialog-template>
+<mat-dialog-actions>
+  @if (!readOnly) {
       <button mat-stroked-button (click)="closeDialog(false)" class="yes-button" data-id="cancelButton">
         CANCEL
       </button>
     }
     <button mat-flat-button (click)="closeDialog(!readOnly)" data-id="okButton">OK</button>
-  </div>
-</sm-dialog-template>
+</mat-dialog-actions>

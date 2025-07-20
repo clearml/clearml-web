@@ -1,14 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectGlobalLegendData, selectShowGlobalLegend} from './reducers';
-import {combineLatestWith, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
+import {combineLatestWith, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {resetSelectCompareHeader, setShowGlobalLegend} from './actions/compare-header.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {Project} from '~/business-logic/model/projects/project';
 import {TitleCasePipe} from '@angular/common';
 import {resetSelectModelState} from '@common/select-model/select-model.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
@@ -43,40 +42,28 @@ const toCompareEntityType = {
     standalone: false
 })
 export class ExperimentsCompareComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private colorHash = inject(ColorHashService);
+  private dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
   protected readonly trackById = trackById;
   private subs = new Subscription();
-  public entityType: EntityTypeEnum;
   public entityTypeEnum = EntityTypeEnum;
-  private selectedProject$: Observable<Project>;
-  private readonly modelsFeature: boolean;
-  public showGlobalLegend$: Observable<boolean>;
-  public globalLegendData$: Observable<{
-    name: string;
-    tags: string[];
-    systemTags: string[];
-    id: string,
-    project: { id: string }
-  }[]>;
   public experimentsColor: Record<string, string>;
   private ids: string[];
   public duplicateNamesObject: Record<string, boolean>;
-  private routeConfig$: Observable<string[]>;
   private titleCasePipe = new TitleCasePipe();
+  protected readonly entityType = this.activatedRoute.snapshot.data.entityType;
+  protected readonly modelsFeature = this.activatedRoute.snapshot.data?.setAllProject;
+  protected selectedProject$ = this.store.select(selectSelectedProject);
+  protected routeConfig$ = this.store.select(selectRouterConfig);
+  protected showGlobalLegend$ = this.store.select(selectShowGlobalLegend);
+  protected globalLegendData$ = this.store.select(selectGlobalLegendData);
 
-  constructor(private store: Store,
-              private router: Router,
-              private activatedRoute: ActivatedRoute,
-              private colorHash: ColorHashService,
-              private dialog: MatDialog,
-              private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     // updating URL with store query params
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.routeConfig$ = this.store.select(selectRouterConfig);
-    this.entityType = this.activatedRoute.snapshot.data.entityType;
-    this.modelsFeature = this.activatedRoute.snapshot.data?.setAllProject;
-    this.showGlobalLegend$ = this.store.select(selectShowGlobalLegend);
-    this.globalLegendData$ = this.store.select(selectGlobalLegendData);
     if (this.modelsFeature) {
       this.store.dispatch(getCompanyTags());
     }
@@ -94,19 +81,28 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}))
     ));
 
-    this.subs.add(combineLatest([this.routeConfig$,
+    this.subs.add(combineLatest([
+      this.routeConfig$,
       this.store.select(selectRouterParams),
-      this.store.select(selectSelectedProject)]).pipe(filter(([, params, project]) => !!params.ids && !!project?.id)).subscribe(([conf, params, project]) => {
-      this.setupCompareContextMenu(toCompareEntityType[this.entityType] ?? this.entityType, conf[conf[0] === 'datasets' ? 4 : 3], project?.id, params.ids, conf[0]);
-    }));
+      this.store.select(selectSelectedProject)
+    ])
+      .pipe(
+        filter(([, params, project]) => !!params.ids && !!project?.id)
+      )
+      .subscribe(([conf, params, project]) => {
+        this.setupCompareContextMenu(toCompareEntityType[this.entityType] ?? this.entityType, conf[conf[0] === 'datasets' ? 4 : 3], project?.id, params.ids, conf[0]);
+      }));
 
-    this.subs.add(this.store.select(selectRouterParams).pipe(
-      filter(params => !!params.ids),
-      distinctUntilChanged(isEqual)
-    ).subscribe(params => {
-      this.ids = params.ids.split(',');
-      this.store.dispatch(getGlobalLegendData({ids: params.ids.split(','), entity: this.entityType}));
-    }));
+    this.subs.add(this.store.select(selectRouterParams)
+      .pipe(
+        map(params => params?.ids),
+        filter(ids => !!ids),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(ids => {
+        this.ids = ids.split(',');
+        this.store.dispatch(getGlobalLegendData({ids: this.ids, entity: this.entityType}));
+      }));
 
     this.subs.add(this.globalLegendData$.pipe(
       combineLatestWith(this.colorHash.getColorsObservable()),

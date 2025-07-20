@@ -13,7 +13,10 @@ import {
 import {ModelInfoScalarsComponent} from '@common/models/containers/model-info-scalars/model-info-scalars.component';
 import {ModelInfoPlotsComponent} from '@common/models/containers/model-info-plots/model-info-plots.component';
 import {CrumbTypeEnum, IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {selectIsModelInEditMode} from '@common/models/reducers';
+import {selectIsModelInEditMode, selectLastVisitedModelsTab} from '@common/models/reducers';
+import {lastVisitedSettingTabGuard} from '@common/shared/guards/last-visted-set-tab.guard';
+import {setLastModelsTab} from '@common/models/actions/models-info.actions';
+import {lastVisitedTabGuard} from '@common/shared/guards/last-visted-tab.guard';
 
 export const routes: Routes = [
   {
@@ -27,9 +30,9 @@ export const routes: Routes = [
     },
     children : [
       {
-        path: ':modelId', component: ModelInfoComponent,
+        path: ':modelId', component: ModelInfoComponent, canDeactivate: [lastVisitedSettingTabGuard], data: {lastTabAction: setLastModelsTab},
         children: [
-          {path: '', redirectTo: 'general', pathMatch: 'full', data: {minimized: true}},
+          {path: '', children: [], pathMatch: 'full', canActivate: [lastVisitedTabGuard], data: {minimized: true, lastTabSelector: selectLastVisitedModelsTab}},
           {path: 'general',
             component: ModelInfoGeneralComponent,
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)],
@@ -64,9 +67,10 @@ export const routes: Routes = [
   {
     path: ':modelId/output',
     component: ModelInfoComponent,
-    data: {search: false},
+    data: {search: false, lastTabAction: setLastModelsTab},
+    canDeactivate: [lastVisitedSettingTabGuard],
     children: [
-      {path: '', redirectTo: 'general', pathMatch: 'full'},
+      {path: '', children: [], pathMatch: 'full', canActivate: [lastVisitedTabGuard], data: {lastTabSelector: selectLastVisitedModelsTab}},
       {path: 'general', component: ModelInfoGeneralComponent},
       {path: 'network', component: ModelInfoNetworkComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
       {path: 'labels', component: ModelInfoLabelsComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},

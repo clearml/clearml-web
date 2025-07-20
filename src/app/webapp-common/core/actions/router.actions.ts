@@ -28,6 +28,7 @@ export const setURLParams = createAction(
     columns?: string[];
     orders?: SortMeta[];
     filters?: Record<string, FilterMetadata>;
+    gsFilters?: Record<string, FilterMetadata>;
     isArchived?: boolean;
     isDeep?: boolean;
     update?: boolean;

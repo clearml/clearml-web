@@ -175,7 +175,10 @@
       }
 
       .tool-bar {
-        background-color: var(--color-surface-container-high) !important;
+        display: flex;
+        padding: 6px;
+        background-color: color-mix(in srgb, var(--color-surface-container-high), transparent 80%) !important;
+        border-bottom-color: var(--color-surface-container-high) !important;
 
         .btn:first-child:before {
           display: none;
@@ -183,14 +186,20 @@
 
         .btn-group {
           display: inline-flex;
-          vertical-align: middle;
-          gap: 3px;
+          gap: 4px;
+          padding: 0 12px !important;
+          border-right: 1px solid var(--color-outline-variant);
+          &:nth-child(1) {
+            padding-left: 0 !important;
+          }
 
           button {
             &.btn-default {
               -webkit-user-select: none;
               user-select: none;
-              display: inline-block;
+              display: flex;
+              align-items: center;
+              justify-content: center;
               position: relative;
               box-sizing: border-box;
               border: none;
@@ -204,12 +213,8 @@
               overflow: visible;
               border-radius: 50%;
               flex-shrink: 0;
-              text-align: center;
-              width: var(--mdc-icon-button-state-layer-size, 48px);
-              height: var(--mdc-icon-button-state-layer-size, 48px);
-              line-height: 23px;
-              padding: calc(calc(var(--mdc-icon-button-state-layer-size, 48px) - var(--mdc-icon-button-icon-size, 24px)) / 2);
-              font-size: var(--mdc-icon-button-icon-size);
+              width: 36px;
+              height: 36px;
               -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
               &:hover {
@@ -250,7 +255,7 @@
                 display: flex;
                 align-items: center;
                 font-size: 20px;
-                line-height: 24px;
+                line-height: 20px;
               }
 
               &.fa-image:before {
@@ -270,11 +275,35 @@
               }
             }
           }
+
+          .extra-buttons .btn-upload-image {
+            padding-right: 0;
+            .al-ico-image {
+              height: 20px;
+              width: 20px;
+              font-size: 20px;
+              line-height: 20px;
+            }
+          }
         }
       }
 
       .editor-panel {
         border-right: 1px solid var(--color-surface-container-high);
+        .ace-github-light-default,
+        .ace-github-dark {
+          background-color: var(--color-surface);
+          color: var(--color-on-surface-variant);
+        }
+        .ace-github-dark {
+          .ace_marker-layer .ace_active-line {
+            background: color-mix(in srgb, var(--color-surface-container-high), transparent 60%);
+          }
+          .ace_gutter {
+            background: var(--color-surface-container);
+            color: var(--color-outline-variant);
+          }
+        }
       }
 
       @media (max-width: 990px) {
@@ -295,12 +324,14 @@
           font-family: variables.$font-family-monospace;
           line-height: 18px;
           border-radius: 4px;
+          background-color: var(--color-surface-container);
+          border: 1px solid var(--color-outline-variant);
         }
 
         code.hljs {
           padding: 16px;
-          background-color: var(--color-surface-container-low);
           color: var(--color-on-surface-variant);
+          background-color: var(--color-surface-container-low);
         }
 
         iframe:not(.iframe-maximized) {
@@ -410,6 +441,7 @@
         .table {
           background-color: transparent;
           border: 1px solid color-mix(in srgb, var(--color-outline-variant), transparent 50%);
+          border-collapse: collapse;
           margin-bottom: 12px;
 
           td, th {
@@ -418,8 +450,9 @@
           }
 
           th {
-            background-color: var(--color-surface-container-lowest);
+            background-color: var(--row-header-color);
             color: var(--color-on-primary-container);
+            border-bottom: 1px solid var(--row-border-color);
             font-weight: 500;
           }
         }

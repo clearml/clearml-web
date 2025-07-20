@@ -17,13 +17,13 @@
       ></a>
     </cdk-virtual-scroll-viewport>
   </div>
-  <div header-content [class.rename-state]="editName.active">
+  <div header-content [class.rename-state]="editName.active()">
     <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #editName
         class="title edit-name dark"
         [originalText]="project.name | shortProjectName"
         [editable]="true"
-        [minLength]="2"
+        [minLength]="3"
         [required]="true"
         pattern="^[^\/]{2,}$"
         [forbiddenString]="[]"
@@ -34,7 +34,7 @@
           <span class="project-name"
             [smTooltip]="project.name | cleanProjectPath"
             smShowTooltipIfEllipsis
-          >{{project.name | shortProjectName}} </span>@if (!hideProjectPathIcon && (project.name | cleanProjectPath:
+          >{{project.name | shortProjectName}} </span>@if (!hideProjectPathIcon() && (project.name | cleanProjectPath:
           false)) {
           <i
             [smTooltip]="project.name | cleanProjectPath: false"

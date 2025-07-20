@@ -7,7 +7,6 @@ const isElementOverflow = ({clientWidth, clientHeight, scrollWidth, scrollHeight
 
 @Directive({
   selector: '[smFitElementsToContainer]',
-  standalone: true,
 })
 export class FitElementsToContainerDirective implements AfterViewInit, OnDestroy {
 

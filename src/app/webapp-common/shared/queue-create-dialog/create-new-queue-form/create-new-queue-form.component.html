@@ -1,43 +1,35 @@
-<form class="create-queue-form" #queueForm='ngForm'>
-  <div class="row position-relative">
-    <mat-form-field appearance="outline" class="w-100 pt-3">
-      @if (name?.errors?.required) {
-        <mat-error>Required</mat-error>
+<form class="create-queue-form" [formGroup]="queueForm">
+  <mat-form-field class="mb-3">
+    <mat-label>Name</mat-label>
+    <input matInput type="text" formControlName="name">
+    @if (queueForm.controls.name.invalid && queueForm.controls.name?.errors; as errors) {
+      <mat-error>
+      @if (errors?.required) {
+        Required
+      } @else if (errors?.minlength) {
+        Name should contain at least 3 characters
+      } @else if (errors?.uniqueName) {
+        Name should be unique
       }
-      @if (name?.errors?.minlength) {
-        <mat-error>Name should contain at least 3 characters</mat-error>
-      }
-      @if (name?.errors?.uniqueName) {
-        <mat-error>Name should be unique</mat-error>
-      }
-      <mat-label>Name</mat-label>
-      <input matInput type="text"
-        name="queueName"
-        #name="ngModel"
-        [(ngModel)]="queue.name"
-        required
-        minlength="3"
-        smUniqueNameValidator
-        [existingNames]="queuesNames">
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="w-100 pt-3">
-      <mat-label>Display Name</mat-label>
-      <input matInput type="text"
-             name="queueCaption"
-             #caption="ngModel"
-             [(ngModel)]="queue.display_name"
-             minlength="3"
-             smUniqueNameValidator
-             [existingNames]="queuesNames">
-      @if (caption?.errors?.minlength) {
-        <mat-error>Display name should contain at least 3 characters</mat-error>
-      }
-    </mat-form-field>
-  </div>
-  <br/>
+      </mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Display Name</mat-label>
+    <input matInput type="text" formControlName="display_name">
+    @if (queueForm.controls.display_name.invalid && queueForm.controls.display_name?.errors; as errors) {
+      <mat-error>
+        @if (errors?.minlength) {
+          Display name should contain at least 3 characters
+        } @else if (errors?.uniqueName) {
+          Display name shouldn't use an existing queue name
+        }
+      </mat-error>
+    }
+  </mat-form-field>
+</form>
   <mat-dialog-actions>
-    <button mat-flat-button [disabled]="queueForm.invalid || (isEdit && queueForm.pristine)" (click)="send()">
-      {{isEdit ? 'UPDATE' : 'CREATE'}}
+    <button mat-flat-button [disabled]="queueForm.invalid || (isEdit() && queueForm.pristine)" (click)="send()">
+      {{isEdit() ? 'UPDATE' : 'CREATE'}}
     </button>
   </mat-dialog-actions>
-</form>

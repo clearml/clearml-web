@@ -1,15 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component, computed, effect, input,
-  signal, output, model
-} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, computed, effect, input, model, output, signal,} from '@angular/core';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {
   CheckboxThreeStateListComponent
 } from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
-
 import {
   TableFilterDurationNumericComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
@@ -28,147 +22,167 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
-    selector: 'sm-table-filter-sort',
-    templateUrl: './table-filter-sort.component.html',
-    styleUrls: ['./table-filter-sort.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CheckboxThreeStateListComponent,
-        TableFilterDurationNumericComponent,
-        TableFilterDurationComponent,
-        MenuComponent,
-        TooltipDirective,
-        MenuItemComponent,
-        ClickStopPropagationDirective,
-        TableFilterDurationDateTimeComponent,
-        DotsLoadMoreComponent,
-        MatIcon,
-        MatIconButton,
-        MatButton
-    ]
+  selector: 'sm-table-filter-sort',
+  templateUrl: './table-filter-sort.component.html',
+  styleUrls: ['./table-filter-sort.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CheckboxThreeStateListComponent,
+    TableFilterDurationNumericComponent,
+    TableFilterDurationComponent,
+    MenuComponent,
+    TooltipDirective,
+    MenuItemComponent,
+    ClickStopPropagationDirective,
+    TableFilterDurationDateTimeComponent,
+    DotsLoadMoreComponent,
+    MatIcon,
+    MatIconButton,
+    MatButton,
+  ],
 })
 export class TableFilterSortComponent {
-
+  // Constants
   public readonly TABLE_SORT_ORDER = TABLE_SORT_ORDER;
+  public readonly FILTER_TYPE = ColHeaderFilterTypeEnum;
 
-  public formControl = new FormControl();
-  searching = true;
-  FILTER_TYPE = ColHeaderFilterTypeEnum;
-  private pageNumber = signal(1)
+  // Inputs
+  public sortOrder = input<{ index: number; field: string; order: TableSortOrderEnum }>();
+  public fixedOptionsSubheader = input<string>();
+  public value = input<string[]>([]);
+  public subValue = input<string[]>([]);
+  public andFilter = model<boolean>(null);
+  public column = input.required<ISmCol>();
+  public searchValue = input<string>('');
+  public options = input<{ label: string; value: string; tooltip?: string }[]>();
+  public subOptions = input<{ label: string; value: string }[]>();
+  public tooltip = input(false);
 
-  sortOrder = input<{
-        index: number;
-        field: string;
-        order: TableSortOrderEnum;
-    }>();
-  public previousLength: number | undefined;
-  private isOpen: boolean;
+  // Outputs
+  public filterChanged = output<{ value: string[]; andFilter?: boolean }>();
+  public subFilterChanged = output<{ value: string[] }>();
+  public menuClosed = output<void>();
+  public menuOpened = output<void>();
+  public sortOrderChanged = output<boolean>();
+  public searchValueChanged = output<{ value: string; loadMore?: boolean }>();
 
-  fixedOptionsSubheader = input<string>();
-  value = input<string[]>([]);
-  subValue = input<string[]>([]);
-  andFilter = model<boolean>(null);
-  column = input<ISmCol>();
-  searchValue = input<string>('');
-  options = input<{ label: string; value: string; tooltip?: string}[]>();
+  // Internal State Signals
+  private pageNumber = signal(1);
+  private lengthBeforeLoad = signal<number | null>(null);
+  protected loading = signal(false); // For "load more" spinner
+  protected searching = signal(false); // For initial search spinner
 
-  subOptions = input<{
-        label: string;
-        value: string;
-    }[]>();
-  tooltip = input(false);
-  filterChanged = output<{value; andFilter?: boolean}>();
-  subFilterChanged = output<{value}>();
-  menuClosed = output();
-  menuOpened = output();
-  sortOrderChanged = output<boolean>();
-  searchValueChanged = output<{
-        value: string;
-        loadMore?: boolean;
-    }>();
 
-  private previousSearchValue = this.searchValue();
-  protected paginatedOptions = computed(() => this.column().paginatedFilterPageSize ?
-    this.options()?.slice(0, this.column().paginatedFilterPageSize * this.pageNumber()) : this.options()
-  );
-  protected noMoreOptions = computed(() => this.column().asyncFilter ?
-    this.options()?.length < this.column().paginatedFilterPageSize || this.options()?.length === this.previousLength && this.searchValue() === (this.previousSearchValue) :
-    this.paginatedOptions()?.length === this.options()?.length
-  );
-  protected state = computed(() => ({
-    value: this.value(),
-    loading: signal(false)
-  }));
-  isFiltered = computed(() => this.value()?.length > 0 || this.subValue()?.length > 0);
+  // Computed Signals
+  protected paginatedOptions = computed(() => {
+    // When a new search is happening, return null to trigger the spinner in the child component.
+    if (this.searching()) {
+      return null;
+    }
+
+    const col = this.column();
+    if (!col.paginatedFilterPageSize) {
+      return this.options();
+    }
+    return this.options()?.slice(0, col.paginatedFilterPageSize * this.pageNumber());
+  });
+
+  protected noMoreOptions = computed(() => {
+    const col = this.column();
+    // Logic for non-async filters remains the same
+    if (!col.asyncFilter) {
+      return this.paginatedOptions()?.length === this.options()?.length;
+    }
+
+    // If we are actively loading more data, we can't know if there are more options yet.
+    if (this.loading()) {
+      return false;
+    }
+
+    const options = this.options();
+    const prevLength = this.lengthBeforeLoad();
+
+    // After the very first search (prevLength is null), if we get less than a full page, we're done.
+    if (prevLength === null && options && options.length < col.paginatedFilterPageSize) {
+      return true;
+    }
+
+    // After a "loadMore" action, if the total number of options hasn't increased, it means we've reached the end.
+    if (prevLength !== null && options && options.length === prevLength) {
+      return true;
+    }
+
+    // Default for async: if no other condition is met, assume there could be more until proven otherwise.
+    return false;
+  });
+
+  public isFiltered = computed(() => (this.value()?.length ?? 0) > 0 || (this.subValue()?.length ?? 0) > 0);
 
   constructor() {
+    // Effect to automatically turn off loading indicators when new options arrive.
     effect(() => {
-      if (this.options() && this.isOpen) {
-        this.previousLength = this.options()?.length;
-        this.searching = false;
-        this.previousSearchValue = this.searchValue();
-        if (this.column().asyncFilter) {
-          this.state().loading.set(false);
-        }
+      if (this.options()) {
+        this.loading.set(false);
+        this.searching.set(false);
       }
     });
 
-    effect(() => {
-      if (this.searchValue() && this.previousSearchValue !== this.searchValue()) {
-        this.pageNumber.set(1);
-      }
-    });
+    // The problematic effect that reset pageNumber has been removed.
   }
 
-  switchSortOrder($event: MouseEvent) {
+  public switchSortOrder($event: MouseEvent): void {
     this.sortOrderChanged.emit($event.shiftKey);
   }
 
-  onSubFilterChanged(val) {
+  public onSubFilterChanged(val: { itemValue: string }): void {
     if (val) {
       const newValues = addOrRemoveFromArray(this.subValue(), val.itemValue);
-      this.subFilterChanged.emit({value: newValues});
+      this.subFilterChanged.emit({ value: newValues });
     }
   }
 
-  toggleCombination() {
+  public toggleCombination(): void {
     this.andFilter.update(filter => !filter);
     this.emitFilterChanged();
   }
 
-  emitFilterChanged(value?: string[]) {
+  public emitFilterChanged(value?: string[]): void {
     this.filterChanged.emit({
       value: value || this.value(),
-      andFilter: this.andFilter()
+      andFilter: this.andFilter(),
     });
   }
 
-  loadMore() {
+  public loadMore(): void {
+    // Don't do anything if we are already loading or know there are no more options.
+    if (this.loading() || this.noMoreOptions()) {
+      return;
+    }
+    // Store the current number of options BEFORE requesting more.
+    this.lengthBeforeLoad.set(this.options()?.length ?? 0);
     this.pageNumber.update(num => num + 1);
-    if (!this.column().asyncFilter) {
-      window.setTimeout(() => this.state().loading.set(false), 300);
-    }
-    // If we have next page in store - no need to fetch more
-    if (this.options()?.length <= this.column().paginatedFilterPageSize * this.pageNumber()) {
-      this.state().loading.set(true);
-      this.searchValueChanged.emit({value: this.searchValue() || '', loadMore: true});
-    }
+    this.loading.set(true);
+    this.searchValueChanged.emit({ value: this.searchValue() || '', loadMore: true });
   }
 
-  onMenuClose() {
-    this.previousLength = 0;
+  public searchChanged(value: string): void {
+    // A new search is starting.
+    this.pageNumber.set(1); // Reset page number on new search.
+    this.lengthBeforeLoad.set(null); // Reset for a new search.
+    this.searching.set(true); // Show initial spinner.
+    this.searchValueChanged.emit({ value });
+  }
+
+  public onMenuClose(): void {
     this.pageNumber.set(1);
     this.menuClosed.emit();
-    this.isOpen = false;
   }
 
-  onMenuOpen() {
-    this.isOpen = true;
+  public onMenuOpen(): void {
     this.menuOpened.emit();
-  }
-
-  searchChanged(value: string) {
-    this.searching = true;
-    this.searchValueChanged.emit({value});
+    // If the menu is opened and there are no options, trigger an initial search.
+    if (!this.options()?.length) {
+      this.searchChanged(this.searchValue());
+    }
   }
 }

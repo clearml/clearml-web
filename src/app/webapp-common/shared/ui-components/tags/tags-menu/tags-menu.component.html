@@ -1,15 +1,15 @@
 <mat-menu class="tags-menu">
   <span cdkTrapFocus (keydown.tab)="$event.stopPropagation()" (keydown.shift.tab)="$event.stopPropagation()">
     <form class="filter-form"
-      smClickStopPropagation
-      (submit)="addTag(filterText)"
-      (keydown)="$event.stopPropagation()"
-      (keyup.arrowDown)="createButtons.first ? createButtons.first.focus() : buttons.first?.focus()"
-      >
+          smClickStopPropagation
+          (submit)="filterText?.trim().length > 0 && (!disableCreateNew() || allTags?.includes(filterText)) && addTag(filterText);"
+          (keydown)="$event.stopPropagation()"
+          (keyup.arrowDown)="createButtons.first ? createButtons.first.focus() : buttons.first?.focus()"
+    >
       <mat-form-field
         class="w-100 no-bottom"
         appearance="fill"
-        >
+      >
         <input
           #nameInput
           matInput
@@ -18,45 +18,47 @@
           [(ngModel)]="filterText"
           class="filter"
           autocomplete="off"
-          >
+        >
         <div matSuffix class="d-flex-center mx-2">
-          @if (companyTags() !== null && (disableFilterByProject$ | ngrxPush)=== false) {
+          @if (!disableFilterByProject() && companyTags() !== null && (disableFilterByProject$ | ngrxPush) === false) {
             <i
               class="icon sm-md me-3 mb-2 pointer"
               [class]="tagsFilterByProject() ? 'i-project-tags-filter-active' : 'i-project-tags-filter'"
               smTooltip="Toggle all/project-only tags"
               data-id="tagFilterButton"
               (click)="projectTagsFilterToggle()"
-            smClickStopPropagation></i>
+              smClickStopPropagation></i>
           }
-          <i data-id="searchButton" class="al-icon sm-md me-3 mb-2" [class]="filterText? 'al-ico-dialog-x pointer':'al-ico-search'"
-          (click)="filterText && clear()" smClickStopPropagation></i>
+          <i data-id="searchButton" class="al-icon sm-md mb-2" [class.me-3]="!disableFilterByProject()" [class]="filterText? 'al-ico-dialog-x pointer':'al-ico-search'"
+             (click)="filterText && clear()" smClickStopPropagation></i>
         </div>
       </mat-form-field>
     </form>
     <div class="buttons-container" [class.searching]="filterText">
-      @if (filterText?.trim().length > 0 && !allTags?.includes(filterText)) {
+      @if (!disableCreateNew() && filterText?.trim().length > 0 && !allTags?.includes(filterText)) {
         <button
           #tagCreateButton
           mat-menu-item
           class="item"
           (click)="addTag(filterText)"
           (keyup.arrowUp)="focus($event)"
-          >"{{filterText.trim()}}" <span class="new" data-id="createNewTag">(Create New)</span></button>
-        }
-        @for (tag of allTags | filter:tags() | filter:filterText; track tag; let i = $index) {
-          <button
-            #tagButton
-            mat-menu-item
-            class="item"
-            (click)="addTag(tag)"
-            (keyup.arrowUp)="i === 0 && !createButtons.first && focus($event)"
-            [smTooltip]="tag"
-            smShowTooltipIfEllipsis
-          >{{tag}}</button>
-        }
+        >"{{ filterText.trim() }}" <span class="new" data-id="createNewTag">(Create New)</span></button>
+      }
+      @for (tag of allTags | filter:tags() | filter:filterText; track tag; let i = $index) {
+        <button
+          #tagButton
+          mat-menu-item
+          class="item"
+          (click)="addTag(tag)"
+          (keyup.arrowUp)="i === 0 && !createButtons.first && focus($event)"
+          [smTooltip]="tag"
+          smShowTooltipIfEllipsis
+        >{{ tag }}</button>
+      }
       </div>
+    @if (!disableColorMangement()) {
       <hr>
-        <button mat-menu-item data-id="TagColors" class="item" (click)="openTagColors()">Tag Colors</button>
+      <button mat-menu-item data-id="TagColors" class="item" (click)="openTagColors()">Tag Colors</button>
+    }
       </span>
-    </mat-menu>
+</mat-menu>

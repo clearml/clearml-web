@@ -1,5 +1,6 @@
 :root {
   .mat-mdc-menu-panel:not(.multiline-tooltip) {
+    --mat-menu-container-color: var(--color-surface);
     max-width: 450px;
     min-width: 114px;
     min-height: 32px;
@@ -17,7 +18,7 @@
     --mat-menu-item-label-text-size: 14px;
     --mat-menu-item-label-text-weight: 400;
 
-    --mat-menu-item-label-text-color: var(--color-on-primary-container);
+    --mat-menu-item-label-text-color: var(--color-on-surface);
     --mat-menu-item-focus-state-layer-color: var(--color-secondary-container);
 
 
@@ -59,5 +60,11 @@
   .menu-opened {
     background-color: var(--color-tint-8);
     box-shadow: 0 0 0 1px var(--color-tint-14) inset;
+  }
+}
+
+:root.dark-mode {
+  .mat-mdc-menu-panel {
+    --mat-menu-container-color: var(--color-surface-container-high);
   }
 }

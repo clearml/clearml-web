@@ -47,11 +47,11 @@ export class AdminCredentialTableBaseDirective {
         no: 'CANCEL',
         iconClass: 'al-ico-access-key',
         width: '200px',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         'max-width': '200px'
       }
     }).afterClosed().subscribe((label) => {
-      if (label !== null) {
+      if (typeof label === 'string') {
         this.updateCredentialLabel.emit({credential, label: label || null});
       }
     });

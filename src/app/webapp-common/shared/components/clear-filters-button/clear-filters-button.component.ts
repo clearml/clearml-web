@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, input, output} from '@angular/core';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatIconButton} from '@angular/material/button';
 

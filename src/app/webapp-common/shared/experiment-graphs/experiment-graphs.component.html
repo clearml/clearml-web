@@ -43,12 +43,13 @@
           [chart]="multipleSingleValueData()"
           [id]="'singleValues'"
           [isCompare]="isCompare()"
-          [hoverMode]="hoverMode()"
+          [defaultHoverMode]="defaultHoverMode()"
           [showLoaderOnDraw]="showLoaderOnDraw()"
           [identifier]="generateIdentifier(multipleSingleValueData())"
           [exportForReport]="exportForReport()"
+          [chartSettings]="(chartSettings['singleValues'] | ngrxPush)"
           (createEmbedCode)="creatingEmbedCode(null, $event)"
-          (hoverModeChanged)="hoverModeChanged.emit($event)"
+          (chartPreferencesChanged)="chartPreferencesChanged({metric:'singleValues'}, $event)"
         ></sm-single-graph>
       </div>
     }
@@ -117,20 +118,21 @@
                           [chart]="chartItem"
                           [id]="chartItem.id"
                           [isCompare]="isCompare()"
-                          [hoverMode]="hoverMode()"
                           [showLoaderOnDraw]="showLoaderOnDraw()"
                           [legendConfiguration]="legendConfiguration()"
                           [smoothSigma]="smoothSigma()"
                           [smoothWeight]="smoothWeight()"
                           [smoothType]="smoothType()"
+                          [showOriginals]="showOriginals()"
                           [xAxisType]="xAxisType()"
+                          [chartSettings]="(chartSettings[chartItem.id] | ngrxPush)"
                           [height]="height"
                           [width]="width"
                           [moveLegendToTitle]="checkIfLegendToTitle(chartItem)"
                           [identifier]="generateIdentifier(chartItem)"
                           [exportForReport]="exportForReport()"
                           (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
-                          (hoverModeChanged)="hoverModeChanged.emit($event)"
+                          (chartPreferencesChanged)="chartPreferencesChanged(chartItem, $event)"
                         ></sm-single-graph>
                       } @placeholder {
                         <div

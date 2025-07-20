@@ -50,7 +50,7 @@ export class ProjectInfoComponent {
 
     effect(() => {
       if (this.projectId()) {
-        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId()));
+        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId(), false));
       }
     });
     this.setupBreadcrumbsOptions();

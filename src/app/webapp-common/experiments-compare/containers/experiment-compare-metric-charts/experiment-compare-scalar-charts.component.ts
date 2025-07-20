@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, effect, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, take, withLatestFrom} from 'rxjs/operators';
@@ -15,23 +15,20 @@ import {
   resetExperimentMetrics,
   setExperimentMetricsSearchTerm,
   setExperimentSettings,
-  setScalarsHoverMode,
   setSelectedExperiments
 } from '../../actions/experiments-compare-charts.actions';
 import {
   selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm,
   selectMultiSingleValues,
-  selectScalarsHoverMode,
   selectSelectedExperiments,
   selectSelectedExperimentSettings
 } from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {GroupByCharts, groupByCharts} from '@common/experiments/actions/common-experiment-output.actions';
+import {GroupByCharts, groupByCharts, setChartSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 import {ActivatedRoute} from '@angular/router';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -59,6 +56,10 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {PushPipe} from '@ngrx/component';
 import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
+import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 
 
 @Component({
@@ -70,7 +71,10 @@ import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-
     ExperimentGraphsModule,
     SelectableGroupedFilterListComponent,
     PushPipe,
-    GraphSettingsBarComponent
+    GraphSettingsBarComponent,
+    MatMenu,
+    MatMenuTrigger,
+    ClickStopPropagationDirective
   ]
 })
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
@@ -81,15 +85,16 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     );
   protected settings$ = this.store.select(selectSelectedExperimentSettings);
   protected splitSize$ = this.store.select(selectSplitSize);
-  protected hoverMode$ = this.store.select(selectScalarsHoverMode).pipe(
-    filter(h => !!h),
-    distinctUntilChanged());
+  // protected hoverMode$ = this.store.select(selectScalarsHoverMode).pipe(
+  //   filter(h => !!h),
+  //   distinctUntilChanged());
   protected singleValues$ = this.store.select(selectMultiSingleValues);
   protected routerParams$ = this.store.select(selectRouterParams).pipe(
     filter(params => params.ids !== undefined),
     distinctUntilChanged()
   );
   protected showSettingsBar = this.store.selectSignal(selectShowCompareScalarSettings);
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   public searchTerm$: Observable<string>;
 
   private subs = new Subscription();
@@ -110,6 +115,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   ];
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
+  @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   private entityType: EntityTypeEnum;
   public modelsFeature: boolean;
   public singleValues: ExtFrame;
@@ -120,7 +126,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     smoothSigma: 2,
     smoothType: smoothTypeEnum.exponential,
     xAxisType: ScalarKeyEnum.Iter,
-    selectedMetricsScalar: []
+    selectedMetricsScalar: [],
+    showOriginals: true
   };
   private originalSettings: ExperimentCompareSettings;
   public minimized = false;
@@ -143,6 +150,12 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   ) {
     this.modelsFeature = this.route.snapshot?.parent.data?.setAllProject;
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
+
+    effect(() => {
+      if (this.showSettingsBar()) {
+        this.trigger.openMenu();
+      }
+    });
   }
 
   ngOnInit() {
@@ -385,6 +398,10 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     };
   }
 
+  changeShowOriginals($event: boolean) {
+    this.settings = {...this.settings, showOriginals: $event};
+  }
+
   changeXAxisType($event: ScalarKeyEnum) {
     this.settings = {...this.settings, xAxisType: $event};
     this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, entity: this.entityType, metrics: this.selectedVariants, xAxisType: this.settings.xAxisType}));
@@ -409,6 +426,10 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     // }
   }
 
+  changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {
+    this.store.dispatch(setChartSettings({...$event, projectId: this.projectId()}));
+  }
+
   selectAllChildren(force = false) {
     const newVariantsToSelect = [];
     Object.entries(this.graphList).forEach(([metric, variant]) => {
@@ -427,9 +448,9 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.store.dispatch(toggleCompareScalarSettings());
   }
 
-  hoverModeChanged(hoverMode: ChartHoverModeEnum) {
-    this.store.dispatch(setScalarsHoverMode({hoverMode}));
-  }
+  // hoverModeChanged(hoverMode: ChartHoverModeEnum) {
+  //   this.store.dispatch(setScalarsHoverMode({hoverMode}));
+  // }
 
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     const entityType = this.entityType === EntityTypeEnum.model ? 'model' : 'task';

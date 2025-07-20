@@ -1,0 +1,13 @@
+<div class="item-row">
+  <mat-icon fontSet="al" [fontIcon]="fontIcon()" class="me-3 main-icon"></mat-icon>
+  <div class="text-row">
+    <div class="title"><span class="name ellipsis">{{ label() }}</span><span class="right-icons"> @if (status()){<sm-status-icon-label [status]="status()" [externalStatusLabels]="statusOptionsLabels()"></sm-status-icon-label>}<sm-mini-tags-list [tags]="tags()"></sm-mini-tags-list>
+</span>
+    </div>
+    <div class="sub-title">
+      <ng-content select="[subtitle]">
+
+      </ng-content>
+    </div>
+  </div>
+</div>

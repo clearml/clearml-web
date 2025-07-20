@@ -24,7 +24,7 @@ import {
 } from '@angular/core';
 import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
-import {select, Store} from '@ngrx/store';
+import { Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
@@ -52,13 +52,24 @@ export interface FlatNode {
 
 @Directive()
 export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase implements OnDestroy, AfterViewInit {
+  private router = inject(Router);
+  protected store = inject(Store);
+  private changeDetection = inject(ChangeDetectorRef);
+  protected activeRoute = inject(ActivatedRoute);
+  private refresh = inject(RefreshService);
+  private cdr = inject(ChangeDetectorRef);
+
   public hasDataFeature$: Observable<boolean>;
   private hasDataFeature: boolean;
 
   public nativeWidth = 410;
   public renameMap = RENAME_MAP;
   public experiments$: Observable<any[]>;
-  public taskIds$: Observable<string[]>;
+  protected taskIds$ = this.store.select(selectRouterParams).pipe(
+    map(params => params?.ids),
+    distinctUntilChanged(),
+    map(ids => ids?.split(','))
+  );
 
   public routerParamsSubscription: Subscription;
   public experimentsSubscription: Subscription;
@@ -67,45 +78,37 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   private scrollSubscription: Subscription[];
 
   public tree: ExperimentCompareTree = {};
-  public experiments: Array<IExperimentDetail>;
-  public originalExperiments: { [id: string]: IExperimentDetail | ExperimentParams } = {};
+  public experiments: IExperimentDetail[];
+  public originalExperiments: Record<string, IExperimentDetail | ExperimentParams> = {};
   public allPathsDiffs: any = {};
   public selectedPath: string = null;
   public hoveredPath: string = null;
-  private selectedPathIndex: number = -1;
   public onlyDiffsPaths: string[];
 
   public allPaths: any = {};
   public calculatingTree: boolean;
   public hideIdenticalFields = false;
-  public experimentsDataControl: {
-    [key: string]: [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>, FlatNode[]]
-  } = {};
+  public experimentsDataControl: Record<string, [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>, FlatNode[]]> = {};
   public compareTabPage: string;
   public foundPaths: string[] = [];
-  public foundIndex: number = 0;
   public searchText = '';
-  public experimentsDataSources: { [id: string]: { all: any; onlyDiffs: any } } = {};
+  public experimentsDataSources: Record<string, { all: any; onlyDiffs: any }> = {};
   public previousOpenPaths: string[] = [];
-  public experimentTags: { [experimentId: string]: string[] } = {};
+  public experimentTags: Record<string, string[]> = {};
   private timeoutIndex: number;
   private originalScrolledElement: EventTarget;
   protected treeCardBody: HTMLDivElement;
   protected entityType = EntityTypeEnum.experiment;
-  protected router: Router;
-  protected store: Store;
-  protected changeDetection: ChangeDetectorRef;
-  protected activeRoute: ActivatedRoute;
-  protected refresh: RefreshService;
-  public cdr: ChangeDetectorRef;
-  @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
-  private prevIndex : number = 0;
-  private prevOffset: number = 0;
+  protected selectedPathIndex = -1;
+  protected foundIndex = 0;
+  protected prevIndex = 0;
+  protected prevOffset = 0;
 
   get baseExperiment(): IExperimentDetail {
     return this.experiments?.[0];
   }
 
+  @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
   @ViewChildren('virtualScrollRef') virtualScrollRef: QueryList<CdkVirtualScrollViewport>;
 
   @HostListener('window:resize')
@@ -118,18 +121,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   constructor() {
     super();
-    this.router = inject(Router);
-    this.store = inject(Store);
-    this.changeDetection = inject(ChangeDetectorRef);
-    this.activeRoute = inject(ActivatedRoute);
-    this.refresh = inject(RefreshService);
-    this.cdr = inject(ChangeDetectorRef);
-    this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
-    this.taskIds$ = this.store.pipe(
-      select(selectRouterParams),
-      map(params => params?.ids?.split(',')),
-      distinctUntilChanged(),
-    );
+    this.hasDataFeature$ = this.store.select((selectHasDataFeature));
   }
 
   onInit() {
@@ -205,7 +197,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         }
         const rootOnlyDiffs = this.filterTreeDiffs(root);
         const treeControl: FlatTreeControl<FlatNode> = new FlatTreeControl<FlatNode>(this.getNodeLevel, this.getIsNodeExpandable);
-        const dataSource: MatTreeFlatDataSource<TreeNode<any>, FlatNode> = new MatTreeFlatDataSource(treeControl, treeFlattener);
+        const dataSource = new MatTreeFlatDataSource<TreeNode<any>, FlatNode>(treeControl, treeFlattener);
 
         dataSource.connect({viewChange: new Observable<ListRange>()}).subscribe((nodes: FlatNode[]) =>
           this.experimentsDataControl[experimentID] = [dataSource, treeControl, nodes]
@@ -476,7 +468,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     }
   }
 
-  public syncUrl(experiments: Array<IExperimentDetail>) {
+  public syncUrl(experiments: IExperimentDetail[]) {
     const newParams = this.getExperimentIdsParams(experiments);
     this.router.navigateByUrl(this.router.url.replace(this.experiments.map(ex => ex.id).toString(), newParams));
   }
@@ -489,7 +481,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     });
   }
 
-  public getExperimentIdsParams(experiments: Array<IExperimentDetail>): string {
+  public getExperimentIdsParams(experiments: IExperimentDetail[]): string {
     return experiments ? experiments.map(e => e.id).toString() : '';
   }
 

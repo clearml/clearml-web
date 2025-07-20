@@ -1,8 +1,20 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {
-  Colors, ExtData,
-  ExtFrame,
-  ExtLayout,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener, inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  Renderer2,
+  signal,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
+import {
+  Colors, ExtLayout,
   PlotlyGraphBaseComponent
 } from '@common/shared/single-graph/plotly-graph-base';
 import {SlicePipe} from '@angular/common';
@@ -17,12 +29,12 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {MetricValueType, SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {GraphViewerComponent, GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
-import {MatDialog} from '@angular/material/dialog';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
@@ -54,19 +66,24 @@ interface ParaPlotData {
 
 
 @Component({
-    selector: 'sm-parallel-coordinates-graph',
-    templateUrl: './parallel-coordinates-graph.component.html',
-    styleUrls: ['./parallel-coordinates-graph.component.scss'],
-    imports: [
-        SlicePipe,
-        TooltipDirective,
-        ChooseColorModule,
-        ShowTooltipIfEllipsisDirective,
-        MatIconButton,
-        MatIcon
-    ]
+  selector: 'sm-parallel-coordinates-graph',
+  templateUrl: './parallel-coordinates-graph.component.html',
+  styleUrls: ['./parallel-coordinates-graph.component.scss'],
+  imports: [
+    SlicePipe,
+    TooltipDirective,
+    ChooseColorModule,
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    MatIcon
+  ]
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit, OnChanges {
+  private colorHash = inject(ColorHashService);
+  private cdr = inject(ChangeDetectorRef);
+  private renderer = inject(Renderer2);
+  private elementRef = inject(ElementRef);
+
   private metricVariantToPathPipe = new MetricVariantToPathPipe();
   private metricVariantToNamePipe = new MetricVariantToNamePipe();
   private data: ParaPlotData[];
@@ -79,10 +96,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
   @ViewChild('legend', {static: true}) legend: ElementRef;
   @ViewChild('container') container: ElementRef<HTMLDivElement>;
-  private graphWidth: number;
   private _metricValueType: MetricValueType;
   private highlighted: ExtraTask;
   private dimensionsOrder: string[];
+  protected maximized = signal(false);
 
   @HostListener('window:resize')
   redrawChart() {
@@ -141,13 +158,15 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
 
   @Input() reportMode = false;
-  @Output() createEmbedCode = new EventEmitter<{ tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
+  @Output() createEmbedCode = new EventEmitter<{
+    tasks: string[];
+    valueType: MetricValueType;
+    metrics?: string[];
+    variants?: string[];
+    domRect: DOMRect
+  }>();
 
-  constructor(
-    private colorHash: ColorHashService,
-    private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor( ) {
     super();
 
     this.sub.add(this.drawGraph$
@@ -347,16 +366,20 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       displaylogo: false,
       displayModeBar: false,
       modeBarButtonsToRemove: ['toggleHover']
-    });
+    })
+      .then(res => {
+        this.plotlyElement = res;
+      });
     this.postRenderingGraphManipulation();
   }
 
   private postRenderingGraphManipulation() {
     if (this.parameters) {
       const graph = select(this.parallelGraph.nativeElement);
-      this.graphWidth = graph.node().getBoundingClientRect().width;
       graph.selectAll('.y-axis')
-        .filter((d: { key: string }) => this.metrics?.map(mv => this.metricVariantToNamePipe.transform(mv, true)).includes(d.key))
+        .filter((d: {
+          key: string
+        }) => this.metrics?.map(mv => this.metricVariantToNamePipe.transform(mv, true)).includes(d.key))
         .classed('metric-column', true);
       graph.selectAll('.axis-title')
         .text((d: { key: string }) => this.wrap(d.key))
@@ -445,26 +468,13 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   }
 
   maximize() {
-    this.dialog.open(GraphViewerComponent, {
-      data: {
-        embedFunction: (data) => this.creatingEmbedCode(data.domRect),
-        // signed url are updated after originChart was cloned - need to update images urls!
-        chart: cloneDeep({
-          data: this.data as unknown as ExtData[],
-          layout: {
-            ...this.getLayout(false, {l: 120, r: 120, t: 150, b: 40}),
-            title: 'Parallel coordinates',
-          },
-          config: {
-            displaylogo: false,
-            displayModeBar: false
-          }
-        } as ExtFrame),
-        id: `compare params ${this.experiments?.map(e => e.id).join(',')}`,
-        hideNavigation: false,
-        isCompare: true
-      } as GraphViewerData,
-      panelClass: ['image-viewer-dialog', 'full-screen'],
-    });
+    if (this.maximized()) {
+      this.renderer.removeClass(this.elementRef.nativeElement, 'maximized');
+      this.maximized.set(false);
+    } else {
+      this.renderer.addClass(this.elementRef.nativeElement, 'maximized');
+      this.maximized.set(true);
+    }
+    window.setTimeout(() => this.prepareGraph());
   }
 }

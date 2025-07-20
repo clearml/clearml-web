@@ -77,17 +77,12 @@ $list-width: 359px;
     padding: 0 25px 0 22px;
     background-color: var(--color-surface-container-lowest);
     transition: max-height 0.3s;
-
-    &.showSettings {
-      min-height: 64px;
-      max-height: 128px;
-    }
   }
 
-  sm-experiment-graphs {
-    &.with-settings {
-      height: calc(100% - 64px);
-    }
+  .menu-trigger {
+    visibility: hidden;
+    position: absolute;
+    right: 120px;
+    top: 110px;
   }
-
 }

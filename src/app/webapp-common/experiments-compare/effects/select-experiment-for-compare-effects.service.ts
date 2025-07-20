@@ -105,10 +105,10 @@ export class SelectCompareHeaderEffects {
       this.store.select(selectExperimentsTableCols),
       this.store.select(selectExperimentsMetricsCols),
     ]),
-    switchMap(([action, oldOrders, projectId, tableCols, metricsCols]) => {
+    map(([action, oldOrders, projectId, tableCols, metricsCols]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
-      const colIds = tableCols.map(col => col.id).concat(metricsCols.map(col => col.id));
-      return [compareAddDialogSetTableSort({orders, projectId, colIds})];
+      const colIds = tableCols.map(col => col.id).concat(metricsCols[projectId].map(col => col.id));
+      return compareAddDialogSetTableSort({orders, projectId, colIds});
     })
   ));
 

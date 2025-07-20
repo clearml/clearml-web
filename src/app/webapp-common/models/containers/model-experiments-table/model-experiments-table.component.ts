@@ -124,7 +124,7 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
         this.filterChanged({col: {id: 'models.input.model'}, value: modelId, andFilter: false});
       });
     this.experiments$.pipe(filter(() => this.initTags)).subscribe(experiments => {
-      this.tags = uniq(experiments.map(exp => exp.tags).flat());
+      this.tags = uniq(experiments?.map(exp => exp.tags).flat());
       this.initTags = false;
     });
   }

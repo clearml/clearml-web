@@ -4,7 +4,7 @@
   [showFolder]="false"
   [oneTabMode]="true"
   >
-  <div header-content [class.rename-state]="editName.active">
+  <div header-content [class.rename-state]="editName.active()">
     <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #editName
         class="title edit-name dark"

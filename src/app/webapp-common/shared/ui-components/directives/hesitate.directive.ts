@@ -122,6 +122,7 @@ export class HesitateDirective implements AfterViewInit, OnDestroy {
     // As such, we have set up into the Angular zone for the emission.
     this.zone.runGuarded(
       () => {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.smHesitate.emit();
       }
     );

@@ -1,7 +1,9 @@
+@use '../../../../webapp-common/layout/layout';
+
 :host {
   .header-container {
     padding-left: 24px;
-    height: 66px;
+    height: layout.$project-header-height;
     transition: background-color 0.5s;
 
     .hide-item {

@@ -8,7 +8,6 @@ import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
 import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {ShortProjectNamePipe} from '../pipes/short-project-name.pipe';
@@ -47,7 +46,6 @@ export class ProjectDialogEffects {
         mergeMap(() => [
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
-            getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been created successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`)
           ]
         ),
@@ -65,7 +63,6 @@ export class ProjectDialogEffects {
         mergeMap(() => [
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
-            getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been updated successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`),
           ]
         ),
@@ -77,14 +74,13 @@ export class ProjectDialogEffects {
   moveProject = createEffect(() => this.actions.pipe(
     ofType(newProjectActions.moveProject),
     concatLatestFrom(() => this.store.select(selectActiveWorkspace)),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     switchMap(([action]) => this.projectsApiService.projectsMove({project: action.project, new_location: action.new_location})
       .pipe(
         tap(() => this.dialog.getDialogById(action.dialogId).close(true)),
         mergeMap(() => [
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
-            getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${action.projectName} has been moved from ${action.fromName} to ${action.toName}`)
           ]
         ),

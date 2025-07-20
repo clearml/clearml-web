@@ -2,7 +2,6 @@ import {Directive, HostListener, input} from '@angular/core';
 
 @Directive({
   selector: '[smPreventKeysByNumbersDirective]',
-  standalone: true,
 })
 export class PreventKeysByNumbersDirective {
   keys = input<number[]>([])

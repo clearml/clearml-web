@@ -68,7 +68,7 @@
               [smTooltip]="queue.display_name ? queue.display_name + ' (' + queue.name + ')' : queue.name"
               smShowTooltipIfEllipsis
             >
-              <div [smSearchText]="selectedQueue?.name">{{queue.caption}}</div>
+              <div [smSearchText]="queueInput.value">{{queue.caption}}</div>
             </mat-option>
           }
         </mat-autocomplete>

@@ -32,7 +32,7 @@
             [disabled]="!sections()[0]?.options?.length"
             (click)="$event.stopPropagation(); sections()[0]?.options?.length && customColumnMode.set(customColumnModeEnum.Metrics)"
           >
-            <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+            <mat-icon fontSet="al" fontIcon="al-ico-plus" data-id="AddCustomMetaDataButton"></mat-icon>
             <span data-id="Metric Button" class="caption">{{sections()[0]?.title ?? sections()[0]?.name | uppercase}}</span>
           </button>
           @if (sections()[1]) {

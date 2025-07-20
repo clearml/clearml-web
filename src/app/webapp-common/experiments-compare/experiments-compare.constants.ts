@@ -97,19 +97,19 @@ export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [
 export const LIMITED_VIEW_LIMIT = 10;
 
 export const EXPERIMENTS_COMPARE_ROUTES = [
-  {header: 'details', subHeader: ''},
-  {header: 'hyperparameters', subHeader: '', featureLink: 'hyper-params'},
-  {header: 'scalars', subHeader: ''},
-  {header: 'plots', subHeader: '', featureLink: 'metrics-plots'},
-  {header: 'debug samples', subHeader: '', featureLink: 'debug-images'},
+  {header: 'details'},
+  {header: 'hyperparameters', featureLink: 'hyper-params'},
+  {header: 'scalars'},
+  {header: 'plots', featureLink: 'metrics-plots'},
+  {header: 'debug samples', featureLink: 'debug-images'},
 ] as HeaderNavbarTabConfig[];
 
 
 export const MODELS_COMPARE_ROUTES = [
-  {header: 'details', subHeader: '', featureLink: 'models-details'},
-  {header: 'network', subHeader: ''},
-  {header: 'scalars', subHeader: ''},
-  {header: 'plots', subHeader: '', featureLink: 'metrics-plots'},
+  {header: 'details', featureLink: 'models-details'},
+  {header: 'network'},
+  {header: 'scalars'},
+  {header: 'plots', featureLink: 'metrics-plots'},
 ] as HeaderNavbarTabConfig[];
 
 export const HIDDEN_PLOTS_BY_DEFAULT = ['Pipeline - Execution Flow', 'Pipeline Details - Execution Details'];

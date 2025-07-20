@@ -209,9 +209,8 @@ export class CommonExperimentsMenuEffects {
 
 
   cloneExperimentRequested$ = createEffect(() => this.actions$.pipe(
-    ofType(menuActions.cloneExperimentClicked),
-    concatLatestFrom(() => this.store.select(selectTableMode)),
-    switchMap(([action, ]) => this.apiTasks.tasksClone({
+    ofType(menuActions.cloneExperiment),
+    switchMap(action => this.apiTasks.tasksClone({
         task: action.originExperiment.id,
 
         ...(action.cloneData?.project?.value && {new_task_project: action.cloneData.project.value}),
@@ -223,13 +222,10 @@ export class CommonExperimentsMenuEffects {
       } as TasksCloneRequest)
         .pipe(
           mergeMap((res: TasksCloneResponse) => {
-            this.router.navigate(['projects', action.cloneData.project?.value || res.new_project?.id || '*', 'tasks', res.id]);
             return [
-              viewActions.getExperiments(),
+              menuActions.cloneExperimentSuccess({project: action.cloneData.project?.value || res.new_project?.id || '*', task: res.id}),
               deactivateLoader(action.type),
-              ...action.cloneData.newProjectName ? [
-                projectsActions.setDeep({deep: false}),
-                getAllSystemProjects()] : [],
+              ...action.cloneData.newProjectName ? [projectsActions.setDeep({deep: false}), getAllSystemProjects()] : [],
             ];
           }),
           catchError(error => [
@@ -240,6 +236,16 @@ export class CommonExperimentsMenuEffects {
         )
     )
   ));
+
+  cloneSuccess = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(menuActions.cloneExperimentSuccess),
+      map(action => {
+        this.router.navigate(['projects', action.project, 'tasks', action.task]);
+        return viewActions.getExperiments();
+      })
+    );
+  });
 
   publishExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.publishClicked),
@@ -382,28 +388,29 @@ export class CommonExperimentsMenuEffects {
 
   removeTag$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.removeTag),
-    switchMap((action) => [
-      ...action.experiments
-        .filter(experiment => experiment.tags.includes(action.tag))
-        .map(experiment =>
-          experimentDetailsUpdated({
-            id: experiment.id,
-            changes: {tags: experiment.tags.filter(tag => tag !== action.tag)}
-          })
-        ),
-      addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” task`, [
-        {
-          name: 'Undo',
-          actions: [
-            addMessage('success', `“${action.tag}” tag has been restored`),
-            ...action.experiments.map(() => menuActions.addTag({
-              experiments: action.experiments,
-              tag: action.tag
-            }))
-          ]
-        }]
-      )
-    ])
+    switchMap(action => this.apiTasks.tasksUpdateTags({
+      ids: action.experiments.map(e=> e.id),
+      remove_tags: [action.tag]
+    }).pipe(
+      switchMap(() => [
+        menuActions.removeTagSuccess({experiments: action.experiments.map(e => e.id), tag: action.tag}),
+        addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” task`, [
+          {
+            name: 'Undo',
+            actions: [
+              addMessage('success', `“${action.tag}” tag has been restored`),
+              ...action.experiments.map(() => menuActions.addTag({
+                experiments: action.experiments,
+                tag: action.tag
+              }))
+            ]
+          }]
+        )
+      ]),
+      catchError(err => {
+        return of(requestFailed(err));
+      }),
+    )),
   ));
 
 

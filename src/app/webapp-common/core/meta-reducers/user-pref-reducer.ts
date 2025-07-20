@@ -88,9 +88,11 @@ export const createUserPrefFeatureReducer = (
       return nextState;
     }
 
-    const val = pick(nextState, syncedKeys );
-    clearTimeout(timeout);
-    timeout = window.setTimeout(() => userPreferences.setPreferences(key, val), 2000);
+    if (syncedKeys.length > 0) {
+      const val = pick(nextState, syncedKeys);
+      clearTimeout(timeout);
+      timeout = window.setTimeout(() => userPreferences.setPreferences(key, val), 2000);
+    }
     return nextState;
   };
 };

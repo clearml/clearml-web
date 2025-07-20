@@ -5,13 +5,13 @@
   [oneTabMode]="true"
   [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
   >
-  <div header-content [class.rename-state]="editName.active">
+  <div header-content [class.rename-state]="editName.active()">
     <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #editName
         class="title edit-name dark"
         [originalText]="project.name | shortProjectName"
         [editable]="true"
-        [minLength]="2"
+        [minLength]="3"
         [required]="true"
         pattern="^[^\/]{2,}$"
         [forbiddenString]="[]"
@@ -23,10 +23,8 @@
           [smTooltip]="project.basename"
           smShowTooltipIfEllipsis
         >{{project.basename}}</span>
-          @if (!hideProjectPathIcon && (project.name | cleanProjectPath: false)) {
-            <i [smTooltip]="project.name | cleanProjectPath:false"
-               class="al-icon al-ico-project-path sm ms-2"
-            ></i>
+          @if (!hideProjectPathIcon() && (project.name | cleanProjectPath: false); as path) {
+            <i [smTooltip]="path" class="al-icon al-ico-project-path sm ms-2"></i>
           }</span>
       </sm-inline-edit>
       @if (!hideMenu()) {

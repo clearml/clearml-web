@@ -1,17 +1,25 @@
 
-
 :host {
-  .content{
-    padding-top: 24px;
+  .content {
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
-  .search-container{
-    display: grid;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
-    sm-show-only-user-work{
+
+  .search-container {
+    display: flex;
+    justify-content: center;
+
+    sm-search {
+      width: 300px;
+    }
+
+    sm-show-only-user-work {
       margin-left: 12px;
     }
   }
+
   .regexp {
     position: absolute;
     right: 8px;

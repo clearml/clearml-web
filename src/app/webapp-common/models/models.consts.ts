@@ -1,6 +1,7 @@
 import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {MODELS_TABLE_COL_FIELDS} from './shared/models.const';
 import {rootProjectsPageSize} from '@common/constants';
+import {Link} from '~/features/experiments/experiments.consts';
 
 export type ModelWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
 export const WIZARD_METHODS = {
@@ -100,6 +101,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id              : MODELS_TABLE_COL_FIELDS.USER,
+    getter          : 'user.name',
     headerType      : ColHeaderTypeEnum.sortFilter,
     searchableFilter: true,
     filterable      : true,
@@ -134,3 +136,13 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     style     : {width: '240px'}
   },
 ];
+
+export const  infoModelsTabsLinks = [
+  {name: 'general', url: ['general']},
+  {name: 'network', url: ['network']},
+  {name: 'labels', url: ['labels']},
+  {name: 'metadata', url: ['metadata']},
+  {name: 'lineage', url: ['tasks']},
+  {name: 'scalars', url: ['scalars']},
+  {name: 'plots', url: ['plots']},
+] as Link[];

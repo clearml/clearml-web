@@ -1,9 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {NA} from '../../../app.constants';
+import {NA} from '~/app.constants';
 
 @Pipe({
   name: 'NA',
-  standalone: true,
 })
 export class NAPipe implements PipeTransform {
 

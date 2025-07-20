@@ -33,7 +33,7 @@ hr {
   padding: 6px 0;
 
   a {
-    color: var(--color-on-primary-container);
+    color: var(--color-on-surface);
     display: flex;
     align-items: center;
     margin: 0 12px;
@@ -69,4 +69,8 @@ hr {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.info-icon {
+  vertical-align: middle;
 }

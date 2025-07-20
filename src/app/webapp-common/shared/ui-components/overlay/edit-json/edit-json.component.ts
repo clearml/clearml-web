@@ -1,5 +1,5 @@
 import {Component, HostListener, inject, viewChild, computed} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogRef} from '@angular/material/dialog';
 import { JsonPipe } from '@angular/common';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
@@ -26,6 +26,7 @@ export interface EditJsonData {
     providers: [{ provide: JsonPipe, useClass: JsonPipe }],
     imports: [
         DialogTemplateComponent,
+        MatDialogActions,
         MatButton,
         CodeEditorComponent
     ]

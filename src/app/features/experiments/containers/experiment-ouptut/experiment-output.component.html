@@ -1,4 +1,4 @@
-<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-info-header-status-icon-label
   [status]=" (selectedExperiment)?.status || selectedExperiment?.status"
 ></sm-info-header-status-icon-label>
@@ -16,23 +16,21 @@
     (maximizedClicked)="maximize()"
   ></sm-experiment-info-header>
   <sm-experiment-info-navbar [minimized]="minimized" [splitSize]="selectSplitSize$ | ngrxPush">
-    @if ((routerConfig.includes('scalar') && minimized) || !minimized ) {
+    @if ((routerConfig.includes('scalars') && minimized) || !minimized) {
       <div class="scalar-buttons" leftButtons></div>
     }
-    @if ((routerConfig.includes('scalar') && minimized) || !minimized ) {
-      <span class="refresh-position" refresh>
+    @if ((routerConfig.includes('scalars') && minimized) || !minimized) {
+      <span class="close-button" refresh>
       <div class="scalar-buttons">
-        @if (routerConfig.includes('scalar')) {
-          <button mat-icon-button class="table-graph-toggle"
-                  [smTooltip]="(metricValuesView$ | async)===false? 'Metric values': 'Graphs'"
-                  [class.maximized]="!minimized"
-                  (click)="toggleTableView()">
-            <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon>
-          </button>
+        @if (routerConfig.includes('scalars')) {
+          <div class="table-graph-toggle" [class.maximized]="!minimized">
+            <button mat-icon-button [smTooltip]="(metricValuesView$ | ngrxPush) === false ? 'Metric values': 'Graphs'" (click)="toggleTableView()">
+              <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | ngrxPush) === false ? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon></button>
+          </div>
         }
-        @if ((metricValuesView$ | async) === false && routerConfig.includes('scalar') && minimized) {
-          <button mat-icon-button [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
-            <mat-icon fontSet="al" fontIcon="al-ico-settings"></mat-icon>
+        @if ((metricValuesView$ | ngrxPush) === false && routerConfig.includes('scalars') && minimized) {
+          <button mat-icon-button data-id="scalar settings" [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
+            <mat-icon fontSet="al" fontIcon="al-ico-tune"></mat-icon>
           </button>
           <mat-menu #graphSettingsMenu="matMenu">
             <sm-graph-settings-bar
@@ -44,17 +42,18 @@
               [smoothType]="smoothType()"
               [xAxisType]="xAxisType()"
               [groupBy]="groupBy()"
-              [clearable]="projectId === '*' ? null : !isProjectLevel()"
               [groupByOptions]="groupByOptions"
+              [showOrigin]="showOriginals()"
+              [clearable]="!isProjectLevel()"
               (changeWeight)="changeSmoothness($event)"
               (changeSigma)="changeSigma($event)"
               (changeXAxisType)="changeXAxisType($event)"
               (changeGroupBy)="changeGroupBy($event)"
+              (changeShowOrigin)="changeShowOriginals($event)"
               (changeSmoothType)="changeSmoothType($event)"
               (setToProject)="setToProject()"
             ></sm-graph-settings-bar>
           </mat-menu>
-
         }
       </div>
         @if (!minimized){
@@ -65,6 +64,10 @@
         }
     </span>
     }
+    @if ((routerConfig.includes('plots') && minimized) || !minimized) {
+      <span class="close-button-fake" refresh></span>
+    }
+
   </sm-experiment-info-navbar>
   <div class="output-body" [class.minimized]="minimized" #scrollContainer>
     <router-outlet class="output-outlet" (activate)="onActivate($event, scrollContainer)"></router-outlet>

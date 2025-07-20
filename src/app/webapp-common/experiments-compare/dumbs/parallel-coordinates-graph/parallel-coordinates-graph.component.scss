@@ -1,10 +1,21 @@
-
 :host {
   display: block;
   position: relative;
   height: 100%;
+  width: 100%;
   overflow: auto;
 
+  &.maximized{
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    width: calc(100% - 50px);
+    height: calc(100% - 50px);
+    background-color: var(--color-surface-container);
+    z-index: 100;
+    border-radius: 12px;
+
+  }
   .actions {
     position: absolute;
     right: 12px;
@@ -27,6 +38,7 @@
     display: inline-block;
     vertical-align: middle;
     transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
+    cursor: url(../../../../webapp-common/assets/icons/pallete-cursor.svg) 6 0, pointer;
   }
 
   .dot-container {

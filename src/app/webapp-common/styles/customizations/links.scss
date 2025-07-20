@@ -5,7 +5,6 @@ a:not(.mat-mdc-button, .mat-mdc-menu-item, .mat-mdc-list-item, .gh-btn) {
   cursor: pointer;
 
   &:hover {
-    color: var(--color-on-primary-container);
     text-decoration: underline;
   }
 }

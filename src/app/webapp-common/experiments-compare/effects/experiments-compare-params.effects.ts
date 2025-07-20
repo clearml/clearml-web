@@ -94,28 +94,28 @@ export class ExperimentsCompareParamsEffects {
     return entity === EntityTypeEnum.model ? this.fetchModelParams$(ids) : this.fetchExperimentParams$(ids);
   }
 
-  fetchExperimentParams$(ids): Observable<Array<IExperimentDetail>> {
+  fetchExperimentParams$(ids): Observable<IExperimentDetail[]> {
     return ids.length > 0 ?
       this.tasksApi.tasksGetAllEx({
         id: ids,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         only_fields: COMPARE_PARAMS_ONLY_FIELDS
       })
         .pipe(map(res => this.experimentParamsReverter.revertExperiments(ids, res.tasks)))
       : of([]);
   }
 
-  fetchModelParams$(ids): Observable<Array<IExperimentDetail>> {
+  fetchModelParams$(ids): Observable<{id?: string}[]> {
     return ids.length > 0 ?
       this.modelsApi.modelsGetAllEx({
         id: ids,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         only_fields: ['company', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'user.name', 'parent', 'project.name', 'design', 'last_iteration', 'last_update']
       })
         .pipe(map(res => {
           try {
             return this.modelDetailsReverter.revertModelsDesign(ids, res.models, false);
-          } catch (e) {
+          } catch {
             return this.modelDetailsReverter.revertModelsDesign(ids, res.models, true);
           }
         }))

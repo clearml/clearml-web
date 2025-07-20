@@ -24,8 +24,7 @@
   (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
 >
 </sm-experiment-header>
-<div class="experiment-body"
-     [class.footer-visible]="(checkedExperiments$ | ngrxPush)?.length > 1 || (showAllSelectedIsActive$ |ngrxPush)">
+<div class="experiment-body">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -102,6 +101,7 @@
 </div>
 
 <sm-entity-footer
+  [class.footer-visible]="(experiments$ | ngrxPush) && (checkedExperiments$ | ngrxPush)?.length > 1 || (showAllSelectedIsActive$ |ngrxPush)"
   [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event, entityType)"

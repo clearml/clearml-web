@@ -1,33 +1,30 @@
-<div class="w-100 model-header">
-  <sm-model-header
-    [minimizedView]="minimizedView"
-    [isArchived]="isArchived$ | ngrxPush"
-    [disableCreateNewButton]="isExampleProject"
-    [tableCols]="filteredTableCols$ | ngrxPush"
-    [sharedView]="isSharedAndNotOwner$|ngrxPush"
-    [tableFilters]="tableFilters$ | ngrxPush"
-    [metadataKeys]="metadataKeys$ | ngrxPush"
-    [metricVariants]="metricVariants$ | ngrxPush"
-    [tableMode]="firstModel ? tableMode() : 'table'"
-    [hideNavigation]="modelsPage$| ngrxPush"
-    [rippleEffect]="tableModeAwareness$ | ngrxPush"
-    [noData]="!((models$ | ngrxPush)?.length > 0)"
-    (isArchivedChanged)="archivedChanged($event)"
-    (setAutoRefresh)="setAutoRefresh($event)"
-    (selectedTableColsChanged)="selectedTableColsChanged($event)"
-    (selectedMetricToShow)="selectedMetricToShow($event)"
-    (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns($event)"
-    (removeColFromList)="removeColFromList($event)"
-    (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged($event)"
-    (clearTableFilters)="clearTableFiltersHandler($event)"
-    (tableModeChanged)="modeChanged($event); tableModeUserAware()"
-    (downloadTableAsCSV)="downloadTableAsCSV()"
-    (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
+<sm-model-header
+  [minimizedView]="minimizedView"
+  [isArchived]="isArchived$ | ngrxPush"
+  [disableCreateNewButton]="isExampleProject"
+  [tableCols]="filteredTableCols$ | ngrxPush"
+  [sharedView]="isSharedAndNotOwner$|ngrxPush"
+  [tableFilters]="tableFilters$ | ngrxPush"
+  [metadataKeys]="metadataKeys$ | ngrxPush"
+  [metricVariants]="metricVariants$ | ngrxPush"
+  [tableMode]="firstModel ? tableMode() : 'table'"
+  [hideNavigation]="modelsPage$| ngrxPush"
+  [rippleEffect]="tableModeAwareness$ | ngrxPush"
+  [noData]="!((models$ | ngrxPush)?.length > 0)"
+  (isArchivedChanged)="archivedChanged($event)"
+  (setAutoRefresh)="setAutoRefresh($event)"
+  (selectedTableColsChanged)="selectedTableColsChanged($event)"
+  (selectedMetricToShow)="selectedMetricToShow($event)"
+  (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns($event)"
+  (removeColFromList)="removeColFromList($event)"
+  (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged($event)"
+  (clearTableFilters)="clearTableFiltersHandler($event)"
+  (tableModeChanged)="modeChanged($event); tableModeUserAware()"
+  (downloadTableAsCSV)="downloadTableAsCSV()"
+  (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
 
-  ></sm-model-header>
-</div>
-<div class="models-body"
-     [class.footer-visible]="(checkedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)">
+></sm-model-header>
+<div class="models-body">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -83,6 +80,7 @@
         (clearAllFilters)="clearTableFiltersHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
         (closePanel)="closePanel()"
+        (resetFilterOptions)="resetTablesFilterOptions()"
       >
       </sm-models-table>
     </as-split-area>
@@ -92,9 +90,9 @@
   </as-split>
 </div>
 <sm-entity-footer
+  [class.footer-visible]="(models$ | ngrxPush) && (checkedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)"
   [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'models')"
->
-</sm-entity-footer>
+></sm-entity-footer>

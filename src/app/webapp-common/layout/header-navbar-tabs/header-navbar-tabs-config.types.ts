@@ -9,4 +9,5 @@ export interface HeaderNavbarTabConfig {
   featureName?: string;
   id?: string;
   queryParams?: Record<string, string>;
+  counters?: {icon: string; value: string; tooltip?: string}[];
 }

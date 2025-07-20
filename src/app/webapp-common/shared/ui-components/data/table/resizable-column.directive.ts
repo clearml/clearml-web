@@ -5,7 +5,6 @@ import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
 
 @Directive({
   selector: '[smResizableColumn]',
-  standalone: true,
 })
 export class ResizableColumnDirective extends ResizableColumn implements AfterViewInit, OnDestroy {
   private sub: Subscription;

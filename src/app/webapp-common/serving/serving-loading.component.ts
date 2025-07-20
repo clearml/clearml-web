@@ -79,7 +79,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
         .pipe(
           filter(queryParams => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, ...queryParamsWithoutSearch} = queryParams;
+            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
             const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
             prevQueryParams = queryParamsWithoutSearch;
             return !equal;
@@ -93,7 +93,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
               const orders = decodeOrder(params.order);
               this.store.dispatch(ServingActions.setLoadingTableSort({orders}));
             }
-            if (params.filter) {
+            if (params.filter != null) {
               const filters = decodeFilter(params.filter);
               this.store.dispatch(ServingActions.setLoadingTableFilters({filters}));
             } else {
@@ -226,7 +226,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
         filter(config => !!config),
       )
       .subscribe((conf) => {
-        this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: conf[0].path}));
+        this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: modelServingRoutes[1].link as string}));
       });
   }
 

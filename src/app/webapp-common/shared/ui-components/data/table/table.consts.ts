@@ -28,6 +28,7 @@ export interface ISmCol {
   hidden?: boolean; // the column visibility.
   includeInDownload?: boolean;
   frozen?: boolean;
+  alignFrozen?: 'right' | 'left';
   headerType?: ColHeaderTypeEnum;
   filterType?: ColHeaderFilterTypeEnum;
   sortable?: boolean; // determine if the column shell be sortable
@@ -58,4 +59,5 @@ export interface ISmCol {
   type?: string;
   showInCardFilters?: boolean;
   downloadKey?: string;
+  infoTooltip?: string;
 }

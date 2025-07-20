@@ -140,14 +140,10 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
       this.store.dispatch(headerActions.reset());
-      this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/output/execution`);
+      this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/output`);
     } else {
       const part = this.route.firstChild.routeConfig.path;
-      if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-        this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/info-output/${part}`);
-      } else {
-        this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/${part}`);
-      }
+      this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/${part}`);
     }
   }
 
@@ -357,7 +353,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
   cloneExperiment(cloneData: CloneExperimentPayload) {
     const project = cloneData.project as IOption;
-    this.store.dispatch(commonMenuActions.cloneExperimentClicked({
+    this.store.dispatch(commonMenuActions.cloneExperiment({
       originExperiment: this.experiment(),
       cloneData: {
         ...cloneData,

@@ -23,7 +23,7 @@
             [width]="400"
             [xAxisType]="xaxis"
             [moveLegendToTitle]="checkIfLegendToTitle(plotData)"
-            [isCompare]="$any(plotData)?.plotParsed?.data?.[0]?.type !== 'parcoords'"
+            [isCompare]="tasksData()?.sourceTasks.length > 1 && $any(plotData)?.plotParsed?.data?.[0]?.type !== 'parcoords'"
             [noMargins]="true"
             [hideMaximize]="hideMaximize"
             (maximizeClicked)="maximize()">

@@ -1,4 +1,6 @@
+<sm-queue-stats [queue]="selectedQueue()"></sm-queue-stats>
 <div class="queues-header">
+  <sm-common-search [searchActive]="true"></sm-common-search>
   @if (queuesManager) {
     <button mat-flat-button (click)="addQueue()">
       <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
@@ -7,7 +9,6 @@
   }
 <!--  <sm-refresh-button (setAutoRefresh)="setAutoRefresh($event)"></sm-refresh-button>-->
 </div>
-<sm-queue-stats [queue]="selectedQueue()"></sm-queue-stats>
 <as-split
   class="flex-grow-1"
   [gutterSize]=1 [useTransition]="true"
@@ -16,7 +17,7 @@
   <as-split-area [size]="selectedQueue() ? 50 : 100">
     <sm-queues-table
       #table
-      [queues]="queues()"
+      [queues]="filteredData()"
       [selectedQueue]="selectedQueue()"
       [tableSortFields]="tableSortFields()"
       [short]="!(shortScreen$ | ngrxPush)"
@@ -25,6 +26,7 @@
       (renameQueue)="renameQueue($event)"
       (clearQueue)="clearQueue($event)"
       (queueSelected)="selectQueue($event)"
+      (copySuccess)="copySuccess($event)"
     ></sm-queues-table>
   </as-split-area>
   <as-split-area [size]="selectedQueue() ? 50 : 0" [visible]="!!selectedQueue()">
