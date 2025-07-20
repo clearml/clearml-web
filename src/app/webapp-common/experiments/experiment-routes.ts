@@ -30,7 +30,7 @@ import {
 import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plots/experiment-output-plots.component';
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentOutputLogComponent} from './containers/experiment-output-log/experiment-output-log.component';
-import {selectIsExperimentInEditMode} from '@common/experiments/reducers';
+import {selectIsExperimentInEditMode, selectLastVisitedTasksTab} from '@common/experiments/reducers';
 import {
   ExperimentCompareScalarChartsComponent
 } from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
@@ -48,6 +48,9 @@ import {StoreModule} from '@ngrx/store';
 import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
 import {compareNavigationGuard} from '@common/experiments/compare-navigation.guard';
 import {compareViewStateGuard} from '@common/experiments/compare-view-state.guard';
+import {lastVisitedTabGuard} from '@common/shared/guards/last-visted-tab.guard';
+import {lastVisitedSettingTabGuard} from '@common/shared/guards/last-visted-set-tab.guard';
+import {setLastTasksTab} from '@common/experiments/actions/common-experiments-info.actions';
 
 export const routes: Routes = [
   {
@@ -84,9 +87,9 @@ export const routes: Routes = [
         ],
       },
       {
-        path: ':experimentId', component: ExperimentOutputComponent,
+        path: ':experimentId', component: ExperimentOutputComponent, canDeactivate: [lastVisitedSettingTabGuard], data: {lastTabAction: setLastTasksTab},
         children: [
-          {path: '', redirectTo: 'execution', pathMatch: 'full'},
+          {path: '', pathMatch: 'full', children: [], canActivate: [lastVisitedTabGuard], data: {lastTabSelector: selectLastVisitedTasksTab}},
           {
             path: 'execution',
             component: ExperimentInfoExecutionComponent,
@@ -119,18 +122,16 @@ export const routes: Routes = [
               {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
             ]
           },
-          {path: 'general', component: ExperimentInfoGeneralComponent, data: {minimized: true}},
-          {
-            path: 'info-output',
-            data: {minimized: true},
-            children: [
-              {path: 'metrics/scalar', component: ExperimentOutputScalarsComponent, data: {minimized: true}},
-              {path: 'metrics/plots', component: ExperimentOutputPlotsComponent, data: {minimized: true}},
-              {path: 'debugImages', component: DebugImagesComponent, data: {minimized: true}},
-              {path: 'log', component: ExperimentOutputLogComponent, data: {minimized: true}},
-              {path: '', redirectTo: 'log', pathMatch: 'full'}
-            ]
-          }
+          {path: 'general', component: ExperimentInfoGeneralComponent, data: {minimized: true}, canDeactivate: []},
+          {path: 'scalars', component: ExperimentOutputScalarsComponent, data: {minimized: true}, pathMatch: 'full'},
+          {path: 'plots', component: ExperimentOutputPlotsComponent, data: {minimized: true}, pathMatch: 'full'},
+          {path: 'debugImages', component: DebugImagesComponent, data: {minimized: true}},
+          {path: 'log', component: ExperimentOutputLogComponent, data: {minimized: true}, pathMatch: 'full'},
+          {path: 'info-output', redirectTo: ''},
+          {path: 'info-output/metrics/scalar', redirectTo: 'scalars'},
+          {path: 'info-output/metrics/plots', redirectTo: 'plots'},
+          {path: 'metrics/scalar', redirectTo: 'scalars'},
+          {path: 'metrics/plots', redirectTo: 'plots'}
         ]
       },
     ]
@@ -139,9 +140,10 @@ export const routes: Routes = [
   {
     path: ':experimentId/output',
     component: ExperimentOutputComponent,
-    data: {search: false},
+    data: {search: false, lastTabAction: setLastTasksTab},
+    canDeactivate: [lastVisitedSettingTabGuard],
     children: [
-      {path: '', redirectTo: 'execution', pathMatch: 'full'},
+      {path: '', pathMatch: 'full', children: [], canActivate: [lastVisitedTabGuard], data: {lastTabSelector: selectLastVisitedTasksTab}},
       {path: 'execution',
         component: ExperimentInfoExecutionComponent,
         canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)]
@@ -170,10 +172,12 @@ export const routes: Routes = [
         ]
       },
       {path: 'general', component: ExperimentInfoGeneralComponent, data: {}},
-      {path: 'metrics/scalar', component: ExperimentOutputScalarsComponent, data: {}},
-      {path: 'metrics/plots', component: ExperimentOutputPlotsComponent, data: {}},
+      {path: 'scalars', component: ExperimentOutputScalarsComponent, data: {}},
+      {path: 'plots', component: ExperimentOutputPlotsComponent, data: {}},
       {path: 'debugImages', component: DebugImagesComponent},
       {path: 'log', component: ExperimentOutputLogComponent},
+      {path: 'metrics/scalar', redirectTo: 'scalars'},
+      {path: 'metrics/plots', redirectTo: 'plots'},
     ]
   },
 ];

@@ -50,6 +50,7 @@ export class BaseContextMenuComponent {
     }
     this.position = position;
     window.setTimeout(() => {
+      this.trigger().updatePosition();
       this.trigger().openMenu();
       this.menuOpened.emit();
     }, 100);

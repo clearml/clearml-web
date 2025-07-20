@@ -73,7 +73,7 @@ export const setGlobalLegendData = createAction(
   props<{data: {name: string, tags: string[], systemTags: string[], id: string, project: {id: string}}[]}>()
 );
 
-export const setScalarsHoverMode = createAction(
-  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SET SCALARS HOVER MODE',
-  props<{ hoverMode: ChartHoverModeEnum }>()
-);
+// export const setScalarsHoverMode = createAction(
+//   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SET SCALARS HOVER MODE',
+//   props<{ hoverMode: ChartHoverModeEnum }>()
+// );

@@ -1,6 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
+import {selectExperimentModelInfoData, selectIsExperimentSaving} from '../../reducers';
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable} from 'rxjs';
@@ -27,7 +27,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 export class ExperimentInfoModelComponent {
   public modelInfo$: Observable<IExperimentModelInfo>;
   public editable$: Observable<boolean>;
-  public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
   public modelLabels$: Observable<Model['labels']>;
   public saving$: Observable<boolean>;
   public modelProjectId: string;
@@ -46,7 +45,6 @@ export class ExperimentInfoModelComponent {
   constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.editable$ = this.store.select(selectIsExperimentEditable);
-    this.userKnowledge$ = this.store.select(selectExperimentUserKnowledge);
     this.saving$ = this.store.select(selectIsExperimentSaving);
     this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
     this.routerModelId$ = this.route.params.pipe(

@@ -3,8 +3,18 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  HostListener,
-  Renderer2, inject, viewChild, viewChildren, input, output, signal, effect, computed, untracked, model, OnDestroy
+  Renderer2,
+  inject,
+  viewChild,
+  viewChildren,
+  input,
+  output,
+  signal,
+  effect,
+  computed,
+  untracked,
+  model,
+  DestroyRef
 } from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {checkIfLegendToTitle, sortMetricsList} from '../../tasks/tasks.utils';
@@ -18,17 +28,16 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {GroupByCharts, groupByCharts} from '../../experiments/actions/common-experiment-output.actions';
 import {Store} from '@ngrx/store';
 import {ResizeEvent} from 'angular-resizable-element';
-import {distinctUntilChanged, map, skip, tap} from 'rxjs/operators';
+import {distinctUntilChanged, skip, tap} from 'rxjs/operators';
 import {Observable, of, combineLatest} from 'rxjs';
-import {ExtFrame, ExtLegend, VisibleExtFrame} from '../single-graph/plotly-graph-base';
+import {ChartPreferences, ExtFrame, ExtLegend, VisibleExtFrame} from '../single-graph/plotly-graph-base';
 import {signUrls} from '../../core/actions/common-auth.actions';
 import {getSignedUrlOrOrigin$} from '../../core/reducers/common-auth-reducer';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {
   EventsGetTaskSingleValueMetricsResponseValues
 } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {v4} from 'uuid';
-import {selectGraphsPerRow} from '@common/experiments/reducers';
+import {selectChartSettings, selectExperimentOrModelId, selectGraphsPerRow} from '@common/experiments/reducers';
 import {setGraphsPerRow} from '@common/experiments/actions/common-experiment-output.actions';
 import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {maxInArray} from '@common/shared/utils/helpers.util';
@@ -36,6 +45,7 @@ import {explicitEffect} from 'ngxtension/explicit-effect';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {computedPrevious} from 'ngxtension/computed-previous';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
+import {injectResize} from 'ngxtension/resize';
 
 export const inHiddenList = (isCompare: boolean, hiddenList: string[], metric: string, variant: string) => {
   const metVar = `${metric}${variant}`;
@@ -50,11 +60,14 @@ export const inHiddenList = (isCompare: boolean, hiddenList: string[], metric: s
   standalone: false
 })
 
-export class ExperimentGraphsComponent implements OnDestroy {
+export class ExperimentGraphsComponent {
   private el = inject(ElementRef);
   private changeDetection = inject(ChangeDetectorRef);
   private store = inject(Store);
   private renderer = inject(Renderer2);
+  private destroy = inject(DestroyRef);
+  private resize = injectResize();
+
   readonly experimentGraphidPrefix = EXPERIMENT_GRAPH_ID_PREFIX;
   readonly singleGraphidPrefix = SINGLE_GRAPH_ID_PREFIX;
   allMetrics = viewChild<ElementRef>('allMetrics');
@@ -70,16 +83,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   protected signedImagePlots: Record<string, Observable<string[]>> = {};
   private previousWindowWidth: number;
   protected plotlyReady = this.store.selectSignal(selectPlotlyReady);
-
-  @HostListener('window:resize')
-  onResize() {
-    clearTimeout(this.timer);
-    if (window.innerWidth !== this.previousWindowWidth) {
-      this.graphsState().graphsPerRow.set(this.allGroupsSingleGraphs() ? 1 : this.graphsState().graphsPerRow());
-    }
-    this.calculateGraphsLayout();
-    this.previousWindowWidth = window.innerWidth;
-  }
+  protected chartSettings: Record<string, Observable<ChartPreferences>> = {};
 
   hiddenList = input<string[]>();
   isGroupGraphs = input<boolean>();
@@ -90,7 +94,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   legendConfiguration = input<Partial<ExtLegend>>({});
   breakPoint = input(700);
   isCompare = input(false);
-  hoverMode = input<ChartHoverModeEnum>();
+  defaultHoverMode = input<ChartHoverModeEnum>();
   disableResize = input(false);
   singleValueData = model<EventsGetTaskSingleValueMetricsResponseValues[]>();
   multipleSingleValueData = model<ExtFrame>();
@@ -101,11 +105,15 @@ export class ExperimentGraphsComponent implements OnDestroy {
   smoothSigma = input<number>();
   smoothType = input<SmoothTypeEnum>();
   groupBy = input<GroupByCharts>();
+  showOriginals = input<boolean>();
   xAxisType = input<ScalarKeyEnum>();
   exportForReport = input(true);
 
+  metrics = input<Record<string, ExtFrame[]>>();
+  list = input<GroupedList>();
+
   resetGraphs = output();
-  hoverModeChanged = output<ChartHoverModeEnum>();
+  // hoverModeChanged = output<ChartHoverModeEnum>();
   createEmbedCode = output<{
     metrics?: string[];
     variants?: string[];
@@ -117,14 +125,16 @@ export class ExperimentGraphsComponent implements OnDestroy {
     domRect: DOMRect;
   }>();
 
+  chartSettingsChanged = output<{id: string, changes:ChartPreferences}>()
+
   allMetricGroups = viewChildren<ElementRef>('metricGroup');
   singleGraphs = viewChildren<ElementRef>('singleGraphContainer');
   singleValueGraph = viewChildren<SingleGraphComponent>('singleValueGraph');
   allGraphs = viewChildren(SingleGraphComponent);
-  allGraphsPrevious = computedPrevious(this.allGraphs);
 
   graphsPerRow = this.store.selectSignal(selectGraphsPerRow);
 
+  allGraphsPrevious = computedPrevious(this.allGraphs);
   loading = computed(() => this.graphsData() === null || this.hiddenList() === null );
 
   constructor() {
@@ -161,6 +171,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
       }
       const graphsData = this.addId(this.sortGraphsData(metrics || {}));
       const toBeSigned = [];
+      this.chartSettings['singleValues'] = this.store.select(selectChartSettings('singleValues', null));
       Object.values(graphsData).forEach((graphs: ExtFrame[]) => {
         graphs.forEach((graph: ExtFrame) => {
           if ((graph?.layout?.images?.length ?? 0) > 0) {
@@ -177,6 +188,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
           } else {
             this.signedImagePlots[graph.id] = of(['true']);
           }
+          this.chartSettings[graph.id] = this.store.select(selectChartSettings(graph.metric, graph.variant));
         });
       });
       this.store.dispatch(signUrls({sign: toBeSigned}));
@@ -185,10 +197,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
     });
 
 
-    this.store.select(selectRouterParams)
+    this.store.select(selectExperimentOrModelId)
       .pipe(
         takeUntilDestroyed(),
-        map(params => params?.experimentId ?? params?.modelId),
         distinctUntilChanged(),
         skip(1) // don't need first null->expId
       )
@@ -201,14 +212,15 @@ export class ExperimentGraphsComponent implements OnDestroy {
         // this.loading.set(true);
         this.multipleSingleValueData.set(null);
       });
-  }
 
-  ngOnDestroy(): void {
-    this.store.dispatch(setGraphsPerRow({graphsPerRow: 2}));
-  }
+    this.resize
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.onResize());
 
-  metrics = input<Record<string, ExtFrame[]>>();
-  list = input<GroupedList>();
+    this.destroy.onDestroy(() => {
+      this.store.dispatch(setGraphsPerRow({graphsPerRow: 2}));
+    });
+  }
 
   graphsState = computed(() => ({
     graphsPerRow: signal(this.graphsPerRow() ?? 2),
@@ -229,6 +241,15 @@ export class ExperimentGraphsComponent implements OnDestroy {
     }, {});
   });
 
+
+  onResize() {
+    clearTimeout(this.timer);
+    if (window.innerWidth !== this.previousWindowWidth) {
+      this.graphsState().graphsPerRow.set(this.allGroupsSingleGraphs() ? 1 : this.graphsState().graphsPerRow());
+    }
+    this.calculateGraphsLayout();
+    this.previousWindowWidth = window.innerWidth;
+  }
 
   sortGraphsData = (data: Record<string, ExtFrame[]>) =>
     Object.entries(data).reduce((acc, [label, graphs]) =>
@@ -447,5 +468,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
       this.renderer.addClass(groupElement, 'group-collapsed');
 
     }
+  }
+
+  chartPreferencesChanged(chartItem: Partial<ExtFrame>, $event: ChartPreferences) {
+    this.chartSettingsChanged.emit({id: !chartItem.variant ? chartItem.metric : `${chartItem.metric}_-_${chartItem.variant}`, changes: $event});
   }
 }

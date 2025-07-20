@@ -1,18 +1,22 @@
 @use "../../layout/layout";
 
+::ng-deep.mat-mdc-menu-panel.search-menu {
+  max-width: fit-content !important;
+}
 :host {
   display: block;
   position: relative;
   height: layout.$top-bar-height;
   border-bottom: 1px solid var(--color-surface-container-high);
 
+
   .share-view {
     visibility: hidden;
   }
 
   .header-container {
-    display: inline-grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    display: grid;
+    grid-template-columns: minmax(150px, 25%) 1fr minmax(150px, 25%);
     grid-gap: 32px;
     background-color: color-mix(in srgb, var(--color-surface-container-high), transparent 80%);
     color: var(--color-primary);
@@ -22,6 +26,13 @@
     align-items: center;
     justify-content: space-between;
 
+    & > * {
+      min-width: 0;
+    }
+
+    &.wider-tabs {
+      grid-template-columns: minmax(150px, auto) 1fr minmax(150px, auto);
+    }
     .header-title {
       font-size: 15px;
       font-weight: 500;
@@ -56,7 +67,7 @@
         .tooltip-container, .tip {
           background-color: var(--color-surface-container-lowest);
         }
-      } 
+      }
     }
 
     .menu-trigger {

@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, signal, Type} from '@angular/core';
 import {ChangesService} from '@common/shared/services/changes.service';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser, selectIsAdmin} from '../../core/reducers/users-reducer';
 import {logout} from '../../core/actions/users.actions';
-import {addMessage, setAutoRefresh} from '../../core/actions/layout.actions';
+import {setAutoRefresh} from '../../core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {
@@ -17,7 +17,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
-import {MESSAGES_SEVERITY} from '@common/constants';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {selectDarkTheme, selectForcedTheme} from '@common/core/reducers/view.reducer';
 import {AppearanceComponent} from '../appearance/appearance.component';
@@ -30,6 +29,9 @@ import {
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'globalSearchTrigger($event)'
+  },
   standalone: false
 })
 export class HeaderComponent {
@@ -41,6 +43,7 @@ export class HeaderComponent {
   private router = inject(Router);
   private activeRoute = inject(ActivatedRoute);
   private configService = inject(ConfigurationService);
+  private searchComponentPromise: Promise<Type<GlobalSearchDialogComponent>>;
 
   isShareMode = input<boolean>();
   isLogin = input<boolean>();
@@ -58,13 +61,26 @@ export class HeaderComponent {
   protected hideSideNav = signal<boolean>(false);
   protected showAutoRefresh = signal<boolean>(false);
   protected searchActive = signal(false);
+  protected widerTabs = signal(false);
   public activeWorkspace = toSignal<GetCurrentUserResponseUserObjectCompany>(this.store.select(selectActiveWorkspace)
     .pipe(
       filter(workspace => !!workspace),
       distinctUntilKeyChanged('id')
     )
   );
-  private globalSearchIsOpen: boolean;
+
+  // Ctrl + K -> Global Search Dialog
+  globalSearchTrigger(e: KeyboardEvent): void {
+    const isModifierPressed = e.metaKey || e.ctrlKey;
+    const isKPressed = e.key.toLowerCase() === 'k';
+    if (isModifierPressed && isKPressed && this.dialog.openDialogs.length === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.body.querySelectorAll('.cdk-overlay-backdrop').forEach((c: HTMLDivElement) => c.click());
+      document.body.querySelectorAll('.cdk-overlay-container').forEach((c: HTMLDivElement) => c.click());
+      this.openGlobalSearch();
+    }
+  }
 
   constructor() {
     this.getRouteData();
@@ -74,16 +90,11 @@ export class HeaderComponent {
         takeUntilDestroyed(),
         filter((event) => event instanceof NavigationEnd)
       )
-      .subscribe(() => this.getRouteData());
-
-    this.router.events
-      .pipe(
-        filter(()=> !this.globalSearchIsOpen),
-        filter((event) => event instanceof NavigationEnd),
-        filter(() => this.activeRoute.snapshot.queryParams.gq)
-      )
       .subscribe(() => {
+        if ( this.dialog.openDialogs.length === 0 && this.activeRoute.snapshot.queryParams.gq) {
           this.openGlobalSearch();
+        }
+        this.getRouteData()
       });
   }
 
@@ -100,15 +111,12 @@ export class HeaderComponent {
     }
     this.showAutoRefresh.set(last.snapshot.data.showAutoRefresh);
     this.searchActive.set(active || last.snapshot.data.search);
+    this.widerTabs.set(last.snapshot.data.widerTabs);
   }
 
   logout() {
     this.loginService.clearLoginCache();
     this.store.dispatch(logout({}));
-  }
-
-  copyToClipboardSuccess() {
-    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   openWelcome(event: MouseEvent) {
@@ -126,13 +134,17 @@ export class HeaderComponent {
   }
 
   openGlobalSearch() {
-    this.globalSearchIsOpen = true;
-    this.dialog.open(GlobalSearchDialogComponent, {
-      width: '90vw',
-      height: '90vh',
-      enterAnimationDuration: 0
-    }).afterClosed().subscribe(() => {
-      this.globalSearchIsOpen = false;
+    if (!this.searchComponentPromise) {
+      this.searchComponentPromise = import(
+        '@common/dashboard-search/global-search-dialog/global-search-dialog.component'
+        ).then(({GlobalSearchDialogComponent}) => GlobalSearchDialogComponent);
+    }
+
+    this.searchComponentPromise.then(component => {
+      this.dialog.open(component, {
+        width: '900px',
+        enterAnimationDuration: 0
+      });
     });
   }
 }

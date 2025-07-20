@@ -1,4 +1,4 @@
-@use "../../../../webapp-common/layout/layout.scss";
+@use "../../../../webapp-common/layout/layout";
 
 :host {
   display: flex;
@@ -40,10 +40,12 @@
         text-transform: uppercase;
         white-space: nowrap;
         overflow: hidden;
+        color: var(--color-on-secondary-container);
       }
 
       .time-selector {
         width: 150px;
+        flex-shrink: 0;
       }
     }
 

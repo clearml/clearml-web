@@ -25,7 +25,14 @@ import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 
-export const experimentsCompareReducers: ActionReducerMap<any, any> = {
+export const experimentsCompareReducers: ActionReducerMap<{
+  details: ExperimentCompareDetailsState;
+  params: CompareParamsState;
+  metricsValues: IExperimentCompareMetricsValuesState;
+  charts: IExperimentCompareChartsState ;
+  compareHeader: CompareHeaderState;
+  scalarsGraph: ScalarsGraphState;
+}> = {
   details: experimentsCompareDetailsReducer,
   params: experimentsCompareParamsReducer,
   metricsValues: experimentsCompareMetricsValuesReducer,
@@ -38,7 +45,7 @@ export const selectCompareIdsFromRoute = createSelector(selectRouterParams, para
 export const experimentsCompare = state => state.experimentsCompare;
 
 // Details
-export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state ? state.details : {});
+export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state.details ?? {});
 export const selectExperimentsDetails = createSelector(experimentsDetails, (state): IExperimentDetail[] => state.experiments);
 export const selectModelsDetails = createSelector(experimentsDetails, (state): ModelDetail[] => state.models);
 export const selectExperimentIdsDetails = createSelector(selectExperimentsDetails,
@@ -47,7 +54,7 @@ export const selectModelIdsDetails = createSelector(selectModelsDetails,
   (models): ModelDetail['id'][] => models.map(model => model.id));
 
 // Params
-export const experimentsParams = createSelector(experimentsCompare, (state): CompareParamsState => state ? state.params : {});
+export const experimentsParams = createSelector(experimentsCompare, (state): CompareParamsState => state.params ?? {});
 export const selectExperimentsParams = createSelector(experimentsParams, (state): ExperimentParams[] => state.experiments);
 export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
   (experiments): IExperimentDetail['id'][] => experiments.map(exp => exp.id));
@@ -79,22 +86,22 @@ export const selectViewArchivedInAddTable = createSelector(selectCompareHeader, 
 export const selectExportTable = createSelector(selectCompareHeader, state => state?.exportTable);
 
 // Metric Values
-export const compareMetricsValues = createSelector(experimentsCompare, (state): IExperimentCompareMetricsValuesState => state ? state.metricsValues : {});
+export const compareMetricsValues = createSelector(experimentsCompare, (state): IExperimentCompareMetricsValuesState => state.metricsValues ?? {});
 export const selectCompareMetricsValuesExperiments = createSelector(compareMetricsValues, state => state.experiments);
 export const selectCompareMetricsValuesSortConfig = createSelector(compareMetricsValues, (state): MetricSortBy => state.metricSortBy);
 
 // Charts
-export const compareCharts = createSelector(experimentsCompare, (state): IExperimentCompareChartsState => state ? state.charts : {});
+export const compareCharts = createSelector(experimentsCompare, (state): IExperimentCompareChartsState => state.charts ?? {});
 export const selectSelectedExperiments = createSelector(compareCharts, (state): string[] => state ? state.selectedExperiments : []);
 export const selectGlobalLegendData = createSelector(compareCharts, state => state.globalLegendData);
 export const selectCompareHistogramCacheAxisType = createSelector(compareCharts, state => state.cachedAxisType);
 export const selectCompareTasksPlotCharts = createSelector(compareCharts, state => state.metricsPlotsCharts);
 export const selectMultiSingleValues = createSelector(compareCharts, state => state.multiSingleValues);
 
-export const selectScalarsHoverMode = createSelector(compareCharts, (state): ChartHoverModeEnum => state.scalarsHoverMode);
+// export const selectScalarsHoverMode = createSelector(compareCharts, (state): ChartHoverModeEnum => state.scalarsHoverMode);
 
 export const selectSelectedExperimentSettings = createSelector(compareCharts, selectSelectedExperiments,
-  (output, currentExperiments): ExperimentCompareSettings => output.settingsList?.find(setting => setting?.id?.join() === currentExperiments?.join()));
+  (output, currentExperiments): ExperimentCompareSettings => output.settingsList?.[currentExperiments?.join()]);
 
 export const selectSelectedSettingsHyperParams = createSelector(selectSelectedExperimentSettings,
   (settings): string[] => settings?.selectedHyperParams);
@@ -142,7 +149,7 @@ export const selectScalarsGraphShowIdenticalHyperParams = createSelector(selectS
 export const selectScalarsGraphMetrics = createSelector(selectScalarsGraph, (state): MetricOption[] => state.metrics);
 export const selectScalarsGraphMetricsResults = createSelector(selectScalarsGraph, (state): MetricVariantResult[] => state.metricVariantsResults);
 export const selectScalarsGraphHyperParams = createSelector(selectScalarsGraph, (state): GroupedHyperParams => state ? state.hyperParams : {});
-export const selectScalarsGraphTasks = createSelector(selectScalarsGraph, (state): any[] => state ? state.tasks : []);
+export const selectScalarsGraphTasks = createSelector(selectScalarsGraph, (state) => state ? state.tasks : []);
 export const selectScalarsParamsHoverInfo = createSelector(selectScalarsGraph, (state): string[] => state ? state.paramsHoverInfo : []);
 export const selectScalarsMetricsHoverInfo = createSelector(selectScalarsGraph, (state): SelectedMetricVariant[] => state ? state.metricsHoverInfo : []);
 

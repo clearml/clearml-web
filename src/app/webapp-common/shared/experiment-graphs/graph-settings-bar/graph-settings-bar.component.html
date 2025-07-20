@@ -20,7 +20,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex field divider" [class.width-100]="verticalLayout()" >
+  <div class="d-flex field divider" [class.width-100]="verticalLayout()">
     <span class="label-text" data-id="SmoothingText">Smoothing</span>
     <mat-form-field appearance="outline" class="smooth-type-field no-bottom thin" data-id="SmoothingInputField">
       <mat-select [panelClass]="'light-theme'" [value]="smoothType()" (selectionChange)="selectSmoothType($event)" [hideSingleSelectionIndicator]="true">
@@ -34,7 +34,7 @@
   </div>
   @if (smoothType() !== smoothTypeEnum.any) {
     <div class="d-flex field" [class.width-100]="verticalLayout()">
-      @if (verticalLayout()){
+      @if (verticalLayout()) {
         <div class="spacer"></div>
       }
       @switch (smoothType()) {
@@ -68,8 +68,8 @@
       }
     </div>
     @if (smoothType() === smoothTypeEnum.gaussian) {
-      <div class="d-flex field last-elm" [class.width-100]="verticalLayout()">
-        @if (verticalLayout()){
+      <div class="d-flex field last-elm" [class.w-100]="verticalLayout()">
+        @if (verticalLayout()) {
           <div class="spacer"></div>
         }
         <span class="label-text smoothing-label">Sigma</span>
@@ -81,6 +81,7 @@
         </div>
       </div>
     }
+    <mat-slide-toggle class="smooth-slide-field" [ngModel]="showOrigin()" (ngModelChange)="changeShowOrigin.emit($event)" labelPosition="before">Show Originals</mat-slide-toggle>
   }
   @if (!verticalLayout()) {
     <button mat-icon-button class="close-button" (click)="toggleSettings.emit()" data-id="CloseScalarSetting">
@@ -88,13 +89,14 @@
     </button>
   }
   @if (clearable() !== null) {
-    <div
-            class="reset-button me-auto mt-2"
-
-            smTooltip="Apply as default scalar view configuration for this project"><button mat-button
+    <div class="reset-button me-auto mt-2"
+         [class.divider]="verticalLayout()"
+         smTooltip="Apply as default scalar view configuration for this project">
+      <button mat-button
               [disabled]="!clearable()"
               (click)="setToProjectLevel()"
-              >Set as default
-    </button></div>
+      >Set as default
+      </button>
+    </div>
   }
 </div>

@@ -5,10 +5,10 @@ import {SortMeta} from 'primeng/api';
 import {ITask} from '~/business-logic/model/al-task';
 import {Topic} from '@common/shared/utils/statistics';
 import {createReducer, on} from '@ngrx/store';
+import {moveItemInArray} from '@angular/cdk/drag-drop';
 
 export interface State {
   data: Queue[];
-  selectedQueue: Queue;
   tasks: ITask[];
   stats: {wait: Topic[]; length: Topic[]};
   selectedStatsTimeFrame: string;
@@ -17,7 +17,6 @@ export interface State {
 
 const initQueues: State = {
   data                  : null,
-  selectedQueue         : null,
   tasks                 : null,
   stats                 : {wait: null, length: null},
   selectedStatsTimeFrame: (3 * TIME_INTERVALS.HOUR).toString(),
@@ -27,10 +26,8 @@ const initQueues: State = {
 export const reducer = createReducer(
   initQueues,
   on(queueActions.setQueues, (state, action): State => ({...state, data: action.queues})),
-  on(queueActions.setSelectedQueue, (state, action): State => ({...state, selectedQueue: action.queue})),
   on(queueActions.setSelectedQueueFromServer, (state, action): State => ({
     ...state,
-    selectedQueue: action.queue,
     data: state.data?.map(queue => queue.id === action.queue?.id ? action.queue : queue) ?? null
   })),
   on(queueActions.setStats, (state, action): State => ({...state, stats: action.data})),
@@ -39,4 +36,18 @@ export const reducer = createReducer(
   on(queueActions.setStatsParams, (state, action): State =>
     ({...state, selectedStatsTimeFrame: action.timeFrame, stats: initQueues.stats})),
   on(queueActions.queuesTableSetSort, (state, action): State => ({...state, tableSortFields: action.orders})),
+  on(queueActions.moveExperimentInQueue, (state, action): State => ({
+    ...state,
+    data: state.data.map(queue => {
+      if (queue.id === action.queueId) {
+        const entries = queue.entries.slice();
+        moveItemInArray(entries, action.previous, action.current);
+        return {
+          ...queue,
+          entries
+        };
+      }
+      return queue
+    }),
+  }))
 );

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, computed,
-  effect,
   inject,
   input,
   output,
@@ -86,19 +85,10 @@ export class QueuesTableComponent extends BaseTableView {
         isShift: boolean;
         colId: ISmCol['id'];
     }>();
+  copySuccess = output<string>();
 
 
   public menuPosition = signal<{ x: number; y: number }>(null);
-
-  constructor() {
-    super();
-    effect(() => {
-      if (this.queues()) {
-        this.table?.focusSelected();
-      }
-    });
-
-  }
 
   getBodyData(rowData: any, col: ISmCol) {
     return get(rowData, col.id);
@@ -117,8 +107,9 @@ export class QueuesTableComponent extends BaseTableView {
     this.queueSelected.emit(event.data);
   }
 
-  openContextMenu(data) {
+  openContextMenu(data: {e: MouseEvent; rowData: Queue}) {
     data.e.preventDefault();
+    this.table.menu().hide()
     this.contextQueue = data.rowData;
     this.menuOpen.set(false);
     setTimeout(() => {
@@ -139,4 +130,5 @@ export class QueuesTableComponent extends BaseTableView {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitSelection(selection: any[]) {
   }
+
 }

@@ -14,6 +14,7 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {PushPipe} from '@ngrx/component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 
 
@@ -34,7 +35,8 @@ import { MatIcon } from '@angular/material/icon';
     ShowTooltipIfEllipsisDirective,
     PushPipe,
     MatIconButton,
-    MatIcon
+    MatIcon,
+    MatSlideToggle
   ]
 })
 export class SingleGraphModule { }

@@ -111,8 +111,7 @@ export const COMPARE_STORE_KEY = 'experimentsCompare';
 export const COMPARE_CONFIG_TOKEN =
   new InjectionToken<StoreConfig<IExperimentCompareChartsState>>('CompareConfigToken');
 
-export const compareSyncedKeys = [
-];
+export const compareSyncedKeys = [];
 
 const localStorageKey = '_saved_compare_state_';
 
@@ -121,17 +120,33 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     reducer => {
       let onInit = true;
       return (state, action) => {
-        const nextState = reducer(state, action);
+        const nextStateOrg = reducer(state, action);
+        let nextState = nextStateOrg;
         if (onInit) {
           onInit = false;
           const savedState = JSON.parse(localStorage.getItem(localStorageKey));
+          // Migration to object settings
+          if (Array.isArray(savedState?.charts?.settingsList)) {
+            nextState = {
+              ...nextStateOrg,
+              charts: {
+                ...nextStateOrg.charts,
+                settingsList: savedState.charts.settingsList.reduce((acc, setting) => {
+                  acc[setting.id] = setting;
+                  return acc;
+                }, {})
+              }
+            };
+          }
+
           return merge({}, nextState, savedState);
         }
         if (action.type.startsWith('EXPERIMENTS_COMPARE_')) {
           localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['charts.settingsList', 'charts.scalarsHoverMode', 'compareHeader.hideIdenticalRows'])));
         }
         return nextState;
-      };
+      }
+        ;
     },
     (reducer: ActionReducer<any>) =>
       createUserPrefFeatureReducer(COMPARE_STORE_KEY, compareSyncedKeys, [EXPERIMENTS_COMPARE_METRICS_CHARTS_, EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_], userPreferences, reducer),
@@ -155,9 +170,9 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     ExperimentCompareHyperParamsGraphComponent,
     CompareScatterPlotComponent
   ],
-    exports: [
-        GetKeyValueArrayPipePipe,
-    ],
+  exports: [
+    GetKeyValueArrayPipePipe,
+  ],
   imports: [
     CommonModule,
     DragDropModule,

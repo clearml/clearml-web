@@ -10,7 +10,7 @@ import {
   selectMetricValuesView,
   selectScalarSingleValue, selectSelectedExperimentFromRouter, selectSelectedExperimentSettings,
   selectSelectedSettingsGroupBy,
-  selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel, selectSelectedSettingsSmoothSigma,
+  selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel, selectSelectedSettingsShowOrigin, selectSelectedSettingsSmoothSigma,
   selectSelectedSettingsSmoothType,
   selectSelectedSettingsSmoothWeight, selectSelectedSettingsTableMetric,
   selectSelectedSettingsxAxisType,
@@ -25,9 +25,8 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {
   experimentScalarRequested,
   GroupByCharts,
-  groupByCharts,
-  removeExperimentSettings,
-  resetExperimentMetrics,
+  groupByCharts, removeExperimentSettings,
+  resetExperimentMetrics, setChartSettings,
   setExperimentMetricsSearchTerm,
   setExperimentSettings,
   toggleSettings
@@ -44,6 +43,7 @@ import {GroupedList} from '@common/tasks/tasks.model';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {explicitEffect} from 'ngxtension/explicit-effect';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 
 @Component({
   selector: 'sm-experiment-output-scalars',
@@ -82,6 +82,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   protected xAxisType = this.store.selectSignal(selectSelectedSettingsxAxisType(false));
   protected xAxisTypePrev = computedPrevious(this.xAxisType);
   protected groupBy = this.store.selectSignal(selectSelectedSettingsGroupBy);
+  protected showOriginals = this.store.selectSignal(selectSelectedSettingsShowOrigin);
   protected singleValueData = this.store.selectSignal(selectScalarSingleValue);
   protected hasSingleValueData = this.store.selectSignal(selectHasScalarSingleValue);
   protected listOfHidden = this.store.selectSignal(selectSelectedSettingsHiddenScalar());
@@ -304,6 +305,13 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), groupBy: $event}}));
   }
 
+  changeShowOriginals($event: boolean) {
+    this.store.dispatch(setExperimentSettings({id: this.experiment()?.id, changes: {...this.getSettingsObject(), showOriginals: $event}}));
+  }
+
+  changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {
+    this.store.dispatch(setChartSettings({...$event, projectId: this.projectId()}));
+  }
 
   getSettingsObject = () => ({
     ...(this.groupBy() && {groupBy: this.groupBy()}),
@@ -312,12 +320,14 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
     ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
     ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    ...(this.showOriginals() !== undefined && {showOriginals: this.showOriginals()}),
     projectLevel: false
   });
 
   setToProject() {
     this.store.dispatch(setExperimentSettings({changes: {...this.allSettings(), id: this.projectId(), projectLevel: true}, id: this.projectId()}));
     this.store.dispatch(removeExperimentSettings({id: this.experiment()?.id}));
+
   }
 
   toggleSettingsBar() {

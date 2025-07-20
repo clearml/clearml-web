@@ -1,8 +1,13 @@
-@if (showCopyButton()) {
-  <button mat-stroked-button class="icon-only copy-button"
-    ngxClipboard [cbContent]="code()" (cbOnSuccess)="copySuccess()"
-  >
-    <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard" data-id="copyToClipBoardButton"></mat-icon>
+<div class="buttons">
+  @if (showCopyButton()) {
+    <button mat-flat-button class="icon-only"
+            ngxClipboard [cbContent]="code()" (cbOnSuccess)="copySuccess()"
+    >
+      <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard" data-id="copyToClipBoardButton"></mat-icon>
+    </button>
+  }
+  <button mat-flat-button class="icon-only" smTooltip="Search (Ctrl + F)" matTooltipShowDelay="500" (click)="openSearch()">
+    <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="searchButton"></mat-icon>
   </button>
-}
-<div class="ace" [class.readonly]="readonly()" #aceEditor></div>
+</div>
+<div cdkFocusInitial class="ace" [class.readonly]="readonly()" #aceEditor></div>

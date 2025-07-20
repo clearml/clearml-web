@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
+import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving} from '../../reducers';
 import {Model} from '~/business-logic/model/models/model';
 import {Observable, Subscription} from 'rxjs';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
@@ -28,7 +28,6 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
   private selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
   public errors$: Observable<ExperimentInfoState['errors']>;
-  public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
   public modelLabels$: Observable<Model['labels']>;
   public saving$: Observable<boolean>;
   private configInfo$: Observable<ConfigurationItem>;
@@ -50,7 +49,6 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
     this.selectedConfigObj$ = this.store.select(selectExperimentSelectedConfigObjectFromRoute);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.errors$ = this.store.select(selectExperimentInfoErrors);
-    this.userKnowledge$ = this.store.select(selectExperimentUserKnowledge);
     this.saving$ = this.store.select(selectIsExperimentSaving);
   }
 

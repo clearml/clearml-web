@@ -96,7 +96,8 @@
         [sysTags]="systemTags()"
         [tags]="experiment()?.tags"
         (add)="openTagMenu()"
-      (remove)="removeTag($event)"></sm-tag-list>
+        (remove)="removeTag($event)"
+      ></sm-tag-list>
     } @else {
       <sm-tag-list
         [sysTags]="systemTags()"

@@ -8,8 +8,8 @@ import {catchError, retryWhen, mergeMap, tap} from 'rxjs/operators';
 import {Environment} from '../../../../environments/base';
 import { retryOperation } from '../utils/promie-with-retry';
 
-export const fetchConfigOutSideAngular = async (): Promise<Environment> =>
-  retryOperation(() => fetch('configuration.json').then(res => res.json()), 500, 2) as Promise<Environment>;
+export const fetchConfigOutSideAngular = async (prefix = ''): Promise<Environment> =>
+  retryOperation(() => fetch(prefix + 'configuration.json').then(res => res.json()), 500, 2) as Promise<Environment>;
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +23,7 @@ export class ConfigurationService {
   public readonly fileServerUrl = computed(() => {
     const filesServer = this.configuration().displayedServerUrls?.filesServer
     if (filesServer) {
-      if (filesServer.startsWith('http')) {
+      if (filesServer.match(/^(https?|s3|gs|azure):\/\//)) {
         return filesServer;
       }
       const url = new URL(window.location.origin);
@@ -37,7 +37,7 @@ export class ConfigurationService {
   public readonly apiServerUrl = computed(() => {
     const apiServer = this.configuration().displayedServerUrls?.apiServer
     if (apiServer) {
-      if (apiServer.startsWith('http')) {
+      if (apiServer.match(/^(https?|s3|gs|azure):\/\//)) {
         return apiServer;
       }
       const url = new URL(window.location.origin);

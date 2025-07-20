@@ -4,5 +4,5 @@ import {selectRouterConfig, selectRouterQueryParams} from '@common/core/reducers
 export const selectProjectsFeature = createSelector(selectRouterConfig, config => config?.[0] === 'projects');
 export const selectHasProjectId = createSelector(selectRouterConfig, config => config?.includes(':projectId'));
 
-export const selectArchive = createSelector(selectRouterQueryParams, params => params?.archive==='true');
+export const selectArchive = createSelector(selectRouterQueryParams, params => params?.archive === 'true');
 export const selectFeatureParam = createSelector(selectRouterConfig, config => config?.[0]);

@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: '#{variables.$icomoon-font-family}';
-  src: url('./#{variables.$icomoon-font-family}.ttf?hfr2ih') format('truetype');
+  src: url('./#{variables.$icomoon-font-family}.ttf?2tj9q0') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,29 +25,34 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-dataviews {
+  &:before {
+    content: variables.$al-ico-dataviews;
+  }
+}
 .al-ico-app-gateway {
   &:before {
-    content: variables.$al-ico-app-gateway; 
+    content: variables.$al-ico-app-gateway;
   }
 }
 .al-ico-distance {
   &:before {
-    content: variables.$al-ico-distance; 
+    content: variables.$al-ico-distance;
   }
 }
 .al-ico-pin {
   &:before {
-    content: variables.$al-ico-pin; 
+    content: variables.$al-ico-pin;
   }
 }
 .al-ico-pin-off {
   &:before {
-    content: variables.$al-ico-pin-off; 
+    content: variables.$al-ico-pin-off;
   }
 }
 .al-ico-nearest {
   &:before {
-    content: variables.$al-ico-nearest; 
+    content: variables.$al-ico-nearest;
   }
 }
 .al-ico-no-data-code {

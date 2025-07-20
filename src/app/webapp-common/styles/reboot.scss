@@ -19,11 +19,11 @@ html, body {
   overflow: hidden;
 }
 
-sm-root {
-  display: block;
-  height: 100%;
-}
-
 a {
   text-decoration: none;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }

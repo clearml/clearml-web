@@ -13,7 +13,8 @@
       text-align: left;
       position: absolute;
       left: -12px;
-      top: -3px;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 
@@ -40,22 +41,21 @@
 }
 
 @mixin system-tag() {
+  --sys-tag-height: 18px;
   display: inline-block;
   position: relative;
   min-width: 50px;
   max-width: 180px;
-  height: 18px;
+  height: var(--sys-tag-height);
+  line-height: calc(var(--sys-tag-height) - 2px);
   font-size: 11px;
   border-radius: 4px;
-  border: 1px solid color-mix(in srgb, var(--color-outline-variant), transparent 50%);
+  border: 1px solid color-mix(in srgb, var(--color-primary-container), var(--color-on-surface) 20%);
   padding: 0 8px 0 14px;
   margin-right: 5px;
   background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
+  color: var(--color-on-surface);
   text-transform: uppercase;
-  background-repeat: no-repeat;
-  background-size: 9px;
-  background-position: 0 -1px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

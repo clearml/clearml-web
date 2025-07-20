@@ -2,7 +2,7 @@ import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
 
 export function validatePrefix(invalidPrefix?: string): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
+  return (control: AbstractControl): Record<string, any> | null => {
     const forbidden = control.value?.startsWith(invalidPrefix);
     return forbidden ? {invalidPrefix: {value: control.value}} : null;
   };
@@ -11,7 +11,6 @@ export function validatePrefix(invalidPrefix?: string): ValidatorFn {
 @Directive({
   selector: '[smInvalidPrefixValidator]',
   providers: [{provide: NG_VALIDATORS, useExisting: InvalidPrefixValidatorDirective, multi: true}],
-  standalone: true,
 })
 export class InvalidPrefixValidatorDirective implements Validator {
   @Input() invalidPrefix: string;

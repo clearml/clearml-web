@@ -50,4 +50,5 @@ export interface OrganizationGetEntitiesCountRequest {
      * Allow public entities to be counted in the results
      */
     allow_public?: boolean;
+  limit?: number;
 }

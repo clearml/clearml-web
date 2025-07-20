@@ -11,7 +11,7 @@ import {decodeHyperParam} from '@common/shared/utils/tableParamEncode';
 })
 export class GetParamMetricValuePipe implements PipeTransform {
 
-  transform(col: ISmCol, experiment: ITask, roundedMetricValue: any): string {
+  transform(col: ISmCol, experiment: ITask, roundedMetricValue: any) {
     return col.isParam ?
       this.getHyperParam(experiment?.hyperparams, col) :
       (col.metric_hash ? this.getVariant(experiment?.last_metrics, col, roundedMetricValue) : experiment[col.id]);

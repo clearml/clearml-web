@@ -1,58 +1,65 @@
-<ng-form #templateForm="ngForm">
+<form [formGroup]="form">
   <div class="inputs-container">
     <input #hoursInput
            matInput
-           name="hour"
-           [(ngModel)]="hours"
+           formControlName="hours"
            (keydown)="checkChars($event)"
-           (keyup)=" ($any($event.target).selectionStart === 2)  && mins.focus()"
-           (keyup.enter)="onChangePartial($event)"
+           (keyup)=" ($any($event.target).selectionStart === 2) && !$event.key.startsWith('Arrow') && mins.focus()"
+           (keyup.enter)="onChangePartial()"
            (keyup.arrowRight)="($any($event.target).selectionStart===2 || $any($event.target).value.length <= 1) && mins.focus()"
+           (keyup.arrowUp)="increase(form.controls.hours)"
+           (keyup.arrowDown)="decrease(form.controls.hours)"
            (blur)="focusOutInput()"
-           maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
            smTooltip="Hours"><span class="separator">:</span>
     <input #mins
            matInput
-           name="min"
-           [(ngModel)]="minutes"
+           formControlName="minutes"
            (keydown)="checkChars($event)"
-           (keyup)="($any($event.target).selectionStart===2 ) && secs.focus()"
-           (keyup.enter)="onChangePartial($event)"
+           (keyup)="($any($event.target).selectionStart===2 ) && !$event.key.startsWith('Arrow') && secs.focus()"
+           (keyup.enter)="onChangePartial()"
            (keyup.arrowRight)="($any($event.target).selectionStart===2 || $any($event.target).value.length <= 1)  && secs.focus()"
            (keyup.arrowLeft)="$any($event.target).selectionEnd===0 && hoursInput.focus()"
+           (keyup.arrowUp)="increase(form.controls.minutes)"
+           (keyup.arrowDown)="decrease(form.controls.minutes)"
            (blur)="focusOutInput()"
-           maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Minutes"><span class="separator">:</span>
+           smTooltip="Minutes"
+    >
+    <span class="separator">:</span>
     <input #secs
            matInput
-           name="sec"
-           [(ngModel)]="seconds"
+           formControlName="seconds"
            (keydown)="checkChars($event)"
-           (keyup)="(($any($event.target).selectionStart === 2 ) && mill.focus())"
-           (keyup.enter)="onChangePartial($event)"
+           (keyup)="(($any($event.target).selectionStart === 2 ) && !$event.key.startsWith('Arrow') && mill.focus())"
+           (keyup.enter)="onChangePartial()"
            (keyup.arrowRight)="($any($event.target).selectionStart === 2 || $any($event.target).value.length <= 1) && mill.focus()"
            (keyup.arrowLeft)="$any($event.target).selectionEnd === 0 && mins.focus()"
+           (keyup.arrowUp)="increase(form.controls.seconds)"
+           (keyup.arrowDown)="decrease(form.controls.seconds)"
            (blur)="focusOutInput()"
-           maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Seconds"><span class="separator">.</span>
+           smTooltip="Seconds"
+    >
+    <span class="separator">.</span>
     <input #mill
-           [(ngModel)]="ms"
            matInput
-           name="ms"
+           formControlName="ms"
            (keydown)="checkChars($event)"
-           (keyup.enter)="onChangePartial($event)"
+           (keyup.enter)="onChangePartial()"
            (keyup.arrowLeft)="$any($event.target).selectionEnd === 0 && secs.focus()"
+           (keyup.arrowUp)="increase(form.controls.ms, 999)"
+           (keyup.arrowDown)="decrease(form.controls.ms)"
            (blur)="focusOutInput()"
-           maxlength="3"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Milliseconds">
-    <div class="submit" [class]="{'in-edit-mode':inEdit}" (click)="onChangePartial($event)"><i class="icon xs i-v-neon"></i></div>
+           smTooltip="Milliseconds"
+    >
+    <button mat-icon-button class="submit" [class.in-edit-mode]="inEdit()" (click)="onChangePartial()">
+      <mat-icon fontSet="al" fontIcon="al-ico-complete"></mat-icon>
+    </button>
   </div>
-</ng-form>
+</form>

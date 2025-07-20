@@ -284,7 +284,6 @@ numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
           <h5>Enqueue task to</h5>
           <section>
             <sm-paginated-entity-selector
-              #selector
               formControlName="queue"
               label="Queue"
               [data]="filteredQueues()"
@@ -292,6 +291,13 @@ numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
               [isRequired]="true"
               (loadMore)="loadMoreQueues()"
             ></sm-paginated-entity-selector>
+            @if (!queueFormGroup.controls.queue.untouched && queueFormGroup.controls.queue.errors; as errors) {
+              <div class="extra-errors">
+                @if (errors?.notFoundInList) {
+                  <mat-error>Please select a queue from the list</mat-error>
+                }
+              </div>
+            }
           </section>
           <h5>Output</h5>
           <section>

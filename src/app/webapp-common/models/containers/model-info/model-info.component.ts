@@ -14,13 +14,11 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {
   groupByCharts,
-  GroupByCharts,
-  removeExperimentSettings,
+  GroupByCharts, removeExperimentSettings,
   setExperimentSettings,
   toggleMetricValuesView,
   toggleSettings
 } from '@common/experiments/actions/common-experiment-output.actions';
-import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {
   selectIsSharedAndNotOwner,
   selectSelectedModelSettings,
@@ -33,7 +31,7 @@ import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
 import {headerActions} from '@common/core/actions/router.actions';
 import {
   selectMetricValuesView,
-  selectModelSettingsGroupBy, selectModelSettingsHiddenScalar,
+  selectModelSettingsGroupBy, selectModelSettingsHiddenScalar, selectModelSettingsShowOrigin,
   selectModelSettingsSmoothSigma, selectModelSettingsSmoothType,
   selectModelSettingsSmoothWeight,
   selectModelSettingsXAxisType, selectSelectedModelSettingsIsProjectLevel
@@ -41,6 +39,7 @@ import {
 import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {concatLatestFrom} from '@ngrx/operators';
+import {infoModelsTabsLinks} from '@common/models/models.consts';
 
 @Component({
   selector: 'sm-model-info',
@@ -66,6 +65,8 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   protected xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
   protected groupBy = this.store.selectSignal(selectModelSettingsGroupBy);
   protected listOfHidden = this.store.selectSignal(selectModelSettingsHiddenScalar);
+  protected showOriginals = this.store.selectSignal(selectModelSettingsShowOrigin);
+
 
 
   groupByOptions = [
@@ -80,15 +81,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   ];
 
 
-  links = [
-    {name: 'general', url: ['general']},
-    {name: 'network', url: ['network']},
-    {name: 'labels', url: ['labels']},
-    {name: 'metadata', url: ['metadata']},
-    {name: 'lineage', url: ['tasks']},
-    {name: 'scalars', url: ['scalars']},
-    {name: 'plots', url: ['plots']},
-  ] as Link[];
+  links = infoModelsTabsLinks;
   public toMaximize: boolean;
   private modelsFeature: boolean;
 
@@ -116,6 +109,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     }
     this.minimized = this.route.snapshot.firstChild?.data.minimized;
     if (!this.minimized) {
+      this.store.dispatch(headerActions.reset());
       this.setupBreadcrumbsOptions();
     }
   }
@@ -290,13 +284,19 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     }));
   }
 
+  changeShowOriginals($event: boolean) {
+    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {...this.getSettingsObject(), showOriginals: $event}}));
+  }
+
   getSettingsObject = () => ({
     ...(this.groupBy() && {groupBy: this.groupBy()}),
+    ...(this.showOriginals() !== undefined && {showOriginals: this.showOriginals()}),
     ...(this.xAxisType() && {xAxisType: this.xAxisType()}),
     ...(this.smoothType() && {smoothType: this.smoothType()}),
     ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
     ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
     ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    ...(this.showOriginals() !== undefined && {showOriginals: this.showOriginals()}),
     projectLevel: false
   });
 

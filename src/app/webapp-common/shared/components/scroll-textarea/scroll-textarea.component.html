@@ -4,7 +4,7 @@
     <div class="floating-buttons">
       <ng-content select="[extra-buttons]"></ng-content>
       @if (formData()) {
-        <sm-copy-clipboard [clipboardText]="formData()" label="" class="copy-textarea" tooltipText='Copy to clipboard' data-id="copy to clipboard"></sm-copy-clipboard>
+        <sm-copy-clipboard [isStroked]="true" [clipboardText]="formData()" label="" class="copy-textarea" tooltipText='Copy to clipboard' data-id="copy to clipboard"></sm-copy-clipboard>
       }
       <sm-search
         class="outline"

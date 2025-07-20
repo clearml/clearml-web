@@ -37,7 +37,7 @@
          }
          @if ((metricValuesView$ | async) === false && routerConfig().includes('scalars') && minimized) {
           <button mat-icon-button data-id="scalar settings" [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
-            <mat-icon fontSet="al" fontIcon="al-ico-settings"></mat-icon>
+            <mat-icon fontSet="al" fontIcon="al-ico-tune"></mat-icon>
           </button>
           <mat-menu #graphSettingsMenu="matMenu">
             <sm-graph-settings-bar
@@ -50,12 +50,14 @@
             [xAxisType]="xAxisType()"
             [groupBy]="groupBy()"
             [groupByOptions]="groupByOptions"
-            [clearable]="projectId() === '*'? null : !isProjectLevel()"
+            [showOrigin]="showOriginals()"
+            [clearable]="!isProjectLevel()"
             (changeWeight)="changeSmoothness($event)"
             (changeSigma)="changeSigma($event)"
             (changeXAxisType)="changeXAxisType($event)"
             (changeGroupBy)="changeGroupBy($event)"
             (changeSmoothType)="changeSmoothType($event)"
+            (changeShowOrigin)="changeShowOriginals($event)"
             (setToProject)="setToProject()"
             ></sm-graph-settings-bar>
           </mat-menu>

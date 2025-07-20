@@ -15,6 +15,7 @@ import {CircleCounterComponent} from '@common/shared/ui-components/indicators/ci
 
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ProjectCardMenuExtendedComponent} from '~/features/projects/containers/project-card-menu-extended/project-card-menu-extended.component';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
@@ -34,6 +35,7 @@ import {ProjectCardMenuExtendedComponent} from '~/features/projects/containers/p
     CdkVirtualForOf,
     ClickStopPropagationDirective,
     ProjectCardMenuExtendedComponent,
+    MatIconModule
   ]
 })
 export class ProjectCardComponent {

@@ -1,10 +1,10 @@
 .tab-nav {
   display: grid;
-  grid-template-columns: 200px 1fr 200px;
+  grid-template-columns: 110px 1fr 110px;
   border-bottom: 1px solid var(--color-surface-container-high);
 
   &.minimized {
-    grid-template-columns: 0 1fr 108px;
+    display: flex;
   }
 
   @media(max-width: 1200px) {
@@ -14,4 +14,5 @@
 
 sm-router-tab-nav-bar {
   overflow: hidden;
+  flex-grow: 1;
 }

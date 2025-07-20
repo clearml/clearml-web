@@ -47,7 +47,7 @@
   position: relative;
   .value {
     display: flex;
-    align-items: center;
+    align-items: start;
     padding-right: 32px;
   }
   .input {
@@ -92,6 +92,7 @@
   .editable-pen {
     position: absolute;
     right: 0;
+    top: 0;
     opacity: 0;
     transition: opacity 0.35s;
   }

@@ -1,11 +1,16 @@
-import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
+import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol, TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {rootProjectsPageSize} from '@common/constants';
+import {SortMeta} from 'primeng/api';
 
 export const EXPERIMENTS_STORE_KEY = 'experiments';
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
 
+export const INITIAL_EXPERIMENT_COLS_ORDER: SortMeta[] = [{
+  field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
+  order: TABLE_SORT_ORDER.DESC
+}]
 export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.SELECTED,
@@ -223,3 +228,4 @@ export enum ActiveSectionEnum {
   'artifact' = 'artifact',
   'other' = 'other',
 }
+

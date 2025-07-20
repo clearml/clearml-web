@@ -1,0 +1,39 @@
+@use '@angular/material' as mat;
+
+:host{
+  .form-container{
+    display: flex;
+    flex-direction:  column;
+    gap: 24px;
+    padding: 24px 0 0 24px;
+  }
+
+  .mat-mdc-chip-listbox {
+    @include mat.chips-overrides((
+      container-height: 24px,
+      container-shape-radius: 4px,
+      elevated-selected-container-color: var(--color-primary),
+      selected-label-text-color: var(--color-on-primary)
+    ));
+  }
+
+  ::ng-deep mat-chip-option {
+    --mdc-chip-label-text-color: var(--color-primary);
+    --mdc-chip-outline-color: var(--color-outline-variant);
+
+    .mat-mdc-chip-graphic {
+      display: none !important;
+    }
+
+    .status-icon-container {
+      grid-template-columns: 14px auto !important;
+    }
+
+    &.mat-mdc-chip-selected {
+      .status-icon-container {
+        color: var(--color-on-primary) !important;
+      }
+    }
+  }
+
+}

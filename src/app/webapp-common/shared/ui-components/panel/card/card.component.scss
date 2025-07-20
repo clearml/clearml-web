@@ -43,7 +43,7 @@
         font: normal normal 500 12px/20px 'Heebo', sans-serif;
         padding-right: 6px;
         white-space: nowrap;
-        color: var(--color-on-primary-container);
+        color: var(--color-on-surface);
         background-color: var(--card-tab2-bg);
       }
     }
@@ -114,7 +114,7 @@
 
       header {
         padding: 0 16px;
-        color: var(--color-on-primary-container);
+        color: var(--color-on-surface);
       }
 
       header.empty {
@@ -155,7 +155,7 @@
 }
 
 ::ng-deep .card .card-container .title {
-  color: var(--color-on-primary-container);
+  color: var(--color-on-surface);
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;

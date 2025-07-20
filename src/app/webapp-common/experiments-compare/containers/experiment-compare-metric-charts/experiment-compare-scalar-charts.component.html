@@ -9,6 +9,7 @@
           [smoothSigma]="settings.smoothSigma"
           [smoothType]="settings.smoothType"
           [xAxisType]="settings.xAxisType"
+          [showOrigin]="settings.showOriginals"
           [groupBy]="settings.groupBy"
           [groupByOptions]="groupByOptions"
           [clearable]="null"
@@ -18,6 +19,7 @@
           (changeXAxisType)="changeXAxisType($event)"
           (changeGroupBy)="changeGroupBy($event)"
           (changeSmoothType)="changeSmoothType($event)"
+          (changeShowOrigin)="changeShowOriginals($event)"
         ></sm-graph-settings-bar>
       }
       @if (!minimized) {
@@ -28,34 +30,13 @@
           (itemSelect)="metricSelected($event)"
           (hiddenChanged)="selectedListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
-          >
+        >
         </sm-selectable-grouped-filter-list>
       }
     </div>
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
-    @if (showSettingsBar() && minimized) {
-      <sm-graph-settings-bar
-        class="ribbon-setting-bar"
-        [class.showSettings]="showSettingsBar() && minimized"
-        [smoothWeight]="settings.smoothWeight"
-        [smoothSigma]="settings.smoothSigma"
-        [smoothType]="settings.smoothType"
-        [xAxisType]="settings.xAxisType"
-        [groupBy]="settings.groupBy"
-        [groupByOptions]="groupByOptions"
-        [splitSize]="splitSize$ | ngrxPush"
-        [clearable]="null"
-        (changeWeight)="changeSmoothness($event)"
-        (changeSigma)="changeSigma($event)"
-        (toggleSettings)="toggleSettingsBar()"
-        (changeXAxisType)="changeXAxisType($event)"
-        (changeGroupBy)="changeGroupBy($event)"
-        (changeSmoothType)="changeSmoothType($event)"
-      ></sm-graph-settings-bar>
-    }
     <sm-experiment-graphs
-      [class.with-settings]="showSettingsBar() && minimized"
       [metrics]="graphs"
       [list]="graphList"
       [hiddenList]="settings.selectedMetricsScalar"
@@ -66,15 +47,47 @@
       [smoothType]="settings.smoothType"
       [xAxisType]="settings.xAxisType"
       [groupBy]="settings.groupBy"
+      [showOriginals]="settings.showOriginals"
       [multipleSingleValueData]="singleValues"
-      [hoverMode]="hoverMode$ | ngrxPush"
       [exportForReport]="!modelsFeature"
       [minimized]="minimized"
       [breakPoint]="900"
       [splitSize]="splitSize$ | ngrxPush"
+      [defaultHoverMode]="'x'"
       (resetGraphs)="resetMetrics()"
-      (hoverModeChanged)="hoverModeChanged($event)"
       (createEmbedCode)="createEmbedCode($event)"
+      (chartSettingsChanged)="changeChartSettings($event)"
     ></sm-experiment-graphs>
   </mat-drawer-content>
 </mat-drawer-container>
+
+
+@if (minimized) {
+  <div class="menu-trigger"
+       smClickStopPropagation
+       [matMenuTriggerFor]="graphSettingsMenu">
+  </div>
+  <mat-menu #graphSettingsMenu="matMenu" (closed)="toggleSettingsBar()">
+    <sm-graph-settings-bar
+      smClickStopPropagation
+      class="graph-settings-menu"
+      [verticalLayout]="true"
+      [smoothWeight]="settings.smoothWeight"
+      [smoothSigma]="settings.smoothSigma"
+      [smoothType]="settings.smoothType"
+      [xAxisType]="settings.xAxisType"
+      [showOrigin]="settings.showOriginals"
+      [groupBy]="settings.groupBy"
+      [groupByOptions]="groupByOptions"
+      [splitSize]="splitSize$ | ngrxPush"
+      [clearable]="null"
+      (changeWeight)="changeSmoothness($event)"
+      (changeSigma)="changeSigma($event)"
+      (toggleSettings)="toggleSettingsBar()"
+      (changeXAxisType)="changeXAxisType($event)"
+      (changeGroupBy)="changeGroupBy($event)"
+      (changeSmoothType)="changeSmoothType($event)"
+      (changeShowOrigin)="changeShowOriginals($event)"
+    ></sm-graph-settings-bar>
+  </mat-menu>
+}

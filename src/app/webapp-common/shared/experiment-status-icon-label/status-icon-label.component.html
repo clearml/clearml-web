@@ -6,7 +6,7 @@
     <div
       class="ellipsis label"
       [class.with-spinner]="showSpinner() && progress()"
-    >{{experimentsStatusLabels[status()] || status()}}</div>
+    >{{experimentsStatusLabels()[status()] || status() | titlecase}}</div>
   }
   @if (showSpinner() && enableSpinner()) {
     <mat-progress-spinner

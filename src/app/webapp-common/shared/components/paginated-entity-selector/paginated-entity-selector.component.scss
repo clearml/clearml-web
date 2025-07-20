@@ -5,20 +5,12 @@ $user-row-height: 36px;
     display: inline-block;
     margin-right: 18px;
     font-size: 14px;
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 
   mat-form-field {
     width: 100%;
     z-index: 1;
 
-  }
-  .selected-items {
-    max-height: $user-row-height * 4;
-    overflow: auto;
-
-    border-radius: 0 0 4px 4px;
-    border: solid 1px #e0e0e0;;
-    border-top: none;
   }
 }

@@ -17,6 +17,9 @@
 
     button {
       max-width: 230px;
+      .label {
+        max-width: 200px;
+      }
     }
 
     .info {

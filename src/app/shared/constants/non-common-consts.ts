@@ -43,7 +43,7 @@ export const EXPERIMENTS_STATUS_LABELS = {
   [TaskTypeEnum.Controller]    : 'Controller',
   [TaskTypeEnum.Optimizer]     : 'Optimizer',
   [TaskTypeEnum.Service]       : 'Service',
-  [TaskTypeEnum.Qc]            : 'Qc',
+  [TaskTypeEnum.Qc]            : 'QC',
   [TaskTypeEnum.Custom]        : 'Custom'
 };
 

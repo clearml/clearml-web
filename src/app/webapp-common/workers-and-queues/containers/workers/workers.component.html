@@ -8,7 +8,8 @@
       [selectedWorker]="selectedWorker$ | ngrxPush"
       (sortedChanged)="sortedChanged($event)"
       [tableSortFields]="tableSortFields$ | ngrxPush"
-      (workerSelected)="selectWorker($event)">
+      (workerSelected)="selectWorker($event)"
+    >
     </sm-workers-table>
   </as-split-area>
   <as-split-area [size]="50" [visible]="!!(selectedWorker$| ngrxPush)">

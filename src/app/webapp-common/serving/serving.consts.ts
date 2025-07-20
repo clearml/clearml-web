@@ -144,7 +144,7 @@ export const endpointsStatsParamInfo = {
 };
 
 export const modelServingRoutes = [
-  {header: 'ACTIVE', subHeader: '', link: 'endpoints/active'},
+  {header: 'ACTIVE', link: 'endpoints/active'},
   {header: 'LOADING', subHeader: '', link: 'endpoints/loading'}
 ] as HeaderNavbarTabConfig[];
 

@@ -3,7 +3,6 @@ import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 import {isAnnotationTask} from '../../../utils/shared-utils';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
@@ -14,7 +13,6 @@ import {MatIcon} from '@angular/material/icon';
         DialogTemplateComponent,
         MatDialogModule,
         MatButton,
-        MatIcon
     ]
 })
 export class AlertDialogComponent {
@@ -52,16 +50,12 @@ export class AlertDialogComponent {
     this.resultMessage   = data.resultMessage;
   }
 
-  openToggle() {
-    this.isOpen = !this.isOpen;
-  }
-
   buildUrl(entity, entityName) {
     if (entityName === 'datasets') {
       return `/datasets/${entity.id}`;
     }
     if (entityName === 'tasks' && isAnnotationTask(entity)) {
-      return `/annotations?annotationId=${entity.id}`;
+      return `/annotations?q=${entity.id}`;
     }
     return `/projects/${entity?.project?.id ?? '*'}/experiments/${entity.id}`;
   }

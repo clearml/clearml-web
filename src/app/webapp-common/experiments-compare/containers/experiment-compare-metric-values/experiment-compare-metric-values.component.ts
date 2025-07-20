@@ -213,9 +213,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
     this.selectedExperimentsSettings$
       .pipe(take(1))
-      .subscribe(settings => {
-        this.originalSelection = settings.selectedMetricsScalar;
-      });
+      .subscribe(settings => this.originalSelection = settings?.selectedMetricsScalar ?? []);
   }
 
   private startTableScrollListener() {

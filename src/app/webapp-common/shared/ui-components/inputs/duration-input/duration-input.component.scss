@@ -3,49 +3,43 @@
   text-align: center;
 
   input {
-    padding-left: 0;
     text-align: center;
     width: 22px;
+    border: none;
+    font-size: 14px;
+    background: transparent;
     &:last-of-type {
       width: 30px;
     }
   }
 
-  ng-form {
-    margin: auto;
+  .inputs-container {
+    background: var(--color-surface-container-high);
+    padding: 0 12px;
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    gap: 1px;
 
-    .inputs-container {
-      background: var(--color-surface-container-high);
-      padding: 0 12px;
-      border-radius: 4px;
-      position: relative;
-      display: inline-block;
+    .separator {
+      line-height: 32px;
 
-      .separator {
-        line-height: 32px;
-        color: var(--color-surface-container);
-
-        &:last-child {
-          padding-right: 0;
-        }
+      &:last-child {
+        padding-right: 0;
       }
+    }
 
-      .submit {
-        border-radius: 30px;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        right: -28px;
-        top: 50%;
-        padding: 6px;
-        transform: translate(0, -50%);
-        cursor: pointer;
-        visibility: hidden;
-        &.in-edit-mode {
-          visibility: visible;
-        }
+    .submit {
+      position: absolute;
+      top: 50%;
+      right: -8px;
+      transform: translate(0, -50%);
+      opacity: 0;
+      transition: right ease-in-out 0.3s, opacity ease-out 0.5s;
+
+      &.in-edit-mode {
+        right: -34px;
+        opacity: 1;
       }
     }
   }

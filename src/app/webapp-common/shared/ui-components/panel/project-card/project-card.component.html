@@ -17,23 +17,23 @@
       ></a>
     </cdk-virtual-scroll-viewport>
   </div>
-  <div header-content class="d-flex justify-content-between align-items-center card-name">
+  <div header-content class="d-flex align-items-center card-name">
     <div class="title">
       <span class="project-name me-2"
         [smTooltip]="project.name"
         smShowTooltipIfEllipsis
         [showAlwaysTooltip]="(project.name?.includes('/'))"
       >{{ project.basename }}</span>
-      @if (!hideMenu() && project.default_output_destination) {
-        <i class="al icon al-ico-info-circle sm" [smTooltip]="'Default output destination: ' + project.default_output_destination"></i>
-      }
     </div>
+    @if (!hideMenu() && project.default_output_destination) {
+      <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info-icon" [smTooltip]="'Default output destination: ' + project.default_output_destination"></mat-icon>
+    }
     @if (project.system_tags?.includes('default')) {
       <div class="justify-content-end project-tag">Sample</div>
     }
     @if (!hideMenu()) {
       <sm-project-card-menu-extended
-        class="menu-wrapper"
+        class="menu-wrapper ms-auto"
         (deleteProjectClicked)="deleteProjectClicked.emit($event)"
         (moveToClicked)="moveToClicked.emit($event)"
         (newProjectClicked)="newProjectClicked.emit($event)"

@@ -14,7 +14,7 @@ import {SelectedModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS} from '../models/models.consts';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/models';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {isEqual, unionBy} from 'lodash-es';
@@ -77,7 +77,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.select(selectSelectedProject)
       .pipe(
         takeUntilDestroyed(),
-        filter(selectedProject => !!selectedProject?.id)
+        debounceTime(100)
       )
       .subscribe(selectedProject => {
         this.selectedProject = selectedProject;

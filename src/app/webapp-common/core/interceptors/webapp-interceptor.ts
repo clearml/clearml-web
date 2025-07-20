@@ -20,7 +20,7 @@ export class WebappInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     request = request.clone({
       setHeaders: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         'X-Allegro-Client': 'Webapp-' + environment.version,
       }
     });
@@ -35,14 +35,9 @@ export class WebappInterceptor implements HttpInterceptor {
     if (request.url.endsWith('system.company_info')) {
       return throwError(() => err);
     }
-    // For automatic login don't go to login page (login in APP_INITIALIZER)
-    if (err.status === 401 && (
-      ['/dashboard'].includes(redirectUrl) ||
-      !environment.autoLogin ||
-      (environment.autoLogin && this.user())
-    )) {
+    if (err.status === 401) {
       if (redirectUrl.indexOf('/signup') === -1 && redirectUrl.indexOf('/login') === -1) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         this.store.dispatch(resetCurrentUser());
         this.dialog.closeAll();
         this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});

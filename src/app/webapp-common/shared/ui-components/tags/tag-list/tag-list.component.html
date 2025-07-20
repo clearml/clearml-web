@@ -26,7 +26,7 @@
                    [colors]="tag.colorObservable | ngrxPush"
                    [caption]="tag.caption"
                    [tooltip]="tooltip()"
-                   [disabledRemove]="disableRemove"
+                   [disabledRemove]="disableRemove()"
                    (remove)="removeTag($event)"
       ></sm-user-tag>
     }
@@ -44,6 +44,7 @@
   @if ($any(add).listeners) {
     <sm-user-tag
       class="add-button"
+      [class.show-only-on-hover]="showAddTagOnlyOnHover()"
       [class.no-tags]="!tagsList()?.length"
       caption="ADD TAG"
       [colors]="{foreground: 'var(--color-primary)', background: null}"

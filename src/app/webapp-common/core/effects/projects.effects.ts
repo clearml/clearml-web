@@ -24,7 +24,7 @@ import {
 } from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
-import {setSelectedModels} from '../../models/actions/models-view.actions';
+import {resetState} from '../../models/actions/models-view.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
@@ -200,7 +200,7 @@ export class ProjectsEffects {
     ofType(actions.resetProjectSelection),
     mergeMap(() => [
       setSelectedExperiments({experiments: []}),
-      setSelectedModels({models: []})
+      resetState()
     ])
   ));
 
@@ -231,7 +231,6 @@ export class ProjectsEffects {
   //getAll but not projects'
   getAllTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getCompanyTags),
-
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
         map((res: OrganizationGetTagsResponse) => actions.setCompanyTags({

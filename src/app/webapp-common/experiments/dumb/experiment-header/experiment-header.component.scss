@@ -1,9 +1,6 @@
-@use '../../../../webapp-common/layout/layout.scss';
+@use '../../../../webapp-common/layout/layout';
 
 :host {
-  display: block;
-  width: 100%;
-
   .header-container {
     padding-left: 24px;
     height: layout.$project-header-height;

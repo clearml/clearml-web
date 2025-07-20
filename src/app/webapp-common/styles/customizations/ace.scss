@@ -1,20 +1,36 @@
 @use '@angular/material' as mat;
 
-@mixin ace-style($theme) {
-  @if mat.get-theme-type($theme) == light {
-    .ace-editor.ace_editor {
-      background: color-mix(in srgb, var(--color-surface-container-low), transparent 60%);
-      .ace_gutter {
-        background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
+.ace.ace_editor {
+  line-height: 1.6;
+  color: var(--color-on-surface-variant);
+  background-color: color-mix(in srgb, var(--color-surface), var(--color-on-surface) 2%);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 4px;
+
+  .ace_gutter {
+    background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
+  }
+  .ace_marker-layer {
+    .ace_selection {
+      background-color: color-mix(in srgb, var(--color-tertiary-container), var(--color-surface) 40%);
+      border: 1px solid var(--color-tertiary);
+      &.ace_br1,
+      &.ace_br12 {
+        border-radius: 0;
+        border: none;
+      }
+      &.ace_br12 + .ace_selection {
+        border: none;
       }
     }
-  } @else {
-    .ace-editor.ace_editor {
-      background-color: var(--color-surface-container-low);
-      color: var(--color-on-surface-variant);
-      .ace_gutter {
-        background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
-      }
+    .ace_selected-word {
+      background-color: var(--color-surface-container-highest);
+      border-color: color-mix(in srgb, var(--color-outline), var(--color-surface) 40%);
+      border-radius: 3px;
+    }
+    .ace_active-line {
+      background: var(--color-surface-container-high);
+      border-color: var(--color-surface-container-high);
     }
   }
 }
@@ -22,30 +38,35 @@
 .ace_search {
   color: var(--color-on-surface);
   background-color: var(--color-surface-container-high);
-  border: 1px solid var(--color-outline);
-
-  .ace_searchbtn_close {
-    color: var(--color-on-surface-variant);
-  }
+  border-color: var(--color-outline-variant);
+  box-shadow: -4px 4px 0 4px rgba(from var(--color-surface) r g b / 0.3);
 
   .ace_search_field {
     color: var(--color-on-surface);
-    background-color: var(--color-surface-container-highest);
+    background-color: var(--color-surface);
     border: 1px solid var(--color-outline-variant);
+    border-radius: 4px;
   }
 
   .ace_searchbtn {
-    color: var(--color-on-surface);
+    color: var(--color-primary);
     background-color: var(--color-surface-container-high);
     border: 1px solid var(--color-outline-variant);
+    border-radius: 4px;
+    margin-left: 4px;
     &:hover {
       background-color: var(--color-surface-container-highest);
     }
   }
   .ace_button {
     color: var(--color-on-surface);
+    border-color: var(--color-outline-variant);
+    border-radius: 4px;
     &:hover {
       background-color: var(--color-surface-container-highest);
+    }
+    &.checked {
+      border-color: var(--color-primary);
     }
   }
 }

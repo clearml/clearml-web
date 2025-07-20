@@ -13,8 +13,7 @@ import {
 } from '~/features/experiments/reducers';
 import {
   groupByCharts,
-  GroupByCharts,
-  removeExperimentSettings,
+  GroupByCharts, removeExperimentSettings,
   resetExperimentMetrics,
   setExperimentSettings,
   toggleMetricValuesView,
@@ -28,7 +27,8 @@ import {
   selectIsExperimentInEditMode,
   selectMetricValuesView,
   selectSelectedExperiments, selectSelectedExperimentSettings,
-  selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel, selectSelectedSettingsSmoothSigma,
+  selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsIsProjectLevel,
+  selectSelectedSettingsShowOrigin, selectSelectedSettingsSmoothSigma,
   selectSelectedSettingsSmoothType,
   selectSelectedSettingsSmoothWeight,
   selectSelectedSettingsxAxisType,
@@ -76,6 +76,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   protected smoothWeight = toSignal(this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null)));
   protected smoothSigma = toSignal(this.store.select(selectSelectedSettingsSmoothSigma).pipe(filter(sigma => sigma !== null)));
   protected smoothType = this.store.selectSignal(selectSelectedSettingsSmoothType);
+  protected showOriginals = this.store.selectSignal(selectSelectedSettingsShowOrigin);
   protected xAxisType = this.store.selectSignal(selectSelectedSettingsxAxisType(false));
   protected allSettings = this.store.selectSignal(selectSelectedExperimentSettings());
   protected isProjectLevel = this.store.selectSignal(selectSelectedSettingsIsProjectLevel);
@@ -97,6 +98,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.minimized = !routerConfig.includes('output');
       if (!this.minimized) {
+        this.store.dispatch(headerActions.reset());
         this.setupBreadcrumbsOptions();
       }
       this.routerConfig = routerConfig;
@@ -154,22 +156,13 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
   minimizeViewUrl(projectId: string, experimentId :string): string {
     const part = this.route?.firstChild.routeConfig.path;
-    if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-      return `projects/${projectId}/tasks/${experimentId}/info-output/${part}`;
-    } else {
-      return `projects/${projectId}/tasks/${experimentId}/${part}`
-    }
+    return `projects/${projectId}/tasks/${experimentId}/${part}`
   }
 
   minimizeView() {
-    const part = this.route.firstChild.routeConfig.path;
-    if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/info-output/${part}`);
-    } else {
-      const parts = this.router ? this.router.url.split('/') : window.location.pathname.split('/');
-      parts.splice(5, 1);
-      this.router.navigateByUrl(parts.join('/'));
-    }
+    const parts = this.router ? this.router.url.split('/') : window.location.pathname.split('/');
+    parts.splice(5, 1);
+    this.router.navigateByUrl(parts.join('/'));
   }
 
   toggleSettingsBar() {
@@ -189,14 +182,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
 
   maximize() {
-    if (window.location.pathname.includes('info-output')) {
-      const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;
-      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/output/${resultsPath}`);
-    } else {
-      const parts = this.router.url.split('/');
-      parts.splice(5, 0, 'output');
-      this.router.navigateByUrl(parts.join('/'));
-    }
+    const parts = this.router.url.split('/');
+    parts.splice(5, 0, 'output');
+    this.router.navigateByUrl(parts.join('/'));
     this.store.dispatch(headerActions.reset());
   }
 
@@ -253,13 +241,19 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), groupBy: $event}}));
   }
 
+  changeShowOriginals($event: boolean) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {...this.getSettingsObject(), showOriginals: $event}}));
+  }
+
   getSettingsObject = () => ({
     ...(this.groupBy() && {groupBy: this.groupBy()}),
+    ...(this.showOriginals() !== undefined && {showOriginals: this.showOriginals()}),
     ...(this.xAxisType() && {xAxisType: this.xAxisType()}),
     ...(this.smoothType() && {smoothType: this.smoothType()}),
     ...(this.smoothWeight() && {smoothWeight: this.smoothWeight()}),
     ...(this.smoothSigma() && {smoothSigma: this.smoothType() === smoothTypeEnum.gaussian ? this.smoothSigma() : 2}),
     ...(this.listOfHidden() && {hiddenMetricsScalar: this.listOfHidden()}),
+    ...(this.showOriginals() !== undefined && {showOriginals: this.showOriginals()}),
     projectLevel: false
   });
 

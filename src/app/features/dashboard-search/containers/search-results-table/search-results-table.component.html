@@ -1,0 +1,243 @@
+<div class="header">
+  <mat-tab-group
+    [selectedIndex]="activeIndex()"
+    (selectedTabChange)="tabChanged($event.index)"
+    [mat-stretch-tabs]="false">
+    @for (searchTab of links(); track searchTab.name) {
+      <mat-tab
+        class="tab-link"
+      >
+        <ng-template mat-tab-label>
+          <span class="d-flex gap-1">{{ searchTab.label }}
+            @if (resultsCount()?.[searchTab.name] > 0) {
+              <i class="dot"></i>
+            }
+          </span>
+        </ng-template>
+      </mat-tab>
+    }
+  </mat-tab-group>
+  <button mat-icon-button class="ms-2 sm" [smTooltip]="showFilter()? 'Hide filter': 'Show filter'" (click)="showFilter.set(!showFilter())">
+    <mat-icon fontSet="al" fontIcon="al-ico-filter"></mat-icon>
+  </button>
+</div>
+<mat-drawer-container>
+  <mat-drawer [mode]="(smallScreen$ | ngrxPush).matches ? 'over' : 'side'" position="end" [(opened)]="showFilter">
+    <sm-global-search-filter-container [typeOptions]="links()[this.activeIndex()]?.typeOptions || []" [statusOptions]="links()[this.activeIndex()]?.statusOptions" [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"></sm-global-search-filter-container>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div #list class="list">
+      @if (noData()) {
+        <span class="no-data">No data to show</span>
+      } @else {
+        @for (itemsList of getAllResults(); let i = $index; track trackByCategory(i, itemsList)) {
+          @if (itemsList.length > 0) {
+            <div class="list__category">
+              <div class="list__category__title">{{ activeLinkConfiguration()[i].title | uppercase }}</div>
+              @for (item of itemsList; track item.id) {
+                <ng-container *ngTemplateOutlet="
+                activeLinkConfiguration()[i].name === searchPages.projects ? ProjectTemplate :
+                activeLinkConfiguration()[i].name === searchPages.experiments ? ExperimentTemplate :
+                activeLinkConfiguration()[i].name === searchPages.models ? ModelsTemplate :
+                activeLinkConfiguration()[i].name === searchPages.pipelines ? PipelineTemplate :
+                activeLinkConfiguration()[i].name === searchPages.pipelineRuns ? PipelineRunTemplate :
+                activeLinkConfiguration()[i].name === searchPages.datasets ? openDatasetTemplate :
+                activeLinkConfiguration()[i].name === searchPages.openDatasetVersions ? openDatasetVersionTemplate :
+                activeLinkConfiguration()[i].name === searchPages.reports ? ReportsTemplate : ProjectTemplate; context: {$implicit: item}">
+                </ng-container>
+              }
+              @if (activeLinkConfiguration()[i].viewAllResults && itemsList.length === SEARCH_PAGE_SIZE) {
+                <div>
+                  <a [routerLink]="activeLinkConfiguration()[i].viewAllResultsLink" [queryParams]="viewAllQueryParams" (click)="closeDialog.emit()" class="list__view-all-link">View all results</a>
+                </div>
+              }
+              @if (!activeLinkConfiguration()[i].viewAllResults && itemsList.length >= SEARCH_PAGE_SIZE) {
+                <div class="list__load-more">
+                  <button mat-button (click)="loadMoreClicked.emit()">
+                    <div class="d-flex-center gap-2">
+                      @if (loading()) {
+                        <mat-spinner [diameter]="16" [strokeWidth]="2" mode="indeterminate"></mat-spinner>
+                      }
+                      <span>LOAD MORE</span>
+                    </div>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+<ng-template #ProjectTemplate let-project>
+  <sm-result-line
+    class="pointer"
+    (click)="this.projectSelected.emit(project)"
+    [fontIcon]="'al-ico-project-path'"
+    [label]="project.basename"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="project.tags">
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Last task run" class="sub-item">{{ project.stats?.active.last_task_run | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ project.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #ExperimentTemplate let-experiment>
+  <sm-result-line
+    class="pointer"
+    (click)="this.experimentSelected.emit(experiment)"
+    [fontIcon]="'al-ico-type-' + (experiment.type ? (experiment.type.toString()).replace('_', '-') : 'training')"
+    [label]="experiment.name"
+    [status]="experiment.status"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="experiment.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ experiment.project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ experiment.last_change | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ experiment.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #PipelineRunTemplate let-pipelineRun>
+  <sm-result-line
+    class="pointer"
+    (click)="this.pipelineRunSelected.emit(pipelineRun)"
+    [fontIcon]="'al-ico-type-' + (pipelineRun.type ? (pipelineRun.type.toString()).replace('_', '-') : 'training')"
+    [label]="pipelineRun.name"
+    [status]="pipelineRun.status"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="pipelineRun.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">Pipeline: {{ pipelineRun.project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ pipelineRun.last_change | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ pipelineRun.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #ModelsTemplate let-model>
+  <sm-result-line
+    class="pointer"
+    (click)="this.modelSelected.emit(model)"
+    [fontIcon]="'al-ico-model-filled'"
+    [label]="model.name"
+    [status]="model.ready? 'published': 'created'"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="model.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ model.project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ model.last_change | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ model.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #PipelineTemplate let-pipeline>
+  <sm-result-line
+    class="pointer"
+    (click)="this.pipelineSelected.emit(pipeline)"
+    [fontIcon]="'al-ico-pipelines'"
+    [label]="pipeline.basename"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="pipeline.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ pipeline.name |  cleanProjectPath | projectLocation }}</span>
+          <span class="dot">●</span>
+          <span title="Last run" class="sub-item">{{ pipeline.last_update | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ pipeline.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #openDatasetTemplate let-dataset>
+  <sm-result-line
+    class="pointer"
+    (click)="this.openDatasetSelected.emit(dataset)"
+    [fontIcon]="'al-ico-datasets'"
+    [label]="dataset.basename"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="dataset.tags">
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ dataset?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Last task run" class="sub-item">{{ dataset.stats.active.last_task_run | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ dataset.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #openDatasetVersionTemplate let-version>
+  <sm-result-line
+    class="pointer"
+    (click)="this.openDatasetVersionSelected.emit(version)"
+    [fontIcon]="'al-ico-type-' + (version.type ? (version.type.toString()).replace('_', '-') : 'training')"
+    [label]="version.name"
+    [status]="version.status"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="version.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ version.project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ version.last_change | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ version.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>
+
+<ng-template #ReportsTemplate let-report>
+  <sm-result-line
+    class="pointer"
+    (click)="this.reportSelected.emit(report)"
+    [fontIcon]="'al-ico-reports'"
+    [label]="report.name | cleanProjectPath"
+    [status]="report.status"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    [tags]="report.tags"
+  >
+    <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ report.project?.name | cleanProjectPath }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ report.last_update | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ report.user?.name }}</span>
+        </span>
+    </ng-container>
+  </sm-result-line>
+</ng-template>

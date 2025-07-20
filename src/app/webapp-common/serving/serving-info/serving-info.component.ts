@@ -3,13 +3,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common/core/actions/projects.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {servingFeature} from '@common/serving/serving.reducer';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {ServingActions} from '@common/serving/serving.actions';
+import {Link} from '~/features/experiments/experiments.consts';
 
 
 @Component({

@@ -12,6 +12,11 @@
           >
             @if (footerItem.divider) {
               <div class="divider" [attr.data-id]="'footer-' + footerItem.id"></div>
+            } @else if (footerItem.warning) {
+              <div class="warning">
+                <mat-icon fontSet="al" [fontIcon]="footerItem.icon"></mat-icon>
+                <span>{{footerItem.title ?? footerItemState.title}}</span>
+              </div>
             } @else if (!footerItem.title && !footerItemState.title) {
               <button
                 mat-icon-button

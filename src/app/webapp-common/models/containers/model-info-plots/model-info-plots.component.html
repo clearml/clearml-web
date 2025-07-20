@@ -40,6 +40,7 @@
       [exportForReport]="!modelsFeature"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
+      (chartSettingsChanged)="changeChartSettings($event)"
       >
     </sm-experiment-graphs>
   </mat-drawer-content>

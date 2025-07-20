@@ -1,12 +1,11 @@
 :host {
+  display: block;
   position: relative;
+  height: 100%;
+
   .ace {
     height: 100%;
     width: 100%;
-    line-height: 1.6;
-    background-color: var(--color-surface-container-low);
-    border-radius: 4px;
-    border: 1px solid var(--color-outline-variant);
     &.readonly {
       ::ng-deep .ace_cursor-layer {
         opacity: 0;
@@ -17,16 +16,19 @@
     }
   }
 
-  .copy-button {
+  .buttons {
+    display: flex;
     position: absolute;
-    right: 12px;
-    top: 12px;
-    z-index: 10;
+    z-index: 2;
+    top: 18px;
+    right: 18px;
+    gap: 12px;
     opacity: 0;
+    transition: opacity ease-in-out 0.3s;
   }
 
   &:hover {
-    .copy-button {
+    .buttons {
       opacity: 1;
     }
   }

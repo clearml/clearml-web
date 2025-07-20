@@ -1,9 +1,3 @@
-<sm-menu
-  panelClasses="light-theme"
-  [header]="(showOnlyUserWork$ | ngrxPush) ? 'My Work': 'Team\'s Work'"
-  [prefixIconClass]="(showOnlyUserWork$ | ngrxPush) ? 'al-ico-me': 'al-ico-users'"
-  class="menu" data-id="Team's Work">
-  <sm-menu-item itemLabel="My Work" (itemClicked)="userFilterChanged(true)" iconClass="al-ico-me" data-id="My Work Option"></sm-menu-item>
-  <sm-menu-item itemLabel="Team's Work" (itemClicked)="userFilterChanged(false)"
-                iconClass="al-ico-users" data-id="Team's Work Option"></sm-menu-item>
-</sm-menu>
+<sm-show-only-user-work-menu
+  [showOnlyUserWork]="showOnlyUserWork$ | ngrxPush"
+  (userFilterChanged)="userFilterChanged($event)"></sm-show-only-user-work-menu>

@@ -56,7 +56,7 @@ $type-colors: (
       }
 
       .segment-key {
-        color: #8249ac;
+        color: #a06bc7;
       }
 
       .segment-separator {
@@ -85,6 +85,8 @@ $type-colors: (
 
   .current .found {
     background-color: var(--color-warning);
+    color: var(--color-on-primary);
+
     &::selection {
       background-color: var(--color-surface-container-lowest);
       color: var(--color-warning);

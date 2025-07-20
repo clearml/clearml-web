@@ -34,12 +34,13 @@ import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {userThemeChanged} from '@common/core/actions/layout.actions';
-import {selectDarkTheme, selectUserTheme} from '@common/core/reducers/view.reducer';
+import {selectUserTheme} from '@common/core/reducers/view.reducer';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {NgOptimizedImage, NgTemplateOutlet} from '@angular/common';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 
 @Component({
@@ -89,8 +90,8 @@ export class LoginComponent {
 
   protected isInvite = this.router.url.includes('invite');
   protected loginForm = new FormGroup({
-    name: new FormControl<string>('', [Validators.required, Validators.minLength(1), Validators.maxLength(70), Validators.pattern(/.*\S.*/)]),
-    password: new FormControl<string>('', [Validators.minLength(1)]),
+    name: new FormControl<string>('', [Validators.required, minLengthTrimmed(1), Validators.maxLength(70), Validators.pattern(/.*\S.*/)]),
+    password: new FormControl<string>(''),
   });
 
   options: any[] = [];
@@ -121,6 +122,11 @@ export class LoginComponent {
         type: CrumbTypeEnum.Feature
       }]]}));
 
+    effect(() => {
+      if (this.loginMode() === loginModes.password) {
+        this.loginForm.controls.password.setValidators([minLengthTrimmed(1)]);
+      }
+    });
     toObservable(this.githubButton)
       .pipe(
         takeUntilDestroyed(),
@@ -175,12 +181,6 @@ export class LoginComponent {
                 this.options = users;
                 this.cdr.markForCheck();
               });
-            if (this.environment().autoLogin && this.redirectUrl && !['/dashboard'].includes(this.redirectUrl)) {
-              this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
-              this.simpleLogin()
-                .pipe(take(1))
-                .subscribe();
-            }
           }
         }))
       .subscribe((loginMode: LoginMode) => {

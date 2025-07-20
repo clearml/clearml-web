@@ -7,7 +7,7 @@
   overflow: hidden;
 
   &:hover {
-    .add-button {
+    .add-button.show-only-on-hover {
       opacity: 1;
     }
   }
@@ -16,7 +16,10 @@
   }
 
   .add-button {
-    opacity: 0;
+    opacity: 1;
+    &.show-only-on-hover {
+      opacity: 0;
+    }
     min-width: 85px;
     max-width: 85px;
     transition: opacity 0.3s;

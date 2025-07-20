@@ -2,8 +2,8 @@ import {inject, Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
-import {Action, Store} from '@ngrx/store';
-import {cloneDeep, flatten, isEqual} from 'lodash-es';
+import {Action, Store, INIT} from '@ngrx/store';
+import {cloneDeep, flatten, get, isEqual} from 'lodash-es';
 import {EMPTY, iif, interval, Observable, of} from 'rxjs';
 import {
   auditTime,
@@ -21,7 +21,7 @@ import {
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {GET_ALL_QUERY_ANY_FIELDS, INITIAL_EXPERIMENT_TABLE_COLS} from '~/features/experiments/experiments.consts';
-import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {experimentsView, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {excludeTypes, EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
@@ -56,7 +56,7 @@ import {
   updateManyExperiment
 } from '../actions/common-experiments-view.actions';
 import * as exSelectors from '../reducers/index';
-import {selectHyperParamsFiltersPage, selectSelectedExperiments, selectTableRefreshList} from '../reducers/index';
+import {selectExperimentsMetricsCols, selectHyperParamsFiltersPage, selectRawExperimentsTableCols, selectSelectedExperiments, selectTableRefreshList} from '../reducers/index';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
 import {convertStopToComplete} from '../shared/common-experiments.utils';
@@ -122,6 +122,9 @@ import {TasksCreateResponse} from '~/business-logic/model/tasks/tasksCreateRespo
 import {ErrorService} from '@common/shared/services/error.service';
 import * as menuActions from '@common/experiments/actions/common-experiments-menu.actions';
 import {TasksCreateRequest} from '~/business-logic/model/tasks/tasksCreateRequest';
+import * as actions from '@common/experiments/actions/common-experiments-view.actions';
+import {UserPreferences} from '@common/user-preferences';
+import {cloneExperiment} from '@common/experiments/actions/common-experiments-menu.actions';
 
 
 @Injectable()
@@ -135,6 +138,7 @@ export class CommonExperimentsViewEffects {
   private orgApi = inject(ApiOrganizationService);
   private errService = inject(ErrorService);
   private route = inject(ActivatedRoute);
+  private userPreferences = inject(UserPreferences);
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(
@@ -145,6 +149,55 @@ export class CommonExperimentsViewEffects {
     filter((action) => !(action as ReturnType<typeof exActions.refreshExperiments>).hideLoader),
     map(action => activeLoader(action.type))
   ));
+
+  private getPathsFromAction(action): string[] {
+    switch (action.type) {
+      case actions.setTableSort.type:
+      case actions.resetSortOrder.type:
+        return [`experiments.view.projectColumnsSortOrder.${action.projectId}`];
+      case actions.clearHyperParamsCols.type:
+        return [
+          `experiments.view.projectColumnsSortOrder.${action.projectId}`,
+          `experiments.view.metricsCols.${action.projectId}`
+        ];
+      case actions.setExtraColumns.type:
+        return [`experiments.view.metricsCols.${action.projectId}`];
+      case actions.removeCol.type:
+        return [
+          `experiments.view.projectColumnsSortOrder.${action.projectId}`,
+          `experiments.view.metricsCols.${action.projectId}`,
+          `experiments.view.projectColumnsWidth.${action.projectId}`,
+          `experiments.view.colsOrder.${action.projectId}`
+        ];
+      case actions.addColumn.type:
+        return [
+          `experiments.view.hiddenProjectTableCols.${action.projectId}`,
+          `experiments.view.metricsCols.${action.projectId}`
+        ];
+      case actions.setTableFilters.type:
+        return [`experiments.view.projectColumnFilters.${action.projectId}`];
+      case actions.setColumnWidth.type:
+        return [`experiments.view.projectColumnsWidth.${action.projectId}`];
+      case actions.toggleColHidden.type:
+      case actions.setVisibleColumnsForProject.type:
+        return [`experiments.view.hiddenProjectTableCols.${action.projectId}`];
+      case actions.setColsOrderForProject.type:
+        return [`experiments.view.colsOrder.${action.projectId}`];
+      case cloneExperiment.type:
+        return ['experiments.view.cloneForceParent'];
+    }
+    return [];
+  }
+
+  setUserPreferences = createEffect(() => this.actions$.pipe(
+    ofType(actions.setTableSort, actions.clearHyperParamsCols, actions.resetSortOrder, actions.setExtraColumns,
+      actions.removeCol, actions.addColumn, actions.setTableFilters, actions.setColumnWidth, actions.toggleColHidden,
+      actions.setColsOrderForProject, actions.setVisibleColumnsForProject, cloneExperiment),
+    concatLatestFrom(() => this.store.select(experimentsView)),
+    map(([action, state]) => {
+      const paths = this.getPathsFromAction(action);
+      paths.forEach(path => this.userPreferences.setPreferences(path, get(state, path.split('.').slice(2).join('.'))));
+    })), {dispatch: false});
 
   tableSortChange = createEffect(() => this.actions$.pipe(
     ofType(exActions.tableSortChanged),
@@ -412,8 +465,8 @@ export class CommonExperimentsViewEffects {
     ]),
     filter(([, , , tableMode]) => tableMode === 'compare'),
     tap(([, routeConfig, projectId]) => {
-      const url = routeConfig.map(conf => conf === ':projectId' ? projectId : conf)
-      setTimeout(() => this.router.navigate([...url, {ids: []}], {queryParamsHandling: 'preserve'}))
+      const url = routeConfig.map(conf => conf === ':projectId' ? projectId : conf);
+      setTimeout(() => this.router.navigate([...url, {ids: []}], {queryParamsHandling: 'preserve'}));
     }),
     map(() => exActions.setSelectedExperiments({experiments: []}))
   ));
@@ -720,7 +773,7 @@ export class CommonExperimentsViewEffects {
     map(([, projectId, isArchived, , sortFields, filters,
            cols, hiddenCols, metricsCols, colsOrder, isDeep, queryParams
          ]) => {
-      const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder ? colsOrder : queryParams.columns);
+      const columns = encodeColumns(cols, hiddenCols, metricsCols[projectId], colsOrder ? colsOrder : queryParams.columns);
       return setURLParams({
         columns,
         filters,
@@ -920,10 +973,6 @@ export class CommonExperimentsViewEffects {
       );
   }
 
-  private filterColumns(projectId: string, metricsCols: ISmCol[]) {
-    return metricsCols.filter(col => col.projectId === projectId);
-  }
-
   getTagsEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.getTags),
     concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
@@ -1009,16 +1058,16 @@ export class CommonExperimentsViewEffects {
             }, {})
         },
         ...(action.data.output && {output_dest: action.data.output}),
-          container: {
-            ...(action.data.docker.image && {
-              image: action.data.docker.image,
-              setup_shell_script: action.data.docker.script
-            }),
-            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venvType === 'manual' ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
-              .concat(action.data.vars?.map(v => ` -e ${v.key}:${v.value}`).join('') ?? '')
-              .trimStart(),
-          }
-        } as TasksCreateRequest).pipe(
+        container: {
+          ...(action.data.docker.image && {
+            image: action.data.docker.image,
+            setup_shell_script: action.data.docker.script
+          }),
+          arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venvType === 'manual' ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
+            .concat(action.data.vars?.map(v => ` -e ${v.key}:${v.value}`).join('') ?? '')
+            .trimStart()
+        }
+      } as TasksCreateRequest).pipe(
         map((res: TasksCreateResponse) => exActions.createExperimentSuccess({data: {...action.data, id: res.id}, project: projectId}))
       )),
       catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to create tasks.\n${this.errService.getErrorMsg(error.error)}`)])

@@ -6,12 +6,19 @@ export const GET_ALL_QUERY_ANY_FIELDS = ['id', 'name', 'comment', 'system_tags',
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getExperimentInfoOnlyFields = (hasDataFeature: boolean) => EXPERIMENT_INFO_ONLY_FIELDS_BASE;
 
-export const DEFAULT_EXPERIMENT_TAB = 'execution';
+export interface Link {
+  name: string;
+  url: string[];
+  activeBy?: string;
+}
 
-export const resourceToIconMap = {
-  project: 'projects-outlined',
-  task: 'projects-outlined',
-  model: 'projects-outlined',
-  dataset: 'datasets',
-  queue: 'workers'
-};
+export const infoTabLinks = [
+  {name: 'execution', url: ['execution']},
+  {name: 'configuration', url: ['hyper-params', 'hyper-param', '_empty_'], activeBy: 'hyper-params'},
+  {name: 'artifacts', url: ['artifacts']},
+  {name: 'info', url: ['general']},
+  {name: 'console', url: ['log'], output: true},
+  {name: 'scalars', url: ['scalars'], output: true},
+  {name: 'plots', url: ['plots'], output: true},
+  {name: 'debug samples', url: ['debugImages'], output: true}
+];

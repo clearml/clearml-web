@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
@@ -61,23 +61,6 @@ export class QueuesEffect {
     )
   });
 
-  getSelectedQueue = createEffect(() => {
-    return this.actions.pipe(
-      ofType(queueActions.setSelectedQueue),
-      filter(action => !!action.queue),
-      tap(action => this.store.dispatch(activeLoader(action.type))),
-      switchMap(action =>
-        this.queuesApi.queuesGetAllEx({id: [action.queue.id], only_fields: ['*', 'entries.task.name']})
-          .pipe(
-            mergeMap(res => [
-              queueActions.setSelectedQueueFromServer({queue: calculateQueuesCaption([res.queues[0]])[0] as any}),
-              deactivateLoader(action.type)]),
-            catchError(err => [deactivateLoader(action.type), requestFailed(err)])
-          )
-      )
-    )
-  });
-
   refreshSelectedQueue = createEffect(() => {
     return this.actions.pipe(
       ofType(queueActions.refreshSelectedQueue),
@@ -115,7 +98,7 @@ export class QueuesEffect {
         map(() => action)
       )),
       switchMap(action => this.queuesApi.queuesDelete({queue: action.queue.id})),
-      mergeMap(() => [queueActions.getQueues({}), queueActions.setSelectedQueue({})]),
+      map(() => queueActions.getQueues({})),
       catchError(err => [
         deactivateLoader(queueActions.deleteQueue.type),
         requestFailed(err),
@@ -182,7 +165,7 @@ export class QueuesEffect {
       this.queuesApi.queuesMoveTaskBackward({
         queue: queue.id,
         task: action.task,
-        count: (action.count)
+        count: (action.current - action.previous)
       }).pipe(
         map(() => queueActions.refreshSelectedQueue({})),
         catchError(err => [
@@ -225,7 +208,7 @@ export class QueuesEffect {
       map((res)=> {return {...action, queueId: res.id}})
     )),
     switchMap((action) => this.queuesApi.queuesAddTask({queue: action.queueId, task: action.task}).pipe(
-        mergeMap(() => [queueActions.refreshSelectedQueue({}), queueActions.getQueues({})]),
+        map(() => queueActions.getQueues({})),
         catchError(err => [
           deactivateLoader(action.type),
           requestFailed(err),

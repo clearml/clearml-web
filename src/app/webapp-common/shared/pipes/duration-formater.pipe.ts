@@ -6,7 +6,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class DurationFormaterPipe implements PipeTransform {
 
-  transform(value: any, arg1: any, arg2: any): any {
+  transform(value: any, inputFormat: 's' | 'ms', timeFormat: string): any {
     if (!value) {
       return '';
     }
@@ -15,31 +15,31 @@ export class DurationFormaterPipe implements PipeTransform {
     let minutes: any;
     let hours: any;
 
-    if (arg1 === 'ms' && arg2 === 'hhmmss') {
+    if (inputFormat === 'ms' && timeFormat === 'hhmmss') {
       seconds = Math.floor((value / 1000) % 60);
       minutes = Math.floor(((value / (1000 * 60)) % 60));
       hours = Math.floor((value / (1000 * 60 * 60)));
-      return this.format(arg2, seconds, minutes, hours, days);
+      return this.format(timeFormat, seconds, minutes, hours, days);
 
-    } else if (arg1 === 's' && arg2 === 'hhmmss') {
+    } else if (inputFormat === 's' && timeFormat === 'hhmmss') {
       seconds = Math.floor((value % 60));
       minutes = Math.floor(((value / 60) % 60));
       hours = Math.floor(((value / 60) / 60));
-      return this.format(arg2, seconds, minutes, hours, days);
+      return this.format(timeFormat, seconds, minutes, hours, days);
 
-    } else if (arg1 === 'ms' && (arg2 === 'ddhhmmss' || arg2 === 'ddhhmmssLong')) {
+    } else if (inputFormat === 'ms' && (timeFormat === 'ddhhmmss' || timeFormat === 'ddhhmmssLong')) {
       seconds = Math.floor(((value / 1000) % 60));
       minutes = Math.floor((value / (1000 * 60) % 60));
       hours = Math.floor((value / (1000 * 60 * 60) % 24));
       days = Math.floor((value / (1000 * 60 * 60 * 24)));
-      return this.format(arg2, seconds, minutes, hours, days);
+      return this.format(timeFormat, seconds, minutes, hours, days);
 
-    } else if (arg1 === 's' && (arg2 === 'ddhhmmss' || arg2 === 'ddhhmmssLong')) {
+    } else if (inputFormat === 's' && (timeFormat === 'ddhhmmss' || timeFormat === 'ddhhmmssLong')) {
       seconds = Math.floor(value % 60);
       minutes = Math.floor(((value / 60) % 60));
       hours = Math.floor(((value / 60) / 60) % 24);
       days = Math.floor((((value / 60) / 60) / 24));
-      return this.format(arg2, seconds, minutes, hours, days);
+      return this.format(timeFormat, seconds, minutes, hours, days);
 
     } else {
       return value;

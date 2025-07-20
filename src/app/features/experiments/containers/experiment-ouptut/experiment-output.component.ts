@@ -8,5 +8,4 @@ import {BaseExperimentOutputComponent} from '@common/experiments/containers/expe
   standalone: false
 })
 export class ExperimentOutputComponent extends BaseExperimentOutputComponent {
-  public overflow: boolean;
 }

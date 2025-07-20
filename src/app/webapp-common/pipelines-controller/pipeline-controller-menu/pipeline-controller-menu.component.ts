@@ -26,7 +26,7 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
     this.dialog.open<RunPipelineControllerDialogComponent, {task: ISelectedExperiment}, RunPipelineResult>(RunPipelineControllerDialogComponent, {
       data: {task: runNew ? null : this.experiment()}
     }).afterClosed()
-      .pipe(filter(res => !!res.confirmed))
+      .pipe(filter(res => !!res?.confirmed))
       .subscribe((res) => {
         this.store.dispatch(commonMenuActions.startPipeline({
           task: res.task,

@@ -41,6 +41,7 @@ export abstract class ItemFooterModel {
   emit = true;
   isTag?: boolean;
   divider?: boolean;
+  warning?: boolean;
   class = '';
   wrapperClass = '';
   state$: Observable<IItemFooterState> = of({});

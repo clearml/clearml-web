@@ -101,7 +101,7 @@ export const selectAutoRefresh = createSelector(views, state => state?.autoRefre
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state?.applicationVisible);
 export const selectUserTheme = createSelector(views, state => state?.theme ?? state?.defaultTheme ?? 'system');
-export const selectSystemTheme = createSelector(views, state => state?.systemTheme?? 'dark');
+export const selectSystemTheme = createSelector(views, state => state?.systemTheme ?? 'dark');
 export const selectDefaultTheme = createSelector(views, state => state?.defaultTheme);
 export const selectForcedTheme = createSelector(views, state => state?.forcedTheme);
 export const selectThemeColors = createSelector(views, state => state.themeColors);
@@ -134,7 +134,7 @@ export const selectHeaderMenuIndex = createSelector(selectHeaderMenu, selectActi
         item.header === active
   )
 );
-export const selectWorkspaceNeutral= createSelector(views, state => state?.workspaceNeutral);
+export const selectWorkspaceNeutral = createSelector(views, state => state?.workspaceNeutral);
 export const selectProjectType = createSelector(selectRouterConfig, selectActiveFeature,
   (config, activeFeature) => (config && routeConfToProjectType(config)) ?? activeFeatureToProjectType(activeFeature));
 export const selectHideEnterpriseFeatures = createSelector(views, state => state.hideEnterpriseFeatures);
@@ -177,23 +177,35 @@ export const viewReducers = [
   })),
   on(layoutActions.resetAceCaretsPositions, state => ({...state, aceCaretPosition: {}})),
   on(layoutActions.resetLoader, (state): ViewState => ({...state, loading: {}})),
-  on(layoutActions.setRedactedArguments, (state, action): ViewState => ({...state, redactedArguments: action.redactedArguments})),
-  on(layoutActions.setHideRedactedArguments, (state, action): ViewState => ({...state, hideRedactedArguments: action.hide})),
+  on(layoutActions.setRedactedArguments, (state, action): ViewState => ({
+    ...state,
+    redactedArguments: action.redactedArguments
+  })),
+  on(layoutActions.setHideRedactedArguments, (state, action): ViewState => ({
+    ...state,
+    hideRedactedArguments: action.hide
+  })),
   on(apiRequest, (state, action): ViewState => ({
     ...state,
     loading: {...state.loading, [action?.endpoint || 'default']: true}
   })),
-  on(layoutActions.setNotificationDialog, (state, action): ViewState => ({...state, notification: action.notification})),
+  on(layoutActions.setNotificationDialog, (state, action): ViewState => ({
+    ...state,
+    notification: action.notification
+  })),
   on(layoutActions.setBackdrop, (state, action): ViewState => ({...state, backdropActive: action.active})),
   on(layoutActions.setAutoRefresh, (state, action): ViewState => ({...state, autoRefresh: action.autoRefresh})),
   on(layoutActions.toggleCardsCollapsed, (state, action): ViewState => ({
     ...state,
     tableCardsCollapsed: {
       ...state.tableCardsCollapsed,
-      [action.entityType]: ! state.tableCardsCollapsed[action.entityType]
+      [action.entityType]: !state.tableCardsCollapsed[action.entityType]
     }
   })),
-  on(layoutActions.setCompareAutoRefresh, (state, action): ViewState => ({...state, compareAutoRefresh: action.autoRefresh})),
+  on(layoutActions.setCompareAutoRefresh, (state, action): ViewState => ({
+    ...state,
+    compareAutoRefresh: action.autoRefresh
+  })),
   on(layoutActions.showEmbedReportMenu, (state, action): ViewState => ({
     ...state,
     showEmbedReportMenu: {show: action.show, position: action.position}
@@ -204,10 +216,12 @@ export const viewReducers = [
   })),
   on(layoutActions.neverShowChangesAgain, (state, action): ViewState => ({
     ...state,
-    neverShowChangesAgain:  action.version
+    neverShowChangesAgain: action.version
   })),
   on(setBreadcrumbs, (state, action): ViewState => ({
-    ...state, breadcrumbs: action.breadcrumbs,  workspaceNeutral: action.workspaceNeutral !== undefined ? action.workspaceNeutral: false
+    ...state,
+    breadcrumbs: action.breadcrumbs,
+    workspaceNeutral: action.workspaceNeutral !== undefined ? action.workspaceNeutral : false
   })),
   on(headerActions.reset, (state): ViewState => ({
     ...state, headerMenuActiveFeature: initViewState.headerMenuActiveFeature, headerMenu: initViewState.headerMenu
@@ -227,7 +241,3 @@ export const viewReducers = [
     ({...state, hideEnterpriseFeatures: action.hide})),
 ] as ReducerTypes<ViewState, ActionCreator[]>[];
 
-export const viewReducer = createReducer(
-  initViewState,
-  ...viewReducers
-);

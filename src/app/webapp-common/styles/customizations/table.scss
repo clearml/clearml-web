@@ -7,15 +7,16 @@
   // --
 
   // Default
-  --row-default-text-color: var(--color-on-primary-container);
+  --row-default-text-color: var(--color-on-surface);
   --row-default-color: var(--color-surface-container-lowest);
   --row-default-hover-color: color-mix(in srgb, var(--color-surface-container-lowest), var(--color-on-surface) 4%);
   // --
 
   // Selection
-  --row-selection-text-color: var(--color-on-secondary-container);
+  --row-selection-text-color: var(--color-on-surface);
   --row-selection-color: var(--color-surface-container-lowest);
   --row-selection-hover-color: color-mix(in srgb, var(--color-surface-container-lowest), var(--color-on-surface) 4%);
+  --row-selection-border-color: color-mix(in srgb, var(--color-primary), transparent 60%);
   // --
 
   // Selected
@@ -58,6 +59,7 @@ sm-table {
     // Selection
     --row-selection-color: color-mix(in srgb, var(--color-surface-container), var(--color-on-surface) 5%);
     --row-selection-hover-color: color-mix(in srgb, var(--color-surface-container), var(--color-on-surface) 10%);
+    --row-selection-border-color: color-mix(in srgb, var(--color-primary), transparent 60%);
 
     // Selected
     --row-selected-hover-color: color-mix(in srgb, var(--color-primary), var(--color-on-surface) 40%);

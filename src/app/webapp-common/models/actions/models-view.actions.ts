@@ -70,12 +70,12 @@ export const setMetadataColValuesOptions = createAction(
 
 export const setHiddenCols = createAction(
   MODELS_PREFIX + 'SET_HIDDEN_COLS',
-  props<{ hiddenCols: { [key: string]: boolean } }>()
+  props<{ hiddenCols: Record<string, boolean> }>()
 );
 
 export const setColsOrderForProject = createAction(
   MODELS_PREFIX + 'SET_COLS_ORDER',
-  props<{ cols: string[]; project: string }>()
+  props<{ cols: string[]; projectId: string }>()
 );
 
 export const setExtraColumns = createAction(
@@ -228,6 +228,6 @@ export const prepareTableForDownload = createAction(
 );
 export const updateManyModels = createAction(
   MODELS_PREFIX + 'update many models',
-  props<{ changeList: {[id: string]: Partial<TableModel>}}>()
+  props<{ changeList: Record<string, Partial<TableModel>>}>()
 );
 

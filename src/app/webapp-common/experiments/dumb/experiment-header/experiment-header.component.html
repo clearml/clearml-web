@@ -56,7 +56,7 @@
     }
 
     @if (tableMode() === 'compare' && compareView() === 'scalars') {
-      <button mat-icon-button (click)="toggleShowCompareSettings.emit()">
+      <button mat-icon-button (click)="toggleShowCompareSettings.emit()" [class.menu-opened]="showCompareScalarSettings()" smTooltip="Settings">
         <mat-icon fontSet="al" fontIcon="al-ico-tune" [class.active]="showCompareScalarSettings()"></mat-icon>
       </button>
     }

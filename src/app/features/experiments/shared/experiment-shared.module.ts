@@ -82,6 +82,8 @@ import {TableCardFilterComponent} from '@common/shared/ui-components/data/table/
 import {SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {JsonIndentPipe} from '@common/experiments/dumb/experiment-execution-parameters/json-indent.pipe';
 import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
+import {PaginatedEntitySelectorComponent} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {MatDividerModule} from '@angular/material/divider';
 import {MatDivider} from '@angular/material/divider';
 
 export const experimentSyncedKeys = [
@@ -208,6 +210,8 @@ const DECLARATIONS = [
     SelectableGroupedFilterListComponent,
     JsonIndentPipe,
     MultiLineTooltipComponent,
+    PaginatedEntitySelectorComponent,
+    MatDividerModule,
     MatDivider,
   ],
   declarations   : [...DECLARATIONS],

@@ -74,7 +74,6 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.searchChanged('');
-    // this.store.dispatch(getAllSystemProjects());
     this.subs.add(this.projects$.subscribe(projects => {
       this.loading = false;
       this.noMoreOptions = this.allProjectsBeforeFilter?.length === this.previousLength || this.allProjectsBeforeFilter?.length < rootProjectsPageSize;

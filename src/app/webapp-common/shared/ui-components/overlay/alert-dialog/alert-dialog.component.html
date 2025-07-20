@@ -1,12 +1,6 @@
 <sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="al-ico-alert">
   @if (moreInfo || resultMessage) {
-    <div (click)="openToggle()" class="pointer">
-      <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpen"></mat-icon>More info
-    </div>
-  }
-  @if (moreInfo || resultMessage) {
-    <div class="more-info" [class.info-open]="isOpen">
-      <a></a>
+    <div class="more-info">
       <div>{{resultMessage}}</div>
       @for (entityName of moreInfoEntities; track entityName) {
         <div>
@@ -22,6 +16,6 @@
     </div>
   }
 </sm-dialog-template>
-<div mat-dialog-actions>
+<mat-dialog-actions>
   <button mat-flat-button mat-dialog-close>{{okMessage}}</button>
-</div>
+</mat-dialog-actions>

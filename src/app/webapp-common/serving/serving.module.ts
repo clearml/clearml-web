@@ -51,10 +51,9 @@ import {CommonSearchComponent} from '@common/common-search/containers/common-sea
 
 
 export const servingSyncedKeys    = [
-  'columnsSortOrder',
+  'tableSortFields',
   'columnFilters',
   'columnsWidth',
-  'hiddenProjectTableCols',
   'colsOrder',
   'hiddenCharts'
 ];

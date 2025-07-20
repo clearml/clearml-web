@@ -1,0 +1,73 @@
+<!--  <sm-show-only-user-work-menu></sm-show-only-user-work-menu>-->
+<form [formGroup]="filterForm" class="form-container">
+  <mat-slide-toggle
+    formControlName="myWorkFilter"
+    id="myWorkFilterSlideToggle">
+    Show only my work
+  </mat-slide-toggle>
+
+  @if (statusOptions().length > 0) {
+    <div class="status-filter-container">
+      <mat-label id="status-chip-list-label">Status</mat-label>
+      <mat-chip-listbox
+        formControlName="statusFilter"
+        aria-labelledby="status-chip-list-label"
+        [multiple]="true"
+      >
+        @for (status of statusOptions(); track status) {
+          <mat-chip-option [value]="status">
+            <span class="d-flex gap-1 ps-2">
+              <sm-status-icon-label [externalStatusLabels]="statusOptionsLabels()" [status]="status"></sm-status-icon-label>
+            </span>
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+  }
+
+  @if (typeOptions()?.length > 0) {
+    <div class="status-filter-container">
+      <mat-label id="type-chip-list-label">Type</mat-label>
+      <mat-chip-listbox
+        formControlName="typeFilter"
+        aria-labelledby="type-chip-list-label"
+        [multiple]="true"
+      >
+        @for (type of typeOptions(); track type) {
+          <mat-chip-option [value]="type">
+            <span class="d-flex gap-1 ps-2">
+              <mat-icon fontSet="al" [fontIcon]="'al-ico-type-' + (type?.replace('_', '-') ?? 'training')" class="sm"></mat-icon>
+              {{ type | replaceViaMapPipe: EXPERIMENTS_STATUS_LABELS }}
+            </span>
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+  }
+  <div>
+    <mat-label>Tags</mat-label>
+    <sm-tag-list
+      class="mt-2"
+      [class.menu-open]="tagsMenuTrigger?.menuOpen"
+      [tags]="tagsFilter.value"
+      [showAddTagOnlyOnHover]="false"
+      (add)="openTagMenu()"
+      (remove)="removeTag($event)"></sm-tag-list>
+    <span
+      #tagsMenuTrigger="matMenuTrigger"
+      [matMenuTriggerFor]="tagsMenu.matMenu"
+      (menuClosed)="tagsMenuClosed()"
+    ></span>
+    <sm-tags-menu
+      #tagsMenu
+      [tags]="tagsFilter.value"
+      [companyTags]="tags()"
+      [disableFilterByProject]="true"
+      [disableCreateNew]="true"
+      [disableColorMangement]="true"
+      (tagSelected)="addTag($event)"
+    ></sm-tags-menu>
+  </div>
+
+
+</form>

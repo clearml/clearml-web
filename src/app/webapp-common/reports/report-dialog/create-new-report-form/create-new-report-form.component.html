@@ -1,14 +1,18 @@
 <form [formGroup]="reportForm" (submit)="reportForm.invalid && send()" class="d-flex flex-column">
   <mat-form-field appearance="outline" class="mat-light">
     <mat-label>Report name</mat-label>
-    @if (reportForm.controls.name.errors?.required) {
-      <mat-error>Please add name.</mat-error>
-    }
-    @if (reportForm.controls.name.errors?.uniqueName) {
-      <mat-error>Report name already exists.</mat-error>
-    }
-    @if (reportForm.controls.name.errors?.minlength) {
-      <mat-error>Report name should contain more than 3 characters.</mat-error>
+    @if (reportForm.controls.name.touched && reportForm.controls.name.errors; as errors) {
+      <mat-error>
+        @if (errors?.required) {
+          Please add name.
+        }
+        @else if (errors?.uniqueName) {
+          Report name already exists.
+        }
+        @else if (errors?.minlength) {
+          Report name should contain more than 3 characters.
+        }
+      </mat-error>
     }
     <input name="reportName"
       formControlName="name"

@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 span {
   font-size: 15px;
 }
@@ -77,6 +79,16 @@ span {
   }
 
 
+  @include mat.badge-overrides((
+    background-color: var(--color-warning),
+    small-size-container-overlap-offset: -7px -3px,
+    small-size-container-padding: 0 3px,
+    small-size-container-size: 9px,
+  ));
+
+  .mat-badge-content {
+    border: 2px solid var(--color-surface-container);
+  }
 }
 
 .sub-project-menu-item {

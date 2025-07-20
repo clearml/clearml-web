@@ -27,11 +27,11 @@
       }
     }
 
-    &.created, &.queued {
+    &.created, &.queued, &.draft, &.pending {
       color: var(--color-draft);
     }
 
-    &.completed, &.Final {
+    &.completed, &.Final, &.available {
       color: var(--color-completed);
 
     }
@@ -48,7 +48,7 @@
       color: var(--color-failed);
     }
 
-    &.in_progress, &.Uploading {
+    &.in_progress, &.Uploading, &.active, &.routing {
       color: var(--color-running);
     }
 

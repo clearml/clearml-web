@@ -43,9 +43,14 @@ export const dequeueClicked = createAction(
   props<{ selectedEntities: ISelectedExperiment[] }>()
 );
 
-export const cloneExperimentClicked = createAction(
+export const cloneExperiment = createAction(
   EXPERIMENTS_INFO_PREFIX + 'CLONE_EXPERIMENT_CLICKED',
   props<{ originExperiment: ISelectedExperiment; cloneData: CloneExperimentPayload }>()
+);
+
+export const cloneExperimentSuccess = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'CLONE_EXPERIMENT_CLICKED success',
+  props<{project: string; task: string}>()
 );
 
 export const addTag = createAction(
@@ -61,6 +66,10 @@ export const abortAllChildren = createAction(
 export const removeTag = createAction(
   EXPERIMENTS_INFO_PREFIX + 'remove tag from experiment',
   props<{ experiments: Partial<ITableExperiment>[]; tag: string }>()
+);
+export const removeTagSuccess = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'remove tag from experiment success',
+  props<{ experiments: string[]; tag: string }>()
 );
 export const shareSelectedExperiments = createAction(
   EXPERIMENTS_INFO_PREFIX + 'share experiments',

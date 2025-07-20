@@ -2,7 +2,7 @@ import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
 
 export const existNameValidator = (names): ValidatorFn =>
-  (control: AbstractControl): { [key: string]: any } | null => {
+  (control: AbstractControl): Record<string, any> | null => {
     const value = control.value?.label || control.value?.name || control.value;
 
     const forbidden = !names.includes(value);
@@ -11,7 +11,6 @@ export const existNameValidator = (names): ValidatorFn =>
 
 @Directive({
   selector: '[smExistNameValidator]',
-  standalone: true,
   providers: [{provide: NG_VALIDATORS, useExisting: ExistNameValidatorDirective, multi: true}]
 })
 export class ExistNameValidatorDirective implements Validator {

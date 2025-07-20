@@ -7,14 +7,16 @@ import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 import {selectModelPlots, selectSelectedModel, selectSplitSize} from '@common/models/reducers';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {convertPlots, ExtMetricsPlotEvent, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
+import {convertPlots, ExtMetricsPlotEvent, groupIterations} from '@common/tasks/tasks.utils';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getPlots, setPlots} from '@common/models/actions/models-info.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {selectModelSettingsHiddenPlot} from '@common/experiments/reducers';
 import {isEqual} from 'lodash-es';
-import {setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {setChartSettings, setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {GroupedList} from '@common/tasks/tasks.model';
+import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 
 @Component({
     selector: 'sm-model-info-plot',
@@ -44,6 +46,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private modelId: string;
   public selectedMetrics: string[];
   private originalPlotList: { metric: string; variant: string }[];
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   protected splitSize$ = this.store.select(selectSplitSize);
   protected modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
   protected plots$ = this.store.select(selectModelPlots).pipe(
@@ -179,6 +182,10 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
       objectType: 'model',
       ...event
     });
+  }
+
+  changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {
+    this.store.dispatch(setChartSettings({...$event, projectId: this.projectId()}));
   }
 
   ngOnDestroy(): void {

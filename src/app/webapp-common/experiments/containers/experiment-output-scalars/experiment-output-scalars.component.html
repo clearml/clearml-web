@@ -14,12 +14,14 @@
             [xAxisType]="xAxisType()"
             [groupBy]="groupBy()"
             [groupByOptions]="groupByOptions"
-            [clearable]="projectId() === '*' ? null : !isProjectLevel()"
+            [showOrigin]="showOriginals()"
+            [clearable]="!isProjectLevel()"
             (changeWeight)="changeSmoothness($event)"
             (changeSigma)="changeSigma($event)"
             (toggleSettings)="toggleSettingsBar()"
             (changeXAxisType)="changeXAxisType($event)"
             (changeGroupBy)="changeGroupBy($event)"
+            (changeShowOrigin)="changeShowOriginals($event)"
             (changeSmoothType)="changeSmoothType($event)"
             (setToProject)="setToProject()"
           ></sm-graph-settings-bar>
@@ -61,6 +63,7 @@
           [smoothWeight]="smoothWeightDelayed()"
           [smoothSigma]="smoothSigmaDelayed()"
           [smoothType]="smoothType()"
+          [showOriginals]="showOriginals()"
           [legendStringLength]="minimized ? 14 : 19"
           [minimized]="minimized"
           [xAxisType]="xAxisType()"
@@ -68,9 +71,9 @@
           [splitSize]="splitSize()"
           [breakPoint]="900"
           [exportForReport]="exportForReport"
-          [hoverMode]="'x'"
           (createEmbedCode)="createEmbedCode($event)"
           (resetGraphs)="resetMetrics()"
+          (chartSettingsChanged)="changeChartSettings($event)"
         ></sm-experiment-graphs>
       </div>
     </mat-drawer-content>

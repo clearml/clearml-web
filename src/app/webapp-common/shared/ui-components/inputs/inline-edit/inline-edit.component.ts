@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, Renderer2, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Renderer2,
+  input,
+  output,
+  viewChild,
+  computed, inject, DestroyRef, signal
+} from '@angular/core';
 import {FormsModule, NgModel} from '@angular/forms';
 
 import {
@@ -10,118 +19,108 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
-    selector: 'sm-inline-edit',
-    templateUrl: './inline-edit.component.html',
-    styleUrls: ['./inline-edit.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        FormsModule,
-        UniqueNameValidatorDirective,
-        TooltipDirective,
-        ClickStopPropagationDirective,
-        MatIcon,
-        MatIconButton,
-    ]
+  selector: 'sm-inline-edit',
+  templateUrl: './inline-edit.component.html',
+  styleUrls: ['./inline-edit.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'stopEditing()'
+  },
+  imports: [
+    FormsModule,
+    UniqueNameValidatorDirective,
+    TooltipDirective,
+    ClickStopPropagationDirective,
+    MatIcon,
+    MatIconButton,
+  ]
 })
-export class InlineEditComponent implements OnDestroy {
-  public readonly cancelButton = 'CANCEL_BUTTON';
-  public readonly saveButton = 'SAVE_BUTTON';
-  public active = false;
-  public inlineValue: string;
-  private shouldSave = true;
-  private _forbiddenString: string[];
+export class InlineEditComponent {
+  private renderer = inject(Renderer2);
+  private readonly destroy = inject(DestroyRef);
 
-  @Input() pattern;
-  @Input() required: boolean;
-  @Input() minLength = 0;
-  @Input() originalText;
-  @Input() set forbiddenString(forbiddenString: string[]) {
-    this._forbiddenString = forbiddenString?.filter(fs => fs !== this.originalText);
-  }
+  protected readonly cancelButton = 'CANCEL_BUTTON';
+  public active = signal(false);
+  protected inlineValue = signal<string>(null);
 
-  get forbiddenString() {
-    return this._forbiddenString;
-  }
+  readonly pattern = input(undefined);
+  readonly required = input(false);
+  readonly minLength = input(0);
+  readonly originalText = input(undefined);
+  forbiddenString = input<string[]>();
+  forbiddenStringFiltered = computed(() => this.forbiddenString()?.filter(fs => fs !== this.originalText()));
+
   // *DEFAULTS*
-  @Input() editable = true;
-  @Input() fixedWidth;
-  @Input() multiline = false;
-  @Input() rows = 3; // Only relevant to multiline
-  @Input() inlineDisabled = false;
-  @Input() warning: string;
+  readonly editable = input(true);
+  readonly fixedWidth = input(undefined);
+  multiline = input(false);
+  readonly rows = input(3); // Only relevant to multiline
+  readonly inlineDisabled = input(false);
+  warning = input<string>();
 
-  @Output() inlineActiveStateChanged = new EventEmitter<boolean>();
-  @Output() textChanged = new EventEmitter<string>();
-  @Output() inlineFocusOutEvent = new EventEmitter<boolean>();
-  @Output() cancelEdit = new EventEmitter();
-  @Output() cancelClick = new EventEmitter<Event>();
-  @ViewChild('inlineInput') inlineInput: NgModel;
-  @ViewChild('inlineInput', { read: ElementRef }) inlineInputRef: ElementRef;
+  readonly inlineActiveStateChanged = output<boolean>();
+  readonly textChanged = output<string>();
+  readonly inlineFocusOutEvent = output<boolean>();
+  readonly cancelEdit = output();
+  readonly cancelClick = output<Event>();
 
-  @ViewChild('template', {static: true}) template: ElementRef;
+  inlineInput = viewChild<NgModel>('inlineInput');
+  readonly inlineInputRef = viewChild('inlineInput', { read: ElementRef });
+  template = viewChild<ElementRef<HTMLDivElement>>('template');
 
-  @HostListener('document:click', [])
-  clickOut() {
-    if (this.active && !this.multiline) {
+  stopEditing() {
+    if (this.active()) {
       this.inlineCanceled();
     }
   }
 
-  constructor(private renderer: Renderer2, private cdr: ChangeDetectorRef) {
+  constructor() {
+    this.destroy.onDestroy(() => {
+      this.stopEditing();
+    });
   }
 
   public inlineCanceled() {
-    this.inlineValue = this.originalText;
-    this.active = false;
+    this.inlineValue.set(this.originalText());
+    this.active.set(false);
     this.inlineActiveStateChanged.emit(false);
     this.cancelEdit.emit();
-    this.cdr.detectChanges();
   }
 
   public inlineSaved() {
-    this.inlineValue = this.inlineInput.value;
-    if (this.inlineValue !== this.originalText) {
-      this.textChanged.emit(this.inlineValue);
-      this.active = false;
+    this.inlineValue.set(this.inlineInput().value);
+    if (this.inlineValue() !== this.originalText()) {
+      this.textChanged.emit(this.inlineValue());
+      this.active.set(false);
       this.inlineActiveStateChanged.emit(false);
-      this.cdr.detectChanges();
     } else {
-       this.inlineCanceled();
+      this.inlineCanceled();
     }
 
   }
 
   public inlineActivated(event?: Event) {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 
-    if (!this.multiline) {
-      const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - (this.multiline ? 20 : 70), 200);
-      this.renderer.setStyle(this.inlineInputRef.nativeElement, 'width', `${templateWidth}px`);
+    if (!this.multiline()) {
+      const templateWidth = this.fixedWidth() || Math.max(this.template().nativeElement.getBoundingClientRect().width - (this.multiline() ? 20 : 70), 200);
+      this.renderer.setStyle(this.inlineInputRef().nativeElement, 'width', `${templateWidth}px`);
     }
-    this.inlineValue = this.originalText;
+    this.inlineValue.set(this.originalText());
     event?.stopPropagation();
     setTimeout(() => {
-      this.active = true;
       this.inlineActiveStateChanged.emit(true);
-      this.cdr.detectChanges();
-      this.inlineInputRef.nativeElement.focus();
+      this.active.set(true);
     }, 50);
+    setTimeout(() => {
+      this.inlineInputRef().nativeElement.focus();
+    }, 100);
   }
 
   cancelClicked(event: Event) {
     this.cancelClick.emit(event);
-    this.shouldSave = false;
     this.inlineCanceled();
-  }
-
-
-  ngOnDestroy(): void {
-    if (this.active) {
-      this.inlineCanceled();
-    }
-    this.inlineInput = null;
-    this.template = null;
   }
 }

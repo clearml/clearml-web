@@ -1,0 +1,130 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  ::ng-deep .mat-mdc-tab-labels {
+    gap: 12px;
+    .mdc-tab {
+      padding: 0 12px;
+      min-width: 40px;
+    }
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+}
+
+.mat-mdc-tab-group {
+  flex: 1;
+  --mat-tab-header-label-text-size: 11px;
+  --mdc-secondary-navigation-tab-container-height: 32px;
+  --mat-tab-header-divider-height: 1px;
+  margin-top: 12px;
+
+  .dot {
+    position: absolute;
+    top: 8px;
+    right: -8px;
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 5px;
+    background-color: var(--color-primary);
+  }
+}
+
+.list {
+  flex-grow: 1;
+  overflow: auto;
+  height: calc(100vh - 400px);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 12px 0 0;
+  &__category {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--color-surface-container-high);
+    &:last-child {
+      border: none;
+    }
+    &__title {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 6px 0;
+      font-weight: 500;
+      font-size: 12px;
+      color: var(--color-tertiary);
+      background: var(--color-surface-container-lowest);
+    }
+  }
+
+  &__view-all-link {
+    margin: 6px 0 12px;
+    display: inline-block;
+  }
+  &__load-more {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+  }
+
+  .no-data {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-empty-state);
+  }
+
+  // item row content
+  .project {
+    max-width: 180px;
+  }
+
+  .project:empty + .dot,
+  .sub-item:empty + .dot {
+    display: none;
+  }
+
+  .sub-title {
+    font-size: 11px;
+    color: color-mix(in srgb, var(--color-outline), transparent 5%);
+
+    .sub-item {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .dot {
+      margin: 0 8px;
+      opacity: 0.4;
+      color: var(--color-primary);
+    }
+  }
+}
+
+.mat-drawer-container {
+  --mat-sidenav-container-divider-color: var(--color-outline-variant);
+}
+
+.mat-drawer {
+  width: 280px;
+  --mat-sidenav-container-background-color: transparent;
+}
+
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--color-primary);
+}
+
+:host-context(.dark-mode) .list__category__title {
+  background: var(--color-surface-container-low);
+}

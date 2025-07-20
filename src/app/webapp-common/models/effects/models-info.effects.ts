@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
@@ -11,7 +11,7 @@ import {
   mergeMap,
   reduce,
   shareReplay,
-  switchMap,
+  switchMap
 } from 'rxjs/operators';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {ModelsGetAllResponse} from '~/business-logic/model/models/modelsGetAllResponse';
@@ -19,10 +19,10 @@ import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setBackdrop, setServerError} from '../../core/actions/layout.actions';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import * as infoActions from '../actions/models-info.actions';
-import {resetActiveSection} from '../actions/models-info.actions';
+import {resetActiveSection, setLastModelsTab} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
-import {selectModelsList, selectSelectedModel, selectSelectedTableModel} from '../reducers';
+import {selectModelInfo, selectModelsList, selectSelectedModel, selectSelectedTableModel} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample} from '../../shared/utils/shared-utils';
@@ -31,25 +31,41 @@ import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {EMPTY, of} from 'rxjs';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {ModelsUpdateRequest} from '~/business-logic/model/models/modelsUpdateRequest';
+import {get} from 'lodash-es';
+import {UserPreferences} from '@common/user-preferences';
 
 @Injectable()
 export class ModelsInfoEffects {
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private apiModels = inject(ApiModelsService);
+  private eventsService = inject(ApiEventsService);
+  private refreshService = inject(RefreshService);
+  private userPreferences = inject(UserPreferences);
   public previousSelectedLastUpdate: Date = null;
   public previousSelectedId: string;
-
-  constructor(
-    private actions$: Actions,
-    private store: Store,
-    private apiModels: ApiModelsService,
-    private eventsService: ApiEventsService,
-    private refreshService: RefreshService
-) {
-  }
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(infoActions.getModelInfo, infoActions.getModel, infoActions.getPlots),
     filter(action => !action?.['autoRefresh']),
     map(action => activeLoader(action.type))));
+
+  private getPathsFromAction(action): string[] {
+    switch (action.type) {
+      case setLastModelsTab.type:
+        return [`models.info.lastTab.${action.projectId}`];
+    }
+    return [];
+  }
+
+  setUserPreferences = createEffect(() => this.actions$.pipe(
+    ofType(setLastModelsTab),
+    concatLatestFrom(() => this.store.select(selectModelInfo)),
+    map(([action, state]) => {
+      const paths = this.getPathsFromAction(action);
+      paths.forEach(path => this.userPreferences.setPreferences(path, get(state, path.split('.').slice(2).join('.'))));
+    })), {dispatch: false});
+
 
   getModel = createEffect(() => this.actions$.pipe(
     ofType(infoActions.getModel),
@@ -122,7 +138,7 @@ export class ModelsInfoEffects {
         }
         return [
           deactivateLoader(action.type),
-          infoActions.getModel({modelId: action.id, autoRefresh}),
+          infoActions.getModel({modelId: action.id, autoRefresh})
         ];
       } else {
         return [deactivateLoader(action.type)];
@@ -151,7 +167,7 @@ export class ModelsInfoEffects {
             requestFailed(err),
             setServerError(err, null, 'edit models failed'),
             setBackdrop({active: false}),
-            infoActions.getModelInfo({id: action.model.id}),
+            infoActions.getModelInfo({id: action.model.id})
           ])
         );
     }),
@@ -165,7 +181,7 @@ export class ModelsInfoEffects {
       this.apiModels.modelsEdit({model: selectedModel.id, metadata: action.metadata})
         .pipe(
           mergeMap(() => [
-            infoActions.modelDetailsUpdated({id:selectedModel.id, changes:{metadata: action.metadata} as Partial<ModelsUpdateRequest>}),
+            infoActions.modelDetailsUpdated({id: selectedModel.id, changes: {metadata: action.metadata} as Partial<ModelsUpdateRequest>}),
             infoActions.getModelInfo({id: selectedModel.id}),
             infoActions.setSavingModel(false),
             resetActiveSection(),
@@ -174,7 +190,7 @@ export class ModelsInfoEffects {
           catchError(err => [
             setBackdrop({active: false}),
             requestFailed(err),
-            setServerError(err, null, 'Update metadata failed'),
+            setServerError(err, null, 'Update metadata failed')
           ])
         )
     ),
@@ -202,7 +218,7 @@ export class ModelsInfoEffects {
           catchError(err => [
             requestFailed(err),
             setServerError(err, null, 'Update models failed'),
-            infoActions.getModelInfo({id: action.id}),
+            infoActions.getModelInfo({id: action.id})
           ])
         )
     ),

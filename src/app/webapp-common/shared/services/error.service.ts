@@ -41,6 +41,7 @@ export class ErrorService {
       67: this.template`${'email'} does not have access to ClearML - Ask your admin to whitelist this address`,
       86: this.template`Can't deactivate last SSO configuration`,
       1205: this.template`This workspace is at its limit for concurrently running instances.`,
+      505: this.template`This version is currently linked to one or more annotation tasks ${'tasks'}`,
       509: this.template`Can't edit frame's metadata for published version.`
     }
   };

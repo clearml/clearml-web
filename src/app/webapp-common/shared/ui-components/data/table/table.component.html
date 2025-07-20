@@ -67,7 +67,10 @@
                   [style.max-width]="col.style?.maxWidth ?? !resizableColumns() && columnResizeMode() === 'fit' && col.style?.width"
                   [style.min-width]="col.style?.minWidth"
                   [style.width]="col.style?.width"
-                  pReorderableColumn smResizableColumn>
+                  [class.p-datatable-frozen-column]="col?.frozen"
+                  [class.p-datatable-frozen-column-left]="col?.frozen && col?.alignFrozen !== 'right'"
+                  [class.p-datatable-frozen-column-right]="col?.frozen && col?.alignFrozen === 'right'"
+              pReorderableColumn smResizableColumn>
                 @switch (col?.headerType) {
                   @case (colHeaderTypeEnum.sortFilter) {
                     <ng-container *ngTemplateOutlet="sortFilterTemplate; context: {$implicit: col}"></ng-container>
@@ -76,7 +79,14 @@
                     <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: col}"></ng-container>
                   }
                   @default {
-                    <div class="col-header" [class.text-center]="col.textCenter">{{ col.header }}</div>
+                    <div class="col-header" [class.text-center]="col.textCenter">
+                      {{ col.header }}
+                      @if (col.infoTooltip) {
+                        <sm-multi-line-tooltip [smallIcon]="true">
+                          {{col.infoTooltip}}
+                        </sm-multi-line-tooltip>
+                      }
+                    </div>
                   }
                 }
               </th>
@@ -121,7 +131,8 @@
           [class.even]="(index + 1) % 2 === 0"
           [class.checked]="isRowSelected(rowData)"
           [class.simple]="simple()"
-          [class.contexted]="activeContextRow()?.id ===rowData?.id && contextMenuOpen()"
+          [class.context-menu-opened]="activeContextRow()?.id === rowData?.id && contextMenuOpen() && !rightClicked"
+          [class.context-menu-opened-row]="activeContextRow()?.id === rowData?.id && contextMenuOpen()"
           [class.selected]="isSelected(rowData)"
           [class.cards-table]="minimizedView()"
           [class.pointer]="!!selectionMode()"
@@ -133,6 +144,9 @@
               [class.ui-resizable-column]="resizableColumns()"
               [class.cursor-default]="selectionMode()===null"
               [class.simple]="simple()"
+              [class.p-datatable-frozen-column]="col?.frozen"
+              [class.p-datatable-frozen-column-left]="col?.frozen && col?.alignFrozen !== 'right'"
+              [class.p-datatable-frozen-column-right]="col?.frozen && col?.alignFrozen === 'right'"
               [style.min-width]="col.style?.minWidth"
               [style.max-width]="col.style?.maxWidth ?? (!resizableColumns() && columnResizeMode() === 'fit' && col.style?.width)"
               [style.width]="col.style?.width">
@@ -170,9 +184,11 @@
           <tr class="table-load-more"
               [class.hidden]="!(index === currRowsNumber() - 1 && lazyLoading() && !noMoreData() && !lastRowExpanded)"
           >
-            <div class="load-more-wrapper">
-              <sm-dots-load-more [loading]="tableSate().loading() && !hasExperimentUpdate()" class="pointer"
-                                 (loadMore)="loadMore()" (mouseenter)="loadMore()"></sm-dots-load-more>
+            <div class="load-more-wrapper-wrapper">
+              <div class="load-more-wrapper">
+                <sm-dots-load-more [loading]="tableSate().loading() && !hasExperimentUpdate()" class="pointer"
+                                   (loadMore)="loadMore()" (mouseenter)="loadMore()"></sm-dots-load-more>
+              </div>
             </div>
           </tr>
         } @else {

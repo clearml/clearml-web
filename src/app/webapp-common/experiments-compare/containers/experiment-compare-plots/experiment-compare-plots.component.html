@@ -23,7 +23,8 @@
       [splitSize]="splitSize$ | ngrxPush"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
-      [hoverMode]="'x unified'"
+      [defaultHoverMode]="'x unified'"
+      (chartSettingsChanged)="changeChartSettings($event)"
       >
     </sm-experiment-graphs>
   </div>

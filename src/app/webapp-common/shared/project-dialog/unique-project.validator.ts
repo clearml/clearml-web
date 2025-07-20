@@ -1,41 +1,44 @@
-import {Directive, Input} from '@angular/core';
-import {AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors} from '@angular/forms';
-import {Observable, of, switchMap} from 'rxjs';
+import {AbstractControl, AsyncValidatorFn} from '@angular/forms';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
+import {of} from 'rxjs';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
-import {catchError, delay, map} from 'rxjs/operators';
+import {catchError, delay, map, switchMap} from 'rxjs/operators';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 
-@Directive({
-  selector: '[smUniqueProjectValidator]',
-  providers: [{provide: NG_ASYNC_VALIDATORS, useExisting: UniqueProjectValidator, multi: true}],
-  standalone: true
-})
-export class UniqueProjectValidator implements AsyncValidator {
-  @Input() parent: string;
-  @Input() allowedPath: string;
+export const uniqueProjectValidator = (
+  projectsApi: ApiProjectsService,
+  allowedPath?: string,
+  initialValue?: string
+): AsyncValidatorFn => {
 
-  constructor(private projectsApi: ApiProjectsService) {
-  }
+  return (control: AbstractControl) => {
+    const nameControl = control.get<string>('name');
+    const parentControl = control.get<string>('parent');
+    const pattern = (parentControl.value && parentControl.value !== 'Projects root' ? `${parentControl.value}/${nameControl.value}` : nameControl.value).trim();
 
-  validate(control: AbstractControl): Promise<ValidationErrors> | Observable<ValidationErrors> {
-    const projectPath = this.parent ? `${this.parent}/${control.value}` : control.value;
-    if (!(control.value?.length > 2) || projectPath === this.allowedPath) {
+    if (!(nameControl.value?.length > 2) || pattern === allowedPath || nameControl.value === initialValue) {
+      nameControl.setErrors(null);
       return of(null);
     }
-
-    return of(control.value).pipe(
-      delay(300),
-      switchMap((name: string) => this.projectsApi.projectsGetAllEx({
-          name: this.parent ? `${this.parent}/${name}` : name,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          only_fields: ['id']
-        }).pipe(
-          map((res: ProjectsGetAllExResponse) => res.projects.length === 0 ? null : {uniqueProject: {value: control.value}}),
-          catchError(() => of({uniqueProject: {value: control.value}}))
+    return of(null)
+      .pipe(
+        delay(300),
+        switchMap(() =>
+          projectsApi.projectsGetAllEx({
+            name: `^${escapeRegex(pattern)}$`,
+            only_fields: ['id', 'name'],
+            search_hidden: true
+          })
         ),
-      )
-    );
-  }
-}
-
-
+        map((res: ProjectsGetAllExResponse) => {
+          if (res.projects.filter(project => project.name === pattern).length === 0) {
+            nameControl.setErrors(null);
+            return null;
+          }
+          nameControl.setErrors({uniqueProject: {value: control.value}});
+          return {uniqueProject: {value: control.value}};
+        }),
+        catchError(() => of({uniqueProject: {value: control.value}}))
+      );
+  };
+};

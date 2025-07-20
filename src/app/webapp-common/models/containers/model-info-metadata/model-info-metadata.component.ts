@@ -17,8 +17,16 @@ import {
 } from '@common/shared/ui-components/template-forms-ui/unique-in-list-sync-validator-2.directive';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import {JsonPipe} from '@angular/common';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {injectResize} from 'ngxtension/resize';
+import {startWith} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {PushPipe} from '@ngrx/component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 export type IModelMetadataMap = Record<string, IModelMetadataItem>;
 
@@ -46,11 +54,15 @@ export interface IModelMetadataItem {
     FormsModule,
     MatButton,
     MatIcon,
-    MatIconButton
+    MatIconButton,
+    PushPipe,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective
   ]
 })
 export class ModelInfoMetadataComponent {
   private store = inject(Store);
+  private resize$ = injectResize({emitInitialResult: true});
   metadataForm = viewChild(NgForm);
 
 
@@ -63,10 +75,20 @@ export class ModelInfoMetadataComponent {
 
   public inEdit = signal(false);
   public cols = [
-    {id : 'key', header: 'Key'},
-    {id : 'type', header: 'Type'},
-    {id : 'value', header: 'Value'}
-  ];
+    {id : 'key', header: 'Key', style: {width: '200px', maxWidth: '200px'}},
+    {id : 'type', header: 'Type', style: {width: '200px', maxWidth: '200px'}},
+    {id : 'value', header: 'Value', style: {width: '200px', maxWidth: '200px'}}
+  ] as ISmCol[];
+  protected calcCols$ = this.resize$
+    .pipe(
+      startWith({width: 500}),
+      map(res => res.width),
+      map(width => [
+        {id : 'key', header: 'Key', style: {width: `${(width - 64) / 3}px`, maxWidth: `${(width - 64) / 3}px`}},
+        {id : 'type', header: 'Type', style: {width: `${(width - 64) / 3}px`, maxWidth: `${(width - 64) / 3}px`}},
+        {id : 'value', header: 'Value', style: {width: `${(width - 64) / 3}px`, maxWidth: `${(width - 64) / 3}px`}}
+      ])
+    );
   public metadata = null as IModelMetadataItem[];
   private originalMetadata;
 

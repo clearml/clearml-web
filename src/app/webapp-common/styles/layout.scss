@@ -1,3 +1,4 @@
+@use '../layout/layout';
 @use "variables";
 
 .sm-card-list-layout {
@@ -37,6 +38,14 @@
       cursor: pointer;
     }
   }
+}
+
+.sm-entity-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: layout.$project-header-height;
 }
 
 .stick-to-corner {

@@ -1,53 +1,60 @@
-<div class="editable-div" #template [class.edit-mode]="active" [class.is-description]="multiline" (click)="active && $event.stopPropagation()">
-  <div class="value" (click)="(!inlineDisabled) && inlineActivated($event)"
-  >
+<div
+  class="editable-div"
+  #template
+  [class.edit-mode]="active()"
+  [class.is-description]="multiline()"
+  (click)="active() && $event.stopPropagation()"
+>
+  <div class="value" (click)="(!inlineDisabled()) && inlineActivated($event)">
     <ng-content></ng-content>
-    @if (editable && !inlineDisabled) {
-      <button mat-icon-button class="editable-pen sm">
-        <mat-icon fontSet="al" fontIcon="al-ico-edit" data-id="Edit Description"></mat-icon>
-      </button>
+    @if (editable() && !inlineDisabled()) {
+      <div class="editable-pen h-100 d-flex-center">
+        <button mat-icon-button class="sm">
+          <mat-icon fontSet="al" fontIcon="al-ico-edit" data-id="Edit Description"></mat-icon>
+        </button>
+      </div>
     }
   </div>
-  @if (editable) {
+  @if (editable()) {
     <div class="input" tabindex="12">
-      <form #form class="inline-edit-form" [class.multiline]="multiline">
-        @if (!multiline) {
+      <form #form class="inline-edit-form" [class.multiline]="multiline()">
+        @if (!multiline()) {
           <input type="text" class="form-control inline-edit-input"
-                 [class.warn]="!!warning"
+                 [class.warn]="!!warning()"
                  [(ngModel)]="inlineValue"
                  name="inline"
                  data-id="nameField"
                  autocomplete="off"
-                 [pattern]="pattern"
-                 [required]="required"
-                 [minLength]="minLength"
+                 [pattern]="pattern()"
+                 [required]="required()"
+                 [minLength]="minLength()"
                  smUniqueNameValidator
-                 [existingNames]="forbiddenString"
+                 [existingNames]="forbiddenStringFiltered()"
                  (keydown.tab)="form.checkValidity() && inlineSaved()"
                  (keydown.escape)="inlineCanceled()"
                  (keydown.enter)="form.checkValidity() && inlineSaved()"
                  #inlineInput="ngModel"/>
         }
-        @if (warning) {
-          <i class="al-icon al-ico-alert sm-md" [smTooltip]="warning"></i>
+        @if (warning()) {
+          <i class="al-icon al-ico-alert sm-md" [smTooltip]="warning()"></i>
         }
-        @if (multiline) {
+        @if (multiline()) {
           <textarea class="form-control inline-edit-textarea"
                     [(ngModel)]="inlineValue"
                     name="inline"
-                    [pattern]="pattern"
+                    [pattern]="pattern()"
                     (keydown.tab)="inlineSaved()"
                     (keydown.escape)="inlineCanceled()"
-                    [rows]="multiline?rows:1"
-                    #inlineInput="ngModel">{{ inlineValue }}
+                    [rows]="multiline()?rows():1"
+                    #inlineInput="ngModel">{{ inlineValue() }}
           </textarea>
         }
         <div class="buttons" smClickStopPropagation>
-          <button mat-icon-button [disabled]="inlineInput?.invalid || !form.checkValidity() || inlineValue?.length < minLength" class="inline-edit-approve sm" (click)="$event.stopPropagation(); form.checkValidity() && inlineSaved()" data-id="ApproveButton">
+          <button mat-icon-button [disabled]="inlineInput()?.invalid || !form.checkValidity() || inlineValue()?.trim().length < minLength()" class="inline-edit-approve sm" (click)="$event.stopPropagation(); form.checkValidity() && inlineSaved()" data-id="ApproveButton">
             <mat-icon fontSet="al" fontIcon="al-ico-success"></mat-icon>
           </button>
-          <button mat-icon-button class="inline-edit-close sm" (click)="$event.stopPropagation(); cancelClicked($event)" [id]="cancelButton">
-            <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" data-id="ApproveButton"></mat-icon>
+          <button mat-icon-button class="inline-edit-close sm" (click)="$event.stopPropagation(); cancelClicked($event)" [id]="cancelButton" data-id="CancelButton">
+            <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
           </button>
         </div>
       </form>

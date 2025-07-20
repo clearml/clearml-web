@@ -2,13 +2,6 @@
   display: block;
   max-width: 640px;
 
-  h5 {
-    padding-top: 15px;
-    font-size: 12px;
-    margin: 0;
-    font-weight: unset;
-  }
-
   .reference {
     padding: 6px;
     margin-bottom: 12px;
@@ -17,33 +10,6 @@
   mat-form-field {
     .clone-description {
       min-height: 68px;
-    }
-  }
-
-  .creat-new-suffix {
-    display: inline-block;
-    margin-right: 18px;
-    font-size: 14px;
-    transform: translateY(-4px);
-  }
-
-  .buttons {
-    margin-top: 32px;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: center;
-    left: 50%;
-    position: relative;
-    transform: translateX(-50%);
-
-    button {
-      width: 130px;
-      text-transform: uppercase;
-    }
-
-    .yes-button {
-      margin-left: 16px;
     }
   }
 
@@ -56,4 +22,10 @@
     white-space: break-spaces;
     margin: 0 0 20px -6px;
   }
+}
+
+.extra-errors {
+  position: relative;
+  top: -18px;
+  left: 6px;
 }

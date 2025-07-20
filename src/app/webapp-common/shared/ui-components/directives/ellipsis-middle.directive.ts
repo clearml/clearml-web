@@ -8,7 +8,7 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 export class EllipsisMiddleDirective implements AfterViewInit {
   @Input() smEllipsisMiddleDirective: string;
   @Input() delay: number;
-  @Input() maxChars: number = Infinity;
+  @Input() maxChars = Infinity;
   @Input() set triggerEllipsis(triggerEllipsis: number) {
     this.el.nativeElement.innerText = this.smEllipsisMiddleDirective;
     this.ngAfterViewInit();

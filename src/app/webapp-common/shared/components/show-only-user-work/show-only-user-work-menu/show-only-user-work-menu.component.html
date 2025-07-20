@@ -1,0 +1,9 @@
+<sm-menu
+  panelClasses="light-theme"
+  [header]="showOnlyUserWork() ? 'My Work': 'Team\'s Work'"
+  [prefixIconClass]="showOnlyUserWork() ? 'al-ico-me': 'al-ico-users'"
+  class="menu" data-id="Team's Work">
+  <sm-menu-item itemLabel="My Work" (itemClicked)="userFilterChanged.emit(true)" iconClass="al-ico-me" data-id="My Work Option"></sm-menu-item>
+  <sm-menu-item itemLabel="Team's Work" (itemClicked)="userFilterChanged.emit(false)"
+                iconClass="al-ico-users" data-id="Team's Work Option"></sm-menu-item>
+</sm-menu>

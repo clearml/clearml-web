@@ -43,12 +43,14 @@ import {CommonProjectsPageComponent} from '@common/projects/containers/projects-
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {concatLatestFrom} from '@ngrx/operators';
+import {selectActiveSearch} from '@common/dashboard-search/dashboard-search.reducer';
 
 @Component({
-    selector: 'sm-reports-page',
-    templateUrl: './reports-page.component.html',
-    styleUrls: ['./reports-page.component.scss'],
-    standalone: false
+  selector: 'sm-reports-page',
+  templateUrl: './reports-page.component.html',
+  styleUrls: ['./reports-page.component.scss'],
+  standalone: false
 })
 export class ReportsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   public reports$: Observable<IReport[]>;
@@ -58,10 +60,12 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
   public noMoreReports$: Observable<boolean>;
   public reportsOrderBy$: Observable<string>;
   public reportsSortOrder$: Observable<1 | -1>;
+  public prevQueryParams: Params;
+
 
   constructor(
     private _clipboardService: ClipboardService
-) {
+  ) {
     super();
     this.reports$ = this.store.select(selectReports);
     this.reportsTags$ = this.store.select(selectReportsTags);
@@ -90,12 +94,12 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
   override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.sub.unsubscribe();
+    this.store.dispatch(setArchive({archive: false}));
     this.store.dispatch(resetReports());
   }
 
   override ngOnInit(): void {
     super.ngOnInit();
-    let prevQueryParams: Params;
     this.sub.add(combineLatest([
         this.store.select(selectMainPageTagsFilter),
         this.store.select(selectMainPageTagsFilterMatchMode),
@@ -103,11 +107,22 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
         this.store.select(selectReportsQueryString),
         this.route.queryParams
           .pipe(
-            filter(params => !isEqual(params, prevQueryParams)),
-            tap((params: Params) => this.store.dispatch(setArchive({archive: params?.archive})))
+            map(params => {
+              const {q, qreg, gq, gqreg, tab, gsfilter, ...filteredQueryParams} = params;
+              return filteredQueryParams;
+            }),
+            filter(params => !isEqual(params, this.prevQueryParams)),
+            tap((params) => {
+              if (params?.archive !== this.prevQueryParams?.archive) {
+                this.store.dispatch(setArchive({archive: params?.archive}));
+              }
+              this.prevQueryParams = params;
+            })
           )
       ])
-        .pipe(debounceTime(0))
+        .pipe(
+          debounceTime(100),
+        )
         .subscribe(() => {
           this.getReports();
         })
@@ -123,7 +138,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
   }
 
   reportSelected(report: IReport) {
-    this.router.navigate(['reports',(report.project as Project)?.id ?? '*', report.id]);
+    this.router.navigate(['reports', (report.project as Project)?.id ?? '*', report.id]);
   }
 
   toggleArchive(archive: boolean) {
@@ -179,6 +194,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
   delete(report: IReport) {
     this.store.dispatch(deleteReport({report}));
   }
+
   toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: 'reports', isNested: nested}));
     if (nested) {

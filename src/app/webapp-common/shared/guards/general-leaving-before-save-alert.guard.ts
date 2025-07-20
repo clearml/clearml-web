@@ -28,5 +28,5 @@ export const generalLeavingBeforeSaveAlertGuard: CanDeactivateFn<DirtyState> = (
       width: 440
     }
   }).afterClosed()
-    .pipe(map(leave => leave));
+    .pipe(map(leave => !!leave));
 };

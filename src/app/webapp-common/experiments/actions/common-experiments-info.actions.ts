@@ -188,3 +188,8 @@ export const navigateToDataset = createAction(
   EXPERIMENTS_INFO_PREFIX + 'Navigate to open dataset',
   props<{ datasetId: string }>()
 );
+
+export const setLastTasksTab = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'set last tab',
+  props<{ projectId: string; lastTab: string }>()
+);

@@ -25,8 +25,18 @@
   }
 
   ::ng-deep .p-datatable-table-container {
+
     .p-datatable-tbody {
       height: calc(100% - var(--table-row-height, 48px));
+
+      .p-datatable-frozen-column-right {
+        right: 24px;
+      }
+    }
+
+    .p-datatable-frozen-column-left {
+      background-color: inherit;
+      left: 0;
     }
   }
 
@@ -84,11 +94,16 @@
     background-color: transparent !important;
     border-bottom: none !important;
     height: 100px;
-    position: relative;
 
     &.hidden {
       height: 0;
     }
+  }
+
+  .load-more-wrapper-wrapper {
+    position: absolute;
+    width: 100%;
+    height: inherit;
   }
 
   .load-more-wrapper {
@@ -126,7 +141,7 @@
       position: sticky;
       left: 50%;
       transform: translateX(-50%);
-      color: var(--color-on-surface);
+      color: var(--color-empty-state);
     }
   }
 
@@ -137,7 +152,7 @@
 
     &:not(.header):not(.selected):not(.checked):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
       background-color: var(--row-default-color);
-      &:hover, &.contexted {
+      &:hover, &.context-menu-opened, &.context-menu-opened-row {
         background-color: var(--row-default-hover-color);
         border-bottom: 1px solid var(--row-border-color);
 
@@ -156,7 +171,7 @@
         border-bottom: none;
       }
 
-      &:hover, &.contexted {
+      &:hover, &.context-menu-opened, &.context-menu-opened-row {
         &:not(.cards-table) {
           background-color: var(--row-selection-hover-color);
         }
@@ -181,6 +196,10 @@
         .mdc-checkbox:hover .mdc-checkbox__background {
           background-color: var(--color-surface);
         }
+      }
+
+      .context-button {
+        border: 1px solid var(--color-on-primary);
       }
 
       &:hover {
@@ -243,7 +262,8 @@
       }
     }
 
-    &:hover {
+    &:hover,
+    &.context-menu-opened {
       .context-button {
         opacity: 1;
       }
@@ -310,9 +330,10 @@
         .card-wrapper {
           background-color: var(--row-selection-color);
           color: var(--row-selection-text-color);
+          border-color: var(--row-selection-border-color);
         }
 
-        &:hover, &.contexted {
+        &:hover, &.context-menu-opened, &.context-menu-opened-row {
           .card-wrapper {
             background-color: var(--row-selection-hover-color);
           }

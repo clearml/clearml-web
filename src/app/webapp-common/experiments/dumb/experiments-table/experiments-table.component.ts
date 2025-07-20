@@ -32,7 +32,12 @@ import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
-import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, selectAllExperiments, setHyperParamsFiltersPage} from '../../actions/common-experiments-view.actions';
+import {
+  hyperParamSelectedExperiments,
+  hyperParamSelectedInfoExperiments,
+  selectAllExperiments,
+  setHyperParamsFiltersPage
+} from '../../actions/common-experiments-view.actions';
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -91,6 +96,11 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
     if (this.contextExperiment) {
       this.contextExperiment = this._experiments.find(experiment => experiment.id === this.contextExperiment.id);
+    }
+    if (experiments?.length > 0) {
+      this.selectionChecked.enable();
+    } else {
+      this.selectionChecked.disable();
     }
   }
 

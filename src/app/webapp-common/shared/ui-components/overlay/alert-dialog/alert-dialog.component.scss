@@ -4,40 +4,17 @@
   --dialog-icon-color: var(--color-warning);
 }
 
-
 .more-info {
-  height: 0;
-  padding: 0;
+  height: 100px;
+  padding: 6px;
+  border-radius: 4px;
   min-width: 400px;
   max-width: 500px;
-  font-family: variables.$font-family-monospace;
   font-size: 12px;
-  border: none;
-  overflow: hidden;
-  transition: height 0.3s;
-
-  &.info-open {
-    height: 100px;
-    padding: 6px;
-    border: 1px solid var(--color-outline-variant);
-    border-radius: 4px;
-    overflow: auto;
-    transition: height 0.3s;
-  }
+  overflow: auto;
 
   .entities {
+    font-family: variables.$font-family-monospace;
     padding-left: 20px;
-  }
-}
-
-.more-info-icon {
-  width: 20px;
-  text-align: center;
-  vertical-align: middle;
-  transform: rotate(0);
-  transition: transform 0.3s ease-in-out;
-
-  &.info-open {
-    transform: rotate(90deg);
   }
 }

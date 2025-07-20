@@ -1,10 +1,11 @@
 import {Subject, Subscription} from 'rxjs';
-import {Component, computed, inject, input, Input, OnDestroy} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy} from '@angular/core';
 import plotly from 'plotly.js';
 import {selectScaleFactor, selectThemeMode} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 import {TinyColor} from '@ctrl/tinycolor';
 import {explicitEffect} from 'ngxtension/explicit-effect';
+import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
 
 export const Colors = {
   dark: {
@@ -14,7 +15,7 @@ export const Colors = {
     legend: '#bfc7d5',
     icon: '#a1c9ff',
     iconActive: '#fff'
-},
+  },
   light: {
     font: '#1a1c1e',
     lines: '#dee1ed',
@@ -22,7 +23,7 @@ export const Colors = {
     legend: '#666',
     icon: '#0060a8',
     iconActive: '#00152c'
-    },
+  }
 };
 
 export interface VisibleExtFrame extends ExtFrame {
@@ -59,6 +60,8 @@ export interface ExtLayout extends Omit<plotly.Layout, 'legend'> {
   name: string;
 }
 
+export interface BinaryArray {bdata?: string; dtype?: string}
+
 export interface ExtData extends plotly.PlotData {
   task: string;
   cells: any;
@@ -74,10 +77,16 @@ export interface ExtData extends plotly.PlotData {
   x_axis_label?: string;
 }
 
+export interface ChartPreferences {
+  log?: boolean;
+  hoverMode?: ChartHoverModeEnum;
+  showSpike?: boolean;
+}
+
 @Component({
-    selector: 'sm-base-plotly-graph',
-    template: '',
-    standalone: false
+  selector: 'sm-base-plotly-graph',
+  template: '',
+  standalone: false
 })
 export abstract class PlotlyGraphBaseComponent implements OnDestroy {
 
@@ -85,6 +94,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
   store = inject(Store);
   public scaleFactor = this.store.selectSignal(selectScaleFactor);
 
+  protected plotlyElement: plotly.PlotlyHTMLElement;
   protected sub = new Subscription();
   protected colorSub: Subscription;
   public isSmooth = false;
@@ -93,28 +103,39 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
   public alreadyDrawn = false;
 
   darkTheme = input<boolean>(null);
-  @Input() isCompare = false;
+  isCompare = input(false);
+  showOriginals = input(true);
 
   theme = this.store.selectSignal(selectThemeMode);
   protected isDarkTheme = computed(() => this.darkTheme() ?? this.theme() === 'dark');
   protected themeColors = computed(() => this.isDarkTheme() ? Colors.dark : Colors.light);
 
-  koko = explicitEffect(
-    [this.isDarkTheme],
-    () => {
-      this.shouldRefresh = true;
-      this.alreadyDrawn = false;
-      this.drawGraph$.next({noTimer: true})
-    });
+  protected constructor() {
+    explicitEffect(
+      [this.isDarkTheme],
+      () => {
+        this.shouldRefresh = true;
+        this.alreadyDrawn = false;
+        this.drawGraph$.next({noTimer: true});
+      });
+  }
 
   public _reColorTrace(trace: ExtData, newColor: number[]): void {
     if (Array.isArray(trace.line?.color) || Array.isArray(trace.marker?.color)) {
       return;
     }
-    const colorString = this.isDarkTheme() ?
-      new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]}).darken((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString():
-      new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]}).lighten((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString();
-    if (trace.marker) {
+    const baseColor = new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]});
+    let colorString: string;
+    if (!this.showOriginals()) {
+      colorString = baseColor.setAlpha(this.isSmooth ? 0 : 1).toRgbString();
+    } else if (this.isSmooth) {
+      const hslColor = baseColor.toHsl();
+      hslColor.l = (this.isSmooth && !trace.isSmoothed) ? (this.isDarkTheme() ? hslColor.l < 0.20 ? hslColor.l : 20 : hslColor.l > 0.8 ? hslColor.l :80) : 0;
+      colorString = new TinyColor(hslColor).toRgbString();
+    } else {
+      colorString = baseColor.toRgbString();
+    }
+    if (trace.marker && !(trace.marker.color as BinaryArray)?.bdata) {
       trace.marker.color = colorString;
       if (trace.marker.line) {
         trace.marker.line.color = colorString;
@@ -148,7 +169,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
         continue;
       }
       const name = data[i].name;
-      if (namesHash[name] && name !== data[i].legendgroup) {
+      if (namesHash[name] && name !== data[i].legendgroup && data[i].showlegend !== false) {
         namesHash[name].push(i);
       } else {
         namesHash[name] = [i];
@@ -167,7 +188,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     }
 
     // Case all series in plot has same colorKey (same task name)
-    const duplicateColorKey = Array.from(new Set(data.map(plot => plot.colorKey))).length < data.length;
+    const duplicateColorKey = Array.from(new Set(data.map(plot => plot.colorKey))).length < data.filter(plot => !plot.isSmoothed).length;
     if (duplicateColorKey && chart.variants?.length > 0) {
       data.forEach((plot => plot.colorKey = plot.name));
     }

@@ -184,8 +184,10 @@ export class LineChartComponent {
           ...(this.darkTheme() && {color: '#dce0ee'}),
           font: {weight: 'normal', size: 12},
           padding: 20,
-          usePointStyle: true
-        }
+          usePointStyle: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          }
 
       },
       tooltip: {

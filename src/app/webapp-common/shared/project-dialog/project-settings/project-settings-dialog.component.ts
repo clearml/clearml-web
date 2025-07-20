@@ -75,6 +75,7 @@ export class ProjectSettingsDialogComponent {
     smoothType: smoothTypeEnum.exponential,
     xAxisType: ScalarKeyEnum.Iter,
     hiddenMetricsScalar: [],
+    showOriginals: true,
     projectLevel: false
   };
 
@@ -153,12 +154,13 @@ export class ProjectSettingsDialogComponent {
     this.settings.update(settings => ({...settings, groupBy: $event}));
   }
 
-  closeDialog() {
-    this.dialogRef.close();
+  changeShowOriginals($event: boolean) {
+    this.scalarSettingsChanged.set(true);
+    this.settings.update(settings => ({...settings, showOriginals: $event}));
   }
 
-  removeSettings() {
-    this.store.dispatch(removeExperimentSettings({id: this.data.project.id}));
+  closeDialog() {
+    this.dialogRef.close();
   }
 
   updateProject(projectForm) {

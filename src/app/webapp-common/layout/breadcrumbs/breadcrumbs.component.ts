@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {debounceTime} from 'rxjs/operators';
-import {ActivatedRoute, RouterLink, UrlTree} from '@angular/router';
+import {ActivatedRoute, Params, RouterLink, UrlTree} from '@angular/router';
 import {fromEvent} from 'rxjs';
 import {addMessage} from '../../core/actions/layout.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
@@ -37,6 +37,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {selectArchive, selectProjectsFeature} from '@common/layout/layout.selectors';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
+import {MatBadgeModule} from '@angular/material/badge';
 
 export enum CrumbTypeEnum {
   Workspace = 'Workspace',
@@ -48,6 +49,7 @@ export enum CrumbTypeEnum {
 export interface IBreadcrumbsLink {
   name?: string;
   url?: string | UrlTree;
+  urlParams?: Params;
   queryParamsHandling?: 'merge' | 'preserve' | '';
   linkLast?: boolean;
   subCrumbs?: { name?: string; url: string; hidden?: boolean }[];
@@ -59,6 +61,7 @@ export interface IBreadcrumbsLink {
   id?: string;
   tags?: string[];
   badge?: string;
+  badgeWarn?: boolean;
   badgeTooltip?: string;
   onlyWithProject?: boolean;
 }
@@ -82,18 +85,19 @@ export interface IBreadcrumbsOptions {
     templateUrl: './breadcrumbs.component.html',
     styleUrls: ['./breadcrumbs.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        MatMenuModule,
-        TooltipDirective,
-        ShowTooltipIfEllipsisDirective,
-        ClipboardModule,
-        RouterLink,
-        ClickStopPropagationDirective,
-        TagListComponent,
-        IdBadgeComponent,
-        MatIcon,
-        MatIconButton
-    ]
+  imports: [
+    MatMenuModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    ClipboardModule,
+    RouterLink,
+    ClickStopPropagationDirective,
+    TagListComponent,
+    IdBadgeComponent,
+    MatIcon,
+    MatIconButton,
+    MatBadgeModule,
+  ]
 })
 export class BreadcrumbsComponent {
   private store = inject(Store);

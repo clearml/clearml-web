@@ -98,7 +98,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   protected isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
   protected metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
   protected metricVariants$ = this.store.select(selectMetricVariants);
-  protected modelsPage$ = this.store.select(modelsSelectors.selectModesPage);
+  protected modelsPage$ = this.store.select(modelsSelectors.selectModelsPage);
 
   protected override showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
   protected searchQuery$ = this.store.select(selectSearchQuery);
@@ -168,7 +168,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
               return false;
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, ...queryParamsWithoutSearch} = queryParams;
+            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
             const equal = projectId === this.projectId && isEqual(queryParamsWithoutSearch, prevQueryParams);
             prevQueryParams = queryParamsWithoutSearch;
             return !equal;
@@ -179,12 +179,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             this.emptyUrlInit();
           } else {
             this.projectId = projectId;
-            this.setupContextMenu('models');
+            this.setupContextMenu('models', params.archive === 'true');
             if (params.order) {
               const orders = decodeOrder(params.order);
               this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
             }
-            if (params.filter) {
+            if (params.filter != null) {
               const filters = decodeFilter(params.filter);
               this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
             } else {
@@ -356,7 +356,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   columnsReordered(cols: string[], updateUrl = true) {
-    this.store.dispatch(modelsActions.setColsOrderForProject({cols, project: this.projectId}));
+    this.store.dispatch(modelsActions.setColsOrderForProject({cols, projectId: this.projectId}));
     if (updateUrl) {
       this.store.dispatch(modelsActions.updateUrlParams());
     }

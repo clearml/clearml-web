@@ -9,7 +9,7 @@ export const MODELS_TABLE_COL_FIELDS = {
   CREATED: 'created' as ModelTableColFieldsEnum,
   FRAMEWORK: 'framework' as ModelTableColFieldsEnum,
   READY: 'ready' as ModelTableColFieldsEnum,
-  USER: 'user.name' as ModelTableColFieldsEnum,
+  USER: 'users' as ModelTableColFieldsEnum,
   PROJECT: 'project.name' as ModelTableColFieldsEnum,
   TASK: 'task.name' as ModelTableColFieldsEnum,
   COMMENT: 'comment' as ModelTableColFieldsEnum,

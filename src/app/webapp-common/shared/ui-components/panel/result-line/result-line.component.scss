@@ -1,0 +1,51 @@
+:host {
+  .trigger {
+    position: absolute;
+
+  }
+
+  .item-row {
+    .main-icon {
+      color: var(--color-primary);
+    }
+
+    padding: 12px;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: var(--color-surface-container-highest);
+    }
+
+    .text-row {
+      width: calc(100% - 46px);
+
+      .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .right-icons {
+          display: flex;
+          flex-direction: row-reverse;
+          font-size: 12px;
+
+          sm-status-icon-label {
+            margin-left: 12px;
+          }
+
+          sm-mini-tags-list {
+            display: flex;
+            gap: 2px;
+          }
+        }
+
+
+      }
+
+
+    }
+  }
+}

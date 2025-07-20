@@ -89,7 +89,7 @@ export class SelectModelEffects {
 
   modelsFilterChanged = createEffect(() => this.actions$.pipe(
     ofType(actions.globalFilterChanged, actions.tableSortChanged, actions.tableFilterChanged, actions.showArchive, actions.clearTableFilter),
-    debounceTime(50), // Let other effects finish first
+    debounceTime(0), // Let other effects finish first
     switchMap((action) => this.fetchModels$(null)
       .pipe(
         mergeMap(res => [

@@ -1,4 +1,4 @@
-<mat-form-field appearance="outline" [class.no-bottom]="!embeddedErrors">
+<mat-form-field appearance="outline" [class.no-bottom]="!embeddedErrors()">
   @if (label(); as label) {
     <mat-label>{{ label }}</mat-label>
   }
@@ -6,7 +6,6 @@
          [matAutocomplete]="auto"
          [formControl]="control"
          [placeholder]="placeHolder()"
-         [disabled]="disabled"
          (input)="getEntitiesFn(control.value)"
          (keydown.enter)="control.markAsTouched()"
          (focusout)="onTouched && onTouched()"
@@ -14,14 +13,16 @@
   @if (createNewSuffix()) {
     <span matSuffix class="creat-new-suffix">(Create New)</span>
   }
-  <i matSuffix class="al-icon sm-md search-icon"
-     [class]="control.value ? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-     (click)="control.value && control.setValue(null); getEntities.emit(null); inputRef.focus()"
-     smClickStopPropagation
-  ></i>
+  @if (control.value) {
+   <button class="sm" style="margin-right: 8px" mat-icon-button matSuffix (click)="$event.stopPropagation(); control.setValue(null); getEntities.emit(null); inputRef.focus()">
+     <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+   </button>
+  } @else {
+    <mat-icon fontSet="al" fontIcon="al-ico-search" matSuffix></mat-icon>
+  }
   <mat-autocomplete #auto="matAutocomplete"
                     [displayWith]="displayFn.bind(this)"
-                    (opened)="(!data().length || control.value) && getEntitiesFn(control.value)"
+                    (opened)="(!data()?.length || control.value) && getEntitiesFn(control.value)"
                     autoActiveFirstOption>
     @if (createNewSuffix()) {
       <mat-option class="item" [value]="control.value" (onSelectionChange)="createNewSelected.emit($event.source.value)">
@@ -40,6 +41,7 @@
       </div>
     }
     <sm-dots-load-more [class.hidden]="data() === null || noMoreOptions" [loading]="state().loading()" (loadMore)="loadMoreEntities(control.value)"></sm-dots-load-more>
-    <mat-option disabled style="height: 0; min-height: 0; padding:0"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
+    <!-- Empty mat-option, so the autocomplete menu will always pop -->
+    <mat-option disabled style="height: 0; min-height: 0; padding:0"></mat-option>
   </mat-autocomplete>
 </mat-form-field>

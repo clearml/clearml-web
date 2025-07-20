@@ -14,9 +14,9 @@
       </button>
       <button
         mat-icon-button
-        smTooltip="Maximize"
+        [smTooltip]="maximized()? '' : 'Maximize' "
         (click)="maximize()"
-      ><mat-icon fontSet="al" fontIcon="al-ico-maximize"></mat-icon>
+      ><mat-icon fontSet="al" [fontIcon]="maximized()? 'al-ico-dialog-x':'al-ico-maximize'"></mat-icon>
       </button>
   </div>
       }
@@ -27,10 +27,10 @@
           @for (experiment of experiments; track experiment.id) {
             <div class="experiment-name">
               <span class="dot-container">
-                <span #dot class="dot pallete-cursor"
+                <span #dot class="dot"
                   [style.background-color]="experimentsColors[experiment.id]"
                   [colorButtonRef]="dot"
-                  [smChooseColor]="experimentsColors[getExperimentNameForColor(experiment)]"
+                  [smChooseColor]="experimentsColors[experiment.id]"
                   [stringToColor]="getExperimentNameForColor(experiment)">
                 </span>
               </span>

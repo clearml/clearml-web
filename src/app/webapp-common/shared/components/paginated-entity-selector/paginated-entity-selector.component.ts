@@ -10,14 +10,16 @@ import {
   Validators
 } from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatInputModule} from '@angular/material/input';
+import {MatInputModule, MatLabel} from '@angular/material/input';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
-import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {rootProjectsPageSize} from '@common/constants';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {uniqueNameValidator} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 export interface baseEntity {
   id?: string;
@@ -41,20 +43,21 @@ export interface baseEntity {
             multi: true
         }
     ],
-    imports: [
-        MatInputModule,
-        MatAutocompleteModule,
-        ReactiveFormsModule,
-        ClickStopPropagationDirective,
-        SearchTextDirective,
-        MatProgressSpinner,
-        DotsLoadMoreComponent,
-    ]
+  imports: [
+    MatInputModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule,
+    SearchTextDirective,
+    MatProgressSpinner,
+    DotsLoadMoreComponent,
+    MatIconButton,
+    MatIconModule,
+    MatLabel,
+  ]
 })
 export class PaginatedEntitySelectorComponent implements ControlValueAccessor, Validator {
   protected control = new FormControl<string>(null);
   protected noMoreOptions: boolean;
-  protected disabled: boolean;
   protected error: string = null;
   private previousLength: number;
   data = input<baseEntity[]>([]);
@@ -65,7 +68,7 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   isRequired = input<boolean>(false);
   minLength = input<number>();
   emptyNameValidator = input<boolean>();
-  embeddedErrors = input<boolean>(false);
+  embeddedErrors = input<boolean>(true);
 
 
   getEntities = output<string>();
@@ -80,10 +83,12 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   }))
 
   constructor() {
-    this.control.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
-      this.onChange && this.onChange(value);
-      this.onValidation && this.onValidation(value);
-    });
+    this.control.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(value => {
+        this.onChange && this.onChange(value);
+        this.onValidation && this.onValidation(value);
+      });
 
     effect(() => {
       if (this.data()) {
@@ -100,9 +105,9 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
         this.control.removeValidators([Validators.required]);
       }
       if(this.minLength()) {
-        this.control.addValidators([Validators.minLength(this.minLength())]);
+        this.control.addValidators([minLengthTrimmed(this.minLength())]);
       } else {
-        this.control.removeValidators([Validators.minLength(this.minLength())]);
+        this.control.removeValidators([minLengthTrimmed(this.minLength())]);
       }
       if(this.emptyNameValidator()) {
         this.control.addValidators([uniqueNameValidator([])]);

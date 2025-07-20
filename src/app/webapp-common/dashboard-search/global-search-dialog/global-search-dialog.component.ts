@@ -1,9 +1,14 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {DashboardSearchModule} from '~/features/dashboard-search/dashboard-search.module';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {Store} from '@ngrx/store';
-import {searchSetTerm} from '@common/dashboard-search/dashboard-search.actions';
+import {
+  searchActivate,
+  searchDeactivate,
+  searchSetTableFilters,
+  searchSetTerm
+} from '@common/dashboard-search/dashboard-search.actions';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatIcon} from '@angular/material/icon';
@@ -13,8 +18,8 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {selectSearchTerm} from '@common/dashboard-search/dashboard-search.reducer';
 import {Observable} from 'rxjs';
-import {ShowOnlyUserWorkComponent} from '@common/shared/components/show-only-user-work/show-only-user-work.component';
 import {MatDialogRef} from '@angular/material/dialog';
+import {decodeFilter} from '@common/shared/utils/tableParamEncode';
 
 @Component({
   selector: 'sm-global-search-dialog',
@@ -26,8 +31,7 @@ import {MatDialogRef} from '@angular/material/dialog';
     MatIcon,
     MatIconButton,
     PushPipe,
-    TooltipDirective,
-    ShowOnlyUserWorkComponent
+    TooltipDirective
   ],
   templateUrl: './global-search-dialog.component.html',
   styleUrl: './global-search-dialog.component.scss'
@@ -46,7 +50,17 @@ export class GlobalSearchDialogComponent implements OnDestroy {
   private itemSelected = false;
 
   constructor() {
+    this.store.dispatch(searchActivate())
     this.searchQuery$ = this.store.select(selectSearchTerm);
+    this.route.queryParams.pipe(
+      distinctUntilChanged((pre, current)=> pre.gsfilter === current.gsfilter)
+    ).subscribe(params => {
+      if (typeof params.gsfilter === 'string') {
+        const filters = params.gsfilter? decodeFilter(params.gsfilter): [];
+        this.store.dispatch(searchSetTableFilters({filters, activeLink: params.tab || 'projects'}));
+      }
+    });
+
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -75,6 +89,7 @@ export class GlobalSearchDialogComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.store.dispatch(searchDeactivate());
     if (!this.itemSelected) {
       this.router.navigate([], {
         relativeTo: this.route,
@@ -83,6 +98,7 @@ export class GlobalSearchDialogComponent implements OnDestroy {
         queryParams: {
           gq: undefined,
           gqreg: undefined,
+          gsfilter: undefined,
           tab: undefined
         }
       });
@@ -112,7 +128,7 @@ export class GlobalSearchDialogComponent implements OnDestroy {
 
   toggleRegExp() {
     this.regExp = !this.regExp;
-    if(!this.regExp) {
+    if (!this.regExp) {
       this.regexError = null;
     }
     this.router.navigate([], {

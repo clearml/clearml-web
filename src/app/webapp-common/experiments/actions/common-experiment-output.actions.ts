@@ -94,6 +94,11 @@ export const setExperimentSettings = createAction(
   props<{ id: string; changes: Partial<ExperimentSettings> }>()
 );
 
+export const setChartSettings = createAction(
+  EXPERIMENTS_OUTPUT_PREFIX + 'UPDATE_CHART_SETTINGS',
+  props<{ id: string; projectId: string; changes: Partial<ExperimentSettings> }>()
+);
+
 export const removeExperimentSettings = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'REMOVE_EXPERIMENT_SETTINGS',
   props<{ id: string }>()

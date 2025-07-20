@@ -326,10 +326,8 @@ export class ReportsEffects {
             ...(!action.skipUndo ?
               [addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report archived successfully', [null, ...undoActions
               ].filter(a => a))] : []),
-
             setReportChanges({
               id: action.report.id,
-
               changes: {system_tags: (action.report.system_tags || []).concat('archived')}
             })
           ];

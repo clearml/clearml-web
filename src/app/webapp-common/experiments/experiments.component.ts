@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  OnDestroy,
-  OnInit, signal,
-  viewChild,
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, OnDestroy, OnInit, signal, viewChild,} from '@angular/core';
 import {
   selectActiveParentsFilter,
   selectCompareSelectedMetrics,
@@ -26,14 +19,22 @@ import {
   selectSelectedExperimentsDisableAvailable,
   selectSelectedTableExperiment,
   selectShowAllSelectedIsActive,
-  selectShowCompareScalarSettings, selectSplitSize,
+  selectShowCompareScalarSettings,
+  selectSplitSize,
   selectTableCompareView,
   selectTableFilters,
   selectTableMode,
   selectTableRefreshList,
   selectTableSortFields
 } from './reducers';
-import {selectCompanyTags, selectIsDeepMode, selectProjectSystemTags, selectRouterProjectId, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
+import {
+  selectCompanyTags,
+  selectIsDeepMode,
+  selectProjectSystemTags,
+  selectRouterProjectId,
+  selectSelectedProjectId,
+  selectTagsFilterByProject
+} from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
@@ -44,14 +45,27 @@ import {selectBackdropActive} from '../core/reducers/view.reducer';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
 import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
-import {selectIsSharedAndNotOwner, selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {
+  selectIsSharedAndNotOwner,
+  selectMetricsLoading,
+  selectSelectedExperiment
+} from '~/features/experiments/reducers';
 import * as experimentsActions from './actions/common-experiments-view.actions';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
-import {createCompareMetricColumn, createMetricColumn, decodeColumns, decodeFilter, decodeOrder, decodeURIComponentSafe} from '../shared/utils/tableParamEncode';
+import {
+  createCompareMetricColumn,
+  createMetricColumn,
+  decodeColumns,
+  decodeFilter,
+  decodeOrder,
+  decodeURIComponentSafe
+} from '../shared/utils/tableParamEncode';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
 import {groupHyperParams} from '../shared/utils/shared-utils';
-import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {
+  ProjectsGetTaskParentsResponseParents
+} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ShowItemsFooterSelected} from '../shared/entity-page/footer-items/show-items-footer-selected';
@@ -66,19 +80,39 @@ import {MoveToFooterItem} from '../shared/entity-page/footer-items/move-to-foote
 import {EnqueueFooterItem} from '../shared/entity-page/footer-items/enqueue-footer-item';
 import {AbortFooterItem} from '../shared/entity-page/footer-items/abort-footer-item';
 import {addTag} from './actions/common-experiments-menu.actions';
-import {CountAvailableAndIsDisableSelectedFiltered, MenuItems, selectionDisabledAbort, selectionDisabledAbortAllChildren, selectionDisabledArchive, selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue, selectionDisabledMoveTo, selectionDisabledPipelineRun, selectionDisabledPublishExperiments, selectionDisabledQueue, selectionDisabledReset, selectionDisabledRetry, selectionDisabledViewWorker} from '../shared/entity-page/items.utils';
+import {
+  CountAvailableAndIsDisableSelectedFiltered,
+  MenuItems,
+  selectionDisabledAbort,
+  selectionDisabledAbortAllChildren,
+  selectionDisabledArchive,
+  selectionDisabledDelete,
+  selectionDisabledDequeue,
+  selectionDisabledEnqueue,
+  selectionDisabledMoveTo,
+  selectionDisabledPipelineRun,
+  selectionDisabledPublishExperiments,
+  selectionDisabledQueue,
+  selectionDisabledReset,
+  selectionDisabledRetry,
+  selectionDisabledViewWorker
+} from '../shared/entity-page/items.utils';
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {encodeHyperParameter, filterArchivedExperiments} from './shared/common-experiments.utils';
 import {AbortAllChildrenFooterItem} from '../shared/entity-page/footer-items/abort-all-footer-item';
-import {ExperimentMenuExtendedComponent} from '~/features/experiments/containers/experiment-menu-extended/experiment-menu-extended.component';
+import {
+  ExperimentMenuExtendedComponent
+} from '~/features/experiments/containers/experiment-menu-extended/experiment-menu-extended.component';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from './experiment.consts';
 import {selectIsPipelines} from '@common/experiments-compare/reducers';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {rootProjectsPageSize} from '@common/constants';
-import {SelectionEvent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {
+  SelectionEvent
+} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {
   CreateExperimentDialogComponent
 } from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
@@ -205,7 +239,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
               return false;
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, ...queryParamsWithoutSearch} = queryParams;
+            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
             const equal = projectId === this.projectId && isEqual(queryParamsWithoutSearch, prevQueryParams);
             prevQueryParams = queryParamsWithoutSearch;
             return !equal;
@@ -217,7 +251,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           } else {
             this.projectId = projectId;
             if (this.entityType === this.entityTypeEnum.experiment) {
-              this.setupContextMenu('tasks');
+              this.setupContextMenu('tasks', params.archive === 'true');
             }
             if (params.columns) {
               const [cols, metrics, hyperParams, , allIds] = decodeColumns(params.columns, this.tableCols);
@@ -236,9 +270,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
               const orders = decodeOrder(params.order);
               this.store.dispatch(experimentsActions.setTableSort({orders, projectId}));
             }
-            if (params.filter) {
-              const filters = decodeFilter(params.filter);
-              this.store.dispatch(experimentsActions.setTableFilters({filters, projectId}));
+            if (params.filter != null) {
+                const filters = decodeFilter(params.filter);
+                this.store.dispatch(experimentsActions.setTableFilters({filters, projectId}));
             } else {
               if (params.order) {
                 this.store.dispatch(experimentsActions.setTableFilters({filters: [], projectId}));
@@ -605,7 +639,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   columnsReordered(cols: string[], updateUrl = true) {
-    this.store.dispatch(experimentsActions.setColsOrderForProject({cols, project: this.projectId}));
+    this.store.dispatch(experimentsActions.setColsOrderForProject({cols: Array.from(new Set([...cols, 'project.name'])), projectId: this.projectId}));
     if (updateUrl) {
       this.store.dispatch(experimentsActions.updateUrlParams());
     }

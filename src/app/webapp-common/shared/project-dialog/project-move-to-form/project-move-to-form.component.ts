@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component, computed, effect, input,
   OnChanges, OnDestroy, output, signal, viewChild
@@ -45,7 +44,7 @@ import {MatButton} from '@angular/material/button';
         MatButton,
     ]
 })
-export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterViewInit {
+export class ProjectMoveToFormComponent implements OnChanges, OnDestroy {
   public readonly projectsRoot = 'Projects root';
   public rootFiltered: boolean;
   public projectName: string;
@@ -90,7 +89,7 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
     toObservable(this.moveToForm)
       .pipe(
         takeUntilDestroyed(),
-        switchMap(form => form.controls['projectName'].valueChanges),
+        switchMap(form => form.controls.projectName?.valueChanges),
         filter(searchString => searchString !== this.project.parent)
       )
       .subscribe(searchString => {
@@ -118,11 +117,6 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
       projectName: new ShortProjectNamePipe().transform(this.projectName),
       fromName: new ProjectLocationPipe().transform(this.projectName),
       toName: this.project.parent
-    });
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
     });
   }
 

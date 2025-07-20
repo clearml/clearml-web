@@ -2,40 +2,43 @@
 
 :host {
   position: fixed;
+  z-index: 100;
   left: 0;
-  height: 48px;
+  right: 0;
+  bottom: -100px;
+  height: 0;
   width: 100%;
-  display: block;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: bottom 0.3s ease-out, height 0.3s linear, opacity 0.3s ease-out;
+
+  &.footer-visible {
+      bottom: 0;
+      height: #{layout.$project-footer-height};
+      opacity: 1;
+  }
 
   .footer-container {
+    pointer-events: all;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 18px;
-
-    border-top:solid 2px var(--color-primary);
-    position: fixed;
-    left: 0;
-    height: layout.$project-footer-height;
-    width: 100%;
-    padding-left: 76px;
-    background-color: var(--color-surface-container-low);
+    gap: 12px;
+    height: 56px;
+    padding: 0 8px;
     font-size: 13px;
     font-weight: 500;
-    z-index: 10;
-    transition:bottom 0.3s ease-out;
-
-    &.show-container {
-      bottom: 0;
-    }
+    border-radius: 56px;
+    border: solid 2px var(--color-primary);
+    background-color: var(--color-surface-container-low);
+    box-shadow: 0 0 0 6px rgba(from var(--color-primary) r g b / 15%);
   }
 
   sm-tags-menu {
-    margin-left: -18px;
-  }
-
-  .show-all {
-    text-decoration: underline;
+    margin-left: -12px;
   }
 
   .divider {
@@ -44,16 +47,15 @@
     border-right: solid 1px var(--color-primary);
   }
 
-  .has-example-item {
-    margin: 0 24px 0 auto;
-    .mat-icon {
-      color: var(--color-tertiary);
-    }
-
-    @media screen and (max-width: 1200px) {
-      .title {
-        display: none;
-      }
+  .warning { // examples objects warning message
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    padding-right: 18px;
+    margin-left: 30px;
+    .al-icon {
+      color: var(--color-warning);
     }
   }
 }

@@ -1,7 +1,7 @@
 <div class="table-card" data-id="cardPanel"
      [class.two-columns]="!hasTypeIcon() && !noSelection()"
      [class.no-selection]="noSelection()"
-     [class]="{'selected':selected(), 'checked':checked(), 'contexted': activeContextRow()?.id ===rowData()?.id && contextMenuOpen()}">
+     [class]="{'selected':selected(), 'checked':checked(), 'context-menu-open': activeContextRow()?.id ===rowData()?.id && contextMenuOpen()}">
 
   @if(!noSelection()) {
     <div class="cbx">

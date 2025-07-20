@@ -1,4 +1,4 @@
-@use "../../../layout/layout.scss";
+@use "../../../layout/layout";
 
 ::ng-deep sm-models footer.d-flex.justify-content-center {
   align-items: center;
@@ -9,9 +9,6 @@
   sm-table {
     display: block;
     height: 100%;
-    &.compare {
-      height: calc(100% - #{layout.$project-footer-height});
-    }
   }
   .header-checkbox {
     ::ng-deep .mat-mdc-checkbox-touch-target {

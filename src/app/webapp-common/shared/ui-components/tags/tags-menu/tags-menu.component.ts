@@ -57,6 +57,9 @@ export class TagsMenuComponent {
   projectTags = input<string[]>();
   companyTags = input<string[]>([]);
   tagsFilterByProject = input<boolean>();
+  disableFilterByProject = input<boolean>();
+  disableCreateNew = input<boolean>();
+  disableColorMangement = input<boolean>();
   tagSelected = output<string>();
   getTags = output();
   getCompanyTags = output();

@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, HostListener, OnInit, input, output, inject } from '@angular/core';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {MatDialog} from '@angular/material/dialog';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
@@ -26,7 +26,8 @@ export class QueueInfoComponent implements OnInit {
   removeExperimentFromQueue = output<Task>();
   moveExperimentInQueue = output<{
     task: string;
-    count: number;
+    current: number;
+    previous: number;
   }>();
 
   public activeTab: string;
@@ -67,12 +68,12 @@ export class QueueInfoComponent implements OnInit {
     this.deselectQueue.emit();
   }
 
-  experimentDropped($event: CdkDragDrop<unknown>) {
+  experimentDropped(event: CdkDragDrop<unknown>) {
     this.moveExperimentInQueue.emit({
-      task: (this.selectedQueue().entries[$event.previousIndex].task as Task).id,
-      count: ($event.currentIndex - $event.previousIndex)
+      task: (this.selectedQueue().entries[event.previousIndex].task as Task).id,
+      current: event.currentIndex,
+      previous: event.previousIndex
     });
-    moveItemInArray(this.selectedQueue().entries, $event.previousIndex, $event.currentIndex);
   }
 
   openContextMenu(e, task) {

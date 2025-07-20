@@ -1,43 +1,24 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {SelectedModel} from '../../shared/models.model';
 import {selectSelectedModel} from '../../reducers';
-import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
-import {createModelLink, isExample} from '@common/shared/utils/shared-utils';
-import {AdminService} from '~/shared/services/admin.service';
+import {isExample} from '@common/shared/utils/shared-utils';
 import {updateModelDetails} from '../../actions/models-info.actions';
 
 
 @Component({
-    selector: 'sm-model-info-general',
-    templateUrl: './model-info-general.component.html',
-    styleUrls: ['./model-info-general.component.scss'],
-    standalone: false
+  selector: 'sm-model-info-general',
+  templateUrl: './model-info-general.component.html',
+  styleUrls: ['./model-info-general.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
-export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
+export class ModelInfoGeneralComponent {
+  private store = inject(Store);
 
-  public selectedModel: SelectedModel;
-  public isExample: boolean;
-  private selectedModelSubscription: Subscription;
-
-  constructor(private store: Store) {}
+  protected selectedModel = this.store.selectSignal(selectSelectedModel);
+  protected isExample = computed(() => isExample(this.selectedModel()));
 
   commentChanged(comment) {
-    this.store.dispatch(updateModelDetails({id: this.selectedModel.id, changes: {comment}}));
+    this.store.dispatch(updateModelDetails({id: this.selectedModel().id, changes: {comment}}));
   }
-
-  ngOnDestroy(): void {
-    this.selectedModelSubscription.unsubscribe();
-  }
-
-  ngOnInit(): void {
-    this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
-    )
-      .subscribe(model => {
-        this.isExample = isExample(model);
-        this.selectedModel = model;
-      });
-  }
-
 }

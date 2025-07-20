@@ -1,10 +1,10 @@
 <div class="counter-container">
-  <div class="circle-counter" [class]="type" [class.multi]="valType === 'array'" data-id="cardStats">
-    @switch (valType) {
+  <div class="circle-counter" [class]="type()" [class.multi]="valType() === 'array'" data-id="cardStats">
+    @switch (valType()) {
       @case ('array') {
         <div class="d-flex-center flex-row wrapper">
           <ng-content select="[tagsList]"></ng-content>
-          @for (subCounter of counter; track trackByLabel($index, subCounter)) {
+          @for (subCounter of $any(counter()); track trackByLabel($index, subCounter)) {
             <div>
               <div class="sub-counter"
               [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
@@ -14,20 +14,20 @@
         </div>
       }
       @case ('number') {
-        <div class="counter">
-        {{counter | filesize: counter < 100000 ? fileSizeConfigCount : fileSizeConfigShortCount}}</div>
+        <div class="counter" [fittext]="true" [maxFontSize]="23" [modelToWatch]="counter()">
+        {{$any(counter()) | filesize: $any(counter()) < 100000 ? fileSizeConfigCount : fileSizeConfigShortCount}}</div>
       }
       @case ('tags') {
         <div class="counter-tags">
         </div>
       }
       @default {
-        <div class="counter">{{counter}}</div>
+        <div class="counter">{{counter()}}</div>
       }
     }
   </div>
-  <div class="counter-label">{{label}}</div>
-  @if (underLabel) {
-    <div class="counter-label leave-space">{{underLabel}}</div>
+  <div class="counter-label">{{label()}}</div>
+  @if (underLabel()) {
+    <div class="counter-label leave-space">{{underLabel()}}</div>
   }
 </div>

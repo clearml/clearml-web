@@ -9,6 +9,7 @@ import {KeyValuePipe} from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'sm-graph-settings-bar',
@@ -25,7 +26,8 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
     MatIcon,
     MatIconButton,
     MatButton,
-    TooltipDirective
+    TooltipDirective,
+    MatSlideToggle
   ]
 })
 export class GraphSettingsBarComponent {
@@ -46,6 +48,7 @@ export class GraphSettingsBarComponent {
   smoothType = input<SmoothTypeEnum>();
   xAxisType = input<ScalarKeyEnum>(ScalarKeyEnum.Iter);
   groupBy = input<GroupByCharts>('metric');
+  showOrigin = input<boolean>(true);
   groupByOptions = input<{
         name: string;
         value: GroupByCharts;
@@ -57,6 +60,7 @@ export class GraphSettingsBarComponent {
   changeSmoothType = output<SmoothTypeEnum>();
   changeXAxisType = output<ScalarKeyEnum>();
   changeGroupBy = output<GroupByCharts>();
+  changeShowOrigin = output<boolean>();
   toggleSettings = output();
   setToProject = output();
 

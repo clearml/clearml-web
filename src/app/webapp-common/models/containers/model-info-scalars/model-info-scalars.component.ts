@@ -11,12 +11,11 @@ import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 import {
   selectModelInfoHistograms,
   selectModelSettingsGroupBy,
-  selectModelSettingsHiddenScalar,
+  selectModelSettingsHiddenScalar, selectModelSettingsShowOrigin,
   selectModelSettingsSmoothSigma,
   selectModelSettingsSmoothType,
   selectModelSettingsSmoothWeight,
-  selectModelSettingsXAxisType,
-  selectSelectedModelSettingsIsProjectLevel,
+  selectModelSettingsXAxisType, selectSelectedModelSettingsIsProjectLevel,
   selectSelectedSettingsModelTableMetric
 } from '@common/experiments/reducers';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -40,6 +39,7 @@ export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent 
   protected override entitySelector = this.store.select(selectModelId);
   protected override scalars = this.store.selectSignal(selectModelInfoHistograms);
   protected override xAxisTypePrev = computedPrevious(this.xAxisType);
+  protected override showOriginals = this.store.selectSignal(selectModelSettingsShowOrigin);
   protected override routerParams$ = this.store.select(selectRouterParams)
     .pipe(
       filter(params => !!params.modelId),

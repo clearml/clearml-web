@@ -15,7 +15,7 @@ export class ChooseColorDirective {
   @Input() colorButtonRef;
   @Input() colorButtonClass: string;
   @Input() stringToColor: string | string[];
-  @Input() colorPickerWithAlpha: boolean = false;
+  @Input() colorPickerWithAlpha = false;
   private _defaultColor: number[];
   private defaultColorString: string;
 
