@@ -22,6 +22,19 @@ $blue-900: #141722; //20,23,34
 $blue-950: #0d0e15; //20,23,34
 $black: #000000;
 
+// Autothought colors - green primary, white secondary, dark grey background
+$autothought-green-primary: #10b981; // emerald green
+$autothought-green-light: #34d399; // lighter green for hover states
+$autothought-green-dark: #059669; // darker green for active states
+$autothought-green-subtle: #d1fae5; // very light green for backgrounds
+$autothought-white: #ffffff; // white secondary
+$autothought-grey-darkest: #1a1a1a; // dark grey background
+$autothought-grey-dark: #2d2d2d; // slightly lighter grey
+$autothought-grey-medium: #404040; // medium grey for borders/dividers
+$autothought-grey-light: #a0a0a0; // light grey for text
+$autothought-text-primary: #ffffff; // white text on dark backgrounds
+$autothought-text-secondary: #d4d4d4; // light grey text
+
 $cloudy-blue: #d4d6e0;
 $cloudy-blue-two: #ced1dc;
 $dark-grey-blue-three: #1e2ce1;
@@ -177,7 +190,7 @@ $font-weight-light: 300; // TODO:
 $font-weight-bold: 700; // TODO:
 
 $nav-bar-height: 64px;
-$nav-bar-bg: $blue-900;
+$nav-bar-bg: $autothought-grey-darkest;
 $side-bar-close-width: 64px;
 $side-bar-open-width: 220px;
 
@@ -199,12 +212,12 @@ $zindex-modal: 1050;
 $zindex-popover: 1060;
 $zindex-tooltip: 1070;
 
-// card
+// card - Autothought theme
 $card-border-radius: 6px;
-$card-bg: $blue-500;
-$card-footer-bg: $blue-600;
-$card-footer-font-color: $blue-300;
-$card-header-color: $blue-300;
+$card-bg: $autothought-grey-dark;
+$card-footer-bg: $autothought-grey-darkest;
+$card-footer-font-color: $autothought-text-secondary;
+$card-header-color: $autothought-text-secondary;
 
 // chips
 $chip-border-radius: 12px;
@@ -213,22 +226,22 @@ $chip-height: 15px;
 
 // circle counter
 
-// table
+// table - Autothought theme
 $table-cell-padding: 0 0.75rem;
 $table-cell-padding-sm: .3rem;
 
-$table-bg: $blue-700;
-$table-even-bg: $blue-800;
-$table-hover-bg: $blue-600;
+$table-bg: $autothought-grey-dark;
+$table-even-bg: $autothought-grey-darkest;
+$table-hover-bg: $autothought-grey-medium;
 $table-active-bg: $table-hover-bg;
 
-$table-header-bg: $blue-600;
-$table-header-color: $blue-300;
+$table-header-bg: $autothought-grey-medium;
+$table-header-color: $autothought-text-primary;
 
 $table-border-radius: 2px; // TODO
 $table-border-color: transparent; // TODO
 
-$body-bg-color: $blue-700;
+$body-bg-color: $autothought-grey-darkest;
 
 $assets-icons-path: 'app/webapp-common/assets/icons';
 

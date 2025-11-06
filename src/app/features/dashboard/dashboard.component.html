@@ -1,4 +1,4 @@
-<div class="dashboard-body">
+<div class="dashboard-body autothought-theme">
   <div class="recent">
     <sm-dashboard-projects (width)="setWidth($event)"></sm-dashboard-projects>
     <sm-dashboard-reports></sm-dashboard-reports>
@@ -7,7 +7,7 @@
       [recentTasks]="recentTasks$| async"
     >
       <div header-buttons>
-        <button mat-flat-button data-id="Manage Workers And Queues" (click)="redirectToWorkers()">
+        <button mat-flat-button class="autothought-button" data-id="Manage Workers And Queues" (click)="redirectToWorkers()">
           <mat-icon fontSet="al" fontIcon="al-ico-queues"></mat-icon>
           MANAGE WORKERS AND QUEUES
         </button>
