@@ -344,7 +344,7 @@ export class CommonExperimentsInfoEffects {
               graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : emptyAction()
             ];
           } else {
-            this.router.navigate(['dashboard']);
+            this.router.navigate(['']);
             return [deactivateLoader(action.type)];
           }
         }),

@@ -109,11 +109,13 @@ export abstract class BaseImageViewerComponent implements OnDestroy {
           this.currentDebugImage = currentDebugImage;
           this.iteration = currentDebugImage.iter;
         }),
-        switchMap(currentDebugImage => getSignedUrlOrOrigin$(currentDebugImage.url, this.store))
+        switchMap(currentDebugImage => {
+          this.isPlayer.set(new IsVideoPipe().transform(currentDebugImage.url) || new IsAudioPipe().transform(currentDebugImage.url));
+          return getSignedUrlOrOrigin$(currentDebugImage.url, this.store)
+        })
       )
       .subscribe(signed => {
         this.url.set(signed);
-        this.isPlayer.set(new IsVideoPipe().transform(signed) || new IsAudioPipe().transform(signed));
       });
   }
 

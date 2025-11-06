@@ -29,7 +29,7 @@ export const getMultiPlotCharts = createAction(
 
 export const setExperimentMultiScalarSingleValue = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'SET_MULTI_SINGLE_SCALAR_CHARTS',
-  props<EventsGetTaskSingleValueMetricsResponse>()
+  props<{name: EventsGetTaskSingleValueMetricsResponse}>()
 );
 
 export const setSelectedExperiments = createAction(

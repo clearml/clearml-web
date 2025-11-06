@@ -11,7 +11,7 @@ export class ProjectsHeaderComponent {
   searchQuery = input<string>();
   sortOrder = input<TableSortOrderEnum>();
   tags = input<string[]>();
-  enableTagsFilter = input(false);
+  enableTagsFilter = input(true);
   sortByField = input<string>();
 
   sortByTitle = computed(() => this.sortByField().includes('name') ? 'NAME' : 'RECENT');

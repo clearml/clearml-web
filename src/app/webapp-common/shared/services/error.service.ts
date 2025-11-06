@@ -27,6 +27,7 @@ export class ErrorService {
 
   private codes = {
     400: {
+      12: this.template`Field excided allowed value`,
       50: this.template`Account reached the maximum number of credentials.`,
       51: this.template`This operation could not be completed at this time. Please try again later. \n${'resultMsg'}`,
       52: this.template`Could not complete identity verification. The provider may be down - Please try again later`,
@@ -45,8 +46,6 @@ export class ErrorService {
       509: this.template`Can't edit frame's metadata for published version.`
     }
   };
-
-  constructor() { }
 
   getErrorMsg(error: Error, extraParams: Record<string, string> = {}) {
     const template = this.codes?.[error?.meta?.result_code]?.[error?.meta?.result_subcode];

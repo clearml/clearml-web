@@ -5,7 +5,7 @@ import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {selectIsDeepMode, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {selectIsDeepMode, selectRouterProjectId, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 import {MODELS_TABLE_COL_FIELDS} from '@common/models/shared/models.const';
 
 export interface ModelsState {
@@ -25,9 +25,9 @@ export const selectModelsView = createSelector(models, (state): ModelsViewState 
 export const selectModelsList = createSelector(selectModelsView, (state) => state.models);
 export const selectCurrentScrollId = createSelector(selectModelsView, (state) => state.scrollId);
 export const selectGlobalFilter = createSelector(selectModelsView, (state) => state.globalFilter);
-export const selectTableSortFields = createSelector(selectModelsView, selectSelectedProjectId,
+export const selectTableSortFields = createSelector(selectModelsView, selectRouterProjectId,
   (state, projectId) => state.projectColumnsSortOrder[projectId] || modelsInitialState.tableSortFields);
-export const selectTableFilters = createSelector(selectModelsView, selectSelectedProjectId,
+export const selectTableFilters = createSelector(selectModelsView, selectRouterProjectId,
   (state, projectId) => state.projectColumnFilters?.[projectId] || {});
 export const selectSelectedModels = createSelector(selectModelsView, state => state.selectedModels);
 export const selectSelectedModelsDisableAvailable = createSelector(selectModelsView, (state) => state.selectedModelsDisableAvailable);
@@ -78,10 +78,10 @@ export const selectSelectedModel = createSelector(selectModelInfo, (state) => st
 export const selectIsModelSaving = createSelector(selectModelInfo, (state) => state.saving);
 export const selectActiveSectionEdit = createSelector(selectModelInfo, state => state.activeSectionEdit);
 export const selectIsModelInEditMode = createSelector(selectModelInfo, (state) => !!state.activeSectionEdit);
-export const selectModelExperimentsTableFilters = createSelector(selectModelInfo, state => state.modelExperimentsTableFilter);
+export const selectModelExperimentsTableFilters = createSelector(selectModelInfo, state => state.modelExperimentsTableFilter ?? {});
 export const selectLastVisitedModelsTab = createSelector(selectModelInfo, (state) => state.lastTab);
 export const selectModelPlots = createSelector(selectModelInfo, state => state.plots);
 
-export const selectModelsPage = createSelector(selectRouterConfig, config => config[0] === 'models');
+export const selectModelsPage = createSelector(selectRouterConfig, config => config?.[0] === 'models');
 export const selectModelId = createSelector(selectRouterParams, params => params?.modelId);
-export const selectProjectId = createSelector(selectModelsPage, selectSelectedProjectId, (modelsPage, projectId) => modelsPage ? '*' : projectId);
+export const selectProjectId = createSelector(selectModelsPage, selectRouterProjectId, (modelsPage, projectId) => modelsPage ? '*' : projectId);

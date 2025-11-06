@@ -1,15 +1,12 @@
 import {NAVIGATION_PREFIX} from '~/app.constants';
 import {createAction, createActionGroup, emptyProps, props} from '@ngrx/store';
 import {Params} from '@angular/router';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {CrumbTypeEnum, IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
 
 export const BREADCRUMBS_PREFIX = 'BREADCRUMBS_';
-
-
-export const navigationEnd = createAction(NAVIGATION_PREFIX + 'NAVIGATION_END');
 
 export const setRouterSegments = createAction(
   NAVIGATION_PREFIX + 'SET_ROUTER_SEGMENT',
@@ -30,6 +27,7 @@ export const setURLParams = createAction(
     filters?: Record<string, FilterMetadata>;
     gsFilters?: Record<string, FilterMetadata>;
     isArchived?: boolean;
+    isAdvanced?: boolean;
     isDeep?: boolean;
     update?: boolean;
     version?: string;

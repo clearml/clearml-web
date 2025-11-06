@@ -17,7 +17,7 @@
 
 .mat-mdc-tab-group.with-border {
   mat-tab-header {
-    border-bottom: solid 1px var(--mat-tab-header-divider-color, var(--mat-sys-surface-variant));
+    border-bottom: solid 1px var(--mat-tab-divider-color, var(--mat-sys-surface-variant));
   }
 }
 

@@ -21,15 +21,36 @@ import {escapeRegExp, get} from 'lodash-es';
 import {initSearch} from '@common/common-search/common-search.actions';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {QueueStatsComponent} from '@common/workers-and-queues/containers/queue-stats/queue-stats.component';
+import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
+import {MatIconModule} from '@angular/material/icon';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {MatButton} from '@angular/material/button';
+import {QueuesTableComponent} from '@common/workers-and-queues/dumb/queues-table/queues-table.component';
+import {PushPipe} from '@ngrx/component';
+import {QueueInfoComponent} from '@common/workers-and-queues/dumb/queue-info/queue-info.component';
+import {QueueCreateDialogModule} from '@common/shared/queue-create-dialog/queue-create-dialog.module';
 
 const REFRESH_INTERVAL = 30000;
 
 @Component({
-    selector: 'sm-queues',
-    templateUrl: './queues.component.html',
-    styleUrls: ['./queues.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-queues',
+  templateUrl: './queues.component.html',
+  styleUrls: ['./queues.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    QueueStatsComponent,
+    CommonSearchComponent,
+    MatIconModule,
+    SplitAreaComponent,
+    SplitAreaComponent,
+    SplitComponent,
+    MatButton,
+    QueuesTableComponent,
+    PushPipe,
+    QueueCreateDialogModule,
+    QueueInfoComponent
+  ],
 })
 export class QueuesComponent {
   private store = inject(Store);

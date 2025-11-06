@@ -61,7 +61,8 @@ export interface RootProjects {
   showHidden: boolean;
   hideExamples: boolean;
   blockUserScript: boolean;
-  mainPageTagsFilter: Record<string, { tags: string[]; filterMatchMode: string }>;
+  mainPageTagsFilter: Record<string, { tags: string[]; filterMatchMode: string  }>;
+  mainPageUsersFilter: Record<string, { users: string[]  }>;
   mainPageTagsFilterMatchMode: string;
   defaultNestedModeForFeature: Record<string, boolean>;
   selectedSubFeature: IBreadcrumbsLink;
@@ -72,6 +73,7 @@ export interface RootProjects {
 
 const initRootProjects: RootProjects = {
   mainPageTagsFilter: {},
+  mainPageUsersFilter: {},
   mainPageTagsFilterMatchMode: 'AND',
   selectedProject: null,
   projectAncestors: null,
@@ -101,12 +103,14 @@ const initRootProjects: RootProjects = {
 
 export const projects = state => state.rootProjects as RootProjects;
 export const selectRouterProjectId = createSelector(selectRouterParams, params => params?.projectId as string);
+export const selectMinimizedView = (getId: (params: Record<string, string>) => string) => createSelector(selectRouterParams,
+params => !!getId(params) || Object.hasOwn(params ?? {}, 'ids'));
 export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
 export const selectSelectedBreadcrumbSubFeature = createSelector(projects, state => state.selectedSubFeature);
 export const selectBreadcrumbOptions = createSelector(projects, state => state.breadcrumbOptions);
 export const selectProjectAncestors = createSelector(projects, state => state.projectAncestors);
 export const selectSelectedProjectDescription = createSelector(projects, state => state.selectedProject?.description);
-export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : '');
+export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : null);
 export const selectIsArchivedMode = createSelector(projects, state => state.archive);
 export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, selectSelectedProjectId,
@@ -114,6 +118,7 @@ export const selectTagsFilterByProject = createSelector(projects, selectSelected
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
 
 export const selectMainPageTagsFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageTagsFilter[projectType]?.tags : []);
+export const selectMainPageUsersFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageUsersFilter[projectType]?.users : []);
 export const selectMainPageTagsFilterMatchMode = createSelector(projects, selectProjectType, (state, projectType) => projectType? state.mainPageTagsFilter[projectType]?.filterMatchMode : null);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
 
@@ -217,6 +222,13 @@ export const projectsReducer = createReducer(
     mainPageTagsFilter: {
       ...state.mainPageTagsFilter,
       [action.feature]: {...state.mainPageTagsFilter[action.feature], tags: action.tags}
+    }
+  })),
+  on(projectsActions.setMainPageUsersFilter, (state, action): RootProjects => ({
+    ...state,
+    mainPageUsersFilter: {
+      ...state.mainPageUsersFilter,
+      [action.feature]: {...state.mainPageUsersFilter[action.feature], users: action.users}
     }
   })),
   on(projectsActions.setMainPageTagsFilterMatchMode, (state, action): RootProjects => ({

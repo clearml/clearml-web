@@ -21,11 +21,11 @@ const initRouter: RouterState = {
 };
 
 export const selectRouter = state => state.router as RouterState;
-export const selectRouterUrl = createSelector(selectRouter, router => router && router.url);
-export const selectRouterParams = createSelector(selectRouter, router => router && router?.params);
+export const selectRouterUrl = createSelector(selectRouter, router => router?.url);
+export const selectRouterParams = createSelector(selectRouter, router => router?.params ?? {});
 export const selectRouterQueryParams = createSelector(selectRouter, router => router && router.queryParams);
-export const selectRouterConfig = createSelector(selectRouter, router => router && router.config);
-export const selectRouterData = createSelector(selectRouter, router => router && router.data);
+export const selectRouterConfig = createSelector(selectRouter, router => router?.config ?? []);
+export const selectRouterData = createSelector(selectRouter, router => router?.data ?? {});
 export const selectFirstRouterConfig = createSelector(selectRouterConfig, config => config?.[0]);
 
 

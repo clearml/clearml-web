@@ -2,7 +2,6 @@
   [formControl]="formControl"
   [hideSingleSelectionIndicator]="true"
   [vertical]="vertical()"
-  (change)="$event.value !== undefined && valueChanged.emit($event.value)"
   name="fontStyle"
   aria-label="Font Style">
   @for (option of options(); track option.value) {

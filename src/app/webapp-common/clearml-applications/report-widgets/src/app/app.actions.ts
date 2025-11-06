@@ -61,3 +61,8 @@ export const setTaskData = createAction('[App] set task data', props<{
   sourceTasks: string[];
   appId?: string;
 }>());
+
+export const paramDecoder = (data: string) =>  {
+  const [section, name] = data.split('.', 2);
+  return {section: decodeURIComponent(section), name: decodeURIComponent(name)};
+}

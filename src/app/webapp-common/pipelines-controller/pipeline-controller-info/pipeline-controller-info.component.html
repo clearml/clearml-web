@@ -84,13 +84,13 @@
       </div>
       <sm-button-toggle
         class="t-btns"
-        [value]="detailsPanelMode()"
         [options]="[
-        {label: 'PREVIEW', value: statusOption.preview},
-        {label: 'CONSOLE', value: statusOption.log},
-        {label: 'CODE', value: statusOption.code}
+          {label: 'PREVIEW', value: statusOption.preview},
+          {label: 'CONSOLE', value: statusOption.log},
+          {label: 'CODE', value: statusOption.code}
         ]"
-        (valueChanged)="detailsPanelMode.set($event)"
+        [ngModel]="detailsPanelMode()"
+        (ngModelChange)="detailsPanelMode.set($event)"
       ></sm-button-toggle>
       <div class="close gap-3">
         <button mat-icon-button (click)="toggleResultSize()" data-id="maxResultPanel">

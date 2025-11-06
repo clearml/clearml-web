@@ -9,6 +9,9 @@
   height: layout.$top-bar-height;
   border-bottom: 1px solid var(--color-surface-container-high);
 
+  sm-header-navbar-tabs {
+    height: layout.$top-bar-height;
+  }
 
   .share-view {
     visibility: hidden;

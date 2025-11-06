@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
@@ -12,32 +12,32 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
-    selector: 'sm-param-selector',
-    imports: [
-        MenuComponent,
-        ExperimentSharedModule,
-        ClickStopPropagationDirective,
-        GroupedCheckedFilterListComponent,
-        TooltipDirective,
-        ShowTooltipIfEllipsisDirective
-    ],
-    templateUrl: './param-selector.component.html',
-    styleUrl: './param-selector.component.scss'
+  selector: 'sm-param-selector',
+  templateUrl: './param-selector.component.html',
+  styleUrl: './param-selector.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MenuComponent,
+    ExperimentSharedModule,
+    ClickStopPropagationDirective,
+    GroupedCheckedFilterListComponent,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective
+  ],
 })
 export class ParamSelectorComponent {
   public trackByIndex = trackByIndex;
 
-  @Input() selectedHyperParams: string[];
-  @Input() title: string;
-  @Input() itemsList: Record<string, any>;
-  @Input() single: boolean;
-  @Input() selectFilteredItems: boolean;
+  selectedHyperParams = input<string[]>();
+  title = input<string>();
+  itemsList = input<Record<string, any>>();
+  single = input<boolean>();
+  selectFilteredItems = input<boolean>();
+  selectedItemsListMapper = input<(data) => string>();
+  selectedItems = output<{ param: string }>();
+  clearSelection = output();
 
-  @Input() selectedItemsListMapper: (data) => string;
-  @Output() selectedItems = new EventEmitter<{ param: string }>();
-  @Output() clearSelection = new EventEmitter();
-
-  removeHyperParam(hyperParam: string) {
-    this.selectedItems.emit({param:hyperParam})
+  removeHyperParam(param: string) {
+    this.selectedItems.emit({param})
   }
 }

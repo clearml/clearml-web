@@ -27,12 +27,12 @@ import {MatIcon} from '@angular/material/icon';
     ]
 })
 export class NestedPipelinePageComponent extends PipelinesPageComponent {
+  override entityType = ProjectTypeEnum.pipelines;
   circleTypeEnum = CircleTypeEnum;
   hideMenu = false;
 
   constructor() {
     super();
-    this.entityType = ProjectTypeEnum.pipelines;
   }
 
   override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {

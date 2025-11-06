@@ -11,7 +11,7 @@ import {
 import {SelectedModel, TableModel} from '../shared/models.model';
 import {cloneDeep} from 'lodash-es';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {createReducer, on} from '@ngrx/store';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
@@ -69,7 +69,7 @@ export const modelsInfoReducer = createReducer(
   on(editModel, (state): ModelInfoState => ({...state, activeSectionEdit: null})),
   on(resetActiveSection, (state): ModelInfoState => ({...state, activeSectionEdit: null})),
   on(setPlots, (state, action): ModelInfoState => ({...state, plots: action.plots})),
-  on(modelSelectionChanged, (state, ): ModelInfoState => ({...state, selectedModel: initialState.selectedModel })),
+  on(modelSelectionChanged, (state): ModelInfoState => ({...state, selectedModel: initialState.selectedModel})),
   on(modelExperimentsTableFilterChanged, (state, action): ModelInfoState => ({
     ...state,
     modelExperimentsTableFilter: {
@@ -78,16 +78,17 @@ export const modelsInfoReducer = createReducer(
     }
   })),
   on(modelsExperimentsTableClearAllFilters, (state): ModelInfoState =>
-    ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
+    ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter})
   ),
   on(setLastModelsTab, (state, {projectId, lastTab}): ModelInfoState => ({...state, lastTab: {...state.lastTab, [projectId]: lastTab}})),
   on(removeTagSuccess, (state, action): ModelInfoState => ({
     ...state,
-    ...(action.models.includes(state.selectedModel.id) && {selectedExperiment: {
+    ...(action.models.includes(state.selectedModel.id) && {
+      selectedModel: {
         ...state.selectedModel,
         tags: state.selectedModel.tags?.filter(tag => tag !== action.tag)
-      }})
+      }
+    })
   }))
-
 );
 

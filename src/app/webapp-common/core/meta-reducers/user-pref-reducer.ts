@@ -27,7 +27,13 @@ export const createUserPrefReducer = (
 
     if (firstRun[key] && userPreferences.isReady() && nextState[key]) {
       firstRun[key]         = false;
-      const savedState = userPreferences.getPreferences(key);
+      let savedState = userPreferences.getPreferences(key);
+      savedState = Object.entries(savedState || {}).reduce(( acc, [param, val]) => {
+        if (val!== undefined && !nextState[param]) {
+          acc[param] = val;
+        }
+        return acc;
+      }, {});
       return merge({}, nextState, {[key]: {...savedState, preferencesReady: true}});
     }
     if (action.type === setPreferences.type) {

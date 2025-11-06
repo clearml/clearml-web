@@ -46,13 +46,13 @@ export class InlineEditComponent {
   readonly pattern = input(undefined);
   readonly required = input(false);
   readonly minLength = input(0);
-  readonly originalText = input(undefined);
+  readonly originalText = input<string>(undefined);
   forbiddenString = input<string[]>();
   forbiddenStringFiltered = computed(() => this.forbiddenString()?.filter(fs => fs !== this.originalText()));
 
   // *DEFAULTS*
   readonly editable = input(true);
-  readonly fixedWidth = input(undefined);
+  readonly fixedWidth = input<number>(null);
   multiline = input(false);
   readonly rows = input(3); // Only relevant to multiline
   readonly inlineDisabled = input(false);

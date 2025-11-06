@@ -4,15 +4,39 @@
     height: inherit;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 24px;
+    .json-info-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-left: 1px solid var(--color-outline);
+      width: 34px;
+      height: 28px;
+      color: var(--color-primary);
+    }
+    .json-error {
+      height: 18px;
+      font-size: 12px;
+      color: var(--color-error);
+      padding: 4px 0 0 18px;
+    }
   }
 
   .search-container {
     display: flex;
     justify-content: center;
+    max-width: 96%;
 
     sm-search {
       width: 300px;
+      margin-right: 8px;
+      transition: width 0.4s ease-in-out;
+      &.advanced {
+        width: 100%;
+      }
+      .advanced-info {
+        margin-right:8px;
+      }
     }
 
     sm-show-only-user-work {
@@ -30,8 +54,9 @@
     }
 
     &.error {
+      color: var(--color-error);
       width: 20px;
-      right: 36px;
+      right: 40px;
     }
   }
 }

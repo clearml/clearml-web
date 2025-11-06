@@ -32,19 +32,17 @@ import {MESSAGES_SEVERITY} from '../../constants';
 import {
   selectDefaultNestedModeForFeature,
   selectMainPageTagsFilter,
-  selectMainPageTagsFilterMatchMode
+  selectMainPageTagsFilterMatchMode, selectMainPageUsersFilter
 } from '../../core/reducers/projects.reducer';
 import {debounceTime, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {setBreadcrumbsOptions, setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
-import {concatLatestFrom} from '@ngrx/operators';
-import {selectActiveSearch} from '@common/dashboard-search/dashboard-search.reducer';
 
 @Component({
   selector: 'sm-reports-page',
@@ -52,11 +50,10 @@ import {selectActiveSearch} from '@common/dashboard-search/dashboard-search.redu
   styleUrls: ['./reports-page.component.scss'],
   standalone: false
 })
-export class ReportsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
+export class ReportsPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
   public reports$: Observable<IReport[]>;
   public archive$: Observable<boolean>;
   public reportsTags$: Observable<string[]>;
-  private sub = new Subscription();
   public noMoreReports$: Observable<boolean>;
   public reportsOrderBy$: Observable<string>;
   public reportsSortOrder$: Observable<1 | -1>;
@@ -75,7 +72,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     this.reportsSortOrder$ = this.store.select(selectReportsSortOrder);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
 
-    this.store.dispatch(getReportsTags());
+
   }
 
   public openCreateReportDialog(projectId) {
@@ -90,20 +87,24 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
         }
       });
   }
+  override getProjectsTags() {
+    this.store.dispatch(getReportsTags());
+  }
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
-    this.sub.unsubscribe();
+    this.subs.unsubscribe();
     this.store.dispatch(setArchive({archive: false}));
     this.store.dispatch(resetReports());
   }
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.sub.add(combineLatest([
+    this.subs.add(combineLatest([
         this.store.select(selectMainPageTagsFilter),
         this.store.select(selectMainPageTagsFilterMatchMode),
         this.store.select(selectShowOnlyUserWork),
+        this.store.select(selectMainPageUsersFilter),
         this.store.select(selectReportsQueryString),
         this.route.queryParams
           .pipe(
@@ -128,7 +129,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
         })
     );
 
-    this.sub.add(this.searchQuery$.subscribe((searchQ) => {
+    this.subs.add(this.searchQuery$.subscribe((searchQ) => {
       this.store.dispatch(setReportsSearchQuery(searchQ));
     }));
   }

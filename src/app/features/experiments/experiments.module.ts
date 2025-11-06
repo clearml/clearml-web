@@ -5,7 +5,6 @@ import {ExperimentRouterModule} from './experiments-routing.module';
 import {AdminService} from '~/shared/services/admin.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SelectModelModule} from '@common/select-model/select-model.module';
-import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {LayoutModule} from '~/layout/layout.module';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
@@ -189,7 +188,6 @@ import {ExperimentDetailsComponent} from '@common/experiments/dumb/experiment-de
   ],
   providers: [
     AdminService,
-    SmSyncStateSelectorService,
     {provide: MAT_AUTOCOMPLETE_SCROLL_STRATEGY, useFactory: scrollFactory, deps: [Overlay]},
   ]
 })

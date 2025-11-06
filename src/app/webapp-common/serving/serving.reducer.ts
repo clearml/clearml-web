@@ -1,6 +1,6 @@
 import {createFeature, createReducer, createSelector, on} from '@ngrx/store';
 import {ServingActions, servingLoadingTableColFields, servingTableColFields} from './serving.actions';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {ISmCol, TABLE_SORT_ORDER} from '@common/shared/ui-components/data/table/table.consts';

@@ -13,147 +13,168 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/member-ordering */
 
 import {HTTP} from '../../app.constants';
-import {SmApiRequestsService} from "./api-requests.service";
+import {SmApiRequestsService} from './api-requests.service';
 
-import { Inject, Injectable, Optional }                      from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams,
-         HttpResponse, HttpEvent }                           from '@angular/common/http';
-import { CustomHttpUrlEncodingCodec }                        from '../encoder';
+import {Inject, Injectable, Optional} from '@angular/core';
+import {
+  HttpClient, HttpHeaders, HttpParams,
+  HttpResponse, HttpEvent
+} from '@angular/common/http';
+import {CustomHttpUrlEncodingCodec} from '../encoder';
 
-import { Observable }                                        from 'rxjs';
+import {Observable} from 'rxjs';
 
-import { OrganizationGetTagsRequest } from '../model/organization/organizationGetTagsRequest';
-import { OrganizationGetTagsResponse } from '../model/organization/organizationGetTagsResponse';
-import { OrganizationGetUserCompaniesResponse } from '../model/organization/organizationGetUserCompaniesResponse';
-import { OrganizationGetEntitiesCountRequest } from '../model/organization/organizationGetEntitiesCountRequest';
-import { OrganizationGetEntitiesCountResponse } from '../model/organization/organizationGetEntitiesCountResponse';
+import {OrganizationGetTagsRequest} from '../model/organization/organizationGetTagsRequest';
+import {OrganizationGetTagsResponse} from '../model/organization/organizationGetTagsResponse';
+import {OrganizationGetUserCompaniesResponse} from '../model/organization/organizationGetUserCompaniesResponse';
+import {OrganizationGetEntitiesCountRequest} from '../model/organization/organizationGetEntitiesCountRequest';
+import {OrganizationGetEntitiesCountResponse} from '../model/organization/organizationGetEntitiesCountResponse';
 
-import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
-import { Configuration }                                     from '../configuration';
-import {OrganizationPrepareDownloadForGetAllRequest} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
+import {BASE_PATH, COLLECTION_FORMATS} from '../variables';
+import {Configuration} from '../configuration';
+import {
+  OrganizationPrepareDownloadForGetAllRequest
+} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
+import {
+  OrganizationGetProjectUsagesRequest
+} from '~/business-logic/model/organization/organizationGetProjectUsagesRequest';
+import {ApiOptions} from '~/business-logic/api-services/api';
+import {
+  OrganizationGetProjectUsagesResponse
+} from '~/business-logic/model/organization/organizationGetProjectUsagesResponse';
 
 
 @Injectable()
 export class ApiOrganizationService {
 
-    protected basePath = HTTP.API_BASE_URL;
-    public defaultHeaders = new HttpHeaders();
-    public configuration = new Configuration();
+  protected basePath = HTTP.API_BASE_URL;
+  public defaultHeaders = new HttpHeaders();
+  public configuration = new Configuration();
 
-    constructor(protected apiRequest: SmApiRequestsService, @Optional()@Inject(BASE_PATH) basePath: string, @Optional() configuration: Configuration) {
-        if (basePath) {
-            this.basePath = basePath;
-        }
-        if (configuration) {
-            this.configuration = configuration;
-            this.basePath = basePath || configuration.basePath || this.basePath;
-        }
+  constructor(protected apiRequest: SmApiRequestsService, @Optional() @Inject(BASE_PATH) basePath: string, @Optional() configuration: Configuration) {
+    if (basePath) {
+      this.basePath = basePath;
+    }
+    if (configuration) {
+      this.configuration = configuration;
+      this.basePath = basePath || configuration.basePath || this.basePath;
+    }
+  }
+
+  /**
+   * @param consumes string[] mime-types
+   * @return true: consumes contains 'multipart/form-data', false: otherwise
+   */
+  private canConsumeForm(consumes: string[]): boolean {
+    const form = 'multipart/form-data';
+    for (const consume of consumes) {
+      if (form === consume) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  /**
+   *
+   * Get all the user and system tags used for the company tasks and models
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+
+  public organizationGetProjectUsages(request: OrganizationGetProjectUsagesRequest, options?: ApiOptions): Observable<any> {
+    return this.apiRequest.post<OrganizationGetProjectUsagesResponse>(`${this.basePath}/organization.get_project_usages`,
+      request,
+      {
+        headers: this.defaultHeaders,
+        withCredentials: this.configuration.withCredentials
+      },
+      options
+    );
+  }
+
+  public organizationGetTags(request: OrganizationGetTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling organizationGetTags.');
     }
 
-    /**
-     * @param consumes string[] mime-types
-     * @return true: consumes contains 'multipart/form-data', false: otherwise
-     */
-    private canConsumeForm(consumes: string[]): boolean {
-        const form = 'multipart/form-data';
-        for (const consume of consumes) {
-            if (form === consume) {
-                return true;
-            }
-        }
-        return false;
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
     }
 
-
-    /**
-     *
-     * Get all the user and system tags used for the company tasks and models
-     * @param request request body
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public organizationGetTags(request: OrganizationGetTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-        if (request === null || request === undefined) {
-            throw new Error('Required parameter request was null or undefined when calling organizationGetTags.');
-        }
-
-        let headers = this.defaultHeaders;
-        if (options && options.async_enable) {
-            headers = headers.set(this.configuration.asyncHeader, '1');
-        }
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set("Accept", httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set("Content-Type", httpContentTypeSelected);
-        }
-
-	return this.apiRequest.post<OrganizationGetTagsResponse>(`${this.basePath}/organization.get_tags`,
-            request,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
     }
 
-    /**
-     *
-     * Get details for all companies associated with the current user
-     * @param request request body
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public organizationGetUserCompanies(request: object, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-        if (request === null || request === undefined) {
-            throw new Error('Required parameter request was null or undefined when calling organizationGetUserCompanies.');
-        }
-
-        let headers = this.defaultHeaders;
-        if (options && options.async_enable) {
-            headers = headers.set(this.configuration.asyncHeader, '1');
-        }
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set("Accept", httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set("Content-Type", httpContentTypeSelected);
-        }
-
-	return this.apiRequest.post<OrganizationGetUserCompaniesResponse>(`${this.basePath}/organization.get_user_companies`,
-            request,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
+    // to determine the Content-Type header
+    const consumes: string[] = [];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set('Content-Type', httpContentTypeSelected);
     }
+
+    return this.apiRequest.post<OrganizationGetTagsResponse>(`${this.basePath}/organization.get_tags`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
+  /**
+   *
+   * Get details for all companies associated with the current user
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public organizationGetUserCompanies(request: object, options?: any, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling organizationGetUserCompanies.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set('Content-Type', httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<OrganizationGetUserCompaniesResponse>(`${this.basePath}/organization.get_user_companies`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
 
   /**
    *
@@ -162,7 +183,7 @@ export class ApiOrganizationService {
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
    * @param reportProgress flag to report request and response progress.
    */
-  public organizationPrepareDownloadForGetAll(request: OrganizationPrepareDownloadForGetAllRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+  public organizationPrepareDownloadForGetAll(request: OrganizationPrepareDownloadForGetAllRequest, options?: any, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
     if (request === null || request === undefined) {
       throw new Error('Required parameter request was null or undefined when calling organizationPrepareDownloadForGetAll.');
     }
@@ -173,19 +194,17 @@ export class ApiOrganizationService {
     }
 
     // to determine the Accept header
-    const httpHeaderAccepts: string[] = [
-    ];
+    const httpHeaderAccepts: string[] = [];
     const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
     if (httpHeaderAcceptSelected != undefined) {
-      headers = headers.set("Accept", httpHeaderAcceptSelected);
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
     }
 
     // to determine the Content-Type header
-    const consumes: string[] = [
-    ];
-    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    const consumes: string[] = [];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
     if (httpContentTypeSelected != undefined) {
-      headers = headers.set("Content-Type", httpContentTypeSelected);
+      headers = headers.set('Content-Type', httpContentTypeSelected);
     }
 
     return this.apiRequest.post<any>(`${this.basePath}/organization.prepare_download_for_get_all`,
@@ -200,47 +219,46 @@ export class ApiOrganizationService {
   }
 
   /**
-     *
-     * Get counts for the company entities according to the passed search criteria
-     * @param request request body
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public organizationGetEntitiesCount(request: OrganizationGetEntitiesCountRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-        if (request === null || request === undefined) {
-            throw new Error('Required parameter request was null or undefined when calling organizationGetEntitiesCount.');
-        }
-
-        let headers = this.defaultHeaders;
-        if (options && options.async_enable) {
-            headers = headers.set(this.configuration.asyncHeader, '1');
-        }
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set("Accept", httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set("Content-Type", httpContentTypeSelected);
-        }
-
-        return this.apiRequest.post<OrganizationGetEntitiesCountResponse>(`${this.basePath}/organization.get_entities_count`,
-          request,
-          {
-              withCredentials: this.configuration.withCredentials,
-              headers: headers,
-              observe: observe,
-              reportProgress: reportProgress
-          }
-        );
+   *
+   * Get counts for the company entities according to the passed search criteria
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public organizationGetEntitiesCount(request: OrganizationGetEntitiesCountRequest, options?: any, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling organizationGetEntitiesCount.');
     }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set('Content-Type', httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<OrganizationGetEntitiesCountResponse>(`${this.basePath}/organization.get_entities_count`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
 }

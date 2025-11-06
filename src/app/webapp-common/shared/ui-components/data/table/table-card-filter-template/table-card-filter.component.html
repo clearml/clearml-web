@@ -39,11 +39,11 @@
           @if (col?.andFilter) {
             <div class="filter-type" smClickStopPropagation>
               <button mat-button data-id="AnyTagOption" class="link"
-                      [class.selected]="filterMatch()[option.key] !== 'AND'"
+                      [class.selected]="!andFilter()"
                       (click)="toggleCombination(option.key)"
               >Any</button>
               <button mat-button data-id="allTagOption" class="link"
-                      [class.selected]="filterMatch()[option.key] === 'AND'"
+                      [class.selected]="andFilter()"
                       (click)="toggleCombination(option.key)"
               >All</button>
             </div>

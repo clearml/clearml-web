@@ -37,6 +37,7 @@ export class TagListComponent {
   readonly = input<boolean>(false);
   empty = input<boolean>(false);
   showAddTagOnlyOnHover = input<boolean>(true);
+  showAddTag = input<boolean>(true);
   remove = output<string>();
   add = output<MouseEvent>();
 

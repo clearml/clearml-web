@@ -1,8 +1,8 @@
 @use "variables";
 
 :host {
-  --mdc-secondary-navigation-tab-container-height: #{variables.$nav-bar-height};
-  --mat-tab-header-inactive-label-text-color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
+  --mat-tab-container-height: #{variables.$nav-bar-height};
+  --mat-tab-inactive-label-text-color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
 
   .sub-header {
     margin-top: 4px;

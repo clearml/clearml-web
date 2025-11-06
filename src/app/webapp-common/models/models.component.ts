@@ -1,10 +1,9 @@
-import {Component, computed, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
-import {Params} from '@angular/router';
+import {ChangeDetectionStrategy, Component, computed, effect, OnDestroy, signal, ViewChild} from '@angular/core';
 import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
 import {distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
 import {
-  getCompanyTags,
+  getCompanyTags, getProjectUsers,
   getTags,
   setArchive as setProjectArchive,
   setBreadcrumbsOptions,
@@ -16,14 +15,13 @@ import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.ac
 import {
   selectCompanyTags,
   selectIsArchivedMode,
-  selectIsDeepMode,
   selectProjectSystemTags,
-  selectProjectTags,
+  selectProjectTags, selectRouterProjectId,
   selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {
   createMetadataCol,
@@ -36,7 +34,7 @@ import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS} from './models.consts';
 import * as modelsSelectors from './reducers';
 import {
-  selectFilteredTableCols,
+  selectFilteredTableCols, selectIsModelInEditMode,
   selectMetadataColsOptions,
   selectMetadataKeys,
   selectMetricVariants,
@@ -65,19 +63,23 @@ import {
   SelectionEvent
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {computedPrevious} from 'ngxtension/computed-previous';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {MemoizedSelector} from '@ngrx/store';
+import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
+import {distinctParamsUntilChanged$} from '@common/projects/common-projects.utils';
 
 
 @Component({
-    selector: 'sm-models',
-    templateUrl: './models.component.html',
-    styleUrls: ['./models.component.scss'],
-    standalone: false
+  selector: 'sm-models',
+  templateUrl: './models.component.html',
+  styleUrls: ['./models.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
-export class ModelsComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
+export class ModelsComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = MODELS_TABLE_COLS;
   public entityTypeEnum = EntityTypeEnum;
-  protected override entityType = EntityTypeEnum.model;
+  private modelsFeature = false;
   public models$: Observable<TableModel[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public showInfo$: Observable<boolean>;
@@ -86,13 +88,11 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   protected override addTag = addTag;
   protected override setSplitSizeAction = modelsActions.setSplitSize;
   protected setTableModeAction = modelsActions.setTableMode;
-  private checkedModels: TableModel[];
-  protected override selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
+  protected override splitSize = this.store.selectSignal(modelsSelectors.selectSplitSize);
   protected tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
-  protected checkedModels$ = this.store.select(modelsSelectors.selectSelectedModels);
+  protected checkedModels = this.store.selectSignal(modelsSelectors.selectSelectedModels);
   protected selectedModelsDisableAvailable$ = this.store.select(modelsSelectors.selectSelectedModelsDisableAvailable);
   protected tableFilters$ = this.store.select(modelsSelectors.selectTableFilters);
-  protected searchValue$ = this.store.select(modelsSelectors.selectGlobalFilter);
   protected isArchived$ = this.store.select(selectIsArchivedMode);
   protected noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
   protected isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
@@ -102,7 +102,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   protected override showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
   protected searchQuery$ = this.store.select(selectSearchQuery);
-  protected inEditMode$ = this.store.select(modelsSelectors.selectIsModelInEditMode);
   protected tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
   protected tags$ = this.store.select(selectModelsTags);
   protected metadataKeys$ = this.store.select(selectMetadataKeys);
@@ -111,7 +110,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   protected companyTags$ = this.store.select(selectCompanyTags);
   protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected frameworks$ = this.store.select(selectModelsFrameworks);
-  protected tableMode = this.store.selectSignal(selectTableMode);
+  override tableMode = this.store.selectSignal(selectTableMode);
   protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
 
   protected selectedTableModel = toSignal(this.store.select(selectSelectedTableModel)
@@ -124,17 +123,25 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
 
   @ViewChild('modelsTable') private table: ModelsTableComponent;
-  private modelsFeature = false;
+
+  protected override get entityType() {
+    return EntityTypeEnum.model;
+  }
+
+  override get selectEditMode(): MemoizedSelector<unknown, boolean> | undefined {
+    return selectIsModelInEditMode;
+  }
 
   constructor() {
     super();
+    this.store.dispatch(getProjectUsers({projectId: this.selectedProjectId, entity: ProjectsGetUserNamesRequest.EntityEnum.Model}))
     let child = this.route.snapshot;
     while (child.firstChild && !child.data.setAllProject) {
       child = child.firstChild;
     }
     if (child.data.setAllProject) {
       this.store.dispatch(getCompanyTags());
-      this.modelsFeature =true;
+      this.modelsFeature = true;
     }
 
     this.tableCols$ = this.filteredTableCols$.pipe(
@@ -150,77 +157,60 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     );
     this.showInfo$ = this.store.select(modelsSelectors.selectModelId);
     this.syncAppSearch();
-  }
 
-  override ngOnInit() {
-    super.ngOnInit();
-    let prevQueryParams: Params;
-    this.sub.add(this.selectedProject$.pipe(filter(selectedProject => (this.modelsFeature && !selectedProject))).subscribe(() =>
-      this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}))
-    ));
-    this.sub.add(combineLatest([
-        this.store.select(modelsSelectors.selectProjectId),
-        this.route.queryParams,
-      ])
-        .pipe(
-          filter(([projectId, queryParams]) => {
-            if (!projectId) {
-              return false;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
-            const equal = projectId === this.projectId && isEqual(queryParamsWithoutSearch, prevQueryParams);
-            prevQueryParams = queryParamsWithoutSearch;
-            return !equal;
-          })
-        )
-        .subscribe(([projectId, params]: [string, Params]) => {
-          if (projectId != this.projectId && Object.keys(params || {}).length === 0) {
-            this.emptyUrlInit();
-          } else {
-            this.projectId = projectId;
-            this.setupContextMenu('models', params.archive === 'true');
-            if (params.order) {
-              const orders = decodeOrder(params.order);
-              this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
-            }
-            if (params.filter != null) {
-              const filters = decodeFilter(params.filter);
-              this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
-            } else {
-              if (params.order) {
-                this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
+    effect(() => {
+      if(this.modelsFeature && !this.selectedProject()) {
+        this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}))
+      }
+    });
+
+    distinctParamsUntilChanged$(combineLatest([
+      this.store.select(selectRouterProjectId),
+      this.route.queryParams,
+    ]))
+      .subscribe(([prevProjectId, projectId, params]) => {
+        if (projectId !== prevProjectId && Object.keys(params || {}).length === 0) {
+          this.emptyUrlInit();
+        } else {
+          this.setupContextMenu('models', params.archive === 'true');
+          if (params.columns) {
+            const [, metrics, , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
+            const hiddenCols = {};
+            this.originalTableColumns.forEach((tableCol) => {
+              if (tableCol.id !== 'selected') {
+                hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
               }
-            }
-            this.store.dispatch(setProjectArchive({archive: !!params.archive}));
-            if (params.deep) {
-              this.store.dispatch(setDeep({deep: true}));
-            }
-
-            if (params.columns) {
-              const [, metrics, , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
-              const hiddenCols = {};
-              this.originalTableColumns.forEach((tableCol) => {
-                if (tableCol.id !== 'selected') {
-                  hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
-                }
-              });
-              this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
-              this.store.dispatch(modelsActions.setExtraColumns({
-                projectId: projectId ?? this.projectId,
-                columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
-                  .concat(metrics.map(metricCol => createMetricColumn(metricCol, projectId)))
-              }));
-              this.columnsReordered(allIds, false);
-            }
-            this.store.dispatch(modelsActions.fetchModelsRequested());
+            });
+            this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
+            this.store.dispatch(modelsActions.setExtraColumns({
+              projectId: projectId ?? this.projectId(),
+              columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
+                .concat(metrics.map(metricCol => createMetricColumn(metricCol, projectId)))
+            }));
+            this.columnsReordered(allIds, false);
           }
-        })
-    );
+          if (params.order) {
+            const orders = decodeOrder(params.order);
+            this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId()}));
+          }
+          if (params.filter != null) {
+            const filters = decodeFilter(params.filter);
+            this.store.dispatch(modelsActions.setTableFilters({filters, projectId: this.selectedProjectId}));
+          } else {
+            if (params.order) {
+              this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
+            }
+          } if (params.deep) {
+            this.store.dispatch(setDeep({deep: true}));
+          }
+          this.store.dispatch(setProjectArchive({archive: !!params.archive}));
+          this.store.dispatch(modelsActions.fetchModelsRequested());
+        }
+      });
 
     this.createFooterItems({
       entitiesType: EntityTypeEnum.model,
-      selected$: this.checkedModels$,
+      selected$: this.store.select(modelsSelectors.selectSelectedModels),
       showAllSelectedIsActive$: this.showAllSelectedIsActive$,
       tags$: this.tags$,
       data$: this.selectedModelsDisableAvailable$,
@@ -230,8 +220,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
         id === '*' ? this.companyTags$ : this.projectTags$
       )),
     });
-
-    this.sub.add(this.checkedModels$.subscribe(selectedModels => this.checkedModels = selectedModels));
 
     this.selectModelFromUrl();
     this.store.dispatch(modelsActions.getFrameworks());
@@ -251,7 +239,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   getSelectedEntities() {
-    return this.checkedModels;
+    return this.checkedModels();
   }
 
   stopSyncSearch() {
@@ -261,7 +249,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for models'}));
-    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query))));
+    this.searchQuery$
+      .pipe(
+        takeUntilDestroyed(),
+        skip(1),
+        filter(query => query !== null)
+      )
+      .subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query)));
   }
 
   getNextModels() {
@@ -269,11 +263,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   selectModelFromUrl() {
-    this.sub.add(combineLatest([
+    combineLatest([
         this.store.select(modelsSelectors.selectModelId),
         this.models$
       ])
         .pipe(
+          takeUntilDestroyed(),
           withLatestFrom(this.store.select(selectTableMode)),
           map(([[id, models], mode]) => {
             this.firstModel = models?.[0];
@@ -281,11 +276,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
               this.shouldOpenDetails = false;
               this.store.dispatch(modelsActions.modelSelectionChanged({
                 model: this.firstModel,
-                project: this.projectId
+                project: this.projectId()
               }));
             } else {
               this.store.dispatch(modelsActions.setTableMode({mode: id ? 'info' : 'table'}));
             }
+            this.shouldOpenDetails = false;
             return models?.find(model => model.id === id);
           }),
           distinctUntilChanged()
@@ -293,8 +289,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
         .subscribe((selectedModel) => {
           this.store.dispatch(modelsActions.setSelectedModel({model: selectedModel}));
           this.store.dispatch(resetAceCaretsPositions());
-        })
-    );
+        });
   }
 
   filterArchivedModels(models: TableModel[], showArchived: boolean) {
@@ -307,10 +302,10 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   modelSelectionChanged({model, openInfo, origin}: {model: SelectedModel; openInfo?: boolean; origin: 'row' | 'table'}) {
     if(model) {
-      if (this.minimizedView || openInfo) {
+      if (this.minimizedView() || openInfo) {
         this.store.dispatch(modelsActions.modelSelectionChanged({
           model: model,
-          project: this.projectId
+          project: this.projectId()
         }));
       } else if (origin === 'row') {
         this.selectionState().highlited.update(current => current?.id === model.id ? null : model);
@@ -334,12 +329,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
         value,
         filterMatchMode: col.filterMatchMode || andFilter ? 'AND' : undefined
       }],
-      projectId: this.projectId
+      projectId: this.projectId()
     }));
   }
 
   afterArchiveChanged() {
-    this.store.dispatch(modelsActions.showSelectedOnly({active: false, projectId: this.projectId}));
+    this.store.dispatch(modelsActions.showSelectedOnly({active: false, projectId: this.projectId()}));
   }
 
   refreshList(isAutorefresh: boolean) {
@@ -348,7 +343,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
 
   showAllSelected(active: boolean) {
-    this.store.dispatch(modelsActions.showSelectedOnly({active, projectId: this.projectId}));
+    this.store.dispatch(modelsActions.showSelectedOnly({active, projectId: this.projectId()}));
   }
 
   setAutoRefresh($event: boolean) {
@@ -356,20 +351,20 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   columnsReordered(cols: string[], updateUrl = true) {
-    this.store.dispatch(modelsActions.setColsOrderForProject({cols, projectId: this.projectId}));
+    this.store.dispatch(modelsActions.setColsOrderForProject({cols, projectId: this.projectId()}));
     if (updateUrl) {
       this.store.dispatch(modelsActions.updateUrlParams());
     }
   }
 
   selectedTableColsChanged(col: ISmCol) {
-    this.store.dispatch(modelsActions.toggleColHidden({columnId: col.id, projectId: this.projectId}));
+    this.store.dispatch(modelsActions.toggleColHidden({columnId: col.id, projectId: this.projectId()}));
   }
 
   columnResized(event: { columnId: string; widthPx: number }) {
     this.store.dispatch(modelsActions.setColumnWidth({
       ...event,
-      projectId: this.projectId,
+      projectId: this.projectId(),
     }));
   }
 
@@ -419,16 +414,16 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
           this.compareExperiments();
           break;
         case MenuItems.archive:
-          this.table.contextMenuExtended.contextMenu().archiveClicked();
+          this.table.contextMenuExtended().contextMenu().archiveClicked();
           break;
         case MenuItems.delete:
-          this.table.contextMenuExtended.contextMenu().deleteModelPopup();
+          this.table.contextMenuExtended().contextMenu().deleteModelPopup();
           break;
         case MenuItems.moveTo:
-          this.table.contextMenuExtended.contextMenu().moveToProjectPopup();
+          this.table.contextMenuExtended().contextMenu().moveToProjectPopup();
           break;
         case MenuItems.publish:
-          this.table.contextMenuExtended.contextMenu().publishPopup();
+          this.table.contextMenuExtended().contextMenu().publishPopup();
           break;
       }
     });
@@ -438,7 +433,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.router.navigate(
       [
         `compare-models`,
-        {ids: this.checkedModels.map(experiment => experiment.id).join(',')},
+        {ids: this.checkedModels().map(experiment => experiment.id).join(',')},
         'models-details'
       ],
       {relativeTo: this.route.parent.parent});
@@ -446,7 +441,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
+    this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId()}));
   }
 
   selectMetadataKeysActiveChanged(mode: { customMode: CustomColumnMode }) {
@@ -460,17 +455,17 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   addOrRemoveMetadataKeyFromColumns($event: { key: string; show: boolean }) {
     if ($event.show) {
-      this.store.dispatch(modelsActions.addColumn({col: createMetadataCol($event.key, this.projectId)}));
+      this.store.dispatch(modelsActions.addColumn({col: createMetadataCol($event.key, this.projectId())}));
     } else {
-      this.store.dispatch(modelsActions.removeCol({id: $event.key, projectId: this.projectId}));
+      this.store.dispatch(modelsActions.removeCol({id: $event.key, projectId: this.projectId()}));
     }
   }
 
   removeColFromList(id: string) {
     if (id.startsWith('last_metrics')) {
-      this.store.dispatch(modelsActions.removeMetricCol({id, projectId: this.projectId}));
+      this.store.dispatch(modelsActions.removeMetricCol({id, projectId: this.projectId()}));
     } else {
-      this.store.dispatch(modelsActions.removeCol({id: id.split('.')[1], projectId: this.projectId}));
+      this.store.dispatch(modelsActions.removeCol({id: id.split('.')[1], projectId: this.projectId()}));
     }
   }
 
@@ -479,8 +474,8 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       this.store.dispatch(modelsActions.setTableMode({mode}));
       if (this.firstModel) {
         this.store.dispatch(modelsActions.modelSelectionChanged({
-          model: this.selectionState().highlited() || this.checkedModels?.[0] || this.firstModel,
-          project: this.projectId
+          model: this.selectionState().highlited() || this.checkedModels()?.[0] || this.firstModel,
+          project: this.projectId()
         }));
       }
       return Promise.resolve()
@@ -499,7 +494,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       valueType: event.valueType,
       metric: event.variant.metric,
       variant: event.variant.variant
-    }, this.projectId);
+    }, this.projectId());
     if (event.addCol) {
       this.store.dispatch(modelsActions.addColumn({col: variantCol}));
     } else {
@@ -508,7 +503,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0, 60)} Models`);
+    this.table.table().downloadTableAsCSV(`ClearML ${this.selectedProject().id === '*'? 'All': this.selectedProject()?.basename?.substring(0, 60)} Models`);
   }
 
   downloadFullTableAsCSV() {
@@ -516,11 +511,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   override setupBreadcrumbsOptions() {
-    this.sub.add(combineLatest([
-      this.selectedProject$,
-      this.store.select(selectIsDeepMode)
-    ])
-      .subscribe(([selectedProject, isDeep]) => {
+    effect(() => {
+      const selectedProject = this.selectedProject();
+      if (selectedProject) {
         if (this.modelsFeature) {
           this.store.dispatch(setBreadcrumbsOptions({
             breadcrumbOptions: {
@@ -536,7 +529,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
                 name: 'PROJECTS',
                 url: 'projects'
               },
-              ...(isDeep && selectedProject?.id !== '*' && {
+              ...(this.projectDeepMode() && selectedProject?.id !== '*' && {
                 subFeatureBreadcrumb: {
                   name: 'All Models'
                 }
@@ -556,6 +549,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             }
           }));
         }
-      }));
+      }
+    });
   }
 }

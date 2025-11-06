@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
@@ -27,7 +27,6 @@ import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.
 import {resetState} from '../../models/actions/models-view.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
-import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {selectRouterConfig, selectRouterParams} from '../reducers/router-reducer';
 import {EMPTY, forkJoin, Observable, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
@@ -39,7 +38,7 @@ import {
   selectProjectsOptionsScrollId,
   selectSelectedMetricVariantForCurrProject,
   selectSelectedProjectId,
-  selectShowHidden,
+  selectShowHidden
 } from '../reducers/projects.reducer';
 import {
   OperationErrorDialogComponent
@@ -65,19 +64,21 @@ import {selectTableFilters} from '@common/models/reducers';
 import {selectSelectModelTableFilters} from '@common/select-model/select-model.reducer';
 import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
+import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
+import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Tasks'};
 
 
 @Injectable()
 export class ProjectsEffects {
-
-  constructor(
-    private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
-    private store: Store, private dialog: MatDialog, private tasksApi: ApiTasksService,
-    private usersApi: ApiUsersService,
-  ) {
-  }
+  private actions$ = inject(Actions);
+  private projectsApi = inject(ApiProjectsService);
+  private orgApi = inject(ApiOrganizationService);
+  private store = inject(Store);
+  private dialog = inject(MatDialog);
+  private tasksApi = inject(ApiTasksService);
+  private usersApi = inject(ApiUsersService);
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
@@ -94,7 +95,7 @@ export class ProjectsEffects {
       this.store.select(selectIsDeepMode)
     ]),
     distinctUntilChanged(([, , preIsDeep], [, , currIsDeep]) => preIsDeep === currIsDeep),
-    map(([, projectId,]) => actions.getProjectUsers({projectId}))));
+    map(([, projectId]) => actions.getProjectUsers({projectId}))));
 
 
   getTablesFilterProjectsOptions$ = createEffect(() => this.actions$.pipe(
@@ -114,27 +115,27 @@ export class ProjectsEffects {
           order_by: ['name'],
           only_fields: ['name', 'company'],
           search_hidden: showHidden,
-            _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
+          _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
           scroll_id: !!action.loadMore && scrollId ? scrollId : null
         } as ProjectsGetAllExRequest),
         !action.loadMore && action.searchString?.length > 2 ?
           this.projectsApi.projectsGetAllEx({
             only_fields: ['name', 'company'],
             search_hidden: showHidden,
-              _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
+            _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']}
 
           } as ProjectsGetAllExRequest)
             .pipe(
-              map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString)),
+              map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString))
             ) :
           of([]),
         !action.loadMore && filters['project.name']?.value.length ?
           this.projectsApi.projectsGetAllEx({
             id: filters['project.name']?.value,
-            only_fields: ['name', 'company'],
+            only_fields: ['name', 'company']
 
           } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
-          of([]),
+          of([])
       ])
         .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
             projects: [
@@ -147,23 +148,24 @@ export class ProjectsEffects {
           })
         ))
     ),
-    mergeMap((projects: {
+    map((projects: {
       projects: ProjectsGetAllResponseSingle[];
       scrollId: string;
-    }) => [setTablesFilterProjectsOptions({...projects})])
+      loadMore: boolean;
+    }) => setTablesFilterProjectsOptions({...projects}))
   ));
 
 
   resetProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.resetSelectedProject),
-    mergeMap(() => [actions.resetProjectSelection()])
+    map(() => actions.resetProjectSelection())
   ));
 
   resetAncestorProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
     concatLatestFrom(() => this.store.select(selectSelectedProjectId)),
     filter(([action, prevProjectId]) => action.projectId !== prevProjectId),
-    mergeMap(() => [setProjectAncestors({projects: null})])
+    map(() => setProjectAncestors({projects: null}))
   ));
 
   getAncestorProjects$ = createEffect(() => this.actions$.pipe(
@@ -176,24 +178,21 @@ export class ProjectsEffects {
       }
       parts.pop();
       const escapedParts = parts.map(escapeRegExp);
-      const [simpleProjectNames, projectsNames] = parts.reduce(
-        ([simpleNames, names], part, index) => [
+      const [simpleProjectNames, projectsNames] = parts.reduce(([simpleNames, names], part, index) => [
           [...simpleNames, parts.slice(0, index + 1).join('/')],
-          [...names, escapedParts.slice(0, index + 1).join('\\/')],
+          [...names, escapedParts.slice(0, index + 1).join('\\/')]
         ],
         [[], []]
       );
       return this.projectsApi.projectsGetAllEx({
-
         _any_: {fields: ['name'], pattern: projectsNames.map(name => `^${name}$`).join('|')},
         search_hidden: true
-
       }).pipe(map(res => [res, simpleProjectNames]));
     }),
-    switchMap(([res, projectsNames]) => [actions.setProjectAncestors({
+    map(([res, projectsNames]) => actions.setProjectAncestors({
         projects: res?.projects?.filter(project => projectsNames.includes(project.name))
           .sort((projectA, projectB) => (projectA.name?.split('/').length >= projectB.name?.split('/').length) ? 1 : -1)
-      })]
+      })
     )));
 
   resetProjectSelections$ = createEffect(() => this.actions$.pipe(
@@ -209,9 +208,7 @@ export class ProjectsEffects {
     switchMap((action) =>
       this.projectsApi.projectsUpdate({project: action.id, ...action.changes})
         .pipe(
-          mergeMap(res => [
-            actions.updateProjectCompleted({id: action.id, changes: res?.fields || action.changes})
-          ]),
+          map(res => actions.updateProjectCompleted({id: action.id, changes: res?.fields || action.changes})),
           catchError(err => [
             requestFailed(err),
             setServerError(err, null, 'Update project failed'),
@@ -244,7 +241,7 @@ export class ProjectsEffects {
 
   getProjectsTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectsTags),
-    switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: [action.entity]}})
+    switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: action.entity === 'project' ? ['-pipeline', '-dataset', '-Annotation'] : [action.entity]}})
       .pipe(
         withLatestFrom(this.store.select(selectMainPageTagsFilter), this.store.select(selectProjectType)),
         mergeMap(([res, fTags, projectType]) => [
@@ -252,7 +249,7 @@ export class ProjectsEffects {
           ...(fTags?.length > 0 && fTags.some(fTag => !res.tags.includes(cleanTag(fTag))) ? [setMainPageTagsFilter({
             tags: fTags.filter(fTag => res.tags.includes(cleanTag(fTag))),
             feature: projectType
-          })] : []),
+          })] : [])
         ]),
         catchError(error => [requestFailed(error)])
       )
@@ -293,7 +290,7 @@ export class ProjectsEffects {
         data: {
           title: `${action.operationName} ${action.entityType}`,
           action,
-          iconClass: `d-block al-ico-${action.operationName} al-icon w-auto`,
+          iconClass: `d-block al-ico-${action.operationName} al-icon w-auto`
         }
       }).afterClosed()
     )
@@ -303,7 +300,7 @@ export class ProjectsEffects {
     ofType(actions.fetchGraphData),
     concatLatestFrom(() => [
       this.store.select(selectSelectedProjectId),
-      this.store.select(selectSelectedMetricVariantForCurrProject),
+      this.store.select(selectSelectedMetricVariantForCurrProject)
     ]),
     filter(([, , variant]) => !!variant),
     switchMap(([, projectId, cols]) => {
@@ -312,40 +309,40 @@ export class ProjectsEffects {
       }
       return forkJoin(cols.map(col => this.tasksApi.tasksGetAllEx({
 
-        project: [projectId],
-        only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
-        [col.id]: [0, null],
-        started: ['2000-01-01T00:00:00', null],
-        status: ['-draft'],
-        order_by: ['-started'],
-        type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
-        system_tags: ['-archived'],
-        scroll_id: null,
-        size: 1000
+          project: [projectId],
+          only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
+          [col.id]: [0, null],
+          started: ['2000-01-01T00:00:00', null],
+          status: ['-draft'],
+          order_by: ['-started'],
+          type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
+          system_tags: ['-archived'],
+          scroll_id: null,
+          size: 1000
 
-      } as unknown as TasksGetAllExRequest)
-        .pipe(map(({tasks}) => tasks))
+        } as unknown as TasksGetAllExRequest)
+          .pipe(map(({tasks}) => tasks))
       ))
-      .pipe(
-        map(tasksList => tasksList.flat()),
-        map((tasks: ITask[]) =>
-          actions.setGraphData({
-            stats: tasks.map((task: ITask) => {
-              const started = new Date(task.started).getTime();
-              const end = started + (task.active_duration ?? 0) * 1000;
-              return cols.map(col => ({
-                id: task.id,
-                variant: col.id,
-                y: get(task, col.id), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
-                x: end,
-                name: `${task.name} (${task.id.slice(0, 6)})`,
-                status: task.status,
-                type: task.type,
-                user: task.user.name,
-              } as ScatterPlotPoint ));
-            }).flat().filter(point => point.y > 0)
-          }))
-      );
+        .pipe(
+          map(tasksList => tasksList.flat()),
+          map((tasks: ITask[]) =>
+            actions.setGraphData({
+              stats: tasks.map((task: ITask) => {
+                const started = new Date(task.started).getTime();
+                const end = started + (task.active_duration ?? 0) * 1000;
+                return cols.map(col => ({
+                  id: task.id,
+                  variant: col.id,
+                  y: get(task, col.id), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
+                  x: end,
+                  name: `${task.name} (${task.id.slice(0, 6)})`,
+                  status: task.status,
+                  type: task.type,
+                  user: task.user.name
+                } as ScatterPlotPoint));
+              }).flat().filter(point => point.y > 0)
+            }))
+        );
     })
   ));
 
@@ -364,7 +361,7 @@ export class ProjectsEffects {
       include_subprojects: true
 
     }, {adminQuery: true}).pipe(
-      mergeMap(res => [actions.setAllProjectUsers(res)]),
+      map(res => actions.setAllProjectUsers(res)),
       catchError(error => [
         requestFailed(error),
         setServerError(error, null, 'Fetch all projects users failed')]
@@ -376,14 +373,14 @@ export class ProjectsEffects {
     ofType(actions.getProjectUsers),
     concatLatestFrom(() => [this.store.select(selectAllProjectsUsers), this.store.select(selectIsDeepMode)]
     ),
-    switchMap(([action, all, isDeep]) => (!action.projectId || action.projectId === '*' ?
+    switchMap(([action, all, isDeep]) => ((!action.projectId || action.projectId === '*') ?
       of({users: all}) :
       this.projectsApi.projectsGetUserNames({
         projects: [action.projectId],
-
+        entity: action.entity ?? ProjectsGetUserNamesRequest.EntityEnum.Task,
         include_subprojects: isDeep
       }, {adminQuery: true})).pipe(
-      mergeMap(res => [actions.setProjectUsers(res)]),
+      map(res => actions.setProjectUsers(res)),
       catchError(error => [
         requestFailed(error),
         setServerError(error, null, 'Fetch users failed')]
@@ -439,7 +436,7 @@ export class ProjectsEffects {
 
   downloadForGetAll$ = createEffect(() => this.actions$.pipe(
     ofType(downloadForGetAll),
-    filter(action => !!action.prepareId),
+    filter(action => !!action.prepareId)
   )).subscribe((action) => {
       const a = document.createElement('a');
       a.href = `${HTTP.API_BASE_URL}/organization.download_for_get_all?prepare_id=${action.prepareId}`;

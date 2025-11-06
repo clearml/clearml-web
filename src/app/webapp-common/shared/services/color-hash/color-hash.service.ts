@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {filter, take} from 'rxjs/operators';
@@ -11,17 +11,17 @@ import stc from 'string-to-color';
 import {TinyColor} from '@ctrl/tinycolor';
 import {toSignal} from '@angular/core/rxjs-interop';
 
-export interface ColorCache {
-  [label: string]: number[];
-}
+export type ColorCache = Record<string, number[]>;
 
 export const DOT_PLACEHOLDER = '--DOT--';
 
 
 @Injectable()
 export class ColorHashService {
+  private store = inject(Store);
 
-  private _colorCache: BehaviorSubject<ColorCache> = new BehaviorSubject({});
+  private _colorCache = new BehaviorSubject<ColorCache>({});
+  __signal = toSignal(this._colorCache);
 
   getColorCache() {
     return this._colorCache.asObservable();
@@ -31,7 +31,7 @@ export class ColorHashService {
     this._colorCache.next(obj);
   }
 
-  constructor(private store: Store) {
+  constructor() {
     this.store.select(selectColorPreferences)
       .pipe(
         filter(preferenceColors => !!preferenceColors),
@@ -87,7 +87,7 @@ export class ColorHashService {
   }
 
   get colorsSignal() {
-    return toSignal(this._colorCache);
+    return this.__signal;
   }
 
   private batchUpdateColorCache(colors: ColorPreference) {
@@ -101,7 +101,7 @@ export class ColorHashService {
     this.setColorCache(filteredCache);
   }
 
-  setColorForString(key: string, color: number[], savePreference: boolean = true, saveAlpha: boolean = false) {
+  setColorForString(key: string, color: number[], savePreference = true, saveAlpha = false) {
     if (savePreference) {
       color = saveAlpha ? color : [color[0], color[1], color[2], this._colorCache.getValue()[key] ? this._colorCache.getValue()[key][3] : 0.35];
       this.setColorCache({
@@ -132,7 +132,7 @@ export class ColorHashService {
     if (colors.length > 1) {
       tc = tc.mix({r: 0, g: 0, b: 0}, 100 / colors.length);
     }
-    colors.slice(1).forEach((colorString, i) => {
+    colors.slice(1).forEach(colorString => {
       const color = this.initColor(colorString);
       tc = tc.mix({r: color[0], g: color[1], b: color[2]}, 100 / colors.length);
     });

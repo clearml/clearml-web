@@ -3,8 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnDestroy,
-  OnInit,
-  viewChild, inject, effect
+  viewChild, inject, effect, computed, signal
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
@@ -29,9 +28,9 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  switchMap, withLatestFrom
+  switchMap,
 } from 'rxjs/operators';
-import {fromEvent, lastValueFrom, Observable, Subscription, take, combineLatest, merge} from 'rxjs';
+import {fromEvent, lastValueFrom, Observable, take, combineLatest, merge} from 'rxjs';
 import {selectEditingReport, selectReport, selectReportsTags} from '@common/reports/reports.reducer';
 import {ReportStatusEnum} from '~/business-logic/model/reports/reportStatusEnum';
 import {getBaseName, isExample} from '@common/shared/utils/shared-utils';
@@ -39,7 +38,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {activeLoader, addMessage, deactivateLoader} from '@common/core/actions/layout.actions';
 import {ICONS, MESSAGES_SEVERITY} from '@common/constants';
-import {IReport} from '@common/reports/reports.consts';
 import {MarkdownEditorComponent} from '@common/shared/components/markdown-editor/markdown-editor.component';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -56,6 +54,7 @@ import {selectBlockUserScript, selectDefaultNestedModeForFeature, selectSelected
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
 import {NgxPrintDirective} from 'ngx-print';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 const replaceSlash = (part) => part
   .replace('\\', '/')
@@ -74,7 +73,7 @@ const replaceSlash = (part) => part
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class ReportComponent implements OnInit, OnDestroy {
+export class ReportComponent implements OnDestroy {
   private store = inject(Store);
   public cdr = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
@@ -84,14 +83,9 @@ export class ReportComponent implements OnInit, OnDestroy {
   private _clipboardService = inject(ClipboardService);
   private http = inject(HttpClient);
   private actions$ = inject(Actions);
-  private sub = new Subscription();
   public icons = ICONS;
-  public report: IReport;
-  public example: boolean;
   public editDesc: boolean;
   public orgDesc: string;
-  public draft: boolean;
-  public archived: boolean;
   public reportTags$: Observable<string[]> = this.store.select(selectReportsTags);
   public smallScreen$: Observable<boolean> = this.breakpointObserver.observe('(max-width: 1200px)')
     .pipe(map(state => state.matches));
@@ -108,7 +102,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   public widthExpanded = false;
   public handleUpload: (files: File[]) => Promise<UploadResult[]>;
   public showDescription = false;
-  public resources: { unused: boolean; url: string }[];
+  public resources = signal<{ unused: boolean; url: string }[]>(null);
   public menuPosition = {x: 0, y: 0};
   public blockUserScripts$: Observable<boolean> = this.store.select(selectBlockUserScript);
   public theme = this.store.selectSignal(selectThemeMode);
@@ -116,18 +110,46 @@ export class ReportComponent implements OnInit, OnDestroy {
   private mdEditor = viewChild<MarkdownEditorComponent>(MarkdownEditorComponent);
   private printHiddenButton = viewChild(NgxPrintDirective);
 
+  protected report = this.store.selectSignal(selectReport);
+  private project = this.store.selectSignal(selectSelectedProject);
+  private nested = this.store.selectSignal(selectDefaultNestedModeForFeature);
+  protected example = computed(() => isExample(this.report()));
+  protected archived = computed(() => this.report()?.system_tags?.includes('archived'));
+  protected draft = computed(() => this.report()?.status !== ReportStatusEnum.Published);
+
   constructor() {
     this.store.dispatch(getReportsTags());
+    effect(() => {
+      this.setupBreadcrumbsOptions();
+    });
 
-    this.sub.add(
-      this.store.select(selectRouterParams)
-        .pipe(
-          map(params => params?.reportId),
-          filter(id => !!id),
-          distinctUntilChanged()
-        )
-        .subscribe(id => this.store.dispatch(getReport({id})))
-    );
+    effect(() => {
+      if (this.theme()) {
+        Array.from(window.frames).forEach(frame => frame.postMessage('themeChanged', '*'));
+      }
+    });
+
+    effect(() => {
+      const archived = this.archived()
+      window.setTimeout(() => {
+        this.router.navigate(['.'], {
+          relativeTo: this.route,
+          skipLocationChange: true,
+          queryParams: {archive: archived}
+        });
+        this.setupBreadcrumbsOptions();
+      }, 50);
+    });
+
+
+    this.store.select(selectRouterParams)
+      .pipe(
+        takeUntilDestroyed(),
+        map(params => params?.reportId),
+        filter(id => !!id),
+        distinctUntilChanged()
+      )
+      .subscribe(id => this.store.dispatch(getReport({id})));
 
     this.handleUpload = (files: File[]): Promise<UploadResult[]> => {
       this.store.dispatch(activeLoader('upload'));
@@ -175,7 +197,7 @@ export class ReportComponent implements OnInit, OnDestroy {
           const results = [] as UploadResult[];
           validFiles
             .forEach(file => {
-              const url = `reports/${this.report.id}/${replaceSlash(file.name)}`;
+              const url = `reports/${this.report().id}/${replaceSlash(file.name)}`;
               formData.append(url, file);
               results.push({
                 name: file.name,
@@ -194,9 +216,9 @@ export class ReportComponent implements OnInit, OnDestroy {
               map(() => {
                 this.store.dispatch(deactivateLoader('upload'));
                 this.store.dispatch(updateReport({
-                  id: this.report.id,
+                  id: this.report().id,
 
-                  changes: {report_assets: Array.from(new Set((this.report.report_assets || []).concat(results.map(r => r.url))))}
+                  changes: {report_assets: Array.from(new Set((this.report().report_assets || []).concat(results.map(r => r.url))))}
                 }));
                 return results;
               })
@@ -206,72 +228,35 @@ export class ReportComponent implements OnInit, OnDestroy {
       return lastValueFrom(uploads$);
     };
 
-    effect(() => {
-      if (this.theme()) {
-        Array.from(window.frames).forEach(frame => frame.postMessage('themeChanged', '*'));
-      }
-    });
-
   }
 
   setupBreadcrumbsOptions() {
-    this.sub.add(
-      combineLatest([
-        this.store.select(selectReport),
-        this.store.select(selectSelectedProject)
-      ]).pipe(
-        filter(([selectedReport]) => !!selectedReport),
-        withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-      ).subscribe(([[selectedReport], defaultNestedModeForFeature]) => this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: !!selectedReport,
-            featureBreadcrumb: {
-              name: 'REPORTS',
-              url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
-            },
-            projectsOptions: {
-              basePath: 'reports',
-              filterBaseNameWith: ['.reports'],
-              compareModule: null,
-              showSelectedProject: false,
-              selectedProjectBreadcrumb: null
-            },
-            subFeatureBreadcrumb: {
-              name: selectedReport.name,
-              onlyWithProject: true
-            }
+    if(this.report() && this.project()) {
+      this.store.dispatch(setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!this.report(),
+          featureBreadcrumb: {
+            name: 'REPORTS',
+            url: this.nested()['reports'] ? 'reports/*/projects' : 'reports'
+          },
+          projectsOptions: {
+            basePath: 'reports',
+            filterBaseNameWith: ['.reports'],
+            compareModule: null,
+            showSelectedProject: false,
+            selectedProjectBreadcrumb: null
+          },
+          subFeatureBreadcrumb: {
+            name: this.report().name,
+            onlyWithProject: true
           }
-        }))
-      ));
-  }
-
-  ngOnInit() {
-    this.sub.add(
-      this.store.select(selectReport)
-        .pipe(filter(report => !!report))
-        .subscribe(report => {
-          this.report = report;
-          this.calculateUnusedResources();
-          this.example = isExample(report);
-          this.archived = report?.system_tags?.includes('archived');
-          if (this.archived) {
-            window.setTimeout(() => {
-              this.router.navigate(['.'], {
-                relativeTo: this.route,
-                skipLocationChange: true,
-                queryParams: {archive: this.archived}
-              });
-            }, 50);
-          }
-          this.draft = this.report.status !== ReportStatusEnum.Published;
-          this.cdr.detectChanges();
-        })
-    );
-    this.setupBreadcrumbsOptions();
+        }
+      }));
+    }
   }
 
   save(report: string) {
-    this.store.dispatch(updateReport({id: this.report.id, changes: {report}}));
+    this.store.dispatch(updateReport({id: this.report().id, changes: {report}}));
     this.store.dispatch(setDirty({dirty: false}));
     Array.from(window.frames).forEach(frame => frame.postMessage('renderPlot', '*'));
   }
@@ -288,27 +273,26 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   addTag(tag: string) {
-    const tags = [...this.report.tags, tag];
+    const tags = [...this.report().tags, tag];
     tags.sort();
-    this.store.dispatch(updateReport({id: this.report.id, changes: {tags}, refresh: true}));
+    this.store.dispatch(updateReport({id: this.report().id, changes: {tags}, refresh: true}));
     this.store.dispatch(addReportsTags({tags: [tag]}));
   }
 
   removeTag(tag: string) {
     this.store.dispatch(updateReport({
-      id: this.report.id,
-      changes: {tags: this.report.tags.filter(t => t !== tag)},
+      id: this.report().id,
+      changes: {tags: this.report().tags.filter(t => t !== tag)},
       refresh: true
     }));
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
     this.store.dispatch(setReport({report: null}));
   }
 
   saveDesc(comment: string) {
-    this.store.dispatch(updateReport({id: this.report.id, changes: {comment}}));
+    this.store.dispatch(updateReport({id: this.report().id, changes: {comment}}));
     this.editDesc = false;
     this.orgDesc = null;
   }
@@ -323,15 +307,15 @@ export class ReportComponent implements OnInit, OnDestroy {
         iconClass: 'al-ico-publish'
       }
     }).afterClosed().subscribe(accept =>
-      accept && this.store.dispatch(publishReport({id: this.report.id}))
+      accept && this.store.dispatch(publishReport({id: this.report().id}))
     );
   }
 
   archive() {
-    if (this.archived) {
-      this.store.dispatch(restoreReport({report: this.report}));
+    if (this.archived()) {
+      this.store.dispatch(restoreReport({report: this.report()}));
     } else {
-      this.store.dispatch(archiveReport({report: this.report}));
+      this.store.dispatch(archiveReport({report: this.report()}));
     }
   }
 
@@ -344,12 +328,12 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   moveToProject() {
-    this.store.dispatch(moveReport({report: this.report}));
+    this.store.dispatch(moveReport({report: this.report()}));
   }
 
   editReportDesc(descElement) {
     const end = descElement.value.length;
-    this.orgDesc = this.report.comment;
+    this.orgDesc = this.report().comment;
     this.editDesc = true;
     setTimeout(() => {
       descElement.setSelectionRange(end, end);
@@ -379,7 +363,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   deleteReport() {
-    this.store.dispatch(deleteReport({report: this.report}));
+    this.store.dispatch(deleteReport({report: this.report()}));
   }
 
   deleteResource(resource: string) {
@@ -413,13 +397,13 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   calculateUnusedResources(unsavedReport?: string) {
-    if (unsavedReport !== undefined || this.report?.report !== undefined) {
+    if (unsavedReport !== undefined || this.report()?.report !== undefined) {
       const test = /!\[.*]\((.*)\)/g;
-      const usedResources = Array.from(new Set(Array.from((unsavedReport ?? this.report.report).matchAll(test)).map(match => match[1])));
-      this.resources = this.report.report_assets.map(resource => ({
+      const usedResources = Array.from(new Set(Array.from((unsavedReport ?? this.report().report).matchAll(test)).map(match => match[1])));
+      this.resources.set(this.report().report_assets.map(resource => ({
         url: resource,
         unused: !usedResources.includes(resource)
-      }));
+      })));
     }
   }
 

@@ -44,7 +44,7 @@ import {
   selectionDisabledPublishModels,
   selectionDisabledTags
 } from '../../shared/entity-page/items.utils';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {ModelsGetAllExResponse} from '~/business-logic/model/models/modelsGetAllExResponse';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {hasValue} from '../../shared/utils/helpers.util';
@@ -318,7 +318,7 @@ export class ModelsViewEffects {
                   resActions.push(getModelInfo({id: selectedModel.id}));
                 }
               }
-              if (selectedModel && action.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
+              if (selectedModel && action.autoRefresh && isEqual(models?.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
                 resActions.push(actions.setModelsInPlace({models: res.models}));
               } else {
                 resActions.push(actions.setModels({models: res.models}));
@@ -420,19 +420,18 @@ export class ModelsViewEffects {
     concatLatestFrom(() => [
       this.store.select(modelsSelectors.selectTableFilters),
       this.store.select(modelsSelectors.selectTableSortFields),
-      this.store.select(selectIsArchivedMode),
       this.store.select(modelsSelectors.selectMetadataColsForProject),
       this.store.select(modelsSelectors.selectModelsTableColsOrder),
       this.store.select(modelsSelectors.selectModelsHiddenTableCols),
       this.store.select(selectIsDeepMode)
     ]),
-    mergeMap(([, filters, sortFields, isArchived, metadataCols, colsOrder, hiddenCols, isDeep]) =>
+    mergeMap(([, filters, sortFields, metadataCols, colsOrder, hiddenCols, isDeep]) =>
       [setURLParams({
         filters: filters as any,
         orders: sortFields,
-        isArchived,
         isDeep,
-        columns: encodeColumns(MODELS_TABLE_COLS, hiddenCols, metadataCols, colsOrder)
+        columns: encodeColumns(MODELS_TABLE_COLS, hiddenCols, metadataCols, colsOrder),
+        update: true
       })]
     )
   ));

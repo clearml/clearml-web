@@ -1,8 +1,5 @@
 $search-font-size: 14px;
-
 :host {
-  // background: none !important;
-
   .search-input-container {
     position: relative;
     display: flex;
@@ -10,9 +7,11 @@ $search-font-size: 14px;
     min-width: 32px;
     width: 36px;
     overflow: hidden;
-    &.animate{
+
+    &.animate {
       transition: width 0.4s ease;
     }
+
     border-radius: 4px 4px 0 0;
 
     &.active {
@@ -55,6 +54,11 @@ $search-font-size: 14px;
 
       button.active {
         margin-right: 4px;
+      }
+
+      .mat-icon.error {
+        margin-right: 8px;
+        color: var(--color-error);
       }
 
       .separator {
@@ -106,48 +110,48 @@ $search-font-size: 14px;
     }
   }
 
-}
+  &.outline {
+    display: block;
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-outline);
 
-:host.outline {
-  display: block;
-  min-width: 36px;
-  height: 36px;
-  border: 1px solid var(--color-outline);
-  &.regex-error{
-    border-color: var(--color-error) !important;
-  }
-  border-radius: 18px;
-  --mdc-icon-button-state-layer-size: 34px;
-  background-color: var(--color-surface-container-lowest);
-
-  .search-input-container .search-input input {
-    padding-left: 16px;
-    padding-right: 54px;
-  }
-
-}
-
-:host.outline.contained-icon {
-  .search-input-container .search-input input {
-    padding-left: 18px;
-    padding-right: 80px;
-  }
-}
-
-
-
-:host.underline-search {
-  .search-input-container {
-    height: inherit;
-
-    .search-input {
-      input {
-        padding-left: 0;
-      }
+    &.regex-error {
+      border-color: var(--color-error) !important;
     }
 
-    border-bottom: 1px solid var(--color-outline);
-    width: 100%;
+    border-radius: 18px;
+    --mat-icon-button-state-layer-size: 34px;
+    background-color: var(--color-surface-container-lowest);
+
+    .search-input-container .search-input input {
+      padding-left: 16px;
+      padding-right: 54px;
+    }
+
+  }
+
+  &.outline.contained-icon {
+    .search-input-container .search-input input {
+      padding-left: 18px;
+      padding-right: 80px;
+    }
+  }
+
+
+  &.underline-search {
+    .search-input-container {
+      height: inherit;
+
+      .search-input {
+        input {
+          padding-left: 0;
+        }
+      }
+
+      border-bottom: 1px solid var(--color-outline);
+      width: 100%;
+    }
   }
 }
 
@@ -158,3 +162,9 @@ $search-font-size: 14px;
     width: auto;
   }
 }
+
+//.mat-mdc-icon-button {
+//  --mat-icon-button-state-layer-size: 24px; /* Adjust as needed */
+//  margin-right: 8px;
+//}
+

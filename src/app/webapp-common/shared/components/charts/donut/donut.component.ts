@@ -2,11 +2,11 @@ import {Component, ChangeDetectionStrategy, signal, effect, input, computed, vie
 import {ActiveDataPoint, ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
 import {BaseChartDirective} from 'ng2-charts';
 
-import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {combineLatest, fromEvent, of} from 'rxjs';
 import {delay, startWith, switchMap} from 'rxjs/operators';
 import {PushPipe} from '@ngrx/component';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 export interface DonutChartData {
   name: string;
@@ -17,15 +17,15 @@ export interface DonutChartData {
 }
 
 @Component({
-    selector: 'sm-donut',
-    templateUrl: './donut.component.html',
-    styleUrls: ['./donut.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        BaseChartDirective,
-        ChooseColorModule,
-        PushPipe
-    ]
+  selector: 'sm-donut',
+  templateUrl: './donut.component.html',
+  styleUrls: ['./donut.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseChartDirective,
+    PushPipe,
+    ChooseColorDirective
+  ]
 })
 export class DonutComponent {
   public doughnutChartType: ChartType = 'doughnut';
@@ -35,6 +35,12 @@ export class DonutComponent {
   donutOptions = {
     maintainAspectRatio: false,
     borderWidth: 0,
+    layout: {
+      padding: {
+        top: 12,
+        bottom: 12
+      }
+    },
     plugins: {
       legend: {display: false},
       tooltip: {enabled: false}
@@ -44,6 +50,9 @@ export class DonutComponent {
   data = input.required<DonutChartData[]>();
   colors = input<string[]>();
   resize = input<number>();
+  units = input('');
+  showPicker = input(true);
+
   protected donutData = computed<ChartData<'doughnut'>>(() => ({
       labels: this.data().map(slice => slice.name),
       datasets: [{
@@ -102,4 +111,6 @@ export class DonutComponent {
     this.chart()?.chart.setActiveElements([]);
     this.chart()?.chart.update('none');
   }
+
+  protected readonly Number = Number;
 }

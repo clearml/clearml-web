@@ -9,6 +9,7 @@
       </a>
       @switch (type) {
         @case (type === 'plot' || type === 'scalar' ? type : '') {
+          @if (plotData) {
           <sm-single-graph
             [hideDownloadButtons]="externalTool"
             [class.less-padding]="false"
@@ -28,6 +29,7 @@
             [hideMaximize]="hideMaximize"
             (maximizeClicked)="maximize()">
           </sm-single-graph>
+          }
         }
         @case ('sample') {
           @if (frame?.url) {

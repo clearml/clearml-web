@@ -3,7 +3,7 @@
                  mat-align-tabs="center"
                  disableRipple
                  [selectedIndex]="index()"
-                 (selectedTabChange)="setFeature($event)">
+                 (selectedIndexChange)="setFeature($event)">
     @for (route of contextNavbar(); track route.header) {
       <mat-tab *smCheckPermission="route.permissionCheck" [labelClass]="'data-id-' + (route?.id ?? route.header)">
         <ng-template mat-tab-label>

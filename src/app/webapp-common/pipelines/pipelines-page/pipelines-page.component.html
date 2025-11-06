@@ -9,12 +9,12 @@
     >
     <sm-button-toggle
       left-items
-      [value]="!!projectId"
       [options]="[
               {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
               {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-      (valueChanged)="!(!!projectId && $event) && toggleNestedView($any($event))"
+      [ngModel]="!!projectId"
+      (ngModelChange)="!(!!projectId && $event) && toggleNestedView($any($event))"
     ></sm-button-toggle>
     <div class="d-flex">
       <button mat-flat-button (click)="createPipeline()" data-id="New Pipeline">

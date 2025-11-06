@@ -52,7 +52,7 @@
     background-color: var(--color-primary);
     color: var(--color-on-primary);
     .mat-mdc-button-base{
-      --mdc-icon-button-icon-color: var(--color-on-primary);
+      --mat-icon-button-icon-color: var(--color-on-primary);
       --mat-icon-button-state-layer-color: var(--color-on-primary);
     }
   }

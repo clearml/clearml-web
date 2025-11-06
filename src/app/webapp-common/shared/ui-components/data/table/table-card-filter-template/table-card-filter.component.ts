@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component, computed, input,
-  signal, output } from '@angular/core';
+  signal, output, model
+} from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuModule} from '@angular/material/menu';
@@ -51,6 +52,7 @@ export class TableCardFilterComponent {
   subValue = input<string[]>( []);
   subOptions = input<IOption[]>([]);
   columns = input.required<ISmCol[]>();
+  andFilter = model<boolean>(null);
   options = input.required<Record<string, IOption[]>>();
   filterMatch = input<Record<string, string>>();
   protected isFiltering = computed(() =>
@@ -70,14 +72,14 @@ export class TableCardFilterComponent {
   filterChanged = output<{
         col: string;
         value: unknown;
-        matchMode?: string;
+        andFilter?: boolean;
     }>();
   menuClosed = output<ISmCol>();
   menuOpened = output<ISmCol>();
   clearAll = output();
 
   emitFilterChangedCheckBox(colId: string, values: string[]) {
-    this.filterChanged.emit({col: colId, value: values, matchMode: this.filterMatch()?.[colId]});
+    this.filterChanged.emit({col: colId, value: values, andFilter: this.andFilter()});
   }
 
   onSubFilterChanged(col: ISmCol, val) {
@@ -107,10 +109,8 @@ export class TableCardFilterComponent {
   }
 
   toggleCombination(colId: string) {
-    this.filterMatch()[colId] = this.filterMatch()[colId] === 'AND' ? '' : 'AND';
-    if (this.value()?.[colId]?.length > 1) {
-      this.filterChanged.emit({col: colId, value: this.value()[colId], matchMode: this.filterMatch()[colId]});
-    }
+    this.andFilter.update(filter => !filter);
+    this.filterChanged.emit({col: colId, value: this.value()[colId], andFilter: this.andFilter()});
   }
 
   getColumnByOption(option: {key: string}) {

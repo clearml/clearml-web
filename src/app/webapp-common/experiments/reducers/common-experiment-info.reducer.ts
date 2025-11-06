@@ -28,7 +28,6 @@ import {
   updateExperimentInfoData
 } from '../actions/common-experiments-info.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {experimentSections, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {set} from 'lodash-es';
 import {removeTagSuccess, setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
 import {ActionCreator, createReducer, on, ReducerTypes} from '@ngrx/store';
@@ -128,7 +127,7 @@ export const commonExperimentInfoReducers = [
   })),
   on(removeTagSuccess, (state, action): CommonExperimentInfoState => ({
     ...state,
-    ...(action.experiments.includes(state.selectedExperiment.id) && {selectedExperiment: {
+    ...(action.experiments.includes(state.selectedExperiment?.id) && {selectedExperiment: {
         ...state.selectedExperiment,
         tags: state.selectedExperiment.tags?.filter(tag => tag !== action.tag)
       }})

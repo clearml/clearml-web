@@ -1,4 +1,5 @@
-import {inject, Injectable, Renderer2} from '@angular/core';
+import {inject, Injectable, Renderer2, DOCUMENT} from '@angular/core';
+
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {BreakpointObserver, BreakpointState} from '@angular/cdk/layout';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -7,7 +8,7 @@ import {Store} from '@ngrx/store';
 import {setForcedTheme, setThemeColors, systemThemeChanged} from '@common/core/actions/layout.actions';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
 import {pairwise} from 'rxjs';
-import {DOCUMENT} from '@angular/common';
+
 
 @Injectable({
   providedIn: 'root'

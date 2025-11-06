@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
-import {Action, Store, INIT} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, get, isEqual} from 'lodash-es';
 import {EMPTY, iif, interval, Observable, of} from 'rxjs';
 import {
@@ -34,7 +34,7 @@ import {
   selectShowHidden
 } from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {addMultipleSortColumns, getRouteFullUrl} from '../../shared/utils/shared-utils';
 import {
@@ -55,15 +55,26 @@ import {
   setSelectedExperiments,
   updateManyExperiment
 } from '../actions/common-experiments-view.actions';
-import * as exSelectors from '../reducers/index';
-import {selectExperimentsMetricsCols, selectHyperParamsFiltersPage, selectRawExperimentsTableCols, selectSelectedExperiments, selectTableRefreshList} from '../reducers/index';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
 import {convertStopToComplete} from '../shared/common-experiments.utils';
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS} from '../../models/shared/models.const';
 import {emptyAction} from '~/app.constants';
-import {selectExperimentsList, selectTableFilters, selectTableMode} from '../reducers';
+import {
+  selectExperimentsHiddenTableCols,
+  selectExperimentsMetricsCols,
+  selectExperimentsMetricsColsForProject,
+  selectExperimentsTableCols,
+  selectExperimentsTableColsOrder,
+  selectExperimentsTableFilters,
+  selectGlobalFilter,
+  selectHyperParamsFiltersPage,
+  selectSelectedExperiments,
+  selectShowAllSelectedIsActive,
+  selectTableRefreshList, selectTableSortFields,
+  selectExperimentsList, selectTableFilters, selectTableMode, selectCurrentScrollId
+} from '../reducers';
 import {ProjectsGetTaskParentsResponse} from '~/business-logic/model/projects/projectsGetTaskParentsResponse';
 import {ProjectsGetTaskParentsRequest} from '~/business-logic/model/projects/projectsGetTaskParentsRequest';
 import {SearchState} from '../../common-search/common-search.reducer';
@@ -92,6 +103,7 @@ import {MINIMUM_ONLY_FIELDS} from '../experiment.consts';
 import {ProjectsGetHyperparamValuesResponse} from '~/business-logic/model/projects/projectsGetHyperparamValuesResponse';
 import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
 import {
+  selectCompareAddTableFilters,
   selectIsCompare,
   selectIsDatasets,
   selectIsPipelines,
@@ -125,6 +137,7 @@ import {TasksCreateRequest} from '~/business-logic/model/tasks/tasksCreateReques
 import * as actions from '@common/experiments/actions/common-experiments-view.actions';
 import {UserPreferences} from '@common/user-preferences';
 import {cloneExperiment} from '@common/experiments/actions/common-experiments-menu.actions';
+import {selectModelExperimentsTableFilters} from '@common/models/reducers';
 
 
 @Injectable()
@@ -201,7 +214,7 @@ export class CommonExperimentsViewEffects {
 
   tableSortChange = createEffect(() => this.actions$.pipe(
     ofType(exActions.tableSortChanged),
-    concatLatestFrom(() => this.store.select(exSelectors.selectTableSortFields)),
+    concatLatestFrom(() => this.store.select(selectTableSortFields)),
     switchMap(([action, oldOrders]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
       return [setURLParams({orders, update: true})];
@@ -210,7 +223,7 @@ export class CommonExperimentsViewEffects {
 
   tableFilterChange = createEffect(() => this.actions$.pipe(
     ofType(exActions.tableFilterChanged),
-    concatLatestFrom(() => this.store.select(exSelectors.selectTableFilters)),
+    concatLatestFrom(() => this.store.select(selectTableFilters)),
     switchMap(([action, oldFilters]) =>
       [setURLParams({
         filters: {
@@ -231,13 +244,13 @@ export class CommonExperimentsViewEffects {
       concatLatestFrom(() => [
         this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
         this.store.select(selectIsArchivedMode),
-        this.store.select(exSelectors.selectGlobalFilter),
-        this.store.select(exSelectors.selectTableSortFields),
-        this.store.select(exSelectors.selectTableFilters),
-        this.store.select(exSelectors.selectSelectedExperiments),
-        this.store.select(exSelectors.selectShowAllSelectedIsActive),
-        this.store.select(exSelectors.selectExperimentsTableCols),
-        this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
+        this.store.select(selectGlobalFilter),
+        this.store.select(selectTableSortFields),
+        this.store.select(selectTableFilters),
+        this.store.select(selectSelectedExperiments),
+        this.store.select(selectShowAllSelectedIsActive),
+        this.store.select(selectExperimentsTableCols),
+        this.store.select(selectExperimentsMetricsColsForProject),
         this.store.select(selectIsDeepMode),
         this.store.select(selectShowHidden),
         this.store.select(selectIsCompare),
@@ -326,7 +339,7 @@ export class CommonExperimentsViewEffects {
     ofType(exActions.refreshExperiments),
     filter(() => !this.lockRefresh),
     concatLatestFrom(() => [
-      this.store.select(exSelectors.selectCurrentScrollId),
+      this.store.select(selectCurrentScrollId),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentsList),
       this.store.select(selectTableRefreshList)
@@ -396,7 +409,7 @@ export class CommonExperimentsViewEffects {
   getNextExperiments = createEffect(() => this.actions$.pipe(
     ofType(exActions.getNextExperiments),
     concatLatestFrom(() => [
-      this.store.select(exSelectors.selectCurrentScrollId),
+      this.store.select(selectCurrentScrollId),
       this.store.select(selectExperimentsList),
       this.store.select(selectTableRefreshList)
     ]),
@@ -478,7 +491,7 @@ export class CommonExperimentsViewEffects {
     ),
     switchMap(([action, projectId]) =>
       this.apiTasks.tasksGetTypes({projects: (action.allProjects || projectId === '*' ? [] : [projectId])}).pipe(
-        concatLatestFrom(() => this.store.select(exSelectors.selectTableFilters)),
+        concatLatestFrom(() => this.store.select(selectTableFilters)),
         mergeMap(([res, tableFilters]) => {
           let shouldFilterFilters: boolean;
           let filteredTableFilter = {} as TableFilter;
@@ -510,7 +523,12 @@ export class CommonExperimentsViewEffects {
 
   getUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(setProjectUsers),
-    concatLatestFrom(() => this.store.select(selectTableFilters)),
+    concatLatestFrom(() => this.isModel() ?
+      this.store.select(selectModelExperimentsTableFilters) :
+      this.isCompare() ?
+        this.store.select(selectCompareAddTableFilters) :
+        this.store.select(selectExperimentsTableFilters)
+    ),
     map(([action, filters]) => {
       const userFiltersValue = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.USER]?.value ?? [];
       const resIds = action.users.map(user => user.id);
@@ -690,10 +708,10 @@ export class CommonExperimentsViewEffects {
     concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode),
-      this.store.select(exSelectors.selectGlobalFilter),
-      this.store.select(exSelectors.selectExperimentsTableCols),
-      this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
-      this.store.select(exSelectors.selectTableFilters),
+      this.store.select(selectGlobalFilter),
+      this.store.select(selectExperimentsTableCols),
+      this.store.select(selectExperimentsMetricsColsForProject),
+      this.store.select(selectTableFilters),
       this.store.select(selectIsDeepMode),
       this.store.select(selectShowHidden),
       this.store.select(selectIsPipelines),
@@ -759,18 +777,21 @@ export class CommonExperimentsViewEffects {
     ofType(exActions.updateUrlParams, exActions.toggleColHidden),
     concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
-      this.store.select(selectIsArchivedMode),
-      this.store.select(exSelectors.selectGlobalFilter),
-      this.store.select(exSelectors.selectTableSortFields),
-      this.store.select(exSelectors.selectTableFilters),
-      this.store.select(exSelectors.selectExperimentsTableCols),
-      this.store.select(exSelectors.selectExperimentsHiddenTableCols),
-      this.store.select(exSelectors.selectExperimentsMetricsCols),
-      this.store.select(exSelectors.selectExperimentsTableColsOrder),
+      this.store.select(selectGlobalFilter),
+      this.store.select(selectTableSortFields),
+      this.isModel() ?
+        this.store.select(selectModelExperimentsTableFilters) :
+        this.isCompare() ?
+          this.store.select(selectCompareAddTableFilters) :
+          this.store.select(selectExperimentsTableFilters),
+      this.store.select(selectExperimentsTableCols),
+      this.store.select(selectExperimentsHiddenTableCols),
+      this.store.select(selectExperimentsMetricsCols),
+      this.store.select(selectExperimentsTableColsOrder),
       this.store.select(selectIsDeepMode),
       this.route.queryParams
     ]),
-    map(([, projectId, isArchived, , sortFields, filters,
+    map(([, projectId, , sortFields, filters,
            cols, hiddenCols, metricsCols, colsOrder, isDeep, queryParams
          ]) => {
       const columns = encodeColumns(cols, hiddenCols, metricsCols[projectId], colsOrder ? colsOrder : queryParams.columns);
@@ -778,7 +799,6 @@ export class CommonExperimentsViewEffects {
         columns,
         filters,
         orders: sortFields,
-        isArchived,
         isDeep,
         update: true
       });
@@ -788,11 +808,11 @@ export class CommonExperimentsViewEffects {
   navigateAfterExperimentSelectionChanged(selectedExperiment: ITableExperiment, experimentProject: string, routeConfig: string[], replaceUrl = false) {
     const module = routeConfig.includes('datasets') ? 'datasets/simple' : routeConfig.includes('pipelines') ? 'pipelines' : 'projects';
     // wow angular really suck...
-    const activeChild = this.route?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild;
-    const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : '';
+    const activeChild = this.route?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild;
+    const activeChildUrl = activeChild && module === 'projects' && !routeConfig.includes('compare') ? getRouteFullUrl(activeChild) : '';
     if (selectedExperiment) {
       this.router.navigate(
-        [module, experimentProject, 'tasks', selectedExperiment.id].concat(activeChild ? activeChildUrl.split('/') : []),
+        [module, experimentProject, 'tasks', selectedExperiment.id].concat(activeChildUrl ? activeChildUrl.split('/') : []),
         {queryParamsHandling: 'preserve'}
       );
     } else {
@@ -926,13 +946,17 @@ export class CommonExperimentsViewEffects {
         concatLatestFrom(() => [
           this.store.select(selectRouterProjectId),
           this.store.select(selectIsArchivedMode),
-          this.store.select(exSelectors.selectGlobalFilter),
-          this.store.select(exSelectors.selectTableSortFields),
-          this.store.select(exSelectors.selectTableFilters),
-          this.store.select(exSelectors.selectSelectedExperiments),
-          this.store.select(exSelectors.selectShowAllSelectedIsActive),
-          this.store.select(exSelectors.selectExperimentsTableCols),
-          this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
+          this.store.select(selectGlobalFilter),
+          this.store.select(selectTableSortFields),
+          this.isModel() ?
+            this.store.select(selectModelExperimentsTableFilters) :
+            this.isCompare() ?
+              this.store.select(selectCompareAddTableFilters) :
+              this.store.select(selectExperimentsTableFilters),
+          this.store.select(selectSelectedExperiments),
+          this.store.select(selectShowAllSelectedIsActive),
+          this.store.select(selectExperimentsTableCols),
+          this.store.select(selectExperimentsMetricsColsForProject),
           this.store.select(selectIsDeepMode),
           this.store.select(selectShowHidden),
           this.store.select(selectIsCompare),
@@ -997,7 +1021,7 @@ export class CommonExperimentsViewEffects {
   setSelectedExperiments = createEffect(() => this.actions$.pipe(
       ofType(exActions.setSelectedExperiments, exActions.updateExperiment, updateManyExperiment.type),
       concatLatestFrom(() =>
-        this.store.select(exSelectors.selectSelectedExperiments)
+        this.store.select(selectSelectedExperiments)
       ),
       switchMap(([action, selectSelectedExperiments]) => {
         const experiments = action.type === exActions.setSelectedExperiments.type ?
@@ -1033,7 +1057,7 @@ export class CommonExperimentsViewEffects {
       switchMap(([action, projectId]) => this.apiTasks.tasksCreate({
         project: projectId,
         name: action.data.name,
-        type: 'training',
+        type: action.data.taskType ?? 'training',
         script: {
           repository: action.data.repo,
           ...(action.data.type === 'branch' ?
@@ -1109,4 +1133,26 @@ export class CommonExperimentsViewEffects {
       catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to enqueue tasks.\n${this.errService.getErrorMsg(error.error)}`)])
     );
   });
+
+  isModel() {
+    let route = this.route.snapshot;
+    while (route.firstChild) {
+      if (route.url[0]?.path === 'models') {
+        return true
+      }
+      route = route.firstChild;
+    }
+    return false;
+  }
+
+  isCompare() {
+    let route = this.route.snapshot;
+    while (route.firstChild) {
+      if (route.url[0]?.path === 'compare-tasks') {
+        return true
+      }
+      route = route.firstChild;
+    }
+    return false;
+  }
 }

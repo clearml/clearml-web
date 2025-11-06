@@ -1,123 +1,119 @@
 @if ((source$ | ngrxPush); as source) {
-  @if (!isFailed) {
-    <div class="item-snippet" [class.loading]="isLoading" [class.no-hover-effect]="noHoverEffects">
-      @switch (type) {
-        @case ('image') {
-          <div class="image" data-id="imageContainer">
-            <img
-              #imageElement
-              class="pointer"
-              data-id="sourceImage"
+  <div class="item-snippet" [class.loading]="loading()" [class.no-hover-effect]="noHoverEffects()">
+    @switch (type()) {
+      @case ('image') {
+        <div class="image" data-id="imageContainer">
+          <img
+            #imageElement
+            class="pointer"
+            data-id="sourceImage"
+            [src]="source"
+            [alt]="source"
+            (error)="mediaError($event)"
+            (click)="imageClicked.emit({src: source})"
+            (load)="loadedMedia()"
+            [class.loading]="loading()"
+          >
+          @if (!noHoverEffects()) {
+            <div class="toolbar top">
+              <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                   (click)="createEmbedCodeClicked($event)"
+                   smTooltip="Copy embed code"
+                   data-id="copyToReportButton">
+                <i class="al-icon al-ico-code sm"></i>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @case ('player') {
+        <div class="player" data-id="videoContainer">
+          @if (!noHoverEffects()) {
+            <video
+              #video
+              preload="metadata"
               [src]="source"
-              [alt]="source"
-              (error)="imageError.emit(); isFailed = true"
+              (error)="mediaError($event)"
+              (loadstart)="this.loadError.set(false)"
+              (loadedmetadata)="loadedMedia()"
               (click)="imageClicked.emit({src: source})"
-              (load)="loadedMedia()"
-              [class.loading]="isLoading"
-              >
-            @if (!noHoverEffects) {
-              <div class="toolbar top">
-                <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                  (click)="createEmbedCodeClicked($event)"
-                  smTooltip="Copy embed code"
-                  data-id="copyToReportButton">
-                  <i class="al-icon al-ico-code sm"></i>
-                </div>
+            ></video>
+          }
+          @if (noHoverEffects()) {
+            <video
+              #video
+              controls
+              preload="metadata"
+              data-id="videoContainer"
+              [src]="source"
+              (error)="mediaError($event)"
+              (loadedmetadata)="loadedMedia()"
+              (click)="imageClicked.emit({src: source})"
+            ></video>
+          }
+          <div  class="toolbar top">
+            @if (!noHoverEffects()) {
+              <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                   (click)="createEmbedCodeClicked($event)"
+                   smTooltip="Copy embed code" data-id="CopyToReportButton">
+                <i class="al-icon al-ico-code sm"></i>
               </div>
             }
           </div>
-        }
-        @case ('player') {
-          <div class="player" data-id="videoContainer">
-            @if (!noHoverEffects) {
-              <video
-                #video
-                preload="metadata"
-                [src]="source"
-                (error)="imageError.emit(); isFailed = true"
-                (loadedmetadata)="loadedMedia()"
-                (click)="imageClicked.emit({src: source})"
-              ></video>
+        </div>
+      }
+      @case ('html') {
+        <div class="html-snippet">
+          <div class="html-wrap" [class.loading]="!blockUserScripts() && loading()">
+            @if (blockUserScripts()) {
+              <div class="scripts-blocked">Preview not available because 3rd party scripts are blocked</div>
+            } @else {
+              <iframe
+                class="html-viewer"
+                data-id="htmlViewer"
+                width="400" height="400"
+                referrerpolicy="origin-when-cross-origin"
+                sandbox="allow-scripts allow-popups allow-same-origin allow-storage-access-by-user-activation"
+                [src]="source | safe: 'url'"
+                (load)="iframeLoaded($event)"
+              ></iframe>
             }
-            @if (noHoverEffects) {
-              <video
-                #video
-                controls
-                preload="metadata"
-                data-id="videoContainer"
-                [src]="source"
-                (error)="imageError.emit(); isFailed = true"
-                (loadedmetadata)="loadedMedia()"
-                (click)="imageClicked.emit({src: source})"
-              ></video>
-            }
-            <div  class="toolbar top">
-              @if (!noHoverEffects) {
-                <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                  (click)="createEmbedCodeClicked($event)"
-                  smTooltip="Copy embed code" data-id="CopyToReportButton">
-                  <i class="al-icon al-ico-code sm"></i>
-                </div>
-              }
-            </div>
           </div>
-        }
-        @case ('html') {
-          <div class="html-snippet">
-            <div class="html-wrap" [class.loading]="!blockUserScripts() && isLoading">
-              @if (blockUserScripts()) {
-                <div class="scripts-blocked">Preview not available because 3rd party scripts are blocked</div>
-              } @else {
-                <iframe
-                  class="html-viewer"
-                  data-id="htmlViewer"
-                  width="400" height="400"
-                  referrerpolicy="origin-when-cross-origin"
-                  sandbox="allow-scripts allow-popups allow-same-origin allow-storage-access-by-user-activation"
-                  [src]="source | safe: 'url'"
-                  (load)="iframeLoaded($event)"
-                ></iframe>
-              }
-            </div>
-            @if (!noHoverEffects) {
-              <div class="toolbar">
-                <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                  (click)="createEmbedCodeClicked($event)"
-                  smTooltip="Copy embed code" data-id="CopyToReportButton">
-                  <i class="al-icon al-ico-code sm"></i>
-                </div>
-                <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                  ngxClipboard
-                  smTooltip="Copy URL"
-                  data-id="CopyURLButton"
-                  [cbContent]="source"
-                  (cbOnSuccess)="copyToClipboardSuccess(true)">
-                  <i class="al-icon al-ico-copy-to-clipboard sm"></i>
-                </div>
-                @if(!blockUserScripts()) {
-                  <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                    smTooltip="Open URL in a new Tab"
-                    data-id="openURLInNewTab"
-                    (click)="openInNewTab(source)">
-                    <i class="al-icon al-ico-export sm"></i>
-                  </div>
-                }
+          @if (!noHoverEffects()) {
+            <div class="toolbar">
+              <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                   (click)="createEmbedCodeClicked($event)"
+                   smTooltip="Copy embed code" data-id="CopyToReportButton">
+                <i class="al-icon al-ico-code sm"></i>
               </div>
-            }
-          </div>
-        }
+              <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                   ngxClipboard
+                   smTooltip="Copy URL"
+                   data-id="CopyURLButton"
+                   [cbContent]="source"
+                   (cbOnSuccess)="copyToClipboardSuccess(true)">
+                <i class="al-icon al-ico-copy-to-clipboard sm"></i>
+              </div>
+              @if(!blockUserScripts()) {
+                <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                     smTooltip="Open URL in a new Tab"
+                     data-id="openURLInNewTab"
+                     (click)="openInNewTab(source)">
+                  <i class="al-icon al-ico-export sm"></i>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }
-      @if (!isLoading) {
-        <div class="image-var ellipsis" [smTooltip]="frame?.variant" smShowTooltipIfEllipsis
-        >{{frame?.variantAndMetric || frame?.variant}}</div>
-      }
-    </div>
-  }
-}
-
-@if ((source$ | ngrxPush); as source) {
-  @if (isFailed) {
-    <div class="item-snippet">
+    }
+    @if (!loading()) {
+      <div class="image-var ellipsis" [smTooltip]="frame()?.variant" smShowTooltipIfEllipsis
+      >{{frame()?.variantAndMetric || frame()?.variant}}</div>
+    }
+  </div>
+  @if (loadError()) {
+    <div class="item-snippet error">
       <sm-snippet-error
         [copyContent]="source?.split('?X-Amz-Date')[0]"
         (openImageClicked)="openInNewTab(source)"

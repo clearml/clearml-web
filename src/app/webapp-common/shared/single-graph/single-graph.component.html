@@ -8,7 +8,7 @@
   (scroll)="repositionModeBar($event.target)"
   >
   <div class="graph-title" [class.table-title]="type?.[0] === 'table'">
-    @if (moveLegendToTitle && chart && (title || chart.layout.name)) {
+    @if (moveLegendToTitle() && chart && (title || chart.layout.name)) {
       <span #dot
         [style.background-color]="isSmooth? chart?.data[1]?.line?.color: chart?.data[0].line?.color"
         [colorButtonRef]="dot"
@@ -22,7 +22,7 @@
          [class.hidden]="hideTitle"
          [title]="graphTitle.scrollWidth <= graphTitle.clientWidth ? '' : title"
          (mouseenter)="changeDetector.detectChanges()" data-id="graphTitleName">
-      {{moveLegendToTitle ? title || chart?.data?.[0]?.name || '' : title}}
+      {{moveLegendToTitle() ? title || chart?.data?.[0]?.name || '' : title}}
     </div>
     @if (title) {
       <sm-tag-list [tags]="chart.tags?.slice(0,3)"></sm-tag-list>

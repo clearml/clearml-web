@@ -3,14 +3,13 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef, QueryList,
-  ViewChild, ViewChildren, input, output, inject } from '@angular/core';
+  ViewChild, ViewChildren, input, output, inject, computed
+} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
 import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {activateModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
 import {MatMenu, MatMenuModule} from '@angular/material/menu';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
@@ -21,7 +20,6 @@ import {A11yModule} from '@angular/cdk/a11y';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {PushPipe} from '@ngrx/component';
 
 @Component({
     selector: 'sm-tags-menu',
@@ -36,8 +34,7 @@ import {PushPipe} from '@ngrx/component';
         TooltipDirective,
         ClickStopPropagationDirective,
         A11yModule,
-        ShowTooltipIfEllipsisDirective,
-        PushPipe
+        ShowTooltipIfEllipsisDirective
     ]
 })
 export class TagsMenuComponent {
@@ -46,12 +43,10 @@ export class TagsMenuComponent {
       private readonly elRef = inject(ElementRef);
   public filterText: string;
   private firstTime = true;
-  public disableFilterByProject$: Observable<boolean> = this.store.select(selectRouterParams)
-    .pipe(map(params => params?.projectId === '*'));
-
-  get allTags(): string[] {
-    return this.tagsFilterByProject() ? this.projectTags() : this.companyTags();
-  }
+  private routerParams = this.store.selectSignal(selectRouterParams);
+  protected isAllProject = computed(() => this.routerParams()?.projectId === '*')
+  private mixedTags = computed(() => Array.from(new Set((this.projectTags() || []).filter(t => t !== null).concat(this.companyTags() || []).sort())));
+  protected allTags = computed(() => this.tagsFilterByProject() ? this.projectTags() : (this.isAllProject() ? this.mixedTags() : this.companyTags()));
 
   tags = input<string[]>();
   projectTags = input<string[]>();
@@ -59,7 +54,7 @@ export class TagsMenuComponent {
   tagsFilterByProject = input<boolean>();
   disableFilterByProject = input<boolean>();
   disableCreateNew = input<boolean>();
-  disableColorMangement = input<boolean>();
+  disableColorManagement = input<boolean>();
   tagSelected = output<string>();
   getTags = output();
   getCompanyTags = output();

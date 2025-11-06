@@ -5,10 +5,10 @@ $credentialBaseHeight: 238px;
 
 :host {
   ::ng-deep .mat-mdc-tab-nav-bar, .mat-mdc-tab-group {
-    --mat-tab-header-divider-height: 1px;
+    --mat-tab-divider-height: 1px;
   }
 
-  --mat-tab-header-divider-color: var(--color-surface-container-high);
+  --mat-tab-divider-color: var(--color-surface-container-high);
 
   ::ng-deep .sub-header {
     padding: 0 32px;

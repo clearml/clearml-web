@@ -23,8 +23,9 @@ export interface QueueFormData {
 }
 
 @Component({
-    selector: 'sm-create-new-queue-form',
-    templateUrl: './create-new-queue-form.component.html',
+  selector: 'sm-create-new-queue-form',
+  templateUrl: './create-new-queue-form.component.html',
+  styleUrls: ['./create-new-queue-form.component.scss'],
   imports: [
     MatDialogActions,
     MatButton,
@@ -35,7 +36,6 @@ export interface QueueFormData {
     MatError,
     ReactiveFormsModule,
   ],
-    styleUrls: ['./create-new-queue-form.component.scss']
 })
 export class CreateNewQueueFormComponent {
   private fb = inject(FormBuilder);

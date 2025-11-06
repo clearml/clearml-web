@@ -1,0 +1,18 @@
+<sm-result-line
+  class="pointer"
+  (click)="modelEndpointSelected.emit(entity())"
+  [fontIcon]="'al-ico-model'"
+  [label]="entity().endpoint"
+  [tags]="[]"
+  [statusOptionsLabels]="{}"
+>
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ (entity().model) }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ entity().last_update | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span [title]="entity().url? 'URL':'PREPROCESS ARTIFACT'" class="sub-item">{{ entity().url || entity().preprocess_artifact }}</span>
+        </span>
+  </ng-container>
+</sm-result-line>

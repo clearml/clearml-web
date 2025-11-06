@@ -74,6 +74,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   public title: string;
   public checkIfLegendToTitle = checkIfLegendToTitle;
   private range: { xaxis: LayoutAxis[]; yaxis: LayoutAxis[] };
+  protected hideLegend: boolean;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -162,7 +163,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     this.id = data.id;
     this.embedFunction = data.embedFunction;
     this.disableNavigation = data.hideNavigation;
-    this.smoothWeight = data.smoothWeight ?? 0;
+    this.smoothWeight = data.chart.layout.type === 'singleValues' ? 0 : data.smoothWeight ?? 0;
+    this.hideLegend = !data.chart.layout.showlegend;
     this.smoothType = data.smoothType ?? smoothTypeEnum.exponential;
     this.showOrigin = data.showOrigin;
 
@@ -435,18 +437,19 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!chart?.layout) {
       return '';
     }
+    const title =  (chart.layout.title as {text: string})?.text ?? chart.layout.title as string;
     if (this.isCompare) {
-      if (this.showSmooth && this.data.id !== 'report-widget') {
-        return chart.layout.title as string;
+      if (chart.layout.type === 'singleValues' || this.showSmooth && this.data.id !== 'report-widget') {
+        return chart.metric !== title ? `${chart.metric} - ${title}` : title;
       }
-      return `${chart.metric ?? ''}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}
-      ${chart.variants?.length > 0 ? '' : chart.variant ? ' - ' + chart.variant : ''}`;
+      return `${chart.metric ?? ''}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
+      ${chart.variant === title ? '' : chart.variants?.length > 0 ? ' - ' + chart.variants?.join(', ') : ''}`;
     } else {
       if (this.disableNavigation) {
-        return chart?.variants?.length > 1 ? chart.variants.join(', ') : chart?.layout?.title as string || chart?.metric;
+        return chart?.variants?.length > 0 ? chart.variants?.join(', ') : chart?.layout?.title as string || chart?.metric;
       } else {
-        return `${chart.metric}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}
-      ${chart.variants?.length > 1 ? ' - ' + chart.variants.join(', ') : ''}`;
+        return `${chart.metric}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
+      ${(chart.variants?.length > 0 && chart.variant !== title) ? ' - ' + chart.variants?.join(', ') : ''}`;
       }
     }
   }

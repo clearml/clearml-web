@@ -56,7 +56,7 @@ export const initialState: IExperimentCompareChartsState = {
   searchTerm: '',
   showSettingsBar: false,
   selectedExperiments: [], // TODO: Move this to the general compare reducer
-  globalLegendData: null,
+  globalLegendData: null
   // scalarsHoverMode: 'x'
 };
 
@@ -72,7 +72,7 @@ export const experimentsCompareChartsReducer = createReducer(
     metricsHistogramCharts: action.payload,
     cachedAxisType: action.axisType
   })),
-  on(actions.setExperimentMultiScalarSingleValue, (state, action): IExperimentCompareChartsState => ({...state, multiSingleValues: action.tasks})),
+  on(actions.setExperimentMultiScalarSingleValue, (state, action): IExperimentCompareChartsState => ({...state, multiSingleValues: action.name.tasks})),
   on(actions.setAxisCache, (state, action): IExperimentCompareChartsState => ({
     ...state,
     cachedAxisType: (action as ReturnType<typeof actions.setAxisCache>).axis
@@ -102,8 +102,8 @@ export const experimentsCompareChartsReducer = createReducer(
       ...filteredOldSettings,
       [ids]: {
         ...(state.settingsList[ids] || {}), // Base with old properties (if any)
-        ...changesWithTimestamp, // Apply new changes and overwrite id/lastModified
-      },
+        ...changesWithTimestamp // Apply new changes and overwrite id/lastModified
+      }
     };
 
     return {...state, settingsList: newSettingsList};
@@ -118,6 +118,6 @@ export const experimentsCompareChartsReducer = createReducer(
   on(actions.setGlobalLegendData, (state, action): IExperimentCompareChartsState => ({
     ...state,
     globalLegendData: action.data
-  })),
+  }))
   // on(actions.setScalarsHoverMode, (state, action): IExperimentCompareChartsState => ({...state, scalarsHoverMode: action.hoverMode})),
 );

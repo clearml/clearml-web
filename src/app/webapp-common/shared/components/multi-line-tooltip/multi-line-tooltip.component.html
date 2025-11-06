@@ -4,20 +4,31 @@
   [action]="'leave'"
   (smHesitate)="hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()"
 >
+  @if(iconImage()) {
+    <button mat-icon-button
+            smClickStopPropagation
+            [delay]="100"
+            [action]="'enter'"
+            (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true">
+    <img [ngSrc]="iconImage()" alt="app-icon" width="20" height="20">
+    </button>
+  } @else {
     <mat-icon
       smClickStopPropagation
       fontSet="al"
       class="pointer"
+      [class]="customClass()"
       [fontIcon]="iconClass() ?? 'al-ico-info-circle'"
       [class.xs]="smallIcon()"
       [delay]="100"
       [action]="'enter'"
       (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true"
     ></mat-icon>
+  }
   <span #trigger="matMenuTrigger" [matMenuTriggerFor]="tooltipMenu" smClickStopPropagation></span>
 </span>
 
-<mat-menu #tooltipMenu="matMenu" [xPosition]="'after'" [yPosition]="position()" [hasBackdrop]="false" [class]="'multiline-tooltip'">
+<mat-menu #tooltipMenu="matMenu" [xPosition]="xPosition()" [yPosition]="yPosition()" [hasBackdrop]="false" [class]="'multiline-tooltip'">
   <div
     class="tooltip-container"
     [class.word-break]="wordBreak()"

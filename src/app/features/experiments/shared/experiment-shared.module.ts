@@ -7,7 +7,6 @@ import {ExperimentExecutionParametersComponent} from '@common/experiments/dumb/e
 import {CloneDialogComponent} from '@common/experiments/shared/components/clone-dialog/clone-dialog.component';
 import {AbortAllChildrenDialogComponent} from '@common/experiments/shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
-import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {ExperimentOutputPlotsComponent} from '@common/experiments/containers/experiment-output-plots/experiment-output-plots.component';
 import {EffectsModule} from '@ngrx/effects';
 import {CommonExperimentsMenuEffects} from '@common/experiments/effects/common-experiments-menu.effects';
@@ -87,15 +86,6 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatDivider} from '@angular/material/divider';
 
 export const experimentSyncedKeys = [
-  'view.projectColumnsSortOrder',
-  'view.projectColumnFilters',
-  'view.projectColumnsWidth',
-  'view.hiddenProjectTableCols',
-  'view.metricsCols',
-  'view.colsOrder',
-  'output.scalarsHoverMode',
-  'info.userKnowledge',
-  'output.settingsList',
 ];
 
 export const EXPERIMENT_CONFIG_TOKEN =
@@ -132,7 +122,6 @@ export const getExperimentsConfig = (userPreferences: UserPreferences) => ({
 const DECLARATIONS = [
   ExperimentMenuComponent,
   ExperimentMenuExtendedComponent,
-  ChangeProjectDialogComponent,
   CloneDialogComponent,
   AbortAllChildrenDialogComponent,
   ExperimentExecutionParametersComponent,

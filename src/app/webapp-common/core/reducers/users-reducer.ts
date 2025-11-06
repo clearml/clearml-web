@@ -4,14 +4,13 @@ import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/get
 import {
   GetCurrentUserResponseUserObjectCompany
 } from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {GettingStarted} from '~/core/actions/users.action';
+import {UsersGetCurrentUserResponseSettings} from '~/business-logic/model/users/usersGetCurrentUserResponseSettings';
+import {Role as RoleEnum} from '~/business-logic/model/auth/role';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {
   OrganizationGetUserCompaniesResponseCompanies
 } from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
-import {GettingStarted} from '~/core/actions/users.action';
-import {UsersGetCurrentUserResponseSettings} from '~/business-logic/model/users/usersGetCurrentUserResponseSettings';
-import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
-import RoleEnum = AuthEditUserRequest.RoleEnum;
-import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 
 export interface UsersState {
@@ -20,7 +19,7 @@ export interface UsersState {
   userWorkspaces: OrganizationGetUserCompaniesResponseCompanies[];
   selectedWorkspaceTab: GetCurrentUserResponseUserObjectCompany;
   workspaces: GetCurrentUserResponseUserObjectCompany[];
-  showOnlyUserWork: { [key: string]: boolean };
+  showOnlyUserWork: Record<string, boolean>;
   serverVersions: { server: string; api: string };
   gettingStarted: GettingStarted;
   settings: UsersGetCurrentUserResponseSettings;
@@ -77,7 +76,7 @@ export const usersReducerFunctions = [
     ...state,
     currentUser: {...state.currentUser, name: action.name}
   })),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   on(logout, state => ({
     ...state,
     currentUser: null

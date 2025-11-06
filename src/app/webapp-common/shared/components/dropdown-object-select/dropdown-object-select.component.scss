@@ -1,0 +1,24 @@
+$user-row-height: 36px;
+
+:host {
+  .creat-new-suffix {
+    display: inline-block;
+    margin-right: 18px;
+    font-size: 14px;
+    transform: translateY(-3px);
+  }
+
+  mat-form-field {
+    width: 100%;
+    z-index: 1;
+  }
+
+  mat-option {
+    line-height: normal;
+  }
+
+  mat-label {
+    display: inline-flex;
+    align-items: center;
+  }
+}

@@ -1,0 +1,25 @@
+.project {
+  max-width: 180px;
+}
+
+.project:empty + .dot,
+.sub-item:empty + .dot {
+  display: none;
+}
+
+.sub-title {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-outline), transparent 5%);
+
+  .sub-item {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .dot {
+    margin: 0 8px;
+    opacity: 0.4;
+    color: var(--color-primary);
+  }
+}

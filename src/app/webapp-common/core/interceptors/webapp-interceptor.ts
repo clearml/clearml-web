@@ -3,18 +3,11 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {catchError} from 'rxjs/operators';
-import { Router } from '@angular/router';
-import {selectCurrentUser} from '../reducers/users-reducer';
-import {Store} from '@ngrx/store';
-import {resetCurrentUser} from '~/core/actions/users.action';
-import {MatDialog} from '@angular/material/dialog';
+import {BaseLoginService} from '@common/shared/services/login.service';
 
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {
-  protected router = inject(Router);
-  protected store = inject(Store);
-  protected dialog = inject(MatDialog);
-  protected user = this.store.selectSignal(selectCurrentUser);
+  protected login = inject(BaseLoginService);
 
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -37,10 +30,7 @@ export class WebappInterceptor implements HttpInterceptor {
     }
     if (err.status === 401) {
       if (redirectUrl.indexOf('/signup') === -1 && redirectUrl.indexOf('/login') === -1) {
-
-        this.store.dispatch(resetCurrentUser());
-        this.dialog.closeAll();
-        this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
+        this.login.logout();
       }
       return throwError(() => err);
     } else {

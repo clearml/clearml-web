@@ -3,7 +3,7 @@ import {CredentialKeyExt, Credentials} from '../reducers/common-auth-reducer';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {SettingsUser} from '~/features/settings/settings.util';
 
-export const AUTH_PREFIX = 'AUTH_';
+export const AUTH_PREFIX = '[AUTH] ';
 
 export const refreshS3Credential = createAction(AUTH_PREFIX + ' [Refresh S3Credential]');
 export const setS3Credentials = createAction(
@@ -71,7 +71,7 @@ export const credentialRevoked = createAction(
 );
 export const updateAllCredentials = createAction(
   AUTH_PREFIX + 'UPDATE_ALL_CREDENTIALS',
-  props<{ credentials: CredentialKeyExt[]; extra: {[workspace: string]: CredentialKeyExt[]}; workspace: string }>()
+  props<{ credentials: CredentialKeyExt[]; extra: Record<string, CredentialKeyExt[]>; workspace: string }>()
 );
 export const getSignedUrl = createAction(
   AUTH_PREFIX + '[get signed url]',

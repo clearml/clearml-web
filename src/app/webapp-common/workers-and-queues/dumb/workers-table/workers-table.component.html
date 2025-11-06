@@ -36,7 +36,7 @@
       <sm-table-filter-sort
         [class.first]="col.id === WORKERS_TABLE_COL_FIELDS.ID"
         [column]="col"
-        [sortOrder]="tableSortFieldsObject[col.id]"
+        [sortOrder]="tableSortFieldsObject()[col.id]"
         (sortOrderChanged)="onSortChanged($event, col.id)">
       </sm-table-filter-sort>
     </ng-template>

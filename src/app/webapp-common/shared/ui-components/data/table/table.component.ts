@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {get} from 'lodash-es';
 import {MenuItem, PrimeTemplate, ScrollerOptions, SortMeta} from 'primeng/api';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {ContextMenu, ContextMenuModule} from 'primeng/contextmenu';
 import {
   Table,
@@ -21,8 +21,15 @@ import {
   TableRowCollapseEvent,
   TableRowExpandEvent
 } from 'primeng/table';
-import {BehaviorSubject, combineLatest, fromEvent, interval, startWith, Subject, Subscription} from 'rxjs';
-import {debounce, filter, take, throttleTime} from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  interval,
+  Subject,
+  Subscription
+} from 'rxjs';
+import {debounce, filter, map, take, throttleTime} from 'rxjs/operators';
 import {custumFilterFunc, custumSortSingle} from './overrideFilterFunc';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from './table.consts';
 import {Store} from '@ngrx/store';
@@ -38,8 +45,8 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
+import {injectResize} from 'ngxtension/resize';
 
 export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSelectEvent, 'index'> {
   single?: boolean;
@@ -68,6 +75,11 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   private element = inject(ElementRef);
   private cdr = inject(ChangeDetectorRef);
   private store = inject(Store);
+  private resizeComponent$ = injectResize({emitInitialResult: true, debounce: 5})
+    .pipe(
+      map(res => res.width),
+      distinctUntilChanged()
+    );
 
   public active = false;
   public bodyTemplate: TemplateRef<{ $implicit: ISmCol; rowData: D; rowIndex: number; expanded: boolean }>;
@@ -234,11 +246,11 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
 
     combineLatest([
       this.resize$,
-      fromEvent(window, 'resize').pipe(startWith(null))
+      this.resizeComponent$
     ])
       .pipe(
         takeUntilDestroyed(),
-        debounce(([delay]) => interval(typeof delay === 'number' ? delay : 50))
+        debounce(([delay]) => interval(typeof delay === 'number' ? delay : 0))
       )
       .subscribe(() => this.calcResize());
   }
@@ -579,7 +591,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   preProcessRows(cols: any[]) {
     return this.tableData().map(row =>
       cols.reduce((acc, dCol) => {
-        const val = get(row, dCol.field, '') as unknown;
+        const val = get(row, (dCol.field).split('.').map(level=> level.replace('%2E', '.')), '') as unknown;
         acc[dCol.name] = Array.isArray(val) ?
           val.toString() :
           typeof val === 'string' ?

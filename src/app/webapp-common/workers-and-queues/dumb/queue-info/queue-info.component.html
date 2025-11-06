@@ -59,11 +59,11 @@
   </mat-tab>
 </mat-tab-group>
 
-@if (menuOpen) {
+@if (menuOpen()) {
   <sm-menu
   smMenuClass="experiments-in-queue-list"
   panelClasses="dark"
-  [position]="menuPosition"
+  [position]="menuPosition()"
   [header]=""
   [showCart]="false"
   [showOverlay]="false"

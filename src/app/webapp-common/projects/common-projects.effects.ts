@@ -12,10 +12,12 @@ import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsG
 import {isExample} from '../shared/utils/shared-utils';
 import {catchError, debounceTime, filter, map, mergeMap, switchMap} from 'rxjs/operators';
 import {pageSize} from './common-projects.consts';
-import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {selectHideExamples, selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode, selectSelectedProject, selectSelectedProjectId, selectShowHidden} from '../core/reducers/projects.reducer';
+import {
+  selectHideExamples, selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode,
+  selectMainPageUsersFilter, selectSelectedProject, selectSelectedProjectId, selectShowHidden
+} from '../core/reducers/projects.reducer';
 import {forkJoin, of} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectStats} from '../core/actions/projects.actions';
@@ -60,16 +62,18 @@ export class CommonProjectsEffects {
   getAllProjects = createEffect(() => this.actions.pipe(
     ofType(getAllProjectsPageProjects),
     concatLatestFrom(() => [
-      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
-      this.store.select(selectSelectedProjectId),
       this.store.select(selectSelectedProject),
     ]),
-    switchMap(([action, routerProjectId, projectId, selectedProject]) =>
-      ((selectedProject && selectedProject.id === routerProjectId) || !projectId && !routerProjectId ? of(selectedProject) : this.projectsApi.projectsGetAllEx({
-        id: routerProjectId || projectId,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        only_fields: ['name']
-      }).pipe(map(res => res.projects[0])))
+    map(([action, selectedProject]) => [action, this.route.snapshot.firstChild.firstChild?.firstChild?.params?.projectId, selectedProject]),
+    switchMap(([action, projectId, selectedProject]) =>
+      ((selectedProject && selectedProject.id === projectId) || !projectId && !projectId ?
+        of(selectedProject) :
+        this.projectsApi.projectsGetAllEx({
+          id: projectId,
+
+          only_fields: ['name']
+        }).pipe(map(res => res.projects[0]))
+      )
         .pipe(
           concatLatestFrom(() => [
             this.store.select(selectProjectsOrderBy),
@@ -82,23 +86,23 @@ export class CommonProjectsEffects {
             this.store.select(selectHideExamples),
             this.store.select(selectMainPageTagsFilter),
             this.store.select(selectMainPageTagsFilterMatchMode),
+            this.store.select(selectMainPageUsersFilter),
           ]),
 
           switchMap(([currentProject,
                        orderBy, sortOrder, searchQuery, scrollId, user, showOnlyUserWork, showHidden, hideExamples,
-                       mainPageTagsFilter, mainPageTagsFilterMatchMode]
+                       mainPageTagsFilter, mainPageTagsFilterMatchMode, mainPageUsersFilter]
             ) => {
-              const selectedProjectId = routerProjectId || projectId; // In rare cases where router not updated yet with
-              const selectedProjectName = selectSelectedProjectId && selectedProjectId !== '*' ? currentProject?.name : null;
+              const selectedProjectName = selectSelectedProjectId && projectId && projectId !== '*' ? currentProject?.name : null;
               const selectedProjectBasename = selectedProjectName?.split('/').at(-1);
               // current project id
-              const projectsView = this.route.snapshot.firstChild.routeConfig.path === 'projects';
-              const nested = this.route.snapshot.firstChild?.firstChild?.firstChild?.routeConfig?.path === 'projects';
+              const projectsView = this.route.snapshot.firstChild.firstChild.routeConfig.path === 'projects';
+              const nested = this.route.snapshot.firstChild?.firstChild?.firstChild.firstChild?.routeConfig?.path === 'projects';
               const datasets = isDatasets(this.route.snapshot);
               const pipelines = isPipelines(this.route.snapshot);
               const reports = isReports(this.route.snapshot);
               let statsFilter;
-              /* eslint-disable @typescript-eslint/naming-convention */
+
               if (!nested) {
                 if (pipelines) {
                   statsFilter = {system_tags: ['pipeline'], type: [TaskTypeEnum.Controller]};
@@ -112,7 +116,7 @@ export class CommonProjectsEffects {
               return forkJoin([
                 // projects list
                 this.projectsApi.projectsGetAllEx({
-                  ...(!projectsView && !nested && mainPageTagsFilter?.length > 0 && {
+                  ...(!nested && mainPageTagsFilter?.length > 0 && {
                     filters: {
                       tags: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter),
                     }
@@ -124,9 +128,10 @@ export class CommonProjectsEffects {
                   include_stats: true,
                   shallow_search: !searchQuery?.query,
                   ...(((projectsView || nested) && !searchQuery?.query) && {permission_roots_only: true}),
-                  ...((projectsView && selectedProjectId && selectedProjectId !== '*') && {parent: [selectedProjectId]}),
+                  ...((projectsView && projectId && projectId !== '*') && {parent: [projectId]}),
                   scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
                   size: pageSize,
+                  ...(mainPageUsersFilter?.length > 0 && {active_users:mainPageUsersFilter}),
                   ...(showOnlyUserWork && {active_users: [user?.id]}),
                   ...((showHidden) && {search_hidden: true}),
                   ...(hideExamples && {allow_public: false}),
@@ -139,12 +144,12 @@ export class CommonProjectsEffects {
                       fields: ['id', 'basename', 'description']
                     }
                   }),
-                  ...(!projectsView && getFeatureProjectRequest(this.route.snapshot, nested, searchQuery, selectedProjectName, selectedProjectId)),
+                  ...(!projectsView && getFeatureProjectRequest(this.route.snapshot, nested, searchQuery, selectedProjectName, projectId)),
                 }),
                 // Getting [current project] stats from server
-                ((nested || projectsView) && selectedProjectId && selectedProjectId !== '*' && !scrollId && !searchQuery?.query) ?
+                ((nested || projectsView) && projectId && projectId !== '*' && !scrollId && !searchQuery?.query) ?
                   this.projectsApi.projectsGetAllEx({
-                    ...(!datasets && !pipelines && !reports && {id: selectedProjectId}),
+                    ...(!datasets && !pipelines && !reports && {id: [projectId]}),
                     ...(datasets && {
                       name: `^${escapeRegex(selectedProjectName)}/\\.datasets$`,
                       search_hidden: true,
@@ -175,7 +180,7 @@ export class CommonProjectsEffects {
                     ...(showOnlyUserWork && {active_users: [user.id]}),
                     only_fields: ['name', 'company', 'user', 'created', 'default_output_destination'],
                     ...(!projectsView && getSelfFeatureProjectRequest(this.route.snapshot)),
-                  }) : nested && reports && selectedProjectId === '*' && !scrollId && !searchQuery?.query ?
+                  }) : nested && reports && projectId === '*' && !scrollId && !searchQuery?.query ?
                     // nested reports virtual card
                     this.projectsApi.projectsGetAllEx({
                       name: '^\\.reports$',
@@ -188,10 +193,10 @@ export class CommonProjectsEffects {
                       ...(showOnlyUserWork && {active_users: [user.id]}),
                       only_fields: ['id', 'company'],
                       ...(mainPageTagsFilter?.length > 0 && {
-                          children_tags_filter: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter)
+                        children_tags_filter: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter)
                       }),
 
-                      /* eslint-enable @typescript-eslint/naming-convention */
+
                     }) :
                     of(null),
               ]).pipe(
@@ -200,7 +205,7 @@ export class CommonProjectsEffects {
                     newScrollId: projectsRes.scroll_id,
                     projects: currentProjectRes !== null && currentProjectRes.projects.length !== 0 &&
                     this.isNotEmptyExampleProject(currentProjectRes.projects[0]) ?
-                      /* eslint-disable @typescript-eslint/naming-convention */
+
                       [(currentProjectRes?.projects?.length === 0 ?
                         {
                           isRoot: true,
@@ -210,15 +215,15 @@ export class CommonProjectsEffects {
                         } :
                         {
                           ...currentProjectRes.projects[0],
-                          id: selectedProjectId,
+                          id: projectId,
                           isRoot: true,
-                          // eslint-disable-next-line @typescript-eslint/naming-convention
+
                           sub_projects: null,
                           name: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectName}]`,
                           basename: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectBasename}]`
                         }),
                         ...projectsRes.projects
-                        /* eslint-enable @typescript-eslint/naming-convention */
+
                       ] :
                       projectsRes.projects
                   }
@@ -247,13 +252,13 @@ export class CommonProjectsEffects {
     ]),
     filter(([, project]) => !!project),
     switchMap(([action, project, user, showHidden]) => this.projectsApi.projectsGetAllEx({
-      /* eslint-disable @typescript-eslint/naming-convention */
+
       id: [project.id],
       include_stats: true,
       ...(showHidden && {search_hidden: true}),
       ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline', '-dataset']}}),
       ...(action.showOnlyUserWork && {active_users: [user.id]}),
-      /* eslint-enable @typescript-eslint/naming-convention */
+
     })),
     switchMap(({projects}) => [setSelectedProjectStats({project: projects[0]})]),
     catchError(error => [requestFailed(error)])

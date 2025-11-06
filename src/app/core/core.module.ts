@@ -11,7 +11,6 @@ import {createUserPrefReducer} from '@common/core/meta-reducers/user-pref-reduce
 import {messagesReducer} from '@common/core/reducers/messages-reducer';
 import {projectsReducer} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
-import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {PROJECTS_PREFIX} from '@common/projects/common-projects.consts';
 import {CHOOSE_COLOR_PREFIX} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {colorSyncedKeys} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
@@ -129,7 +128,6 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] =>
     ...extCoreModules
   ],
   providers: [
-    SmSyncStateSelectorService,
     UsageStatsService,
     AdminService,
     ReportCodeEmbedService,

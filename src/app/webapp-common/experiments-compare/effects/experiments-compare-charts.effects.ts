@@ -77,7 +77,7 @@ export class ExperimentsCompareChartsEffects {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       model_events: action.entity === EntityTypeEnum.model,
     })),
-    mergeMap((res) => [chartActions.setExperimentMultiScalarSingleValue({tasks: res?.tasks})]
+    map((res) => chartActions.setExperimentMultiScalarSingleValue({name: {tasks: res?.tasks}})
     )
   ));
 

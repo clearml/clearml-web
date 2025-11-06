@@ -8,7 +8,6 @@
     [filterDelay]="0"
     [globalFilterFields]="enableTableSearch() ? globalFilterFields() : null"
     [scrollHeight]="scrollHeight()"
-    [autoLayout]="false"
     [columns]="visibleColumns()"
     [selectionMode]="selectionMode()"
     [rows]="currRowsNumber()"
@@ -53,7 +52,7 @@
         *ngTemplateOutlet="rowExpansionTemplate; context: {$implicit: row, lastFrame: lastRowExpanded}"></ng-container>
     </ng-template>
     @if (!noHeader()) {
-      <ng-template #header let-columns>
+      <ng-template #header>
         @if (!minimizedView()) {
           <tr class="header ui-state-default">
             @for (col of visibleColumns(); track col.id) {
@@ -64,7 +63,7 @@
                   [class.selected-col-header]="col?.disablePointerEvents"
                   [pReorderableColumnDisabled]="!reorderableColumns() || col?.disableDrag"
                   [pResizableColumnDisabled]="col?.disableDrag"
-                  [style.max-width]="col.style?.maxWidth ?? !resizableColumns() && columnResizeMode() === 'fit' && col.style?.width"
+                  [style.max-width]="col.style?.maxWidth ?? (!resizableColumns() && columnResizeMode() === 'fit' && col.style?.width)"
                   [style.min-width]="col.style?.minWidth"
                   [style.width]="col.style?.width"
                   [class.p-datatable-frozen-column]="col?.frozen"
@@ -139,7 +138,7 @@
           (click)="!minimizedView() && checkClick({e: $event, data: rowData})"
           (dblclick)="!minimizedView() && checkClick({e: $event, data: rowData})">
         @if (!minimizedView()) {
-          @for (col of columns; track col.id; let i = $index) {
+          @for (col of columns; track col.id) {
             <td
               [class.ui-resizable-column]="resizableColumns()"
               [class.cursor-default]="selectionMode()===null"

@@ -1,0 +1,25 @@
+<sm-result-line
+  class="pointer"
+  (click)="routeSelected.emit(entity())"
+  [fontIcon]="'al-ico-app-gateway'"
+  [label]="entity().name"
+  [status]="entity().status"
+  [statusOptionsLabels]="statusOptionsLabels()"
+  [tags]="[]"
+>
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span [title]="entity().path ? 'Path' : 'Subdomain'" class="project ellipsis">{{ entity().path || entity().subdomain }}</span>
+          <span class="dot">●</span>
+          <span class="project ellipsis">{{ entity().tasks?.length || 0 }} tasks</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ entity().last_update | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Updated by" class="sub-item">{{ entity().updated_by?.name }}</span>
+          @if (entity().load_balancer?.enabled) {
+            <span class="dot">●</span>
+            <span class="project ellipsis">Load Balanced</span>
+          }
+        </span>
+  </ng-container>
+</sm-result-line>

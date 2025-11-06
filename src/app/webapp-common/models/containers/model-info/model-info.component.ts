@@ -1,12 +1,16 @@
-import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, computed, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import * as infoActions from '../../actions/models-info.actions';
-import {selectIsModelInEditMode, selectSelectedModel, selectSelectedTableModel, selectSplitSize} from '../../reducers';
-import {SelectedModel} from '../../shared/models.model';
-import {Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
+import {
+  selectIsModelInEditMode,
+  selectModelId,
+  selectSelectedModel,
+  selectSelectedTableModel,
+  selectSplitSize
+} from '../../reducers';
+import {debounceTime, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
@@ -40,6 +44,7 @@ import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {concatLatestFrom} from '@ngrx/operators';
 import {infoModelsTabsLinks} from '@common/models/models.consts';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'sm-model-info',
@@ -47,27 +52,12 @@ import {infoModelsTabsLinks} from '@common/models/models.consts';
   styleUrls: ['./model-info.component.scss'],
   standalone: false
 })
-export class ModelInfoComponent implements OnInit, OnDestroy {
+export class ModelInfoComponent implements OnDestroy {
   private router = inject(Router);
   private store = inject(Store);
   private route = inject(ActivatedRoute);
   private refresh = inject(RefreshService);
-  private cdr = inject(ChangeDetectorRef);
   private modelInfoEffect = inject(ModelsInfoEffects);
-  public minimized: boolean;
-
-  public selectedModel: SelectedModel;
-  private sub = new Subscription();
-  public isExample: boolean;
-  protected smoothWeight = this.store.selectSignal(selectModelSettingsSmoothWeight);
-  protected smoothSigma = this.store.selectSignal(selectModelSettingsSmoothSigma);
-  protected smoothType = this.store.selectSignal(selectModelSettingsSmoothType);
-  protected xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
-  protected groupBy = this.store.selectSignal(selectModelSettingsGroupBy);
-  protected listOfHidden = this.store.selectSignal(selectModelSettingsHiddenScalar);
-  protected showOriginals = this.store.selectSignal(selectModelSettingsShowOrigin);
-
-
 
   groupByOptions = [
     {
@@ -80,13 +70,21 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     }
   ];
 
-
-  links = infoModelsTabsLinks;
+  private isArchived = this.route.snapshot.queryParams.archive === 'true';
+  protected minimized = this.route.snapshot.firstChild?.data.minimized;
+  private modelsFeature = this.route.snapshot.data?.setAllProject;
   public toMaximize: boolean;
-  private modelsFeature: boolean;
+  links = infoModelsTabsLinks;
 
-  protected selectedModel$ = this.store.select(selectSelectedModel)
-    .pipe(filter(model => !!model));
+  public selectedModel = this.store.selectSignal(selectSelectedModel);
+  public isExample = computed(() => isReadOnly(this.selectedModel()));
+  protected smoothWeight = this.store.selectSignal(selectModelSettingsSmoothWeight);
+  protected smoothSigma = this.store.selectSignal(selectModelSettingsSmoothSigma);
+  protected smoothType = this.store.selectSignal(selectModelSettingsSmoothType);
+  protected xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
+  protected groupBy = this.store.selectSignal(selectModelSettingsGroupBy);
+  protected listOfHidden = this.store.selectSignal(selectModelSettingsHiddenScalar);
+  protected showOriginals = this.store.selectSignal(selectModelSettingsShowOrigin);
   protected routerConfig = this.store.selectSignal(selectRouterConfig);
   protected routerParams = this.store.selectSignal(selectRouterParams);
   protected backdropActive$ = this.store.select(selectBackdropActive);
@@ -100,56 +98,42 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   protected isProjectLevel = this.store.selectSignal(selectSelectedModelSettingsIsProjectLevel);
 
   projectId = computed(() => this.routerParams().projectId);
+  modelId = computed(() => this.routerParams().modelId);
 
   constructor() {
-    this.modelsFeature = this.route.snapshot.data?.setAllProject;
     if (this.modelsFeature) {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}));
       this.store.dispatch(getCompanyTags());
     }
-    this.minimized = this.route.snapshot.firstChild?.data.minimized;
     if (!this.minimized) {
       this.store.dispatch(headerActions.reset());
       this.setupBreadcrumbsOptions();
     }
-  }
 
-  ngOnInit() {
-    this.sub.add(this.store.select(selectSelectedModel)
-      .subscribe(model => {
-        this.selectedModel = model;
-        this.isExample = isReadOnly(model);
-        this.cdr.detectChanges();
-      })
-    );
-
-    this.sub.add(this.store.select(selectRouterParams)
+    this.store.select(selectModelId)
       .pipe(
+        takeUntilDestroyed(),
         debounceTime(150),
-        map(params => params?.modelId),
         filter(modelId => !!modelId),
         distinctUntilChanged()
       )
-      .subscribe(id => this.store.dispatch(infoActions.getModelInfo({id})))
-    );
+      .subscribe(id => this.store.dispatch(infoActions.getModelInfo({id})));
 
-    this.sub.add(this.refresh.tick
+    this.refresh.tick
       .pipe(
+        takeUntilDestroyed(),
         withLatestFrom(this.isModelInEditMode$),
         filter(([, isModelInEditMode]) => !isModelInEditMode && !this.minimized)
       ).subscribe(([auto]) => {
         if (auto === null) {
-          this.store.dispatch(infoActions.refreshModelInfo(this.selectedModel.id));
+          this.store.dispatch(infoActions.refreshModelInfo(this.modelId()));
         } else {
-          this.store.dispatch(infoActions.getModelInfo({id: this.selectedModel.id}));
+          this.store.dispatch(infoActions.getModelInfo({id: this.modelId()}));
         }
-      })
-    );
-
+      });
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
     if (!this.toMaximize) {
       this.modelInfoEffect.previousSelectedId = null;
       this.modelInfoEffect.previousSelectedLastUpdate = null;
@@ -159,7 +143,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   public updateModelName(name: string) {
     if (name.trim().length > 2) {
-      this.store.dispatch(infoActions.updateModelDetails({id: this.selectedModel.id, changes: {name}}));
+      this.store.dispatch(infoActions.updateModelDetails({id: this.modelId(), changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
@@ -184,7 +168,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   maximize() {
     const last = this.route.snapshot.firstChild.url[0].path;
     this.store.dispatch(headerActions.reset());
-    return this.router.navigate(['output', last], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+    return this.router.navigate(['output', last], {relativeTo: this.route, ...(this.isArchived && {queryParams: {archive: true}})});
   }
 
   minimizeView() {
@@ -197,39 +181,46 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   }
 
   setupBreadcrumbsOptions() {
-    this.sub.add(this.selectedProject$.pipe(concatLatestFrom(() => [this.store.select(selectRouterParams), this.store.select(selectRouterConfig)])
-    ).subscribe(([selectedProject, params, config]) => {
-      if (this.modelsFeature) {
-        this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: false,
-            featureBreadcrumb: {name: 'Models'},
-          }
-        }));
-      } else {
-        this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: !!selectedProject,
-            featureBreadcrumb: {
-              name: 'PROJECTS',
-              url: 'projects'
-            },
-            projectsOptions: {
-              basePath: 'projects',
-              filterBaseNameWith: null,
-              compareModule: null,
-              showSelectedProject: selectedProject?.id !== '*',
-              ...(selectedProject && {
-                selectedProjectBreadcrumb: {
-                  name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename,
-                  url: this.getMinimizeURL(params, config), queryParamsHandling: 'preserve', linkLast: true
-                }
-              })
+    this.selectedProject$
+      .pipe(
+        takeUntilDestroyed(),
+        concatLatestFrom(() => [
+          this.store.select(selectRouterParams),
+          this.store.select(selectRouterConfig)
+        ])
+      )
+      .subscribe(([selectedProject, params, config]) => {
+        if (this.modelsFeature) {
+          this.store.dispatch(setBreadcrumbsOptions({
+            breadcrumbOptions: {
+              showProjects: false,
+              featureBreadcrumb: {name: 'Models'},
             }
-          }
-        }));
-      }
-    }));
+          }));
+        } else {
+          this.store.dispatch(setBreadcrumbsOptions({
+            breadcrumbOptions: {
+              showProjects: !!selectedProject,
+              featureBreadcrumb: {
+                name: 'PROJECTS',
+                url: 'projects'
+              },
+              projectsOptions: {
+                basePath: 'projects',
+                filterBaseNameWith: null,
+                compareModule: null,
+                showSelectedProject: selectedProject?.id !== '*',
+                ...(selectedProject && {
+                  selectedProjectBreadcrumb: {
+                    name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename,
+                    url: this.getMinimizeURL(params, config), queryParamsHandling: 'preserve', linkLast: true
+                  }
+                })
+              }
+            }
+          }));
+        }
+      });
   }
 
   getMinimizeURL(params, config): string {
@@ -251,41 +242,41 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   changeSmoothness($event: number) {
     this.store.dispatch(setExperimentSettings({
-      id: this.selectedModel.id,
+      id: this.modelId(),
       changes: {...this.getSettingsObject(), smoothWeight: $event}
     }));
   }
 
   changeSigma($event: number) {
     this.store.dispatch(setExperimentSettings({
-      id: this.selectedModel.id,
+      id: this.modelId(),
       changes: {...this.getSettingsObject(), smoothSigma: $event}
     }));
   }
 
   changeSmoothType($event: SmoothTypeEnum) {
     this.store.dispatch(setExperimentSettings({
-      id: this.selectedModel.id,
+      id: this.modelId(),
       changes: {...this.getSettingsObject(), smoothType: $event}
     }));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
     this.store.dispatch(setExperimentSettings({
-      id: this.selectedModel.id,
+      id: this.modelId(),
       changes: {...this.getSettingsObject(), xAxisType: $event}
     }));
   }
 
   changeGroupBy($event: GroupByCharts) {
     this.store.dispatch(setExperimentSettings({
-      id: this.selectedModel.id,
+      id: this.modelId(),
       changes: {...this.getSettingsObject(), groupBy: $event}
     }));
   }
 
   changeShowOriginals($event: boolean) {
-    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {...this.getSettingsObject(), showOriginals: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.modelId(), changes: {...this.getSettingsObject(), showOriginals: $event}}));
   }
 
   getSettingsObject = () => ({
@@ -308,7 +299,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
         projectLevel: true
       }, id: this.projectId()
     }));
-    this.store.dispatch(removeExperimentSettings({id: this.selectedModel.id}));
+    this.store.dispatch(removeExperimentSettings({id: this.modelId()}));
   }
 
 }

@@ -12,19 +12,21 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 @Component({
     selector: 'sm-chips',
     templateUrl: './chips.component.html',
     styleUrls: ['./chips.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        ChooseColorModule,
-        TooltipDirective,
-        ShowTooltipIfEllipsisDirective,
-        MatIconButton,
-        MatIcon
-    ]
+  imports: [
+    ChooseColorModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    MatIcon,
+    ChooseColorDirective
+  ]
 })
 export class ChipsComponent implements OnInit, OnDestroy {
 

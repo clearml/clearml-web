@@ -50,9 +50,9 @@
     <sm-tags-menu
       #tagsMenu
       [tags]="model()?.tags"
-      [projectTags]="allProjects() ? companyTags() : projectTags()"
-      [companyTags]="allProjects() ? null : companyTags()"
-      [tagsFilterByProject]="allProjects() || tagsFilterByProject()"
+      [tagsFilterByProject]="!allProjects() && tagsFilterByProject()"
+      [projectTags]="projectTags()"
+      [companyTags]="companyTags()"
       (tagSelected)="tagSelected.emit($event)">
     </sm-tags-menu>
     <hr>

@@ -1,15 +1,15 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
-  [tableCols]="tableMode() === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
-  [isArchived]="isArchivedMode()"
+  [tableCols]="tableMode() === 'compare' ? (tableCompareView() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
+  [isArchived]="inArchivedMode()"
   [metricVariants]="metricsVariants$()"
   [hyperParams]="hyperParams$ | ngrxPush"
-  [minimizedView]="minimizedView"
+  [minimizedView]="minimizedView()"
   [isMetricsLoading]="metricLoading$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
   [tableMode]="firstExperiment ? tableMode() : 'table'"
   [showCompareScalarSettings]="showCompareScalarSettings$ | ngrxPush"
-  [compareView]="tableCompareView$()"
+  [compareView]="tableCompareView()"
   [rippleEffect]="tableModeAwareness$ | ngrxPush"
   [addButtonTemplate]="addButton"
   [noData]="!((experiments$ | ngrxPush)?.length > 0)"
@@ -34,7 +34,7 @@
   <button
     mat-flat-button
     class="tertiary-button me-3"
-    [disabled]="isArchivedMode() || isExampleProject"
+    [disabled]="inArchivedMode() || exampleProject()"
     (click)="newRun()"
   >
     <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="newRunButton"></mat-icon>
@@ -42,20 +42,20 @@
   </button>
 </ng-template>
 <div class="experiment-body">
-  <as-split #split
-            [gutterSize]=1
-            [useTransition]="true"
-            [gutterDblClickDuration]="400"
-            (gutterClick)="clickOnSplit()"
-            (gutterDblClick)="closePanel()"
-            (dragEnd)="splitSizeChange($event)"
-            (dragStart)="disableInfoPanel()"
-            (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
-            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
-            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
+  <as-split
+    [gutterSize]=1
+    [useTransition]="true"
+    [gutterDblClickDuration]="400"
+    (gutterClick)="clickOnSplit()"
+    (gutterDblClick)="closePanel()"
+    (dragEnd)="splitSizeChange($event)"
+    (dragStart)="disableInfoPanel()"
+    (transitionEnd)="experimentsTable.table()?.resize(); experimentsTable.afterTableInit()"
+    [class.opened]="minimizedView() && splitSize() <= 1"
+    [class.closed]="minimizedView() && splitSize() >= 99"
   >
     <as-split-area
-      [size]="100 - (splitInitialSize)"
+      [size]="100 - splitSize()"
       [minSize]="1"
       [maxSize]="99"
     >
@@ -67,7 +67,7 @@
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [tableCols]="tableCols$| ngrxPush"
         [experiments]="experiments$ | ngrxPush"
-        [users]="users$ | ngrxPush"
+        [users]="users()"
         [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
         [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
         [parents]="parents$ | ngrxPush"
@@ -80,14 +80,13 @@
         [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
         [selectedExperiment]="highlited()"
-        [minimizedView]="minimizedView"
+        [minimizedView]="minimizedView()"
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
-        [split]="selectSplitSize$ | ngrxPush"
         [contextMenuTemplate]="contextMenuExtendedTemplate"
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
         [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | ngrxPush"
-        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed()"
         [cardHeight]="112"
         (experimentSelectionChanged)="getTableModeFromURL() !== 'compare' && experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
@@ -109,8 +108,8 @@
     <as-split-area
       style="display: flex; flex-direction: column; overflow: hidden;"
       [class.light-theme]="getTableModeFromURL() === 'compare'"
-      [size]="splitInitialSize"
-      [visible]="minimizedView"
+      [size]="splitSize()"
+      [visible]="minimizedView()"
     >
       <router-outlet></router-outlet>
     </as-split-area>
@@ -140,7 +139,7 @@
     [activateFromMenuButton]="false"
     [useCurrentEntity]="singleRowContext"
     [minimizedView]="true"
-    [tableMode]="!minimizedView"
+    [tableMode]="!minimizedView()"
     [backdrop]="menuBackdrop"
     (tagSelected)="onAddTag($event, contextExperiment)"
     (menuOpened)="setContextMenuStatus(true)"

@@ -31,7 +31,6 @@
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
         [systemTags]="systemTags$ | ngrxPush"
         [entityType]="entityTypes.experiment"
-        [split]="splitSize()"
         [selectedExperiment]="null"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (loadMoreExperiments)="getNextExperiments()"

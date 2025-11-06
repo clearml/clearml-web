@@ -39,11 +39,23 @@
           <div class="header">PARAMETERS</div>
           @for (section of (entity()?.type === 'controller' ? {'Args': {}} : entity()?.hyperparams) | keyvalue; track section) {
             @for (param of entity()?.hyperparams[section.key]  | keyvalue | filterRegex: '^(?!_).+$'; track param) {
-              <div
-                class="param"
-              >
+              <div class="param">
                 <div class="key" [smTooltip]="param.key" smShowTooltipIfEllipsis>{{ param.key }}</div>
-                <div class="value" [smTooltip]="param.value.value" smShowTooltipIfEllipsis>{{ param.value.value }}</div>
+                @if (section.key === 'kwargs_artifacts') {
+                  @let taskId = param.value.value?.split('.')?.[0];
+                  @let artifact = param.value.value?.split('.')?.[1];
+                  <div class="value" [smTooltip]="artifact" smShowTooltipIfEllipsis>
+                    @if (taskId) {
+                      <a target="_blank" [routerLink]="['/projects', '*', 'tasks', taskId, 'output', 'artifacts', 'other', artifact, 'output']">
+                        {{ artifact }}
+                      </a>
+                    } @else {
+                      {{ artifact }}
+                    }
+                  </div>
+                } @else {
+                  <div class="value" [smTooltip]="param.value.value" smShowTooltipIfEllipsis>{{ param.value.value }}</div>
+                }
               </div>
             }
           }

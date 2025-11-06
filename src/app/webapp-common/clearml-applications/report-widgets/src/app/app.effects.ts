@@ -62,7 +62,7 @@ export class AppEffects {
     )),
     mergeMap((res) => [
       setTaskData({
-        sourceProject: (res.data.tasks[0]?.project as any).id,
+        sourceProject: this.getProject(res.data.tasks),
         sourceTasks: res.data.tasks.map(t => t.id),
         appId: (res.data.tasks[0] as any)?.application?.app_id?.id
       }),
@@ -89,7 +89,7 @@ export class AppEffects {
         mergeMap(res => [
           setPlotData({data: res.data.scalar_metrics_iter_histogram as ReportsApiMultiplotsResponse}),
           setTaskData({
-            sourceProject: (res.data.tasks[0]?.project as any).id,
+            sourceProject: this.getProject(res.data.tasks),
             sourceTasks: res.data.tasks.map(t => t.id),
             appId: (res.data.tasks[0] as any)?.application?.app_id?.id
           })]
@@ -113,7 +113,7 @@ export class AppEffects {
       ).pipe(
         mergeMap(res => [
           setSampleData({data: res.data.debug_images?.[0]?.iterations?.[0]?.events[0] as DebugSample}),
-          setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})]),
+          setTaskData({sourceProject: this.getProject(res.data.tasks), sourceTasks: res.data.tasks.map(t => t.id)})]),
         catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
     ))
@@ -125,11 +125,11 @@ export class AppEffects {
         id: action.tasks,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['last_metrics', 'name', 'last_iteration', 'project', ...action.variants.map(variant => `hyperparams.${variant}`)]
-      })
+      }, {headers: this.getHeaders(action.company)})
         .pipe(
           mergeMap(res => [
             setParallelCoordinateExperiments({data: res.data.tasks as unknown as Task[]}),
-            setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
+            setTaskData({sourceProject: this.getProject(res.data.tasks), sourceTasks: res.data.tasks.map(t => t.id)})
           ])
         )
     ))
@@ -143,11 +143,11 @@ export class AppEffects {
         model_events: action.models,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         single_value_metrics: {}
-      })
+      }, {headers: this.getHeaders(action.company)})
     ),
     mergeMap((res: { data: ReportsGetTaskDataResponse }) => [
         setSingleValues({data: res.data.single_value_metrics}),
-        setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
+        setTaskData({sourceProject: this.getProject(res.data.tasks), sourceTasks: res.data.tasks.map(t => t.id)})
       ]
     )
   ));
@@ -158,7 +158,7 @@ export class AppEffects {
     mergeMap(action =>
       of(action).pipe(
         concatLatestFrom(() => this.store.select(selectSignedUrl(action.url))),
-        switchMap(([,prevSigned]) => this.adminService.signUrlIfNeeded(action.url, action.config, prevSigned)),
+        switchMap(([, prevSigned]) => this.adminService.signUrlIfNeeded(action.url, action.config, prevSigned)),
         filter(res => !!res),
         switchMap((res: SignResponse) => {
             switch (res.type) {
@@ -170,9 +170,12 @@ export class AppEffects {
                 return EMPTY;
             }
           }
-        ),
-      ),
+        )
+      )
     )
   ));
 
+  getProject(tasks: any[]): string {
+    return tasks?.find(task => task.project)?.project.id ?? '*';
+  }
 }

@@ -17,7 +17,7 @@
             ></span>
             <span class="experiment-name"
               [smTooltip]="duplicateNamesObject[exp.name] ? '' : exp.name" smShowTooltipIfEllipsis>
-              <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
+              <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags?.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
             </span>
             <sm-tag-list [tags]="exp.tags"></sm-tag-list>
             @if ((globalLegendData$ | ngrxPush)?.length > 1) {

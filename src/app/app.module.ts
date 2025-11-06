@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, inject, NgModule, provideAppInitializer} from '@angular/core';
+import {inject, NgModule, provideAppInitializer} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {PreloadAllModules, RouteReuseStrategy, RouterModule} from '@angular/router';
@@ -30,9 +30,10 @@ import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
 import {PushPipe} from '@ngrx/component';
 import { providePrimeNG } from 'primeng/config';
 import {cmlPreset} from '@common/styles/prime.preset';
+import {AppRootComponent} from '~/app';
 
 @NgModule({
-  declarations   : [AppComponent],
+  declarations   : [AppComponent, AppRootComponent],
   imports: [
     ExperimentSharedModule,
     FormsModule,
@@ -84,7 +85,7 @@ import {cmlPreset} from '@common/styles/prime.preset';
       }
     })
   ],
-  bootstrap      : [AppComponent],
+  bootstrap      : [AppRootComponent],
   exports        : []
 })
 export class AppModule {

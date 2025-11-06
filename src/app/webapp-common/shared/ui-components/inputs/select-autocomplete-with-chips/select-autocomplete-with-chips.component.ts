@@ -79,7 +79,7 @@ export class SelectAutocompleteWithChipsComponent implements ControlValueAccesso
   items = input<IOption[]>([]);
   focusIt = input<boolean>();
 
-  protected autocompleteInput = viewChild<ElementRef<HTMLInputElement>>('autocompleteInput');
+  public autocompleteInput = viewChild<ElementRef<HTMLInputElement>>('autocompleteInput');
   autocomplete = viewChild(MatAutocompleteTrigger);
 
   protected valueChanged = toSignal(this.chipCtrl.valueChanges);
@@ -113,7 +113,8 @@ export class SelectAutocompleteWithChipsComponent implements ControlValueAccesso
   constructor() {
     effect(() => {
       const selection = this.selected();
-      if (this.init && !isEqual(this.selected(), this.prevSelected())) {
+      const prevSelection = this.prevSelected();
+      if (this.init && !isEqual(selection, prevSelection)) {
         if (this.onChange) {
           this.onChange(selection);
         }

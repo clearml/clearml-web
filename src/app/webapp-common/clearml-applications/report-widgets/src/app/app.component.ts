@@ -5,13 +5,14 @@ import {
   HostListener,
   inject,
   OnInit, Renderer2,
-  ViewChild
+  ViewChild,
+  DOCUMENT
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
-import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
+import {getParcoords, getPlot, getSample, getScalar, getSingleValues, paramDecoder, reportsPlotlyReady} from './app.actions';
 import {appFeature} from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
@@ -40,7 +41,7 @@ import {
 } from '@common/shared/single-value-summary-table/single-value-summary-table.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
-import {DOCUMENT} from '@angular/common';
+
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
@@ -87,7 +88,7 @@ export class AppComponent implements OnInit {
   protected tasksData = this.store.selectSignal(appFeature.selectTaskData);
   public isDarkTheme = false;
   public externalTool = false;
-  public parcoordsData: { experiments: ExtraTask[]; params: string[]; metrics: SelectedMetricVariant[] };
+  public parcoordsData: { experiments: ExtraTask[]; params: { section: string; name: string; }[]; metrics: SelectedMetricVariant[] };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
   public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
   public readonly xaxis: ScalarKeyEnum;
@@ -198,8 +199,13 @@ export class AppComponent implements OnInit {
           if (groupedPlots[metric] && allowedMergedTypes.includes(plotParsed?.data?.[0]?.type) && previousPlotIsMergable) {
             groupedPlots[metric].plotParsed = {...groupedPlots[metric].plotParsed, data: _mergeVariants(groupedPlots[metric].plotParsed.data, plotParsed.data)};
           } else {
+            // Adding series/variant to title in case SDK didn't do it
+            if (!allowedMergedTypes.includes(plotParsed.data[0]?.type) && plotParsed.layout.title !== plot.variant && !plotParsed.layout.title.endsWith(`/${plot.variant}`) && plot.variant && plot.metric) {
+              plotParsed.layout.title = `${plotParsed.layout.title} / ${plot.variant}`;
+            }
             groupedPlots[metric] = {...plot, plotParsed};
           }
+          groupedPlots[metric].variants = groupedPlots[metric].variants ? [...groupedPlots[metric].variants, plot.variant] : [plot.variant];
           previousPlotIsMergable = index > -1 || (index === -1 && allowedMergedTypes.includes(plotParsed.data[0]?.type));
         });
       });
@@ -299,7 +305,7 @@ export class AppComponent implements OnInit {
               valueType: valueType ?? this.searchParams.get('value_type')
             } as SelectedMetricVariant;
           }),
-          params: this.searchParams.getAll('variants')
+          params: this.searchParams.getAll('variants').map(param => paramDecoder(param))
         };
         this.cdr.markForCheck();
       });
@@ -339,8 +345,12 @@ export class AppComponent implements OnInit {
       const objects = this.searchParams.getAll('objects');
       if (objects.length > 1) {
         this.type = 'scalar';
-        const singleValuesData = createMultiSingleValuesChart(singleValueData);
-        this.plotData = prepareGraph(singleValuesData.data, singleValuesData.layout, {}, {type: 'singleValue'});
+        const variants = this.searchParams.getAll('variants');
+        let filteredSingleValueData = singleValueData;
+        if (variants.length > 0) {
+          filteredSingleValueData = singleValueData.map(single => ({...single, values: single.values.filter(val => variants.includes(val.variant))}))
+        }
+        this.plotData = createMultiSingleValuesChart(filteredSingleValueData);
       } else {
         this.singleValueData = singleValueData[0].values;
       }
@@ -448,7 +458,7 @@ export class AppComponent implements OnInit {
     if (entityIds.length === 0 && this.tasksData().sourceTasks.length > 0) {
       entityIds = this.tasksData().sourceTasks.slice(0,100);
     }
-    const isCompare =this.tasksData().sourceTasks.length > 1;
+    const isCompare = this.tasksData().sourceTasks.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
       url += `${isModels ? 'compare-models;ids=' : 'compare-tasks;ids='}${entityIds.filter(id => !!id).join(',')}/${

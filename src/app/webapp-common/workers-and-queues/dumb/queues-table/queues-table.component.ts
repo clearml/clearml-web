@@ -12,16 +12,48 @@ import {find, get} from 'lodash-es';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
+import {
+  QueuesMenuExtendedComponent
+} from '~/features/workers-and-queues/queues-menu-extended/queues-menu-extended.component';
+import {
+  TableFilterSortComponent
+} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {PrimeTemplate} from 'primeng/api';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ClipboardModule} from 'ngx-clipboard';
+import {MatMenuItem} from '@angular/material/menu';
+import {MatIconModule} from '@angular/material/icon';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 
 
 @Component({
-    selector: 'sm-queues-table',
-    templateUrl: './queues-table.component.html',
-    styleUrls: ['./queues-table.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-queues-table',
+  templateUrl: './queues-table.component.html',
+  styleUrls: ['./queues-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    QueuesMenuExtendedComponent,
+    TableFilterSortComponent,
+    MenuComponent,
+    TableComponent,
+    MatIconModule,
+    PrimeTemplate,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    ClipboardModule,
+    MatMenuItem,
+    TimeAgoPipe,
+  ]
 })
 export class QueuesTableComponent extends BaseTableView {
+  override entitiesKey = 'queues';
+  override selectedEntitiesKey = 'selectedQueue';
+
   private changeDetector = inject(ChangeDetectorRef);
 
   protected cols = computed(() => {
@@ -109,7 +141,7 @@ export class QueuesTableComponent extends BaseTableView {
 
   openContextMenu(data: {e: MouseEvent; rowData: Queue}) {
     data.e.preventDefault();
-    this.table.menu().hide()
+    this.table().menu().hide()
     this.contextQueue = data.rowData;
     this.menuOpen.set(false);
     setTimeout(() => {

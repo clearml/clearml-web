@@ -14,7 +14,7 @@ export interface ReportCodeEmbedConfiguration {
   type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample' | 'parcoords' | 'single';
   objects?: string[];
   objectType: 'model' | 'task';
-  domRect: DOMRect;
+  domRect: {x: number; y: number};
   name?: string;
   metrics?: string[];
   variants?: string[];

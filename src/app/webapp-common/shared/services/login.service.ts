@@ -1,11 +1,11 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, filter, map, retry, switchMap, tap} from 'rxjs/operators';
+import {catchError, map, retry, switchMap, tap} from 'rxjs/operators';
 import {HTTP} from '~/app.constants';
 import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
-import {EMPTY, Observable, of, timer} from 'rxjs';
+import {BehaviorSubject, EMPTY, Observable, of, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
@@ -20,6 +20,7 @@ import {LocationStrategy} from '@angular/common';
 import {selectDarkTheme} from '@common/core/reducers/view.reducer';
 import {environment} from '../../../../environments/environment';
 import {TIME_IN_MILLI} from '@common/shared/utils/time-util';
+import {resetCurrentUser} from '~/core/actions/users.action';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error' | 'tenant';
 
@@ -63,8 +64,18 @@ export class BaseLoginService {
   }
 
   protected _authenticated: boolean;
+  protected _authenticated$ = new BehaviorSubject<boolean>(false);
   get authenticated(): boolean {
     return this._authenticated;
+  }
+
+  set authenticated(isAuth) {
+    this._authenticated = isAuth;
+    this._authenticated$.next(isAuth);
+  }
+
+  get authenticated$(): Observable<boolean> {
+    return this._authenticated$;
   }
 
   initCredentials() {
@@ -83,7 +94,7 @@ export class BaseLoginService {
       switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json').pipe(
         catchError(() => of(fromEnv())),
       ) : of(fromEnv())),
-      tap((credentials: any) => {
+      tap((credentials: ReturnType<typeof fromEnv>) => {
         this.userKey = credentials.userKey;
         this.userSecret = credentials.userSecret;
         this.companyID = credentials.companyID;
@@ -105,11 +116,8 @@ export class BaseLoginService {
     } else {
       return this.getLoginSupportedModes()
         .pipe(
-          // for testing: map(res => ({...res, server_errors: {missed_es_upgrade: true}}) ),
-          tap(res => (res?.server_errors && this.shouldOpenServerError(res.server_errors)) && this.openEs7MessageDialog(res.server_errors)),
-          filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
-            this._authenticated = res.authenticated;
+            this.authenticated = res.authenticated;
             this._loginMode = this.calcLoginMode(res);
             this._loginModeTTL = new Date().getTime() + TIME_IN_MILLI.ONE_MIN * 10;
           }),
@@ -186,40 +194,6 @@ export class BaseLoginService {
   }
 
 
-  private shouldOpenServerError(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
-    return serverErrors?.missed_es_upgrade || serverErrors?.es_connection_error;
-  }
-
-
-  private openEs7MessageDialog(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
-    this.setLogo();
-
-    const body = `The ClearML Server database seems to be unavailable.<BR>Possible reasons for this state are:<BR><BR>
-<ul>
-  ${serverErrors?.missed_es_upgrade ? '<li>Upgrading the Trains Server from a version earlier than v0.16 without performing the required data migration (see <a target="_blank" href="https://allegro.ai/clearml/docs/deploying_trains/trains_server_es7_migration/">instructions</a>).</li>' : ''}
-  <li>Misconfiguration of the Elasticsearch container storage: Check the directory mappings in the docker-compose YAML configuration file
-     are correct and the target directories have the right permissions (see <a target="_blank" href="https://allegro.ai/clearml/docs/deploying_trains/trains_deploy_overview/#option-3-a-self-hosted-trains-server">documentation</a>).</li>
-  <li>Other errors in the database startup sequence: Check the elasticsearch logs in the elasticsearch container for problem description.</li>
-</ul>
-<BR>
-After the issue is resolved and Trains Server is up and running, reload this page.`;
-
-    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
-      disableClose: true,
-      data: {
-        title: 'Database Error',
-        body,
-
-        yes: 'Reload',
-        iconClass: 'al-ico-alert',
-        iconColor: 'var(--color-warning)'
-      }
-    });
-    confirmDialogRef.afterClosed().subscribe(() => {
-      window.location.reload();
-    });
-  }
-
   private openServerError() {
     this.setLogo();
     const body = this.environment().serverDownMessage;
@@ -252,7 +226,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     this._loginMode = undefined;
   }
 
-  loginFlow(resolve: (unknow) => void) {
+  loginFlow() {
     const redirectToLogin = (status) => {
       if (status === 401) {
         let pathname = window.location.pathname;
@@ -269,27 +243,35 @@ After the issue is resolved and Trains Server is up and running, reload this pag
         }
 
         if (!extraParam && !['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
-          const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login' + '/' + extraParam;
-          window.history.replaceState(window.history.state, '', targetUrl);
+          return of((redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login' + '/' + extraParam);
         }
       }
-      resolve(null);
-      return EMPTY;
+      return of('/login')
     };
 
     if (this.authenticated === false) {
       return redirectToLogin(401);
     } else {
       this.store.dispatch(fetchCurrentUser());
-      const obs = this.userPreferences.loadPreferences()
-        .pipe(catchError((err) => redirectToLogin(err.status)));
-      obs.subscribe(() => resolve(null));
-      return obs;
+      return this.userPreferences.loadPreferences()
+        .pipe(
+          catchError((err) => redirectToLogin(err.status)),
+          map(() => null)
+        );
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getInviteInfo(inviteId: string): Observable<unknown> {
     return EMPTY;
+  }
+
+  logout() {
+    this._loginMode = undefined;
+    this.authenticated = false;
+    this.store.dispatch(resetCurrentUser());
+    this.dialog.closeAll();
+    const redirectUrl: string = window.location.pathname + window.location.search;
+    this.router.navigate(['/login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
   }
 }

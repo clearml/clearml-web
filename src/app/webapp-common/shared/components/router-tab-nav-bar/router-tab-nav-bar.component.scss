@@ -1,14 +1,14 @@
 nav {
-  --mat-tab-header-label-text-size: 12px;
-  --mat-tab-header-label-text-letter-spacing: 0.03em;
-  --mat-tab-header-inactive-label-text-color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
+  --mat-tab-label-text-size: 12px;
+  --mat-tab-label-text-letter-spacing: 0.03em;
+  --mat-tab-inactive-label-text-color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
 
   &.mat-mdc-tab-header-pagination-controls-enabled {
     padding: 0 8px;
   }
 
   &.mat-mdc-tab-nav-bar {
-    --mat-tab-header-pagination-icon-color: var(--color-primary);
+    --mat-tab-pagination-icon-color: var(--color-primary);
   }
 
   a {

@@ -21,7 +21,6 @@ import {CompareParamsState, experimentsCompareParamsReducer} from './experiments
 import {groupByCharts, GroupByCharts} from '../../experiments/actions/common-experiment-output.actions';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 
@@ -150,7 +149,7 @@ export const selectScalarsGraphMetrics = createSelector(selectScalarsGraph, (sta
 export const selectScalarsGraphMetricsResults = createSelector(selectScalarsGraph, (state): MetricVariantResult[] => state.metricVariantsResults);
 export const selectScalarsGraphHyperParams = createSelector(selectScalarsGraph, (state): GroupedHyperParams => state ? state.hyperParams : {});
 export const selectScalarsGraphTasks = createSelector(selectScalarsGraph, (state) => state ? state.tasks : []);
-export const selectScalarsParamsHoverInfo = createSelector(selectScalarsGraph, (state): string[] => state ? state.paramsHoverInfo : []);
+export const selectScalarsParamsHoverInfo = createSelector(selectScalarsGraph, (state) => state.paramsHoverInfo ?? []);
 export const selectScalarsMetricsHoverInfo = createSelector(selectScalarsGraph, (state): SelectedMetricVariant[] => state ? state.metricsHoverInfo : []);
 
 export const selectCompareTasksScalarCharts = createSelector(

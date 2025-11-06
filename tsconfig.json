@@ -10,7 +10,7 @@
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "esModuleInterop": true,
     "target": "ES2022",
@@ -21,9 +21,8 @@
       "node_modules/@types"
     ],
     "lib": [
-      "ES2022",
+      "ES2024",
       "dom",
-      "ES2023.Array"
     ],
     "paths": {
       "@common/*": [

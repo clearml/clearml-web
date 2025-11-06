@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
@@ -36,11 +36,9 @@ const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: numb
 
 @Injectable()
 export class WorkersEffects {
-
-  constructor(
-    private actions: Actions,
-    private workersApi: ApiWorkersService, private store: Store) {
-  }
+  private actions = inject(Actions);
+  private workersApi = inject(ApiWorkersService);
+  private store = inject(Store);
 
   getWorkers$ = createEffect(() => this.actions.pipe(
     ofType(workersActions.getWorkers),
