@@ -32,6 +32,11 @@
        [class.active]="baseRouteConfig() ==='pipelines'"
        smTooltip="PIPELINES"
     ></a>
+    <a class="item al-ico-code"
+       routerLink="/code"
+       routerLinkActive="active"
+       smTooltip="CODE"
+    ></a>
     @if (!hideEnterpriseFeatures()) {
       <a class="item al-ico-enterprise-rocket lm"
          routerLink="enterprise"
