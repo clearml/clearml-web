@@ -14,13 +14,24 @@ import {
 import {formatDistance} from 'date-fns'
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {debounceTime, map} from 'rxjs/operators';
+import {LineChartComponent} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {MatSelectModule} from '@angular/material/select';
+import {MatIconModule} from '@angular/material/icon';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
-    selector: 'sm-queue-stats',
-    templateUrl: './queue-stats.component.html',
-    styleUrls: ['./queue-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-queue-stats',
+  templateUrl: './queue-stats.component.html',
+  styleUrls: ['./queue-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    LineChartComponent,
+    MatSelectModule,
+    MatIconModule,
+    MatFormFieldModule,
+    TooltipDirective
+  ]
 })
 export class QueueStatsComponent {
   private readonly store = inject(Store);

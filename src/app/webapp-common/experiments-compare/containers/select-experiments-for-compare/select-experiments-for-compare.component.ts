@@ -56,7 +56,7 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {
   ProjectsGetTaskParentsResponseParents
 } from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
@@ -99,7 +99,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public experiments$: Observable<ITableExperiment[]>;
   private projectId: string;
   public users$: Observable<User[]>;
-  public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
+  public tableFilters$: Observable<Record<string, FilterMetadata>>;
   public tags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public types$: Observable<string[]>;
@@ -112,8 +112,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   selectedExperiment: ITableExperiment;
   public reachedCompareLimit: boolean;
   public showArchived$: Observable<boolean>;
-  private _resizedCols = {} as { [colId: string]: string };
-  private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
+  private _resizedCols = {} as Record<string, string>;
+  private resizedCols$ = new BehaviorSubject<Record<string, string>>(this._resizedCols);
   private loadMoreCount = 0;
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
   @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
@@ -185,7 +185,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
         )));
     this.dialogRef.afterOpened()
       .pipe(take(1))
-      .subscribe(() => this.table.split = 1);
+      .subscribe(() => this.table.table().resize());
   }
 
   public searchTermChanged(term: string) {
@@ -223,7 +223,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(setTableCols({cols: this.initTableCols}));
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
     this.store.dispatch(getProjectUsers({projectId: '*'}));
-    window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
+    window.setTimeout(() => this.table.table().rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.select(selectRouterParams)
       .pipe(
         map(params => [params && params['ids'], params?.projectId]),
@@ -257,7 +257,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
 
-  experimentsSelectionChanged(experiments: Array<ITableExperiment>) {
+  experimentsSelectionChanged(experiments: ITableExperiment[]) {
     this.reachedCompareLimit = experiments.length >= compareLimitations;
     if (experiments.length === 0) {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.WARN, 'Compare module should include at least one experiment'));

@@ -50,4 +50,5 @@ export interface EndpointStats {
      * The latest time when one of the model instances was updated
      */
     last_update?: string;
+    preprocess_artifact?: string;
 }

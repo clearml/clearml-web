@@ -1,19 +1,19 @@
-<sm-workers-graph [activeWorker]="selectedWorker$ | ngrxPush" class="overflow-hidden"></sm-workers-graph>
-<as-split class="flex-grow-1" [gutterSize]=1 [useTransition]="true" (transitionEnd)="table.table.resize(); table.afterTableInit()">
+<sm-workers-graph [activeWorker]="activeWorker()" class="overflow-hidden"></sm-workers-graph>
+<as-split class="flex-grow-1" [gutterSize]=1 [useTransition]="true" (transitionEnd)="table.table().resize(); table.afterTableInit()">
   <as-split-area [size]="50">
     <sm-workers-table
       #table
       class="mt-2"
-      [workers]="workers$ | ngrxPush"
-      [selectedWorker]="selectedWorker$ | ngrxPush"
+      [workers]="workers()"
+      [selectedWorker]="activeWorker()"
       (sortedChanged)="sortedChanged($event)"
-      [tableSortFields]="tableSortFields$ | ngrxPush"
+      [tableSortFields]="tableSortFields()"
       (workerSelected)="selectWorker($event)"
     >
     </sm-workers-table>
   </as-split-area>
-  <as-split-area [size]="50" [visible]="!!(selectedWorker$| ngrxPush)">
-    <sm-worker-info [selectedWorker]="selectedWorker$ | ngrxPush"
+  <as-split-area [size]="50" [visible]="activeWorker()">
+    <sm-worker-info [selectedWorker]="activeWorker()"
       (deselectWorker)="selectWorker(null)">
     </sm-worker-info>
   </as-split-area>

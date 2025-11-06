@@ -8,7 +8,7 @@
 
 @mixin choose-leaf() {
   @include common-leaf;
-  border-bottom: 8px solid var(--mdc-dialog-container-color);
+  border-bottom: 8px solid var(--mat-dialog-container-color);
   &:hover {
     border-bottom: 8px solid var(--color-primary);
     ::ng-deep .step-number {

@@ -35,7 +35,8 @@ export const selectSortedQueues = createSelector(selectQueues, selectQueuesTable
 export const selectWorkersState = createSelector(workersAndQueues, state => state.workers);
 export const selectWorkers = createSelector(selectWorkersState, state => state.data as WorkerExt[]);
 export const selectStats   = createSelector(selectWorkersState, state => state.stats);
-export const selectSelectedWorker  = createSelector(selectWorkersState, state => state.selectedWorker);
+export const selectSelectedWorker  = createSelector(selectWorkers, selectRouterQueryParams,
+  (workers, params) => params?.id ? workers?.find(worker => worker.id === params?.id) : null);
 export const selectWorkersTableSortFields = createSelector(selectWorkersState, state => state.tableSortFields);
 
 export const selectStatsParams = createSelector(selectWorkersState, state => state.selectedStatsParam);

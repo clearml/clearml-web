@@ -21,7 +21,7 @@ export class ConfigurationService {
   public globalEnvironmentObservable = new BehaviorSubject(environment as Environment);
   public readonly configuration = toSignal<Environment>(this.globalEnvironmentObservable.asObservable());
   public readonly fileServerUrl = computed(() => {
-    const filesServer = this.configuration().displayedServerUrls?.filesServer
+    const filesServer = this.configuration().displayedServerUrls?.filesServer;
     if (filesServer) {
       if (filesServer.match(/^(https?|s3|gs|azure):\/\//)) {
         return filesServer;
@@ -29,6 +29,8 @@ export class ConfigurationService {
       const url = new URL(window.location.origin);
       url.pathname = filesServer;
       return url.toString();
+    } else if (filesServer === null) {
+      return null;
     } else {
       return HTTP.FILE_BASE_URL;
     }

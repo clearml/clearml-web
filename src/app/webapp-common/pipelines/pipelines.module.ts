@@ -13,6 +13,7 @@ import {PushPipe} from '@ngrx/component';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {FormsModule} from '@angular/forms';
 
 
 
@@ -59,6 +60,7 @@ const getPipelineConfig = () => ({
     DotsLoadMoreComponent,
     MatButton,
     MatIcon,
+    FormsModule,
   ],
   exports: [PipelinesPageComponent],
   providers: [

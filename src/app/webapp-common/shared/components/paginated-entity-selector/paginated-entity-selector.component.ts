@@ -24,6 +24,7 @@ import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 export interface baseEntity {
   id?: string;
   name?: string;
+  disabled?: boolean;
 }
 
 @Component({
@@ -126,12 +127,12 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   }
 
   getEntitiesFn(value: string) {
-    this.state().loading.set(true);
+    setTimeout(() => this.state().loading.set(true)); //skip immediate data = [] => loading=false
     this.getEntities.emit(value);
   }
 
   loadMoreEntities(value: string) {
-    this.state().loading.set(true);
+    setTimeout(() => this.state().loading.set(true)); //skip immediate data = [] => loading=false
     this.loadMore.emit(value);
   }
 

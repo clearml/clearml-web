@@ -66,5 +66,6 @@
 :root.dark-mode {
   .mat-mdc-menu-panel {
     --mat-menu-container-color: var(--color-surface-container-high);
+    border: 1px solid var(--color-outline-variant);
   }
 }

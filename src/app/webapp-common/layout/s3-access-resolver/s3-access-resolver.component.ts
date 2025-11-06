@@ -8,6 +8,7 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {S3AccessDialogComponent} from '@common/layout/s3-access-dialog/s3-access-dialog.component';
+import {MatButton} from '@angular/material/button';
 
 
 export interface S3AccessDialogData {
@@ -24,12 +25,13 @@ export interface S3AccessDialogResult extends Credentials {
     selector: 'sm-s3-access-resolver',
     templateUrl: './s3-access-resolver.component.html',
     styleUrls: ['./s3-access-resolver.component.scss'],
-    imports: [
-        DialogTemplateComponent,
-        MatCheckboxModule,
-        FormsModule,
-        S3AccessDialogComponent
-    ]
+  imports: [
+    DialogTemplateComponent,
+    MatCheckboxModule,
+    FormsModule,
+    S3AccessDialogComponent,
+    MatButton
+  ]
 })
 export class S3AccessResolverComponent {
   show: Observable<boolean>;
@@ -44,6 +46,7 @@ export class S3AccessResolverComponent {
   title: string;
   public useSSL: boolean;
   useGcsHmac = false;
+  dontShowGcsAgain = false;
 
 
   constructor(

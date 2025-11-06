@@ -7,8 +7,8 @@
     height: $size;
     margin: 0 4px;
 
-    --mdc-slider-inactive-track-color: var(--color-outline);
-    --mdc-slider-active-track-color: var(--color-outline);
+    --mat-slider-inactive-track-color: var(--color-outline);
+    --mat-slider-active-track-color: var(--color-outline);
 
     &.indicator-position-bottom {
       --mat-slider-value-indicator-border-radius: 50% 0 50% 50%;
@@ -26,8 +26,8 @@
       width: $size;
     }
     &__thumb-knob {
-      --mdc-slider-handle-width: #{$size * 0.5 - 2};
-      --mdc-slider-handle-height: #{$size * 0.5 - 2};
+      --mat-slider-handle-width: #{$size * 0.5 - 2};
+      --mat-slider-handle-height: #{$size * 0.5 - 2};
     }
     &__input {
       height: $size;
@@ -36,7 +36,7 @@
   }
 
   .mat-mdc-slider-visual-thumb .mat-ripple {
-    border-radius: var(--mdc-slider-handle-shape);
+    border-radius: var(--mat-slider-handle-shape);
   }
 }
 

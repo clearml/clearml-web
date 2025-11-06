@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {EXPERIMENTS_STATUS_LABELS} from '~/shared/constants/non-common-consts';
+import {EXPERIMENTS_TYPE_LABELS} from '~/shared/constants/non-common-consts';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {MatIcon} from '@angular/material/icon';
 
@@ -16,7 +16,7 @@ import {MatIcon} from '@angular/material/icon';
     ]
 })
 export class CircleStatusComponent {
-  protected readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
+  protected readonly experimentsStatusLabels = EXPERIMENTS_TYPE_LABELS;
 
   status = input<TaskStatusEnum>();
   type = input<TaskTypeEnum>();

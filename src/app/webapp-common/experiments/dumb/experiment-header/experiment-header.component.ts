@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, input, output, TemplateRef} from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
 import {SelectionEvent, SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';

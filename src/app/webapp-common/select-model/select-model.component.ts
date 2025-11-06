@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, ViewChild, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
 import * as actions from './select-model.actions';
 import {clearTableFilter, setSelectedModels, showArchive} from './select-model.actions';
@@ -32,11 +32,11 @@ export interface SelectModelData {
 
 
 @Component({
-    selector: 'sm-select-model',
-    templateUrl: './select-model.component.html',
-    styleUrls: ['./select-model.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-select-model',
+  templateUrl: './select-model.component.html',
+  styleUrls: ['./select-model.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class SelectModelComponent implements OnInit, OnDestroy {
   private store = inject(Store);
@@ -69,7 +69,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     // this.models$ = this.store.select(selectModelsList);
     this.models$ = combineLatest([
       this.store.select(selectModels),
-      this.store.select(selectSelectedModelsList),
+      this.store.select(selectSelectedModelsList)
     ]).pipe(
       map(([models, selectedModels]) => unionBy(selectedModels, models, 'id')),
       map(models => models?.map(model => ({...model, system_tags: model.system_tags?.map((t => t.replace('archive', ' archive')))})))
@@ -81,9 +81,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
       )
       .subscribe(selectedProject => {
         this.selectedProject = selectedProject;
-        if (selectedProject?.id !== '*') {
-          this.store.dispatch(actions.tableFilterChanged({col: {id: 'project.name'}, value: [selectedProject.id]}));
-        }
+        this.store.dispatch(actions.tableFilterChanged({col: {id: 'project.name'}, value: selectedProject.id === '*' ? [] : [selectedProject.id]}));
       });
 
     this.frameworks$ = this.store.select(selectFrameworks);
@@ -100,8 +98,8 @@ export class SelectModelComponent implements OnInit, OnDestroy {
               filterable: true,
               searchableFilter: true,
               sortable: false,
-              headerType: ColHeaderTypeEnum.sortFilter,
-            }),
+              headerType: ColHeaderTypeEnum.sortFilter
+            })
           })
         )));
   }
@@ -109,13 +107,13 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   @ViewChild(ModelsTableComponent) table: ModelsTableComponent;
 
   ngOnInit() {
-    this.store.dispatch(actions.getNextModels());
+    // this.store.dispatch(actions.getNextModels());
     this.store.dispatch(actions.getFrameworks());
     this.store.dispatch(actions.getTags());
     if (this.data.selectedModels) {
       this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
     }
-    window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
+    window.setTimeout(() => this.table.table().rowRightClick = new EventEmitter());
   }
 
   ngOnDestroy(): void {
@@ -142,7 +140,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(actions.tableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
 
-  filterChanged(filter: { col: ISmCol; value: string; andFilter?: boolean}) {
+  filterChanged(filter: { col: ISmCol; value: string; andFilter?: boolean }) {
     this.store.dispatch(actions.tableFilterChanged({col: filter.col, value: filter.value, andFilter: filter.andFilter}));
   }
 

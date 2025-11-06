@@ -6,23 +6,35 @@
     [showOverlay]="false"
     [openOnInit]="true"
   >
-    @if (queuesManager) {
-      <sm-menu-item
-        itemLabel="Delete"
-        [disabled]="selectedQueue()?.entries?.length>0"
-        (itemClicked)="deleteQueue.emit(selectedQueue())"
-      ></sm-menu-item>
+    @if (selectedQueue().profile_connection) {
+      <div class="info">
+        <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm"></mat-icon>
+        <div>
+          Queue managed by
+          @if(selectedQueue().profile_connection?.policy_name){
+            the <a class="policy-name" [routerLink]="['..', 'resource-policies']" [queryParams]="{id:  selectedQueue().profile_connection.policy}">{{selectedQueue().profile_connection?.policy_name}}</a>
+          }
+          resource policy
+        </div>
+      </div>
+      <mat-divider></mat-divider>
     }
     @if (queuesManager) {
       <sm-menu-item
+        itemLabel="Delete"
+        [disabled]="selectedQueue()?.entries?.length > 0 || !!selectedQueue().profile_connection"
+        (itemClicked)="deleteQueue.emit(selectedQueue())"
+      ></sm-menu-item>
+      <sm-menu-item
         itemLabel="Update"
+        [disabled]="!!selectedQueue().profile_connection"
         (itemClicked)="renameQueue.emit(selectedQueue())"
       ></sm-menu-item>
     }
     <sm-menu-item
       itemLabel="Clear"
       (itemClicked)="clearQueue.emit(selectedQueue())"
-      [disabled]="selectedQueue()?.entries?.length===0"
+      [disabled]="selectedQueue()?.entries?.length === 0"
     ></sm-menu-item>
     <ng-content select="[extendedQueuesMenu]"></ng-content>
   </sm-menu>

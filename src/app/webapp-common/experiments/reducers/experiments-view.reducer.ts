@@ -9,7 +9,7 @@ import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {createReducer, on} from '@ngrx/store';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {cloneExperiment, removeTagSuccess} from '@common/experiments/actions/common-experiments-menu.actions';
@@ -208,10 +208,9 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     }
   })),
   on(actions.toggleColHidden, (state, action): ExperimentsViewState => {
-    const newHiddenCols = {
-      ...(state.hiddenProjectTableCols[action.projectId] || experimentsViewInitialState.hiddenTableCols),
-      [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
-    }
+    let newHiddenCols = {...(state.hiddenProjectTableCols[action.projectId] || experimentsViewInitialState.hiddenTableCols)};
+      newHiddenCols = {...newHiddenCols, [action.columnId]: !newHiddenCols?.[action.columnId]};
+
     if (!state.hiddenProjectTableCols[action.projectId] && isEqual(newHiddenCols, experimentsViewInitialState.hiddenProjectTableCols)) {
       return state;
     }
@@ -431,10 +430,10 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
   on(cloneExperiment, (state, action): ExperimentsViewState => ({...state, cloneForceParent: action.cloneData.forceParent})),
   on(removeTagSuccess, (state, action): ExperimentsViewState => ({
     ...state,
-    experiments: state.experiments.map(experiment => action.experiments.includes(experiment.id) ? {
+    experiments: state.experiments ? state.experiments.map(experiment => action.experiments.includes(experiment.id) ? {
         ...experiment,
         tags: experiment.tags?.filter(tag => tag !== action.tag)
       } : experiment
-    ),
+    ) : null,
   }))
 );

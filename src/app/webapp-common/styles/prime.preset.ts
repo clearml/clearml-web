@@ -1,6 +1,6 @@
 import {definePreset} from '@primeng/themes';
-import {SliderDesignTokens} from '@primeng/themes/types/slider';
-import {DataTableDesignTokens} from '@primeng/themes/types/datatable';
+import {SliderDesignTokens} from '@primeuix/themes/types/slider';
+import {DataTableDesignTokens} from '@primeuix/themes/types/datatable';
 
 export const cmlPreset = definePreset({}, {
   components: {

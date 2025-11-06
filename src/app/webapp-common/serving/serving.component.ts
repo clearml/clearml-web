@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {combineLatest, Observable, of} from 'rxjs';
 import {ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {selectCompanyTags, selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
 import {debounceTime, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
@@ -29,26 +29,23 @@ type EndpointsTableViewMode = 'active' | 'loading';
     styleUrl: './serving.component.scss',
     standalone: false
 })
-export class ServingComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
+export class ServingComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = servingTableCols;
   public entityTypeEnum = EntityTypeEnum;
-  protected override entityType = EntityTypeEnum.endpoint;
-  protected override inEditMode$: Observable<boolean> = of(false);
   public override showAllSelectedIsActive$: Observable<boolean> = of(false);
   public firstEndpoint: EndpointStats;
   protected override setSplitSizeAction = ServingActions.setSplitSize;
   protected setTableModeAction = ServingActions.setTableViewMode;
-  private selectedEndpoints: EndpointStats[];
   // private isAppVisible$: Observable<boolean>;
 
   protected tableSortOrder$: Observable<TableSortOrderEnum>;
   protected modelNamesOptions$ = this.store.select(servingFeature.modelNamesOptions);
   protected inputTypesOptions$ = this.store.select(servingFeature.inputTypesOptions);
   protected preprocessArtifactOptions$ = this.store.select(servingFeature.preprocessArtifactOptions);
-  protected override selectSplitSize$ = this.store.select(servingFeature.selectSplitSize);
+  protected override splitSize = this.store.selectSignal(servingFeature.selectSplitSize);
   protected tableSortFields$ = this.store.select(servingFeature.selectTableSortFields);
-  protected selectedEndpoint$ = this.store.select(servingFeature.selectSelectedEndpoint);
-  protected selectedEndpoints$ = this.store.select(servingFeature.selectSelectedEndpoints);
+  protected selectedEndpoint = this.store.selectSignal(servingFeature.selectSelectedEndpoint);
+  protected selectedEndpoints = this.store.selectSignal(servingFeature.selectSelectedEndpoints);
   protected tableFilters$ = this.store.select(servingFeature.selectColumnFilters);
 
   protected tableColsOrder$ = this.store.select(servingFeature.selectColsOrder);
@@ -69,8 +66,13 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
   @ViewChild('endpointsTable') private table: ServingTableComponent;
   viewMode: EndpointsTableViewMode = this.route.snapshot.url[0].path as EndpointsTableViewMode;
 
+  protected override get entityType() {
+    return EntityTypeEnum.endpoint;
+  }
+
   constructor() {
     super();
+    this.store.dispatch(ServingActions.fetchServingEndpoints());
     this.syncAppSearch();
     this.setContextMenu();
 
@@ -83,63 +85,54 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
       .subscribe (() => {
         this.router.navigate(['..', 'active'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
-  }
-
-  override ngOnInit() {
-    super.ngOnInit();
-    this.store.dispatch(ServingActions.fetchServingEndpoints());
     let prevQueryParams: Params;
 
-    this.sub.add(this.route.queryParams
-        .pipe(
-          filter(queryParams => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
-            const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
-            prevQueryParams = queryParamsWithoutSearch;
-            return !equal;
-          })
-        )
-        .subscribe(params => {
-          if (Object.keys(params || {}).length === 0) {
-            this.emptyUrlInit();
+    this.route.queryParams
+      .pipe(
+        takeUntilDestroyed(),
+        filter(queryParams => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
+          const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
+          prevQueryParams = queryParamsWithoutSearch;
+          return !equal;
+        })
+      )
+      .subscribe(params => {
+        if (Object.keys(params || {}).length === 0) {
+          this.emptyUrlInit();
+        } else {
+          if (params.order) {
+            const orders = decodeOrder(params.order);
+            this.store.dispatch(ServingActions.setTableSort({orders}));
+          }
+          if (params.filter != null) {
+            const filters = decodeFilter(params.filter);
+            this.store.dispatch(ServingActions.setTableFilters({filters}));
           } else {
             if (params.order) {
-              const orders = decodeOrder(params.order);
-              this.store.dispatch(ServingActions.setTableSort({orders}));
-            }
-            if (params.filter != null) {
-              const filters = decodeFilter(params.filter);
-              this.store.dispatch(ServingActions.setTableFilters({filters}));
-            } else {
-              if (params.order) {
-                this.store.dispatch(ServingActions.setTableFilters({filters: []}));
-              }
-            }
-
-            if (params.columns) {
-              const [, metrics, , , allIds] = decodeColumns(params.columns, this.originalTableColumns);
-              const hiddenCols = {};
-              this.originalTableColumns.forEach((tableCol) => {
-                if (tableCol.id !== 'selected') {
-                  hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
-                }
-              });
-              this.store.dispatch(ServingActions.setHiddenCols({hiddenCols}));
-              this.store.dispatch(ServingActions.setExtraColumns({
-                columns: metrics.map(metricCol => createMetricColumn(metricCol, undefined))
-              }));
-              this.columnsReordered(allIds, false);
+              this.store.dispatch(ServingActions.setTableFilters({filters: []}));
             }
           }
-        })
-    );
 
-    this.sub.add(this.selectedEndpoints$.subscribe(ServingEndpoints => this.selectedEndpoints = ServingEndpoints));
+          if (params.columns) {
+            const [, metrics, , , allIds] = decodeColumns(params.columns, this.originalTableColumns);
+            const hiddenCols = {};
+            this.originalTableColumns.forEach((tableCol) => {
+              if (tableCol.id !== 'selected') {
+                hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
+              }
+            });
+            this.store.dispatch(ServingActions.setHiddenCols({hiddenCols}));
+            this.store.dispatch(ServingActions.setExtraColumns({
+              columns: metrics.map(metricCol => createMetricColumn(metricCol, undefined))
+            }));
+            this.columnsReordered(allIds, false);
+          }
+        }
+      });
 
     this.selectEndpointFromUrl();
-    // this.store.dispatch(ServingActions.getTags());
-    // this.store.dispatch(getTags());
   }
 
   override ngOnDestroy(): void {
@@ -154,7 +147,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
   }
 
   getSelectedEntities() {
-    return this.selectedEndpoints;
+    return this.selectedEndpoints();
   }
 
   stopSyncSearch() {
@@ -168,31 +161,32 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
   }
 
   selectEndpointFromUrl() {
-    this.sub.add(combineLatest([
-        this.store.select(selectRouterParams).pipe(
-          map(params => params.endpointId),
-          distinctUntilChanged()),
-        this.endpoints$.pipe(filter(items => items?.length > 0))
-      ])
-        .pipe(
-          withLatestFrom(this.store.select(servingFeature.selectTableMode)),
-          map(([[id, endpoints], mode]) => {
-            this.firstEndpoint = endpoints?.[0];
-            if (!id && this.shouldOpenDetails && this.firstEndpoint && mode === 'info') {
-              this.shouldOpenDetails = false;
-              this.store.dispatch(ServingActions.servingEndpointSelectionChanged({servingEndpoint: this.firstEndpoint}));
-            } else {
-              this.store.dispatch(ServingActions.setTableViewMode({mode: id ? 'info' : 'table'}));
-            }
-            return id ? endpoints?.find(endpoint => endpoint.id === id) ?? endpoints[0] : null;
-          }),
-          distinctUntilChanged(),
-          filter(a => !!a)
-        )
-        .subscribe((endpoint) => {
-          this.store.dispatch(ServingActions.setSelectedServingEndpoint({endpoint}));
-        })
-    );
+    combineLatest([
+      this.store.select(selectRouterParams).pipe(
+        map(params => params?.endpointId),
+        distinctUntilChanged()),
+      this.endpoints$.pipe(filter(items => items?.length > 0))
+    ])
+      .pipe(
+        takeUntilDestroyed(),
+        withLatestFrom(this.store.select(servingFeature.selectTableMode)),
+        map(([[id, endpoints], mode]) => {
+          this.firstEndpoint = endpoints?.[0];
+          if (!id && this.shouldOpenDetails && this.firstEndpoint && mode === 'info') {
+            this.shouldOpenDetails = false;
+            this.store.dispatch(ServingActions.servingEndpointSelectionChanged({servingEndpoint: this.firstEndpoint}));
+          } else {
+            this.store.dispatch(ServingActions.setTableViewMode({mode: id ? 'info' : 'table'}));
+          }
+          this.shouldOpenDetails = false
+          return id ? endpoints?.find(endpoint => endpoint.id === id) ?? endpoints[0] : null;
+        }),
+        distinctUntilChanged(),
+        filter(a => !!a)
+      )
+      .subscribe((endpoint) => {
+        this.store.dispatch(ServingActions.setSelectedServingEndpoint({endpoint}));
+      });
   }
 
   endpointSelectionChanged(event: { endpoint: EndpointStats; openInfo?: boolean }) {
@@ -278,7 +272,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
       this.store.dispatch(ServingActions.setTableViewMode({mode}));
       if (this.firstEndpoint) {
         this.store.dispatch(ServingActions.servingEndpointSelectionChanged({
-          servingEndpoint: this.selectedEndpoints?.[0] || this.firstEndpoint
+          servingEndpoint: this.selectedEndpoints()?.[0] || this.firstEndpoint
         }));
       }
       return Promise.resolve()
@@ -307,7 +301,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
       valueType: event.valueType,
       metric: event.variant.metric,
       variant: event.variant.variant
-    }, this.projectId);
+    }, this.projectId());
     if (event.addCol) {
       this.store.dispatch(ServingActions.addColumn({col: variantCol}));
     } else {
@@ -316,7 +310,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
   }
 
   downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML All Endpoints`);
+    this.table.table().downloadTableAsCSV(`ClearML All Endpoints`);
   }
 
   override onFooterHandler(): void {
@@ -339,5 +333,4 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
         this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: feature[0]?.path}));
       });
   }
-
 }

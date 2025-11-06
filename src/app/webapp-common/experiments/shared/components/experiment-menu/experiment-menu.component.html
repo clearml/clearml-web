@@ -23,7 +23,7 @@
         <span>Details</span>
       </button>
     }
-    <button mat-menu-item (click)="toggleFullScreen(minimizedView())" [disabled]="isSharedAndNotOwner()"
+    <button mat-menu-item (click)="toggleFullScreen(minimizedView())" [disabled]="isSharedNotInWorkspaces()"
             data-id="View Full Screen Option">
       <mat-icon fontSet="al" [fontIcon]="icons.CHART"></mat-icon>
       {{minimizedView() ? 'View Full Screen' : 'View in Task Table'}}

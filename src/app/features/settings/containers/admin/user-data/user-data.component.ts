@@ -4,7 +4,6 @@ import {Component, input} from '@angular/core';
   selector: 'sm-user-data',
   templateUrl: './user-data.component.html',
   styleUrls: ['./user-data.component.scss'],
-  standalone: false
 })
 export class UserDataComponent {
 

@@ -38,6 +38,7 @@ import {selectArchive, selectProjectsFeature} from '@common/layout/layout.select
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatBadgeModule} from '@angular/material/badge';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 
 export enum CrumbTypeEnum {
   Workspace = 'Workspace',
@@ -96,7 +97,7 @@ export interface IBreadcrumbsOptions {
     IdBadgeComponent,
     MatIcon,
     MatIconButton,
-    MatBadgeModule,
+    MatBadgeModule
   ]
 })
 export class BreadcrumbsComponent {
@@ -115,6 +116,8 @@ export class BreadcrumbsComponent {
   protected showHidden = this.store.selectSignal(selectShowHiddenUserSelection);
   protected workspaceNeutral = this.store.selectSignal(selectWorkspaceNeutral);
   protected archive = this.store.selectSignal<boolean>(selectArchive);
+  private routeConfig = this.store.selectSignal(selectRouterConfig);
+  protected showArchive = computed(() => this.archive() && !['overview', 'workloads'].includes(this.routeConfig().at(-1)));
   private breadCrumbsContainer = viewChild<ElementRef<HTMLDivElement>>('container');
   private crumbElements=  viewChildren<ElementRef<HTMLDivElement>>('crumb');
   protected breadcrumbLinks = this.store.selectSignal<IBreadcrumbsLink[][]>(selectBreadcrumbs);
@@ -126,7 +129,6 @@ export class BreadcrumbsComponent {
   );
   protected isCommunity = computed(() => this.environment().communityServer);
   protected shouldCollapse: boolean;
-
 
 
   constructor(

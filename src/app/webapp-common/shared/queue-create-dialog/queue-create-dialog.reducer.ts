@@ -1,6 +1,6 @@
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {setCreationStatus, setQueues, resetState} from './queue-create-dialog.actions';
-import {Queue} from '~/business-logic/model/queues/queue';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 export type CreationStatusEnum = 'success' | 'failed' | 'inProgress';
 export const CREATION_STATUS = {
@@ -10,7 +10,7 @@ export const CREATION_STATUS = {
 };
 
 export interface ICreateQueueDialog {
-  queues: Array<Queue>;
+  queues: Queue[];
   creationStatus: CreationStatusEnum;
 }
 
@@ -20,7 +20,7 @@ const createQueueInitState: ICreateQueueDialog = {
 };
 
 export const selectCreateQueueDialog = createFeatureSelector<ICreateQueueDialog>('queueCreateDialog');
-export const selectQueues            = createSelector(selectCreateQueueDialog, (state): Array<Queue> => state.queues);
+export const selectQueues            = createSelector(selectCreateQueueDialog, (state) => state.queues);
 export const selectCreationStatus    = createSelector(selectCreateQueueDialog, (state): CreationStatusEnum => state.creationStatus);
 
 export const queueCreateDialogReducer = createReducer(

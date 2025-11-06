@@ -32,7 +32,7 @@
       border-bottom: 1px solid var(--row-border-color);
     }
     .mat-mdc-tab {
-      --mdc-secondary-navigation-tab-container-height: 39px;
+      --mat-tab-container-height: 39px;
     }
   } 
 
@@ -81,5 +81,6 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    color: var(--color-empty-state);
   }
 }

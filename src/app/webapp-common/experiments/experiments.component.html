@@ -1,16 +1,16 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
-  [tableCols]="tableMode() === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
-  [isArchived]="isArchivedMode()"
+  [tableCols]="tableMode() === 'compare' ? (tableCompareView() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
+  [isArchived]="inArchivedMode()"
   [metricVariants]="metricsVariants$()"
   [hyperParams]="tableMode() === 'compare' ? null : hyperParams$ | ngrxPush"
-  [minimizedView]="minimizedView$ | ngrxPush"
+  [minimizedView]="minimizedView()"
   [isMetricsLoading]="metricLoading$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
   [showNavbarLinks]="(isPipeline$ | ngrxPush) === false"
   [tableMode]="tableMode()"
   [showCompareScalarSettings]="showCompareScalarSettings$ | ngrxPush"
-  [compareView]="tableCompareView$()"
+  [compareView]="tableCompareView()"
   [rippleEffect]="tableModeAwareness$ | ngrxPush"
   [addButtonTemplate]="addButton"
   [noData]="!((experiments$ | ngrxPush)?.length > 0)"
@@ -31,11 +31,11 @@
   (compareViewChanged)="compareViewChanged($event)"
 ></sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
-  @if (projectId$() !== '*') {
+  @if (selectedProjectId !== '*') {
     <button
       mat-flat-button
       class="me-3"
-      [disabled]="isArchivedMode() || isExampleProject"
+      [disabled]="inArchivedMode() || exampleProject()"
       [class.icon-only]="isSmallScreen"
       data-id="New Experiment"
       (click)="newExperiment()"
@@ -49,20 +49,20 @@
   }
 </ng-template>
 <div class="experiment-body">
-  <as-split #split
-            [gutterSize]=1
-            [useTransition]="true"
-            [gutterDblClickDuration]="400"
-            (gutterClick)="clickOnSplit()"
-            (gutterDblClick)="closePanel()"
-            (dragEnd)="splitSizeChange($event)"
-            (dragStart)="disableInfoPanel()"
-            (transitionEnd)="experimentsTable.table?.resize(100); experimentsTable.afterTableInit()"
-            [class.opened]="(minimizedView$ | ngrxPush) && ((selectSplitSize$ | ngrxPush) <= 1)"
-            [class.closed]="(minimizedView$ | ngrxPush) && ((selectSplitSize$ | ngrxPush) >= 99)"
+  <as-split
+    [gutterSize]=1
+    [useTransition]="true"
+    [gutterDblClickDuration]="400"
+    (gutterClick)="clickOnSplit()"
+    (gutterDblClick)="closePanel()"
+    (dragEnd)="splitSizeChange($event)"
+    (dragStart)="disableInfoPanel()"
+    (transitionEnd)="experimentsTable.table()?.resize(100); experimentsTable.afterTableInit()"
+    [class.opened]="minimizedView() && splitSize() <= 1"
+    [class.closed]="minimizedView() && splitSize() >= 99"
   >
     <as-split-area
-      [size]="100 - (splitInitialSize)"
+      [size]="100 - splitSize()"
       [minSize]="1"
       [maxSize]="99"
     >
@@ -70,12 +70,12 @@
         #experimentsTable
         class="align-self-stretch"
         selectionMode="single"
-        [projects]="(projectsOptions$ | ngrxPush)"
+        [projects]="projectsOptions()"
         [initialColumns]="tableCols"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [tableCols]="tableCols$| ngrxPush"
         [experiments]="$any(experiments$ | ngrxPush)"
-        [users]="users$ | ngrxPush"
+        [users]="users()"
         [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
         [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
         [parents]="parents$ | ngrxPush"
@@ -88,14 +88,13 @@
         [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
         [selectedExperiment]="highlited()"
-        [minimizedView]="(minimizedView$ | ngrxPush)"
+        [minimizedView]="minimizedView()"
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
-        [split]="selectSplitSize$ | ngrxPush"
         [contextMenuTemplate]="contextMenuExtendedTemplate"
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
         [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | ngrxPush"
-        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed()"
         [cardHeight]="116"
         (experimentSelectionChanged)="getTableModeFromURL() !== 'compare' && experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
@@ -117,9 +116,9 @@
     </as-split-area>
     <as-split-area
       style="display: flex; flex-direction: column;"
-      [size]="splitInitialSize"
+      [size]="splitSize()"
       [class.info-disabled]="infoDisabled"
-      [visible]="minimizedView$ | ngrxPush"
+      [visible]="minimizedView()"
     >
       <router-outlet></router-outlet>
     </as-split-area>
@@ -148,7 +147,7 @@
     [activateFromMenuButton]="false"
     [useCurrentEntity]="singleRowContext"
     [minimizedView]="true"
-    [tableMode]="!(minimizedView$ | ngrxPush)"
+    [tableMode]="!minimizedView()"
     [backdrop]="menuBackdrop"
     [isCompare]="getTableModeFromURL() === 'compare'"
     (tagSelected)="onAddTag($event, contextExperiment)"

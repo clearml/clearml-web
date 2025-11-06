@@ -123,6 +123,7 @@ export class ExperimentGraphsComponent {
     plotsNames?: string[];
     seriesName?: string[];
     domRect: DOMRect;
+    singleValues?: boolean;
   }>();
 
   chartSettingsChanged = output<{id: string, changes:ChartPreferences}>()
@@ -256,11 +257,13 @@ export class ExperimentGraphsComponent {
       ({
         ...acc,
         [label]: graphs.sort((a, b) => {
-          a.layout.title = a.layout.title || '';
-          b.layout.title = b.layout.title || '';
-          return a.layout.title === b.layout.title ?
+          const aTitle = (a.layout.title as {text: string})?.text ?? a.layout.title as string;
+          const bTitle = (b.layout.title as {text: string})?.text ?? b.layout.title as string;
+          a.layout.title = {text: aTitle || ''};
+          b.layout.title = {text: bTitle || ''};
+          return aTitle === bTitle ?
             b.iter - a.iter :
-            (a.layout.title as string).localeCompare((b.layout.title as string), undefined, {
+            aTitle.localeCompare(bTitle, undefined, {
               numeric: true,
               sensitivity: 'base'
             });
@@ -287,7 +290,7 @@ export class ExperimentGraphsComponent {
     this.timer = window.setTimeout(() => {
       const containerWidth = this.el.nativeElement.clientWidth;
       graphsPerRow = graphsPerRow ?? this.allGroupsSingleGraphs() ? 1 : this.graphsState().graphsPerRow();
-      if (this.allGraphs()?.length > 0 && containerWidth) {
+      if (this.allGraphs()?.length > 0 || this.allMetricGroups()?.length > 0 && containerWidth) {
         while (containerWidth / graphsPerRow < this.minWidth && graphsPerRow > 1 || containerWidth / graphsPerRow < this.graphsState().maxUserWidth()) {
           graphsPerRow -= 1;
         }
@@ -295,6 +298,8 @@ export class ExperimentGraphsComponent {
         this.width = width - 16 / graphsPerRow;
         this.height = this.graphsState().maxUserHeight() || this.height;
         if (!this.isGroupGraphs()) {
+          this.singleGraphs()?.forEach(metricGroup => this.renderer.removeStyle(metricGroup.nativeElement, 'width'));
+          this.singleGraphs()?.forEach(metricGroup => this.renderer.removeStyle(metricGroup.nativeElement, 'height'));
           this.allMetricGroups()?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
           this.allMetricGroups()?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
         } else {
@@ -422,6 +427,7 @@ export class ExperimentGraphsComponent {
       ...(this.xAxisType() && {xaxis: this.xAxisType()}),
       group: true,
       plotsNames: metric.map(plot => plot.layout.name ?? plot.layout.title as string),
+      singleValues: metric[0].layout.type === 'singleValues',
       domRect: domRect.getBoundingClientRect()
     });
   }
@@ -448,6 +454,7 @@ export class ExperimentGraphsComponent {
         ...((xaxis || this.xAxisType()) && {xaxis: xaxis ?? this.xAxisType()}),
         ...(chartItem.data.length < 2 && {originalObject: [chartItem.task]}),
         ...(chartItem.data[0]?.seriesName && {seriesName: [chartItem.data[0]?.seriesName]}),
+        singleValues: chartItem.layout.type === 'singleValues',
         domRect
       });
     }

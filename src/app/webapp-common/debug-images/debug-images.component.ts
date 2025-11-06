@@ -73,8 +73,6 @@ export class DebugImagesComponent {
   selected = input<Task>();
   copyIdClicked = output();
 
-  private sampleViews = viewChildren(DebugImagesViewComponent);
-
   protected mergeIterations = injectRouteData<boolean>('mergeIterations');
   protected multipleExperiments = injectRouteData<boolean>('multiple');
   protected minimized = injectRouteData<boolean>('minimized');
@@ -375,7 +373,7 @@ export class DebugImagesComponent {
     this.bindNavigationMode.update(mode => !mode);
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }, experimentId: string) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: {x: number; y: number;};}, experimentId: string) {
     this.reportEmbed.createCode({
       type: 'sample',
       objects: [experimentId],

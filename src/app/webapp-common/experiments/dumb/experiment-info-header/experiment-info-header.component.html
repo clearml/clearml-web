@@ -24,6 +24,7 @@
       <div class="shared line-item"
         ><i class="al-icon al-ico-link sm-md"></i></div>
       }
+    <ng-content select=".linkToOrigin"></ng-content>
       @if (experiment()?.id) {
         <sm-id-badge [id]="experiment()?.id" (copied)="copyToClipboard()"></sm-id-badge>
       }
@@ -61,7 +62,7 @@
         </button>
       }
 
-      @if (experiment() && (!minimized()) && !isSharedAndNotOwner() && !isPipeline()) {
+      @if (experiment() && (!minimized()) && !isSharedNotInWorkspaces() && !isPipeline()) {
         <button class="line-item" mat-icon-button (click)="minimizeClicked.emit()" smTooltip="View in tasks table" data-id="tasksDetailsView">
           <mat-icon fontSet="al" fontIcon="al-ico-info-min"></mat-icon>
         </button>
@@ -77,7 +78,7 @@
           [projectTags]="projectTags$ | ngrxPush"
           [companyTags]="companyTags$ | ngrxPush"
           [minimizedView]="minimized()"
-          [isSharedAndNotOwner]="isSharedAndNotOwner()"
+          [isSharedNotInWorkspaces]="isSharedNotInWorkspaces()"
           [numSelected]="1"
           (tagSelected)="addTag($event)"
         ></sm-experiment-menu-extended>

@@ -12,28 +12,42 @@
     ></canvas>
     <div class="percent" [style.opacity]="(resizing$ | ngrxPush) !== true && highlightedData() !== null ? 1 : null">
       @if (highlightedData(); as highlighted) {
-        <div class="caption">{{highlighted.caption}} ({{highlighted.value}})</div>
-        <div>{{highlighted.percent}}%</div>
+        @if (Number.isFinite(highlighted.percent)) {
+          <div class="caption">
+            <div>{{highlighted.caption}}</div>
+            <div class="caption-value">({{highlighted.value}}{{units()}})</div>
+          </div>
+          <div>{{highlighted.percent}}%</div>
+        }
       }
     </div>
   </div>
   <div class="donut-legend" data-id="annotationPieChart">
-    @for (slice of donutData().datasets[0].data; track index; let index = $index) {
+    @for (slice of donutData().datasets[0].data; track $index) {
       <div
         class="slice"
-        [class.highlight]="index === highlight()"
-        [style.--sliceColor]="colors()[index]"
-        (mouseenter)="hoverLegend(index)"
+        [class.highlight]="$index === highlight()"
+        [style.--sliceColor]="colors()[$index]"
+        (mouseenter)="hoverLegend($index)"
         (mouseleave)="leaveLegend()"
       >
-        <div
-          #colorButton
-          [smChooseColor]="colors()[index]"
-          [stringToColor]="$any(donutData().labels[index])"
-          [colorButtonRef]="colorButton"
-          class="circle"
-          data-id="annotationColorButton"
-        ></div>{{donutData().labels[index]}}<span class="quantity" data-id="annotationCount">({{slice}})</span>
+        @if (showPicker()) {
+          @defer (on  viewport) {
+            <div
+              #colorButton
+              [smChooseColor]="colors()[$index]"
+              [stringToColor]="$any(donutData().labels[$index])"
+              [colorButtonRef]="colorButton"
+              class="circle action"
+              data-id="annotationColorButton"
+            ></div>
+          } @placeholder {
+            <div class="circle" data-id="annotationColorButton"></div>
+          }
+        } @else {
+          <div class="circle" data-id="annotationColorButton"></div>
+        }
+        {{donutData().labels[$index]}}<span class="quantity" data-id="annotationCount">({{slice}}{{units()}})</span>
       </div>
     }
   </div>

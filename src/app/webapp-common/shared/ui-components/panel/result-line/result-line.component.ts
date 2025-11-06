@@ -25,7 +25,7 @@ export class ResultLineComponent {
   status = input<string>();
   statusOptionsLabels = input.required<Record<string, string>>();
 
-  tags = input.required<string[]>();
+  tags = input<string[]>();
 
   itemSelected = output();
   toggleItemHoverActive = output<boolean>();

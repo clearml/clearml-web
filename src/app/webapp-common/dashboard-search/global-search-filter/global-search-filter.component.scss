@@ -1,14 +1,61 @@
 @use '@angular/material' as mat;
 
-:host{
-  .form-container{
+:host {
+
+  .clear-all {
+    margin-top: 24px;
     display: flex;
-    flex-direction:  column;
-    gap: 24px;
-    padding: 24px 0 0 24px;
+    justify-content: center;
+
+    background-color: var(--mat-dialog-container-color);
+    border-top: 1px solid var(--color-surface-container-high);
+    padding: 12px 0;
+
+    position: sticky;
+    bottom: -1px;
+    z-index: 100;
+
+    a.disabled {
+      pointer-events: none;
+      color: var(--color-empty-state);
+    }
   }
 
-  .mat-mdc-chip-listbox {
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 24px 0 24px;
+
+    .user-filter-container {
+      height: 32px;
+    }
+  }
+
+
+  .filter-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 24px;
+
+    h4 {
+      font-weight: normal;
+      margin: 0;
+    }
+  }
+
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    color: var(--color-empty-state);
+  }
+
+
+  .mat-mdc-chip-listbox, .mat-mdc-chip-set {
     @include mat.chips-overrides((
       container-height: 24px,
       container-shape-radius: 4px,
@@ -17,23 +64,76 @@
     ));
   }
 
-  ::ng-deep mat-chip-option {
-    --mdc-chip-label-text-color: var(--color-primary);
-    --mdc-chip-outline-color: var(--color-outline-variant);
+  ::ng-deep mat-chip-option, ::ng-deep mat-chip-row {
+    --mat-chip-outline-color: var(--color-outline-variant);
+
+    .name {
+      max-width: 120px;
+      line-height: normal;
+    }
+    .remove-button{
+      padding-left: 6px !important;
+      padding-right: 6px !important;
+      height: 12px;
+    }
 
     .mat-mdc-chip-graphic {
       display: none !important;
     }
 
-    .status-icon-container {
+    .mdc-evolution-chip__action {
+      padding: 0 4px;
+    }
+
+    .status-icon-container, {
       grid-template-columns: 14px auto !important;
     }
+
+    .type-icon {
+      color: var(--color-primary)
+    }
+  ;
 
     &.mat-mdc-chip-selected {
       .status-icon-container {
         color: var(--color-on-primary) !important;
       }
+
+      .type-icon {
+        color: var(--color-on-primary)
+      }
     }
   }
 
+  ::ng-deep sm-autocomplete-multi-selection {
+    mat-label {
+      font-size: 14px;
+    }
+
+    .selected-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 6px;
+      max-height: 260px !important;
+      border: none !important;
+    }
+  }
 }
+
+::ng-deep .selected-items sm-user-selected-row {
+  .selected-user-row {
+    grid-template-columns: 40px 140px 1fr 40px;
+  }
+}
+
+.options-section {
+  height: 60vh;
+  max-height: 400px;
+  overflow: auto;
+}
+
+::ng-deep .user-options-filter-menu .user-option-row {
+  grid-template-columns: 32px 140px 1fr !important;
+}
+

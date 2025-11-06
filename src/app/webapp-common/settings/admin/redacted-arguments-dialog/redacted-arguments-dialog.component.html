@@ -1,6 +1,6 @@
 <sm-dialog-template header="REDACTED ARGUMENTS" iconClass="al-ico-access-key">
   <form class="form-container" #redactedArgumentsForm ='ngForm'>
-    @for (redactedArgument of redactedArguments; track redactedArgument.key; let i = $index) {
+    @for (redactedArgument of redactedArguments(); track redactedArgument.key; let i = $index) {
       <div class="d-flex align-items-center" >
         <mat-form-field appearance="outline" floatLabel="always" class="argument-input no-bottom">
           @if (redactedArg?.errors?.required) {
@@ -15,13 +15,13 @@
             [(ngModel)]="redactedArgument.key"
             placeholder="Argument">
         </mat-form-field>
-        <button mat-icon-button (click)="redactedArguments.splice(i, 1)">
+        <button mat-icon-button (click)="redactedArguments().splice(i, 1)">
           <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
         </button>
       </div>
     }
   </form>
-  <button mat-button (click)="redactedArguments.push({key:''})"><mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>Add</button>
+  <button mat-button (click)="redactedArguments().push({key:''})"><mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>Add</button>
   <mat-dialog-actions>
     <button
       mat-stroked-button
@@ -34,7 +34,5 @@
       [disabled]="redactedArgumentsForm.invalid">
       SAVE
     </button>
-
   </mat-dialog-actions>
-
 </sm-dialog-template>

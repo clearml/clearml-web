@@ -5,7 +5,6 @@ import {EffectsModule} from '@ngrx/effects';
 import {queueCreateDialogReducer} from './queue-create-dialog.reducer';
 import {QueueCreateDialogEffects} from './queue-create-dialog.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {QueueCreateDialogComponent} from './queue-create-dialog.component';
 import {
   UniqueNameValidatorDirective
 } from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
@@ -30,7 +29,6 @@ import {
     PushPipe,
     CreateNewQueueFormComponent,
   ],
-  declarations   : [QueueCreateDialogComponent]
 })
 export class QueueCreateDialogModule {
 }

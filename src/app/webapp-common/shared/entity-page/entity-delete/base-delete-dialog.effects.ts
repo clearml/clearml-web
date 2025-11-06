@@ -6,8 +6,8 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {inject, Injectable} from '@angular/core';
 import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {emptyAction} from '~/app.constants';
-import {Action, Store} from '@ngrx/store';
-import {Observable, forkJoin, of} from 'rxjs';
+import {Action, MemoizedSelector, Store} from '@ngrx/store';
+import {forkJoin, Observable, of} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
 import {AdminService} from '~/shared/services/admin.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -27,17 +27,15 @@ import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {CloudProviders} from './common-delete-dialog.reducer';
 import {selectProjectForDelete} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
+import {activateEdit, experimentUpdatedSuccessfully} from '@common/experiments/actions/common-experiments-info.actions';
 import {activateModelEdit} from '@common/models/actions/models-info.actions';
 import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDeleteManyResponse';
 import {TasksDeleteManyResponse} from '~/business-logic/model/tasks/tasksDeleteManyResponse';
 import {ConfigurationService} from '../../services/configuration.service';
 import {isFileserverUrl} from '~/shared/utils/url';
-import {getChildrenExperiments} from '@common/experiments/effects/common-experiments-menu.effects';
 import {TasksResetManyResponseSucceeded} from '~/business-logic/model/tasks/tasksResetManyResponseSucceeded';
 import {updateManyExperiment} from '@common/experiments/actions/common-experiments-view.actions';
 import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin-utils';
-import {MemoizedSelector} from '@ngrx/store/src/selector';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
 import {PipelinesDeleteRunsResponse} from '~/business-logic/model/pipelines/pipelinesDeleteRunsResponse';
 import {MatDialog} from '@angular/material/dialog';
@@ -45,7 +43,8 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {ErrorService} from '@common/shared/services/error.service';
 import {Router} from '@angular/router';
-import {Task} from '~/business-logic/model/tasks/task';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Injectable()
 export class DeleteDialogEffectsBase {
@@ -82,7 +81,11 @@ export class DeleteDialogEffectsBase {
     const ids = entities.map(entity => entity.id as string);
     switch (entityType) {
       case EntityTypeEnum.controller:
-        return this.pipelinesService.pipelinesDeleteRuns({ids, project: projectId || entities[0]?.project?.id, include_pipeline_steps: includeChildren })
+        return this.pipelinesService.pipelinesDeleteRuns({
+          ids,
+          project: projectId || entities[0]?.project?.id,
+          include_pipeline_steps: includeChildren
+        })
           .pipe(
             map((res: PipelinesDeleteRunsResponse) => ({
               failed: res.failed,
@@ -136,6 +139,7 @@ export class DeleteDialogEffectsBase {
     }
   }
 
+  // @ts-ignore
   getEntitySelector(entityType: EntityTypeEnum): MemoizedSelector<any, any[]> {
     switch (entityType) {
       case EntityTypeEnum.dataset:
@@ -173,8 +177,11 @@ export class DeleteDialogEffectsBase {
       map(([, entities]) => action.entity ? [action.entity] : entities),
       // switchMap(entities => action.includeChildren ? getChildrenExperiments(this.tasksApi, entities)
       //   .pipe(map((children: Task[]) => [...children, ...entities])) : of(entities)),
-      withLatestFrom(this.store.select(selectSelectedProjectId)),
-      switchMap(([entities, projectId]) => this.deleteEntityApi(
+      withLatestFrom(this.store.select(selectSelectedProjectId),
+        this.store.select(selectSelectedExperiment)
+      ),
+      switchMap(([entities, projectId, selectedExperiment]) =>
+        this.deleteEntityApi(
           action.entityType,
           entities,
           action.deleteArtifacts,
@@ -186,13 +193,14 @@ export class DeleteDialogEffectsBase {
             map(({failed, succeeded, urlsToDelete}) => [
               this.parseErrors(failed, entities),
               this.getUrlsPerProvider(action.deleteArtifacts ? urlsToDelete : []),
-              succeeded
+              succeeded,
+              selectedExperiment
             ]),
-            mergeMap(([failed, /*urlsPerSource*/, succeeded]: [{
+            mergeMap(([failed, /*urlsPerSource*/, succeeded, selectedExperiment]: [{
                 id: string;
                 name: string;
                 message: string
-              }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
+              }[], Record<CloudProviders, string[]>, TasksResetManyResponseSucceeded[],IExperimentInfo ]) => [
                 ...this.pauseAutorefresh(action.entityType),
                 setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
                 setFailedDeletedEntities({failedEntities: failed}),
@@ -201,7 +209,8 @@ export class DeleteDialogEffectsBase {
                 // deleteGoogleCloudeSource(urlsPerSource['gc']),
                 // deleteAzure(urlsPerSource['azure']),
                 // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
-                action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction()
+                action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction(),
+              (action.resetMode && selectedExperiment?.id) ? experimentUpdatedSuccessfully({id: selectedExperiment?.id}) : emptyAction()
               ]
             ),
             catchError(error => {
@@ -272,7 +281,7 @@ export class DeleteDialogEffectsBase {
     catchError(() => [setNumberOfSourcesToDelete({numberOfFiles: -1})])
   ));
 
-  public getUrlsPerProvider(commutativeUrls: string[]): { [provider in CloudProviders]: string[] } {
+  public getUrlsPerProvider(commutativeUrls: string[]): Record<CloudProviders, string[]> {
 
     return commutativeUrls.reduce((acc, url) => {
       const sourceType = this.getSourceType(url);

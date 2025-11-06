@@ -4,7 +4,7 @@
   [closeOnX]="false"
   (xClicked)="closeDialog(false)"
 >
-  <form class="d-flex flex-column light-theme" (submit)="queueControl.valid && closeDialog(true)">
+  <form class="d-flex flex-column light-theme" (submit)="$event.preventDefault(); queueControl.valid && closeDialog(true)">
     @if (reference()) {
       <p>
         <b [smTooltip]="reference().length > 80 ? reference() : undefined">{{ reference().length > 80 ? (reference() | slice:0:77) + '...' : reference() }}</b>

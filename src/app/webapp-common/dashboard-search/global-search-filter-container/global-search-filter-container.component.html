@@ -1,6 +1,11 @@
 <sm-global-search-filter (filterChanged)="filterChanged($event)"
+                         (resetFilters)="resetFilters()"
                          [filters]="filters()"
+                         [isFiltered]="isFiltered()"
                          [statusOptions]="statusOptions()"
+                         [currentUserId]="currentUser().id"
+                         [usersOptions]="userOptions()"
                          [typeOptions]="typeOptions()"
+                         [showUserFilter]="showUserFilter()"
                          [statusOptionsLabels]="statusOptionsLabels()"
                          [tags]="tags()"></sm-global-search-filter>

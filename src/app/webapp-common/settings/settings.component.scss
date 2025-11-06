@@ -2,7 +2,7 @@
 
   .settings-container mat-nav-list {
     --mat-expansion-header-text-color: var(--color-on-surface-variant);
-    --mdc-list-list-item-label-text-color: var(--color-on-surface-variant);
+    --mat-list-list-item-label-text-color: var(--color-on-surface-variant);
 
     .mat-expansion-panel {
       box-shadow: none;
@@ -49,17 +49,17 @@
       margin: 0 12px 2px;
       padding: 0 10px;
       border-radius: 4px;
-      --mdc-list-list-item-one-line-container-height: 40px;
-      --mdc-list-list-item-label-text-color: var(--color-on-surface-variant);
-      --mdc-theme-text-primary-on-background: var(--color-on-surface-variant);
+      --mat-list-list-item-one-line-container-height: 40px;
+      --mat-list-list-item-label-text-color: var(--color-on-surface-variant);
+      --mat-theme-text-primary-on-background: var(--color-on-surface-variant);
 
       &:hover {
         background-color: var(--color-surface-container-high);
       }
 
       &.active {
-        --mdc-list-list-item-label-text-color: var(--color-on-surface);
-        --mdc-list-list-item-container-color: var(--color-surface-container-high);
+        --mat-list-list-item-label-text-color: var(--color-on-surface);
+        --mat-list-list-item-container-color: var(--color-surface-container-high);
 
         &:hover {
           background-color: var(--color-surface-container-highest);

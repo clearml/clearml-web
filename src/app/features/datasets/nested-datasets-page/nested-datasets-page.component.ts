@@ -3,7 +3,7 @@ import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-p
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import { AsyncPipe } from '@angular/common';
-import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
@@ -28,7 +28,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
         ClickStopPropagationDirective
     ]
 })
-export class NestedDatasetsPageComponent extends CommonProjectsPageComponent {
+export class NestedDatasetsPageComponent extends ProjectsPageComponent {
   entityTypeEnum = ProjectTypeEnum;
   circleTypeEnum = CircleTypeEnum;
   hideMenu = false;

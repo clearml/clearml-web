@@ -16,6 +16,7 @@ import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 
@@ -92,66 +93,71 @@ export const setDeep = createAction(
 );
 
 export const getTags = createAction(
-  PROJECTS_PREFIX + '[get tags]',
+  PROJECTS_PREFIX + 'get tags',
   (project = null) => ({projectId: project})
 );
 
 export const getCompanyTags = createAction(
-  PROJECTS_PREFIX + '[get company tags]'
+  PROJECTS_PREFIX + 'get company tags'
 );
 
 export const getProjectsTags = createAction(
-  PROJECTS_PREFIX + '[get projects tags]',
+  PROJECTS_PREFIX + 'get projects tags',
   props<{ entity: string }>()
 );
 
 export const setTagsFilterByProject = createAction(
-  PROJECTS_PREFIX + '[set tags filter by project]',
+  PROJECTS_PREFIX + 'set tags filter by project',
   props<{ tagsFilterByProject: boolean }>()
 );
 
 export const setTags = createAction(
-  PROJECTS_PREFIX + '[set tags]',
+  PROJECTS_PREFIX + 'set tags',
   props<{ tags: string[] }>()
 );
 
 export const setCompanyTags = createAction(
-  PROJECTS_PREFIX + '[set company tags]',
+  PROJECTS_PREFIX + 'set company tags',
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
 export const addCompanyTag = createAction(
-  PROJECTS_PREFIX + '[add company tag]',
+  PROJECTS_PREFIX + 'add company tag',
   props<{tag: string}>()
 );
 
 export const setMainPageTagsFilter = createAction(
-  PROJECTS_PREFIX + '[set main page tags filters]',
+  PROJECTS_PREFIX + 'set main page tags filters',
   props<{ tags?: string[]; feature: string}>()
 );
 
+export const setMainPageUsersFilter = createAction(
+  PROJECTS_PREFIX + 'set main page users filters',
+  props<{ users?: string[]; feature: string}>()
+);
+
 export const setMainPageTagsFilterMatchMode = createAction(
-  PROJECTS_PREFIX + '[set main page tags filters match mode]',
+  PROJECTS_PREFIX + 'set main page tags filters match mode',
   props<{ matchMode: string; feature: string}>()
 );
 
 export const addProjectTags = createAction(
-  PROJECTS_PREFIX + '[add all projects tags]',
+  PROJECTS_PREFIX + 'add all projects tags',
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
 export const openTagColorsMenu = createAction(
-  PROJECTS_PREFIX + '[open tag colors]',
+  PROJECTS_PREFIX + 'open tag colors',
   props<{ tags: string[] }>()
 );
 
 export const setTagColors = createAction(
-  PROJECTS_PREFIX + '[set tag colors]',
+  PROJECTS_PREFIX + 'set tag colors',
   props<{ tag: string; colors: TagColor }>()
 );
 
 export const openMoreInfoPopup = createAction(
-  PROJECTS_PREFIX + '[open more info popup]',
+  PROJECTS_PREFIX + 'open more info popup',
   props<{
     parentAction: ReturnType<typeof archiveSelectedModels>;
     operationName: string;
@@ -161,35 +167,35 @@ export const openMoreInfoPopup = createAction(
 );
 
 export const setMetricVariant = createAction(
-  PROJECTS_PREFIX + '[set selected metric variant for graph]',
+  PROJECTS_PREFIX + 'set selected metric variant for graph',
   props<{ projectId: string; cols: ISmCol[] }>()
 );
-export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for project graph]');
+export const fetchGraphData = createAction(PROJECTS_PREFIX + 'fetch stats for project graph');
 
 export const toggleState = createAction(
-  PROJECTS_PREFIX + '[toggle state]',
+  PROJECTS_PREFIX + 'toggle state',
   props<{ state: string }>()
 );
 
 export const setGraphData = createAction(
-  PROJECTS_PREFIX + '[set project stats]',
+  PROJECTS_PREFIX + 'set project stats',
   props<{ stats: ScatterPlotPoint[] }>()
 );
 
 export const getProjectUsers = createAction(
-  PROJECTS_PREFIX + '[get current project users]',
-  props<{ projectId: string }>()
+  PROJECTS_PREFIX + 'get current project users',
+  props<{ projectId: string; entity?: ProjectsGetUserNamesRequest.EntityEnum }>()
 );
 export const setProjectUsers = createAction(
-  PROJECTS_PREFIX + '[set current project users]',
+  PROJECTS_PREFIX + 'set current project users',
   props<{ users: User[] }>()
 );
 export const setAllProjectUsers = createAction(
-  PROJECTS_PREFIX + '[set all projects users]',
+  PROJECTS_PREFIX + 'set all projects users',
   props<{ users: User[] }>()
 );
 export const setProjectExtraUsers = createAction(
-  PROJECTS_PREFIX + '[set extra users]',
+  PROJECTS_PREFIX + 'set extra users',
   props<{ users: User[] }>()
 );
 export const getFilteredUsers = createAction(
@@ -197,52 +203,52 @@ export const getFilteredUsers = createAction(
   props<{ filteredUsers: string[] }>()
 );
 export const setShowHidden = createAction(
-  PROJECTS_PREFIX + ' [set show hidden]',
+  PROJECTS_PREFIX + 'set show hidden',
   props<{ show: boolean }>()
 );
 
 export const setHideExamples = createAction(
-  PROJECTS_PREFIX + ' [set hide examples]',
+  PROJECTS_PREFIX + 'set hide examples]',
   props<{ hide: boolean }>()
 );
 export const setBlockUserScript = createAction(
-  PROJECTS_PREFIX + ' [set block users scripts]',
+  PROJECTS_PREFIX + 'set block users scripts]',
   props<{ block: boolean }>()
 );
 export const setDefaultNestedModeForFeature = createAction(
-  PROJECTS_PREFIX + ' [set defaultNestedModeForFeature]',
+  PROJECTS_PREFIX + 'set defaultNestedModeForFeature',
   props<{ feature: string; isNested: boolean }>()
 );
 export const setSelectedBreadcrumbSubFeature = createAction(
-  PROJECTS_PREFIX + ' [set SelectedSubFeature]',
+  PROJECTS_PREFIX + 'set SelectedSubFeature',
   props<{ breadcrumb: IBreadcrumbsLink }>()
 );
 
 export const setBreadcrumbMainFeature = createAction(
-  PROJECTS_PREFIX + ' [setBreadcrumbMainFeature]',
+  PROJECTS_PREFIX + 'setBreadcrumbMainFeature',
   props<{ breadcrumb: IBreadcrumbsLink }>()
 );
 
 export const setBreadcrumbsOptions = createAction(
-  PROJECTS_PREFIX + ' [setBreadcrumbsOptions]',
+  PROJECTS_PREFIX + 'setBreadcrumbsOptions',
   props<{ breadcrumbOptions: IBreadcrumbsOptions }>()
 );
 
 export const resetTablesFilterProjectsOptions = createAction(
-  PROJECTS_PREFIX + ' [reset tables filter projects options]'
+  PROJECTS_PREFIX + 'reset tables filter projects options'
 );
 
 export const getTablesFilterProjectsOptions = createAction(
-  PROJECTS_PREFIX + ' [get tables filter projects options]',
+  PROJECTS_PREFIX + 'get tables filter projects options',
   props<{ searchString: string; loadMore: boolean; allowPublic?: boolean}>()
 );
 
 export const setTablesFilterProjectsOptions = createAction(
-  PROJECTS_PREFIX + ' [set tables filter projects options]',
+  PROJECTS_PREFIX + 'set tables filter projects options',
   props<{ projects: Partial<ProjectsGetAllResponseSingle>[]; scrollId: string; loadMore?: boolean }>()
 );
 
 export const downloadForGetAll = createAction(
-  PROJECTS_PREFIX + ' [downloadForGetAll]',
+  PROJECTS_PREFIX + 'downloadForGetAll',
   props<{ prepareId: string}>()
 );

@@ -15,9 +15,10 @@ import {
 } from '../core/reducers/projects.reducer';
 import {setBreadcrumbsOptions, updateProject} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
-import {HeaderMenuService} from '@common/shared/services/header-menu.service';
+import {HeaderMenuService} from '~/shared/services/header-menu.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
+import {injectQueryParams} from 'ngxtension/inject-query-params';
 
 
 @Component({
@@ -30,6 +31,7 @@ import {selectThemeMode} from '@common/core/reducers/view.reducer';
 export class ProjectInfoComponent {
   private store = inject(Store);
   private contextMenuService = inject(HeaderMenuService);
+  private archive = injectQueryParams('archive');
 
   protected blockUserScripts$ = this.store.select(selectBlockUserScript);
   private selectedProject$ = this.store.select(selectSelectedProject);
@@ -50,7 +52,7 @@ export class ProjectInfoComponent {
 
     effect(() => {
       if (this.projectId()) {
-        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId(), false));
+        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId(), this.archive() === 'true'));
       }
     });
     this.setupBreadcrumbsOptions();

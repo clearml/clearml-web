@@ -1,4 +1,4 @@
-import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, provideZonelessChangeDetection} from '@angular/core';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {appFeature} from '@common/clearml-applications/report-widgets/src/app/app.reducer';
@@ -22,6 +22,7 @@ export const appConfig: ApplicationConfig = {
       EffectsModule.forRoot([AppEffects])
     ),
     ...extCoreConfig,
+    provideZonelessChangeDetection(),
     provideAnimations(),
     provideHttpClient(),
     BaseAdminService,

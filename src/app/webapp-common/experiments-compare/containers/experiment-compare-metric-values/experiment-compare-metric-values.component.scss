@@ -203,7 +203,7 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
       table-layout: fixed !important;
     }
   }
-  .p-datatable {
+  &.p-datatable {
     .p-paginator-bottom {
       border-width: $tableBottomPaginatorBorderWidth;
       border-radius: 0;

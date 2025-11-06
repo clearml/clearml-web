@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ModelsViewModesEnum} from '../../models.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 
 @Component({
     selector: 'sm-select-model-header',
@@ -17,7 +17,7 @@ export class SelectModelHeaderComponent {
   @Input() hideCreateNewButton: boolean;
   @Input() viewMode: ModelsViewModesEnum;
   @Input() searchActive: boolean;
-  @Input() tableFilters: { [s: string]: FilterMetadata };
+  @Input() tableFilters: Record<string, FilterMetadata>;
   @Input() isShowArchived: boolean;
 
   @Output() searchValueChanged   = new EventEmitter<string>();

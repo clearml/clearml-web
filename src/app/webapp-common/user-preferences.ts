@@ -3,7 +3,7 @@ import {Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 import {cloneDeep, isEqual, get, set} from 'lodash-es';
 import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
 
@@ -12,14 +12,17 @@ export const enum USER_PREFERENCES_KEY {
   firstLogin = 'firstLogin',
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserPreferences {
+  private userService = inject(ApiUsersService);
 
-  private preferences: Record<string, any>;
+  private preferences: Record<string, Record<string, any>>;
   private timer: number;
   private prefsQueue: Record<string, any> = {};
 
-  constructor(private userService: ApiUsersService) {
+  constructor() {
     this.removeFromLocalStorage();
   }
 
@@ -123,10 +126,11 @@ export class UserPreferences {
       const oldData = get(pref, path);
       if (oldData && Array.isArray(oldData)) {
         this.setPreferences(path, oldData.reduce((acc, metricsCol) => {
-          if (acc[metricsCol.projectId]) {
-            acc[metricsCol.projectId].push(metricsCol);
+          const id = metricsCol.projectId ?? metricsCol.datasetId;
+          if (acc[id]) {
+            acc[id].push(metricsCol);
           } else {
-            acc[metricsCol.projectId] = [metricsCol];
+            acc[id] = [metricsCol];
           }
           return acc;
         }, {}));

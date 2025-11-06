@@ -58,4 +58,5 @@ export interface ProjectsGetAllResponseSingle {
     sub_projects?: Array<ProjectsGetAllResponseSingleSubProjects>;
     isRoot?: boolean;
     last_update?: string; //MANUALLY
+    hidden?: boolean;
 }

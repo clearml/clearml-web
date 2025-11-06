@@ -8,9 +8,16 @@
     border: none;
     font-size: 14px;
     background: transparent;
+    color: var(--mat-form-field-outlined-input-text-color);
+
     &:last-of-type {
       width: 30px;
     }
+  }
+
+  form {
+    position: relative;
+
   }
 
   .inputs-container {
@@ -20,6 +27,7 @@
     position: relative;
     display: flex;
     gap: 1px;
+    z-index: 2;
 
     .separator {
       line-height: 32px;
@@ -28,7 +36,7 @@
         padding-right: 0;
       }
     }
-
+  }
     .submit {
       position: absolute;
       top: 50%;
@@ -36,11 +44,12 @@
       transform: translate(0, -50%);
       opacity: 0;
       transition: right ease-in-out 0.3s, opacity ease-out 0.5s;
+      pointer-events: none;
 
       &.in-edit-mode {
-        right: -34px;
+        pointer-events: all;
+        right: -40px;
         opacity: 1;
       }
     }
-  }
 }

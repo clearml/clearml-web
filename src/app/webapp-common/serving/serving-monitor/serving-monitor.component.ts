@@ -64,8 +64,8 @@ export class ServingMonitorComponent {
     {label: 'AVERAGE GPU UTILIZATION (%)', value: MetricTypeEnum.GpuUtil},
     {label: 'MEMORY USAGE (GB)', value: MetricTypeEnum.RamTotal},
     {label: 'MEMORY FREE (GB)', value: MetricTypeEnum.RamFree},
-    {label: 'VIDEO MEMORY USAGE (GB)', value: MetricTypeEnum.GpuRamTotal},
-    {label: 'VIDEO MEMORY FREE (GB)', value: MetricTypeEnum.GpuRamFree},
+    {label: 'GPU MEMORY USAGE (GB)', value: MetricTypeEnum.GpuRamTotal},
+    {label: 'GPU MEMORY FREE (GB)', value: MetricTypeEnum.GpuRamFree},
     {label: 'NETWORK THROUGHPUT RX (MBps)', value: MetricTypeEnum.NetworkRx},
     {label: 'NETWORK THROUGHPUT TX (MBps)', value: MetricTypeEnum.NetworkTx}
   ];

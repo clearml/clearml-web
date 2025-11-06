@@ -51,6 +51,7 @@ export class ExperimentInfoHeaderComponent {
   showMenu = input<boolean>();
   minimized = input<boolean>();
   isSharedAndNotOwner = input<boolean>();
+  isSharedNotInWorkspaces = input<boolean>();
   experimentNameChanged = output<string>();
   minimizeClicked = output();
   closeInfoClicked = output();

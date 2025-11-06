@@ -73,16 +73,15 @@ export class ModelsMenuEffects {
         return this.apiModels.modelsMove({
           ids: action.selectedModels.map(model => model.id),
           project: action.project.id,
-
           project_name: action.project.name
         })
           .pipe(
-            tap(res => this.route.snapshot.firstChild.data.setAllProject ?
+            tap(res => this.route.snapshot.firstChild.firstChild.data.setAllProject ?
               this.router.navigate([]) :
               this.router.navigate([
                 'projects', action.project.id ? action.project.id : res.project_id ?? '*',
                 'models', action.selectedModels.length === 1 ? action.selectedModels[0].id : ''
-              ], {queryParamsHandling: 'merge'})),
+              ], {queryParamsHandling: 'replace'})),
             mergeMap(() => [
               viewActions.resetState(),
               selectedModel ? infoActions.setModelInfo({model: selectedModel}) : emptyAction(),

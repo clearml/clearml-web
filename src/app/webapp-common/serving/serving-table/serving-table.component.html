@@ -1,24 +1,24 @@
-<div class="table-container" [class.card-view]="minimizedView">
+<div class="table-container" [class.card-view]="minimizedView()">
   <sm-table
     [cardHeight]="84"
-    [cardsCollapsed]="cardsCollapsed"
+    [cardsCollapsed]="cardsCollapsed()"
     [initialColumns]="initialColumns"
-    [selectionMode]="selectionMode"
-    [tableData]="endpoints"
+    [selectionMode]="selectionMode()"
+    [tableData]="endpoints()"
     [noMoreData]="true"
-    [resizableColumns]="enableMultiSelect"
-    [columns]="tableCols"
-    [reorderableColumns]="reorderableColumns && enableMultiSelect"
+    [resizableColumns]="enableMultiSelect()"
+    [columns]="tableCols()"
+    [reorderableColumns]="reorderableColumns() && enableMultiSelect()"
     [scrollable]="true"
-    [columnsOrder]="colsOrder"
+    [columnsOrder]="colsOrder()"
     [lazyLoading]="true"
-    [selection]="selectedEndpoint"
-    [checkedItems]="selectedEndpoints"
-    [activeContextRow]="contextEndpoint"
-    [contextMenuOpen]="contextMenuActive"
-    [minimizedView]="minimizedView"
+    [selection]="selectedEndpoint()"
+    [checkedItems]="selectedEndpoints()"
+    [activeContextRow]="contextEndpoint()"
+    [contextMenuOpen]="contextMenuActive()"
+    [minimizedView]="minimizedView()"
     [minimizedTableHeader]="'ENDPOINTS LIST'"
-    [sortFields]="tableSortFields"
+    [sortFields]="tableSortFields()"
     [keyboardControl]="true"
     [autoLoadMore]="true"
     [noDataTemplate]="noData"
@@ -33,16 +33,16 @@
   >
     <ng-template let-col pTemplate="cardFilter">
       <sm-table-card-filter
-        [options]="filtersOptions"
-        [value]="filtersValues"
+        [options]="filtersOptions()"
+        [value]="filtersValues()"
         [columns]="initialColumns"
         [filterMatch]="filtersMatch"
         fixedOptionsSubheader="System tags"
         (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-        (filterChanged)="tableAllFiltersChanged($event)"
+        (filterChanged)="tableFilterChanged({id: $event.col}, $event)"
         (menuOpened)="columnFilterOpened($event)"
         (menuClosed)="columnFilterClosed($event)"
-        (clearAll)="clearAllFilters.emit(tableFilters)"
+        (clearAll)="clearAllFilters.emit(tableFilters())"
       ></sm-table-card-filter>
     </ng-template>
 
@@ -51,11 +51,10 @@
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort
         [column]="col"
-        [value]="filtersValues[col.id]"
+        [value]="filtersValues()[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="filtersOptions[col.id] | filter:searchValues[col.id]:'label'"
-        [sortOrder]="tableSortFieldsObject[col.id]"
-        [fixedOptionsSubheader]="col.id === filtersOptions.TAGS ? 'System tags' : ''"
+        [options]="filtersOptions()[col.id] | filter:searchValues[col.id]:'label'"
+        [sortOrder]="tableSortFieldsObject()[col.id]"
         [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
@@ -149,13 +148,13 @@
       <sm-table-card
         [selected]="selected"
         [cardName]="endpoint.endpoint"
-        [columns]="tableCols"
+        [columns]="tableCols()"
         [rowData]="endpoint"
-        [checked]="endpoints | isRowSelected:endpoint"
-        [activeContextRow]="contextEndpoint"
-        [contextMenuOpen]="contextMenuActive"
+        [checked]="endpoints() | isRowSelected:endpoint"
+        [activeContextRow]="contextEndpoint()"
+        [contextMenuOpen]="contextMenuActive()"
         [compactColDataTemplate]="compactCol"
-        [entityType]="entityType"
+        [entityType]="entityType()"
         [tagsTemplate]="tagList"
         [noSelection]="true"
         [class.no-tags]="true"
@@ -164,7 +163,7 @@
 
       </sm-table-card>
       <ng-template #compactCol>
-        @if (!cardsCollapsed) {
+        @if (!cardsCollapsed()) {
           <span class="model-name" [class.selected]="selected" [@inOutAnimation]>{{ endpoint.model }}</span>
         }
 

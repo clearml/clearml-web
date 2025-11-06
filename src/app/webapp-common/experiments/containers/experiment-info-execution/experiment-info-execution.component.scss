@@ -26,12 +26,12 @@
     font-weight: 500;
     border-radius: 4px;
     margin-bottom: 2px;
-    --mdc-list-list-item-one-line-container-height: 40px;
-    --mdc-list-list-item-label-text-size: 12px;
+    --mat-list-list-item-one-line-container-height: 40px;
+    --mat-list-list-item-label-text-size: 12px;
 
     &.selected {
-      --mdc-list-list-item-label-text-color: var(--color-on-surface);
-      --mdc-list-list-item-hover-label-text-color: var(--color-on-surface);
+      --mat-list-list-item-label-text-color: var(--color-on-surface);
+      --mat-list-list-item-hover-label-text-color: var(--color-on-surface);
       background-color:  var(--color-surface-container-high);
     }
   }

@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, Signal, ViewChild} from '@angular/core';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable, of} from 'rxjs';
 import {ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 import {selectSearchQuery} from '@common/common-search/common-search.reducer';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {distinctUntilChanged, filter, skip} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
@@ -26,11 +26,9 @@ import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
     styleUrl: './serving.component.scss',
     standalone: false
 })
-export class ServingLoadingComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
+export class ServingLoadingComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = servingLoadingTableCols;
   public entityTypeEnum = EntityTypeEnum;
-  protected override entityType = EntityTypeEnum.endpointsContainer;
-  protected override inEditMode$: Observable<boolean> = of(false);
   public override showAllSelectedIsActive$: Observable<boolean> = of(false);
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public tags$: Observable<string[]>;
@@ -39,15 +37,14 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   protected metricVariants$: Observable<MetricVariantResult[]>;
   protected override setSplitSizeAction = ServingActions.setSplitSize;
   protected setTableModeAction = ServingActions.setTableViewMode;
-  private selectedEndpoints: EndpointStats[];
+  protected selectedEndpoints = this.store.selectSignal(servingFeature.selectSelectedEndpoints);
+  protected selectedEndpoint = this.store.selectSignal(servingFeature.selectSelectedEndpoint);
   private readonly tagsFilter$: Observable<boolean>;
   private readonly companyTags$: Observable<string[]>;
-  protected selectedEndpoints$: Observable<EndpointStats[]>;
-  protected selectedEndpoint$: Observable<EndpointStats>;
   modelNamesOptions$ = this.store.select(servingFeature.modelLoadingNamesOptions);
   inputTypesOptions$ = this.store.select(servingFeature.inputTypesOptions);
   preprocessArtifactOptions$ = this.store.select(servingFeature.preprocessArtifactOptions);
-  protected override selectSplitSize$ = this.store.select(servingFeature.selectSplitSize);
+  protected override splitSize = this.store.selectSignal(servingFeature.selectSplitSize);
   protected tableSortFields$ = this.store.select(servingFeature.selectLoadingTableSortFields);
   protected tableFilters$ = this.store.select(servingFeature.selectLoadingColumnFilters);
   protected searchValue$ = this.store.select(servingFeature.selectGlobalFilter);
@@ -61,6 +58,10 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   protected endpoints$ = this.store.select(servingFeature.selectLoadingSortedFilteredEndpoints).pipe(
     filter(endpoints => endpoints !== null)) as Observable<EndpointStats[]>;
 
+  protected override get entityType() {
+    return EntityTypeEnum.endpointsContainer;
+  }
+
   @ViewChild('endpointsTable') private table: ServingTableComponent;
   viewMode = this.route.snapshot.url[0].path;
 
@@ -68,47 +69,43 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
     super();
     this.syncAppSearch();
     this.setContextMenu();
-  }
-
-  override ngOnInit() {
-    super.ngOnInit();
     this.store.dispatch(ServingActions.fetchLoadingEndpoints());
     let prevQueryParams: Params;
 
-    this.sub.add(this.route.queryParams
-        .pipe(
-          filter(queryParams => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
-            const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
-            prevQueryParams = queryParamsWithoutSearch;
-            return !equal;
-          })
-        )
-        .subscribe(params => {
-          if (Object.keys(params || {}).length === 0) {
-            this.emptyUrlInit();
+    this.route.queryParams
+      .pipe(
+        takeUntilDestroyed(),
+        filter(queryParams => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
+          const equal = isEqual(queryParamsWithoutSearch, prevQueryParams);
+          prevQueryParams = queryParamsWithoutSearch;
+          return !equal;
+        })
+      )
+      .subscribe(params => {
+        if (Object.keys(params || {}).length === 0) {
+          this.emptyUrlInit();
+        } else {
+          if (params.order) {
+            const orders = decodeOrder(params.order);
+            this.store.dispatch(ServingActions.setLoadingTableSort({orders}));
+          }
+          if (params.filter != null) {
+            const filters = decodeFilter(params.filter);
+            this.store.dispatch(ServingActions.setLoadingTableFilters({filters}));
           } else {
             if (params.order) {
-              const orders = decodeOrder(params.order);
-              this.store.dispatch(ServingActions.setLoadingTableSort({orders}));
-            }
-            if (params.filter != null) {
-              const filters = decodeFilter(params.filter);
-              this.store.dispatch(ServingActions.setLoadingTableFilters({filters}));
-            } else {
-              if (params.order) {
-                this.store.dispatch(ServingActions.setLoadingTableFilters({filters: []}));
-              }
-            }
-
-            if (params.columns) {
-              const [, , , , allIds] = decodeColumns(params.columns, this.originalTableColumns);
-              this.columnsReordered(allIds, false);
+              this.store.dispatch(ServingActions.setLoadingTableFilters({filters: []}));
             }
           }
-        })
-    );
+
+          if (params.columns) {
+            const [, , , , allIds] = decodeColumns(params.columns, this.originalTableColumns);
+            this.columnsReordered(allIds, false);
+          }
+        }
+      });
   }
 
   override ngOnDestroy(): void {
@@ -123,7 +120,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   }
 
   getSelectedEntities() {
-    return this.selectedEndpoints;
+    return this.selectedEndpoints();
   }
 
   stopSyncSearch() {
@@ -133,7 +130,13 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for endpoints'}));
-    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => this.store.dispatch(ServingActions.globalFilterChanged(query))));
+    this.searchQuery$
+      .pipe(
+        takeUntilDestroyed(),
+        skip(1),
+        filter(query => query !== null)
+      )
+      .subscribe(query => this.store.dispatch(ServingActions.globalFilterChanged(query)));
   }
 
   endpointsSelectionChanged(endpoints: EndpointStats[]) {
@@ -209,7 +212,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   }
 
   downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML All Endpoints`);
+    this.table.table().downloadTableAsCSV(`ClearML All Endpoints`);
   }
 
   override onFooterHandler(): void {
@@ -225,7 +228,7 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
         takeUntilDestroyed(),
         filter(config => !!config),
       )
-      .subscribe((conf) => {
+      .subscribe(() => {
         this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: modelServingRoutes[1].link as string}));
       });
   }
@@ -233,5 +236,4 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
   endpointSelectionChanged(event: { endpoint: EndpointStats; openInfo?: boolean }) {
     return event;
   }
-
 }

@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, effect, input, output} from '@angular/core';
-import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, input, forwardRef} from '@angular/core';
+import {FormControl, ReactiveFormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {RippleButtonComponent} from '@common/shared/ui-components/buttons/ripple-button/ripple-button.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -26,9 +26,16 @@ export interface Option<D> {
         ReactiveFormsModule,
         AppendComponentOnTopElementDirective,
         MatIcon
+    ],
+    providers: [
+      {
+        provide: NG_VALUE_ACCESSOR,
+        useExisting: forwardRef(() => ButtonToggleComponent),
+        multi: true
+      }
     ]
 })
-export class ButtonToggleComponent<D> {
+export class ButtonToggleComponent<D> implements ControlValueAccessor {
 
   public rippleComponent = RippleButtonComponent;
   public formControl = new FormControl();
@@ -36,13 +43,35 @@ export class ButtonToggleComponent<D> {
   options = input<Option<D>[]>();
   disabled = input<boolean>();
   rippleEffect = input<boolean>();
-  value = input<D>();
   vertical = input(false);
-  valueChanged = output<D>();
+
+  private onChange: (value: D) => void;
+  private onTouched: () => void;
 
   constructor() {
-    effect(() => {
-      this.formControl.patchValue(this.value(), {emitEvent: false});
+    this.formControl.valueChanges.subscribe(value => {
+      this.onChange?.(value);
+      this.onTouched?.();
     });
+  }
+
+  writeValue(obj: D): void {
+    this.formControl.patchValue(obj, {emitEvent: false});
+  }
+
+  registerOnChange(fn: (value: D) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    if (isDisabled) {
+      this.formControl.disable({emitEvent: false});
+    } else {
+      this.formControl.enable({emitEvent: false});
+    }
   }
 }

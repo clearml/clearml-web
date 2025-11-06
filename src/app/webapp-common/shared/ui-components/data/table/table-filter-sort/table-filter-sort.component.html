@@ -27,6 +27,7 @@
       [class.active]="this.sortOrder()?.order || isFiltered()"
     >{{column().header}}</div>
     <sm-menu
+      #smMenu
       searchPlaceholder="Search"
       [enableSearch]="column().searchableFilter"
       [fixedOptionsSubheader]="subOptions()?.length ? fixedOptionsSubheader() : ''"

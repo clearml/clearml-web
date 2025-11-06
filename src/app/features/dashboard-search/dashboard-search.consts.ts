@@ -1,9 +1,8 @@
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {EXPERIMENTS_STATUS_LABELS} from '~/shared/constants/non-common-consts';
-import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
+import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 
-export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines' | 'datasets';
+export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines' | 'datasets' | 'modelEndpoints';
 
 export const activeSearchLink = {
   projects: 'projects' as ActiveSearchLink,
@@ -13,7 +12,9 @@ export const activeSearchLink = {
   pipelineRuns: 'pipelineRuns' as ActiveSearchLink,
   datasets: 'datasets' as ActiveSearchLink,
   openDatasetVersions: 'openDatasetVersions' as ActiveSearchLink,
-  reports: 'reports' as ActiveSearchLink
+  reports: 'reports' as ActiveSearchLink,
+  modelEndpoints: 'modelEndpoints' as ActiveSearchLink,
+  loadingEndpoints: 'loadingEndpoints' as ActiveSearchLink,
 };
 
 export const SearchTabsWithTable = [activeSearchLink.models, activeSearchLink.experiments];
@@ -32,13 +33,15 @@ export interface SearchPageConfig {
 export const activeLinksList = [
   {
     label: 'PROJECTS',
+    showUserFilter: true,
     name: activeSearchLink.projects,
     statusOptions: [],
     relevantSearchItems:{
-      [activeSearchLink.projects]:{name: activeSearchLink.projects, viewAllResults: true, viewAllResultsLink: 'projects'}}
+      [activeSearchLink.projects]:{name: activeSearchLink.projects, viewAllResults: true, viewAllResultsLink: 'projects', title: 'Projects'}}
   },
   {
     label: 'DATASETS',
+    showUserFilter: true,
     name: activeSearchLink.datasets,
     statusOptions:  TaskStatusOptions,
     statusOptionsLabels: {...EXPERIMENTS_STATUS_LABELS,...DATASETS_STATUS_LABEL},
@@ -49,25 +52,28 @@ export const activeLinksList = [
   },
   {
     label: 'TASKS',
+    showUserFilter: true,
     statusOptions:  TaskStatusOptions,
     statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
     typeOptions: TaskTypeOptions,
     name: activeSearchLink.experiments,
     relevantSearchItems:{
-      [activeSearchLink.experiments]:{name: activeSearchLink.experiments, viewAllResults: true, viewAllResultsLink: 'projects/*/tasks'},
+      [activeSearchLink.experiments]:{name: activeSearchLink.experiments, viewAllResults: true, viewAllResultsLink: 'projects/*/tasks', title: 'Tasks'},
     }
   },
   {
     label: 'MODELS',
+    showUserFilter: true,
     statusOptions: ['created', 'published'],
     statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
     name: activeSearchLink.models,
     relevantSearchItems:{
-      [activeSearchLink.models]:{name: activeSearchLink.models, viewAllResults: true, viewAllResultsLink: 'projects/*/models/'},
+      [activeSearchLink.models]:{name: activeSearchLink.models, viewAllResults: true, viewAllResultsLink: 'projects/*/models/', title: 'Models'},
     }
   },
   {
     label: 'PIPELINES',
+    showUserFilter: true,
     name: activeSearchLink.pipelines,
     statusOptions: TaskStatusOptions,
     statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
@@ -78,11 +84,22 @@ export const activeLinksList = [
   },
   {
     label: 'REPORTS',
+    showUserFilter: true,
     name: activeSearchLink.reports,
     statusOptions: ['created', 'published'],
     statusOptionsLabels: {created: 'Draft',  published: 'Published'},
     relevantSearchItems:{
-      [activeSearchLink.reports]:{name: activeSearchLink.reports, viewAllResults: true, viewAllResultsLink: 'reports/'},
+      [activeSearchLink.reports]:{name: activeSearchLink.reports, viewAllResults: true, viewAllResultsLink: 'reports/', title: 'Reports' },
     }
   },
-] as {label: string; name: string; feature?: string, typeOptions: string[],statusOptions?: string[], statusOptionsLabels?:  Record<string,string> , relevantSearchItems: Record<string, SearchPageConfig>}[];
+  {
+    label: 'ENDPOINTS',
+    showUserFilter: true,
+    name: activeSearchLink.modelEndpoints,
+    statusOptions: [],
+    relevantSearchItems: {
+      [activeSearchLink.modelEndpoints]:{name: activeSearchLink.modelEndpoints, viewAllResults: true, viewAllResultsLink: 'endpoints/active', title: 'Active endpoints'},
+      [activeSearchLink.loadingEndpoints]:{name: activeSearchLink.loadingEndpoints, viewAllResults: true, viewAllResultsLink: 'endpoints/loading', title: 'Loading endpoints'},
+    }
+  },
+] as {label: string; name: string; showUserFilter?: boolean, typeOptions: string[],statusOptions?: string[], statusOptionsLabels?:  Record<string,string> , relevantSearchItems: Record<string, SearchPageConfig>}[];

@@ -10,16 +10,16 @@ import {
   selectNeverShowPopups
 } from '@common/core/reducers/view.reducer';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
 import {MatDialog} from '@angular/material/dialog';
 import {RedactedArgumentsDialogComponent} from '../redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {selectBlockUserScript, selectHideExamples, selectShowHiddenUserSelection} from '@common/core/reducers/projects.reducer';
 import {setBlockUserScript, setHideExamples, setShowHidden} from '@common/core/actions/projects.actions';
-import RoleEnum = AuthEditUserRequest.RoleEnum;
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {Role} from '~/business-logic/model/auth/role';
+import {getBlockNotice} from '~/features/settings/settings.util';
 
 @Component({
     selector: 'sm-profile-preferences',
@@ -48,10 +48,12 @@ export class ProfilePreferencesComponent {
   protected blockUserScripts = this.store.selectSignal(selectBlockUserScript);
   protected hideEnterpriseFeatures = this.store.selectSignal(selectHideEnterpriseFeatures);
   protected show = this.store.selectSignal(selectShowHiddenUserSelection);
-  protected admin = computed(() => this.currentUser()?.role === RoleEnum.Admin);
+  protected admin = computed(() => this.currentUser()?.role === Role.Admin);
   protected hideRedactedArguments = this.store.selectSignal(selectHideRedactedArguments);
   protected hideExamples= this.store.selectSignal(selectHideExamples);
   private currentUser= this.store.selectSignal(selectCurrentUser);
+
+  protected blockScriptNotice = computed(() => getBlockNotice(this.config.configuration()));
 
   hidpiChange(event: MatSlideToggleChange) {
     window.localStorage.setItem('disableHidpi', JSON.stringify(event.checked));

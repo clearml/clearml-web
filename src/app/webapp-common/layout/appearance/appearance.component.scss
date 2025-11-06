@@ -1,5 +1,5 @@
 :host {
-  --mdc-list-list-item-one-line-container-height: 100%;
+  --mat-list-list-item-one-line-container-height: 100%;
 }
 
 .theme-selector {
@@ -9,14 +9,14 @@
   &__option {
     padding: 16px;
     border-radius: 12px;
-    --mdc-list-list-item-container-color: var(--color-surface-container-low);
-    --mdc-list-list-item-focus-state-layer-color: transparent;
+    --mat-list-list-item-container-color: var(--color-surface-container-low);
+    --mat-list-list-item-focus-state-layer-color: transparent;
     &.selected {
-      --mdc-list-list-item-container-color: var(--color-primary);
-      --mdc-list-list-item-selected-container-color: var(--color-primary);
-      --mdc-list-list-item-label-text-color: var(--color-surface-container);
-      --mdc-list-list-item-hover-label-text-color: var(--color-surface-container);
-      --mdc-list-list-item-focus-label-text-color: var(--color-surface-container);
+      --mat-list-list-item-container-color: var(--color-primary);
+      --mat-list-list-item-selected-container-color: var(--color-primary);
+      --mat-list-list-item-label-text-color: var(--color-surface-container);
+      --mat-list-list-item-hover-label-text-color: var(--color-surface-container);
+      --mat-list-list-item-focus-label-text-color: var(--color-surface-container);
     }
   }
 }

@@ -40,7 +40,7 @@ export interface NewProjectResults {
     PaginatedEntitySelectorComponent,
     ReactiveFormsModule,
     MatButton,
-    MatError,
+    MatError
   ]
 })
 export class CreateNewProjectFormComponent {
@@ -102,7 +102,9 @@ export class CreateNewProjectFormComponent {
         takeUntilDestroyed()
       )
       .subscribe(() => {
-        this.projectForm.controls.name.setErrors(null);
+        if (this.projectForm.controls.name.value.length > 2) {
+          this.projectForm.controls.name.setErrors(null);
+        }
       });
   }
 

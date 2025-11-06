@@ -1,8 +1,8 @@
 import {Component, computed} from '@angular/core';
 import {DashboardSearchBaseComponent} from '@common/dashboard/dashboard-search.component.base';
-import {selectFeatures} from '~/core/reducers/users.reducer';
 import {activeLinksList} from '~/features/dashboard-search/dashboard-search.consts';
-import {selectLoadMoreActive, selectSearchTableFilters} from '@common/dashboard-search/dashboard-search.reducer';
+import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
+import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
 
 @Component({
   selector: 'sm-dashboard-search',
@@ -11,10 +11,14 @@ import {selectLoadMoreActive, selectSearchTableFilters} from '@common/dashboard-
   standalone: false
 })
 export class DashboardSearchComponent extends DashboardSearchBaseComponent {
+  protected links = computed(() => activeLinksList);
+  modelEndpointSelected(endpoint: EndpointStats) {
+    this.router.navigate(['/endpoints', 'active', endpoint.id]);
+    this.itemSelected.emit();
+  }
 
-  private features = this.store.selectSignal(selectFeatures);
-  public loadMoreActive = this.store.selectSignal(selectLoadMoreActive);
-  protected filters = this.store.selectSignal(selectSearchTableFilters);
-  protected links = computed(() => activeLinksList.filter(link => !link.feature || this.features().includes(link.feature)));
-
+  loadingModelEndpointSelected(endpoint: ContainerInfo) {
+    this.router.navigate(['/endpoints', 'loading']);
+    this.itemSelected.emit();
+  }
 }

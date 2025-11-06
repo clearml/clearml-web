@@ -12,6 +12,7 @@ import {OpenDatasetsComponent} from '@common/datasets/open-datasets/open-dataset
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {FormsModule} from '@angular/forms';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
     PushPipe,
     MatButton,
     MatIcon,
-    DotsLoadMoreComponent
+    DotsLoadMoreComponent,
+    FormsModule
   ],
   declarations: [
     OpenDatasetsComponent,

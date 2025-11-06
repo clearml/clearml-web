@@ -1,10 +1,10 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
   [tableCols]="filteredTableCols$| ngrxPush"
-  [isArchived]="isArchivedMode()"
+  [isArchived]="inArchivedMode()"
   [metricVariants]="metricVariants$ | ngrxPush"
   [hyperParams]="hyperParams$ | ngrxPush"
-  [minimizedView]="minimizedView"
+  [minimizedView]="minimizedView()"
   [isMetricsLoading]="metricLoading$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
   [tableMode]="firstExperiment ? tableMode() : 'table'"
@@ -25,20 +25,20 @@
 >
 </sm-experiment-header>
 <div class="experiment-body">
-  <as-split #split
-            [gutterSize]=1
-            [useTransition]="true"
-            [gutterDblClickDuration]="400"
-            (gutterClick)="clickOnSplit()"
-            (gutterDblClick)="closePanel()"
-            (dragEnd)="splitSizeChange($event)"
-            (dragStart)="disableInfoPanel()"
-            (transitionEnd)="experimentsTable.table?.resize(100); experimentsTable.afterTableInit()"
-            [class.opened]="(minimizedView$ | ngrxPush) && (selectSplitSize$ | ngrxPush) <= 1"
-            [class.closed]="(minimizedView$ | ngrxPush) && (selectSplitSize$ | ngrxPush) >= 99"
+  <as-split
+    [gutterSize]=1
+    [useTransition]="true"
+    [gutterDblClickDuration]="400"
+    (gutterClick)="clickOnSplit()"
+    (gutterDblClick)="closePanel()"
+    (dragEnd)="splitSizeChange($event)"
+    (dragStart)="disableInfoPanel()"
+    (transitionEnd)="experimentsTable.table()?.resize(100); experimentsTable.afterTableInit()"
+    [class.opened]="minimizedView() && splitSize() <= 1"
+    [class.closed]="minimizedView() && splitSize() >= 99"
   >
     <as-split-area
-      [size]="100 - (splitInitialSize)"
+      [size]="100 - splitSize()"
       [minSize]="1"
       [maxSize]="99"
     >
@@ -46,12 +46,12 @@
         #experimentsTable
         class="align-self-stretch"
         selectionMode="single"
-        [projects]="(projectsOptions$ | ngrxPush)"
+        [projects]="projectsOptions()"
         [initialColumns]="tableCols"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [tableCols]="tableCols$ | ngrxPush"
         [experiments]="$any(experiments$ | ngrxPush)"
-        [users]="users$ | ngrxPush"
+        [users]="users()"
         [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
         [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
         [parents]="parents$ | ngrxPush"
@@ -64,13 +64,12 @@
         [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
         [selectedExperiment]="highlited()"
-        [minimizedView]="(minimizedView$ | ngrxPush)"
+        [minimizedView]="minimizedView()"
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
-        [split]="selectSplitSize$ | ngrxPush"
         [contextMenuTemplate]="contextMenuExtendedTemplate"
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
-        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed()"
         [cardHeight]="112"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
@@ -91,8 +90,8 @@
       </sm-experiments-table>
     </as-split-area>
     <as-split-area
-      [size]="splitInitialSize"
-      [visible]="minimizedView$ | ngrxPush"
+      [size]="splitSize()"
+      [visible]="minimizedView()"
       style="overflow: hidden"
     >
       <sm-open-dataset-version-info></sm-open-dataset-version-info>
@@ -123,7 +122,7 @@
     [activateFromMenuButton]="false"
     [useCurrentEntity]="singleRowContext"
     [minimizedView]="true"
-    [tableMode]="!(minimizedView$ | ngrxPush)"
+    [tableMode]="!minimizedView()"
     [backdrop]="menuBackdrop"
     (tagSelected)="onAddTag($event, contextExperiment)"
     (menuOpened)="setContextMenuStatus(true)"

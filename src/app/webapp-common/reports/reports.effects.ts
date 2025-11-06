@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
@@ -45,7 +45,7 @@ import {ReportsMoveResponse} from '~/business-logic/model/reports/reportsMoveRes
 import {
   selectHideExamples,
   selectMainPageTagsFilter,
-  selectMainPageTagsFilterMatchMode,
+  selectMainPageTagsFilterMatchMode, selectMainPageUsersFilter,
   selectSelectedProjectId
 } from '../core/reducers/projects.reducer';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
@@ -54,8 +54,9 @@ import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants';
 import {MatDialog} from '@angular/material/dialog';
 import {
-  ChangeProjectDialogComponent
-} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
+  MoveProjectData,
+  MoveProjectDialogComponent
+} from '@common/experiments/shared/components/move-project-dialog/move-project-dialog.component';
 import {ReportsMoveRequest} from '~/business-logic/model/reports/reportsMoveRequest';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {ReportsCreateResponse} from '~/business-logic/model/reports/reportsCreateResponse';
@@ -67,21 +68,18 @@ import {cleanTag} from '@common/shared/utils/helpers.util';
 import {excludedKey, getTagsFilters} from '@common/shared/utils/tableParamEncode';
 import {of} from 'rxjs';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {Project} from '~/business-logic/model/projects/project';
 
 @Injectable()
 export class ReportsEffects {
-
-  constructor(
-    private actions: Actions,
-    private store: Store,
-    private route: ActivatedRoute,
-    private router: Router,
-    private reportsApiService: ApiReportsService,
-    private projectsApi: ApiProjectsService,
-    private http: HttpClient,
-    private matDialog: MatDialog
-  ) {
-  }
+  private actions = inject(Actions);
+  private store = inject(Store);
+  private router = inject(Router);
+  private reportsApiService = inject(ApiReportsService);
+  private projectsApi = inject(ApiProjectsService);
+  private http = inject(HttpClient);
+  private matDialog = inject(MatDialog);
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(getReports, getReport, createReport, updateReport, restoreReport, archiveReport),
@@ -121,8 +119,9 @@ export class ReportsEffects {
       this.store.select(selectReportsQueryString),
       this.store.select(selectHideExamples),
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+      this.store.select(selectMainPageUsersFilter),
     ]),
-    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId]) =>
+    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId, mainPageUsersFilter]) =>
       this.reportsApiService.reportsGetAllEx({
 
         only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
@@ -131,6 +130,7 @@ export class ReportsEffects {
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
         system_tags: [archive ? '__$and' : excludedKey, 'archived'],
+        ...(mainPageUsersFilter?.length > 0 && {user :mainPageUsersFilter}),
         ...(showOnlyUserWork && {user: [user.id]}),
         order_by: [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
         ...(mainPageTagsFilter?.length > 0 && {
@@ -176,7 +176,7 @@ export class ReportsEffects {
     concatLatestFrom(() => this.store.select(selectMainPageTagsFilter)),
     mergeMap(([res, fTags]) => [
       setReportsTags({tags: res.tags}),
-      ...(fTags?.some(fTag => !res.tags.includes(cleanTag(fTag))) ?
+      ...(fTags?.length > 0 && fTags?.some(fTag => !res.tags.includes(cleanTag(fTag))) ?
         [
           setMainPageTagsFilter({
             tags: fTags.filter(fTag => res.tags.includes(cleanTag(fTag))),
@@ -238,18 +238,17 @@ export class ReportsEffects {
   moveReport = createEffect(() => this.actions.pipe(
     ofType(moveReport),
     switchMap(action =>
-      this.matDialog.open(ChangeProjectDialogComponent, {
+      this.matDialog.open<MoveProjectDialogComponent, MoveProjectData, Project>(MoveProjectDialogComponent, {
         data: {
-          currentProjects: action.report.project?.id ?? action.report.project,
+          currentProjects: [action.report.project?.id ?? (typeof action.report.project === 'string' ? action.report.project : action.report.project.id)],
           defaultProject: action.report.project,
           reference: action.report.name,
-          type: 'report'
+          allowRootProject: true,
+          type: EntityTypeEnum.report
         }
       }).afterClosed()
-
         .pipe(
           filter(project => !!project),
-
           map(project => ({task: action.report.id, project: project.id, project_name: project.name}))
         )
     ),
@@ -418,7 +417,6 @@ export class ReportsEffects {
         mergeMap(([, report]) => [updateReport({
           id: report.id,
           changes: {
-
             report_assets: report.report_assets?.filter(r => r !== action.resource),
           }
         })])

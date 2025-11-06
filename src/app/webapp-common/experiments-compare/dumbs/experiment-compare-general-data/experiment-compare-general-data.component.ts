@@ -1,5 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ActivatedRoute, RouterLink} from '@angular/router';
@@ -33,23 +32,20 @@ import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-la
 })
 export class ExperimentCompareGeneralDataComponent {
 
-  public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
+  private route = inject(ActivatedRoute);
 
   @Input() experiment: IExperimentDetail;
-  @Input() isOrigin: boolean = false;
+  @Input() isOrigin = false;
   @Input() tags: string[];
   @Output() copyIdClicked = new EventEmitter();
   timeFormatString = TIME_FORMAT_STRING;
-
-  constructor(private route: ActivatedRoute) {
-  }
 
   copyToClipboard() {
     this.copyIdClicked.emit();
   }
 
   buildUrl() {
-    const projectOrPipeline = this.route.root.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
+    const projectOrPipeline = this.route.root.firstChild.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
     const targetEntity = this.route.snapshot.parent.data.entityType === EntityTypeEnum.model ? EntityTypeEnum.model : EntityTypeEnum.experiment;
     return [`/${projectOrPipeline}`, this.experiment.project?.id || '*', `${targetEntity}s`, this.experiment.id];
   }

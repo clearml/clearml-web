@@ -1,12 +1,12 @@
 :host {
     ::ng-deep .mat-mdc-tab-nav-bar, .mat-mdc-tab-group {
-      --mat-tab-header-divider-height: 1px;
+      --mat-tab-divider-height: 1px;
     }
   display: flex;
   flex-direction: column;
   padding-bottom: 32px;
   min-height: 160px;
-  --mat-tab-header-divider-color: var(--color-surface-container-high);
+  --mat-tab-divider-color: var(--color-surface-container-high);
 
   .label-row {
     padding-bottom: 24px;

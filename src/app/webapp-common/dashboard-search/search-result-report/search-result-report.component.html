@@ -1,0 +1,19 @@
+<sm-result-line
+  class="pointer"
+  (click)="this.reportSelected.emit(entity())"
+  [fontIcon]="'al-ico-reports'"
+  [label]="entity().name | cleanProjectPath"
+  [status]="entity().status"
+  [statusOptionsLabels]="statusOptionsLabels()"
+  [tags]="entity().tags"
+>
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ entity().project?.name | cleanProjectPath }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ entity().last_update | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ entity().user?.name }}</span>
+        </span>
+  </ng-container>
+</sm-result-line>

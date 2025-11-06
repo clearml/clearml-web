@@ -1,8 +1,8 @@
 @use "variables";
 
 :host {
-  --mdc-icon-button-icon-size: 20px;
-  --mdc-icon-button-state-layer-size: 30px;
+  --mat-icon-button-icon-size: 20px;
+  --mat-icon-button-state-layer-size: 30px;
   ::ng-deep .ui-inplace .ui-inplace-display {
     background-color: transparent;
     padding: 0;

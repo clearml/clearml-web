@@ -6,7 +6,7 @@ import {
 } from '~/features/dashboard-search/dashboard-search.consts';
 import {convertFiltersToRecord, decodeFilter, encodeFilters} from '@common/shared/utils/tableParamEncode';
 
-export const SEARCH_PREFIX = 'SEARCH_';
+export const SEARCH_PREFIX = '[SEARCH] ';
 export const SEARCH_PAGE_SIZE = 8;
 
 export const EXPERIMENT_SEARCH_ONLY_FIELDS = ['name', 'created', 'status', 'type', 'user.name', 'id', 'company', 'project.name', 'tags', 'last_change'];
@@ -22,20 +22,11 @@ export const convertToViewAllFilter = (qParams: Params, activeLink: ActiveSearch
         : filter
     );
   }
-  if (SearchTabsWithTable.includes(activeLink)) {
-    filters = filters.map(filter =>
-      filter.col === 'myWork' ? {
-          col: 'users',
-          value: filter.value.includes('true') ? [userId] : [],
-        }
-        : filter
-    );
-  }
   const encodedFilters = encodeFilters(convertFiltersToRecord(filters));
   return {
-    q: qParams.gq,
+    ...(qParams.gq && {q: qParams.gq}),
     ...(qParams.gqreg && {qreg: qParams.gqreg}),
-    filter: encodedFilters
+    filter: encodedFilters,
   };
 };
 

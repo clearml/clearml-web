@@ -2,8 +2,8 @@ import {Directive, input } from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
 
 export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): ValidatorFn =>
-  (control: AbstractControl): { [key: string]: any } | null => {
-    const originValue = control.value?.label || control.value?.name || control.value;
+  (control: AbstractControl): Record<string, any> | null => {
+    const originValue = control.value?.label ?? control.value?.name ?? control.value;
     let value = originValue ? originValue.trim() : originValue;
     if (value?.length === 0 && originValue?.length > 0) {
       return {emptyName: value.length === 0};

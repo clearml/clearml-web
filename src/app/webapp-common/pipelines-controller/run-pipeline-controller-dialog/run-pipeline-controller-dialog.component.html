@@ -43,10 +43,7 @@
     <div class="section-title d-flex align-items-center">Configuration</div>
     <div class="param-line">
       <div class="param-key" [class.error]="queueInputModel?.errors?.required">Pipeline controller queue*</div>
-      <mat-form-field
-        appearance="outline" class="no-bottom queue-select"
-        (mousedown)="selectedQueue && !isFocused(queueInput) && (selectedQueue = null)"
-        >
+      <mat-form-field appearance="outline" class="no-bottom queue-select">
         <input type="text"
           #queueInput
           #queueInputModel="ngModel"

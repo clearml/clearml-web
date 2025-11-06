@@ -1,8 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, OnDestroy, OnInit, signal, viewChild,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed, effect,
+  OnDestroy,
+  signal,
+  viewChild
+} from '@angular/core';
 import {
   selectActiveParentsFilter,
-  selectCompareSelectedMetrics,
-  selectCustomColumns,
+  selectCompareSelectedMetrics, selectCustomColumns,
   selectExperimentsList,
   selectExperimentsParents,
   selectExperimentsTableColsOrder,
@@ -29,14 +35,11 @@ import {
 } from './reducers';
 import {
   selectCompanyTags,
-  selectIsDeepMode,
-  selectProjectSystemTags,
-  selectRouterProjectId,
+  selectProjectSystemTags, selectRouterProjectId,
   selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map, skip, switchMap, tap, withLatestFrom} from 'rxjs/operators';
@@ -45,14 +48,9 @@ import {selectBackdropActive} from '../core/reducers/view.reducer';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
 import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
-import {
-  selectIsSharedAndNotOwner,
-  selectMetricsLoading,
-  selectSelectedExperiment
-} from '~/features/experiments/reducers';
 import * as experimentsActions from './actions/common-experiments-view.actions';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
-import {setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
+import {getProjectUsers, setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
 import {
   createCompareMetricColumn,
   createMetricColumn,
@@ -100,7 +98,7 @@ import {
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {encodeHyperParameter, filterArchivedExperiments} from './shared/common-experiments.utils';
 import {AbortAllChildrenFooterItem} from '../shared/entity-page/footer-items/abort-all-footer-item';
 import {
@@ -118,8 +116,11 @@ import {
 } from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
 import {RetryFooterItem} from '@common/shared/entity-page/footer-items/retry-footer-item';
 import {computedPrevious} from 'ngxtension/computed-previous';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {setExperiment} from '@common/experiments/actions/common-experiments-info.actions';
+import {selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
+import {distinctParamsUntilChanged$} from '@common/projects/common-projects.utils';
 
 
 @Component({
@@ -129,15 +130,15 @@ import {setExperiment} from '@common/experiments/actions/common-experiments-info
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class ExperimentsComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
-
-  public tableCols = INITIAL_EXPERIMENT_TABLE_COLS;
+export class ExperimentsComponent extends BaseEntityPageComponent implements OnDestroy {
+  protected get tableCols() {
+    return INITIAL_EXPERIMENT_TABLE_COLS;
+  }
 
   public entityTypeEnum = EntityTypeEnum;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public readOnlySelection: boolean;
   public contextMenuActive: boolean;
-  protected override entityType = EntityTypeEnum.experiment;
   public singleRowContext: boolean;
   public firstExperiment: ITableExperiment;
   public menuBackdrop: boolean;
@@ -145,8 +146,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   private sortFields: SortMeta[];
   protected override parents: ProjectsGetTaskParentsResponseParents[];
 
-  protected override selectSplitSize$ = this.store.select(selectSplitSize);
+  protected override splitSize = this.store.selectSignal(selectSplitSize);
   protected override showAllSelectedIsActive$ = this.store.select(selectShowAllSelectedIsActive);
+
   protected isPipeline$ = this.store.select(selectIsPipelines);
   protected tableSortFields$ = this.store.select(selectTableSortFields).pipe(tap(field => this.sortFields = field));
   protected backdropActive$ = this.store.select(selectBackdropActive);
@@ -160,8 +162,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
       this.readOnlySelection = this.checkedExperiments.some(exp => isReadOnly(exp));
     }));
   protected searchQuery$ = this.store.select(selectSearchQuery);
-  protected inEditMode$ = this.store.select(selectIsExperimentInEditMode);
-  protected isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
   protected parents$ = this.store.select(selectExperimentsParents).pipe(tap(parents => this.parents = parents));
   protected activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
   protected types$ = this.store.select(selectExperimentsTypes);
@@ -180,7 +180,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     .pipe(
       filter(experiments => experiments !== null),
       // lil hack for hiding archived task after they have been archived from task info or footer...
-      map((experiments) => filterArchivedExperiments(experiments, this.isArchivedMode())));
+      map((experiments) => filterArchivedExperiments(experiments, this.inArchivedMode())));
 
   protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
 
@@ -189,7 +189,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     distinctUntilChanged((a, b) => isEqual(a, b)),
     map(cols => cols.filter(col => !col.hidden))
   );
-  protected tableMode = this.store.selectSignal(selectTableMode);
+  override tableMode = this.store.selectSignal(selectTableMode);
     // .pipe(tap(tableMode => this.tableMode = tableMode));
   protected showCompareScalarSettings$ = this.store.select(selectShowCompareScalarSettings);
   protected compareSelectedMetricsScalars$ = this.store.select(selectCompareSelectedMetrics('scalars'));
@@ -212,88 +212,93 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   // public tableMode: 'table' | 'info' | 'compare';
   private previousSelectedIds: string;
   public metricsVariants$ = this.store.selectSignal(selectMetricVariantForView);
-  public tableCompareView$ = this.store.selectSignal(selectTableCompareView);
+  public tableCompareView = this.store.selectSignal(selectTableCompareView);
 
+
+  override get selectEditMode() {
+    return selectIsExperimentInEditMode;
+  }
+
+  protected override get entityType() {
+    return EntityTypeEnum.experiment;
+  }
 
   constructor() {
     super();
     this.setSplitSizeAction = experimentsActions.setSplitSize;
     this.addTag = addTag;
     this.syncAppSearch();
-  }
 
-  override ngOnInit() {
-    super.ngOnInit();
+    this.store.dispatch(getProjectUsers({projectId: this.selectedProjectId, entity: ProjectsGetUserNamesRequest.EntityEnum.Task}))
     this.store.dispatch(experimentsActions.setTableCols({cols: this.tableCols}));
-    let prevQueryParams: Params;
-    this.sub.add(this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))).subscribe(() =>
-      this.store.dispatch(resetAceCaretsPositions())));
-    this.sub.add(combineLatest([
-        this.store.select(selectRouterProjectId),
-        this.route.queryParams,
-        this.store.select(selectCustomColumns)
-      ])
-        .pipe(
-          filter(([projectId, queryParams]) => {
-            if (!projectId) {
-              return false;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = queryParams;
-            const equal = projectId === this.projectId && isEqual(queryParamsWithoutSearch, prevQueryParams);
-            prevQueryParams = queryParamsWithoutSearch;
-            return !equal;
-          })
-        )
-        .subscribe(([projectId, params]) => {
-          if (projectId !== this.projectId && Object.keys(params || {}).length === 0) {
-            this.emptyUrlInit();
-          } else {
-            this.projectId = projectId;
-            if (this.entityType === this.entityTypeEnum.experiment) {
-              this.setupContextMenu('tasks', params.archive === 'true');
-            }
-            if (params.columns) {
-              const [cols, metrics, hyperParams, , allIds] = decodeColumns(params.columns, this.tableCols);
-              this.store.dispatch(experimentsActions.setVisibleColumnsForProject({
-                visibleColumns: cols,
-                projectId: this.projectId
-              }));
-              this.store.dispatch(experimentsActions.setExtraColumns({
-                projectId: this.selectedProjectId,
-                columns: metrics.map(metricCol => createMetricColumn(metricCol, projectId))
-                  .concat(hyperParams.map(param => this.createParamColumn(decodeURIComponentSafe(param), projectId)))
-              }));
-              this.columnsReordered(allIds, false);
-            }
-            if (params.order) {
-              const orders = decodeOrder(params.order);
-              this.store.dispatch(experimentsActions.setTableSort({orders, projectId}));
-            }
-            if (params.filter != null) {
-                const filters = decodeFilter(params.filter);
-                this.store.dispatch(experimentsActions.setTableFilters({filters, projectId}));
-            } else {
-              if (params.order) {
-                this.store.dispatch(experimentsActions.setTableFilters({filters: [], projectId}));
-              }
-            }
-            if (params.deep) {
-              this.store.dispatch(setDeep({deep: true}));
-            }
-            this.store.dispatch(setProjectArchive({archive: params.archive === 'true'}));
-            this.store.dispatch(experimentsActions.getExperiments());
+
+    // effect(() => {
+    //   this.shouldOpenDetails = this.tableMode() !== 'table';
+    // });
+
+    this.store.select(selectRouterParams)
+      .pipe(
+        takeUntilDestroyed(),
+        map(params => this.getParamId(params)))
+      .subscribe(() =>
+        this.store.dispatch(resetAceCaretsPositions()));
+
+    distinctParamsUntilChanged$(combineLatest([
+      this.store.select(selectRouterProjectId),
+      this.route.queryParams,
+      this.store.select(selectCustomColumns)
+    ]))
+      .subscribe(([prevProjectId, projectId, params]) => {
+        if (projectId !== prevProjectId && Object.keys(params || {}).length === 0) {
+          this.emptyUrlInit();
+        } else {
+          if (this.entityType === this.entityTypeEnum.experiment) {
+            this.setupContextMenu('tasks', params.archive === 'true');
           }
-        })
-    );
+          if (params.columns) {
+            const [cols, metrics, hyperParams, , allIds] = decodeColumns(params.columns, this.tableCols);
+            this.store.dispatch(experimentsActions.setVisibleColumnsForProject({
+              visibleColumns: cols,
+              projectId: this.projectId()
+            }));
+            this.store.dispatch(experimentsActions.setExtraColumns({
+              projectId: this.selectedProjectId,
+              columns: metrics.map(metricCol => createMetricColumn(metricCol, projectId))
+                .concat(hyperParams.map(param => this.createParamColumn(decodeURIComponentSafe(param), projectId)))
+            }));
+            this.columnsReordered(allIds, false);
+          }
+          if (params.order) {
+            const orders = decodeOrder(params.order);
+            this.store.dispatch(experimentsActions.setTableSort({orders, projectId}));
+          }
+          if (params.filter != null) {
+            const filters = decodeFilter(params.filter);
+            this.store.dispatch(experimentsActions.setTableFilters({filters, projectId: this.selectedProjectId}));
+          } else {
+            if (params.order) {
+              this.store.dispatch(experimentsActions.setTableFilters({filters: [], projectId}));
+            }
+          }
+          if (params.deep) {
+            this.store.dispatch(setDeep({deep: true}));
+          }
+          this.store.dispatch(setProjectArchive({archive: params.archive === 'true'}));
+          this.store.dispatch(experimentsActions.getExperiments());
+        }
+      });
 
     this.createFooterItemsRunner();
 
 
     this.selectExperimentFromUrl();
     this.store.dispatch(experimentsActions.getParents({searchValue: null}));
-    this.store.dispatch(experimentsActions.getTags({}));
-    this.store.dispatch(experimentsActions.getProjectTypes({}));
+    effect(() => {
+      if (this.projectId()) {
+        this.store.dispatch(experimentsActions.getTags({}));
+        this.store.dispatch(experimentsActions.getProjectTypes({}));
+      }
+    });
   }
 
   createFooterItemsRunner = () => this.createFooterItems({
@@ -424,55 +429,62 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for tasks'}));
 
-    this.sub.add(this.searchQuery$.pipe(skip(1),filter(query => query !== null)).subscribe(query => {
-      this.store.dispatch(experimentsActions.globalFilterChanged(query));
-    }));
+    this.searchQuery$
+      .pipe(
+        takeUntilDestroyed(),
+        skip(1),
+        filter(query => query !== null)
+      )
+      .subscribe(query => this.store.dispatch(experimentsActions.globalFilterChanged(query)));
   }
 
   selectExperimentFromUrl() {
-    this.sub.add(combineLatest([
-        this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))),
-        this.experiments$
-      ])
-        .pipe(
-          withLatestFrom(this.store.select(selectTableMode)),
-          map(([[experimentId, experiments], mode]) => {
-            this.firstExperiment = experiments?.[0];
-            this.entities = experiments;
-            const experimentsIds = this.route.snapshot.firstChild?.params?.ids?.split(',').filter(id => !!id);
-            if (this.getTableModeFromURL() === 'compare' && experimentsIds?.length > 0 && this.checkedExperiments.length === 0 && !this.previousSelectedIds) {
-              this.store.dispatch(experimentsActions.getSelectedExperiments({ids: experimentsIds}));
-            }
-            this.previousSelectedIds = experimentsIds;
-            if (!experimentId && this.shouldOpenDetails && this.firstExperiment && mode === 'info') {
-              this.shouldOpenDetails = false;
-              this.store.dispatch(experimentsActions.experimentSelectionChanged({
-                experiment: this.firstExperiment,
-                project: this.selectedProjectId
-              }));
-            } else if (mode !== 'compare' || ![EntityTypeEnum.experiment, EntityTypeEnum.controller].includes(this.entityType)) {
-              this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
-            } else if (this.shouldOpenDetails) {
-              this.modeChanged(mode);
-              this.shouldOpenDetails = false;
-            } else {
-              this.modeChanged(this.getTableModeFromURL());
-            }
-
-            return experiments.find(experiment => experiment.id === experimentId);
-          }),
-          distinctUntilChanged()
-        )
-        .subscribe((selectedExperiment) => {
-            // this.tableMode = this.getTableModeFromURL();
-            this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
-            this.store.dispatch(experimentsActions.setSelectedExperiment({experiment: selectedExperiment}));
+    combineLatest([
+      this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))),
+      this.experiments$
+    ])
+      .pipe(
+        takeUntilDestroyed(),
+        withLatestFrom(this.store.select(selectTableMode)),
+        map(([[experimentId, experiments], mode]) => {
+          this.firstExperiment = experiments?.[0];
+          this.entities = experiments;
+          const experimentsIds = (this.route.snapshot.firstChild?.firstChild ?? this.route.snapshot.firstChild)?.params?.ids?.split(',').filter(id => !!id);
+          if (this.getTableModeFromURL() === 'compare' && experimentsIds?.length > 0 && this.checkedExperiments?.length === 0 && !this.previousSelectedIds) {
+            this.store.dispatch(experimentsActions.getSelectedExperiments({ids: experimentsIds}));
           }
-        )
-    );
+          this.previousSelectedIds = experimentsIds;
+          if (!experimentId && this.shouldOpenDetails && this.firstExperiment && mode === 'info') {
+            this.shouldOpenDetails = false;
+            this.store.dispatch(experimentsActions.experimentSelectionChanged({
+              experiment: this.firstExperiment,
+              project: this.selectedProjectId
+            }));
+          } else if (mode !== 'compare' || ![EntityTypeEnum.experiment, EntityTypeEnum.controller].includes(this.entityType)) {
+            this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
+          } else if (this.shouldOpenDetails) {
+            this.modeChanged(mode);
+            this.shouldOpenDetails = false;
+          } else if (this.getTableModeFromURL() !== mode){
+            this.modeChanged(this.getTableModeFromURL());
+          }
+          this.shouldOpenDetails = false;
+          return experiments.find(experiment => experiment.id === experimentId);
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((selectedExperiment) => {
+          // this.tableMode = this.getTableModeFromURL();
+          this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
+          this.store.dispatch(experimentsActions.setSelectedExperiment({experiment: selectedExperiment}));
+        }
+      );
   }
 
   public getTableModeFromURL() {
+    if (!this.route.snapshot.firstChild) {
+      return 'table';
+    }
     return this.route.snapshot.firstChild?.url[0].path === 'compare' ? 'compare' :
       this.route.snapshot.firstChild?.routeConfig.path === undefined ? 'table' : 'info';
   }
@@ -490,7 +502,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   experimentSelectionChanged({experiment, openInfo, origin}: { experiment: ITableExperiment; openInfo?: boolean; origin: 'table' | 'row' }) {
     if (experiment) {
-      if (this.minimizedView || openInfo) {
+      if (this.minimizedView() || openInfo) {
         this.store.dispatch(experimentsActions.experimentSelectionChanged({
           experiment: experiment,
           project: this.selectedProjectId
@@ -511,7 +523,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
         col: col.id,
         value,
         filterMatchMode: col.filterMatchMode || andFilter ? 'AND' : undefined
-      }], projectId: this.projectId
+      }], projectId: this.projectId()
     }));
   }
 
@@ -525,19 +537,19 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   afterArchiveChanged() {
-    this.store.dispatch(experimentsActions.showOnlySelected({active: false, projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.showOnlySelected({active: false, projectId: this.projectId()}));
   }
 
   showAllSelected(active: boolean) {
-    this.store.dispatch(experimentsActions.showOnlySelected({active, projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.showOnlySelected({active, projectId: this.projectId()}));
   }
 
   selectedTableColsChanged(col: ISmCol) {
-    this.store.dispatch(experimentsActions.toggleColHidden({columnId: col.id, projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.toggleColHidden({columnId: col.id, projectId: this.projectId()}));
   }
 
   toggleSelectedMetricHidden(col: ISmCol) {
-    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({columnId: col.id, projectId: this.projectId }));
+    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({columnId: col.id, projectId: this.projectId() }));
   }
 
   getMetricsToDisplay() {
@@ -557,7 +569,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
       valueType: event.valueType,
       metric: event.variant.metric,
       variant: event.variant.variant
-    }, this.projectId);
+    }, this.projectId());
     if (event.addCol) {
       this.store.dispatch(experimentsActions.addColumn({col: variantCol}));
     } else {
@@ -569,9 +581,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   compareSelectedMetricToShow(event: SelectionEvent) {
     const variantCol = createCompareMetricColumn(event.variant);
     if (event.addCol) {
-      this.store.dispatch(experimentsActions.addSelectedMetric({col: variantCol, projectId: this.projectId}));
+      this.store.dispatch(experimentsActions.addSelectedMetric({col: variantCol, projectId: this.projectId()}));
     } else {
-      this.store.dispatch(experimentsActions.removeSelectedMetric({id: variantCol.id, projectId: this.projectId}));
+      this.store.dispatch(experimentsActions.removeSelectedMetric({id: variantCol.id, projectId: this.projectId()}));
     }
   }
 
@@ -584,7 +596,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
       filterable: true,
       header: decodeURIComponentSafe(param.replace('hyperparams.', '')),
       hidden: false,
-      projectId: projectId || this.projectId,
+      projectId: projectId || this.projectId(),
       isParam: true,
       style: {width: '200px'},
       searchableFilter: true,
@@ -606,20 +618,20 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   removeColFromList(colId: string) {
     const sortIndex = this.sortFields.findIndex(field => field.field === colId);
     if (sortIndex > -1) {
-      this.store.dispatch(experimentsActions.resetSortOrder({sortIndex, projectId: this.projectId}));
+      this.store.dispatch(experimentsActions.resetSortOrder({sortIndex, projectId: this.projectId()}));
     }
-    this.store.dispatch(experimentsActions.removeCol({id: colId, projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.removeCol({id: colId, projectId: this.projectId()}));
     this.store.dispatch(experimentsActions.updateUrlParams());
   }
 
   compareRemoveColFromList(colId: string) {
-    this.store.dispatch(experimentsActions.removeSelectedMetric({id: colId, projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.removeSelectedMetric({id: colId, projectId: this.projectId()}));
   }
 
   columnResized(event: { columnId: string; widthPx: number }) {
     this.store.dispatch(experimentsActions.setColumnWidth({
       ...event,
-      projectId: this.projectId
+      projectId: this.projectId()
     }));
   }
 
@@ -635,11 +647,11 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   clearSelection() {
-    this.store.dispatch(experimentsActions.clearHyperParamsCols({projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.clearHyperParamsCols({projectId: this.projectId()}));
   }
 
   columnsReordered(cols: string[], updateUrl = true) {
-    this.store.dispatch(experimentsActions.setColsOrderForProject({cols: Array.from(new Set([...cols, 'project.name'])), projectId: this.projectId}));
+    this.store.dispatch(experimentsActions.setColsOrderForProject({cols: Array.from(new Set([...cols, 'project.name'])), projectId: this.projectId()}));
     if (updateUrl) {
       this.store.dispatch(experimentsActions.updateUrlParams());
     }
@@ -687,13 +699,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   modeChanged(mode: 'info' | 'table' | 'compare') {
-    if (this.getTableModeFromURL() === mode) {
-      if (this.tableMode() !== mode) {
-        this.store.dispatch(experimentsActions.setTableMode({mode}));
-      }
-      return false;
+    if (this.tableMode() !== mode) {
+      this.store.dispatch(experimentsActions.setTableMode({mode}));
     }
-    this.store.dispatch(experimentsActions.setTableMode({mode}));
     setTimeout(() => this.createFooterItemsRunner(), 100);
     if (mode === 'info') {
       this.store.dispatch(experimentsActions.experimentSelectionChanged({
@@ -718,7 +726,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   downloadTableAsCSV() {
-    this.table().table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*' ? 'All' : this.selectedProject?.basename?.substring(0, 60)} Experiments`);
+    this.table().table().downloadTableAsCSV(`ClearML ${this.selectedProject().id === '*' ? 'All' : this.selectedProject()?.basename?.substring(0, 60)} Experiments`);
   }
 
   downloadFullTableAsCSV() {
@@ -726,37 +734,37 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   override setupBreadcrumbsOptions() {
-    this.sub.add(combineLatest([
-      this.selectedProject$,
-      this.store.select(selectIsDeepMode)
-    ]).subscribe(([selectedProject, isDeep]) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedProject,
-          featureBreadcrumb: {
-            name: 'PROJECTS',
-            url: 'projects'
-          },
-          ...(isDeep && selectedProject?.id !== '*' && {
-            subFeatureBreadcrumb: {
-              name: 'All Tasks'
-            }
-          }),
-          projectsOptions: {
-            basePath: 'projects',
-            filterBaseNameWith: null,
-            compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && {
-              selectedProjectBreadcrumb: {
-                name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename,
-                url: `projects/${selectedProject?.id}/projects`
+    effect(() => {
+      const selectedProject = this.selectedProject();
+      if (selectedProject) {
+        this.store.dispatch(setBreadcrumbsOptions({
+          breadcrumbOptions: {
+            showProjects: !!selectedProject,
+            featureBreadcrumb: {
+              name: 'PROJECTS',
+              url: 'projects'
+            },
+            ...(this.projectDeepMode() && selectedProject?.id !== '*' && {
+              subFeatureBreadcrumb: {
+                name: 'All Tasks'
               }
-            })
+            }),
+            projectsOptions: {
+              basePath: 'projects',
+              filterBaseNameWith: null,
+              compareModule: null,
+              showSelectedProject: selectedProject?.id !== '*',
+              ...(selectedProject && {
+                selectedProjectBreadcrumb: {
+                  name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename,
+                  url: `projects/${selectedProject?.id}/projects`
+                }
+              })
+            }
           }
-        }
-      }));
-    }));
+        }));
+      }
+    });
   }
 
   showCompareSettingsChanged() {

@@ -72,9 +72,9 @@
     gap: 6px;
     padding: 0 16px;
     border-right: 1px solid var(--color-primary-fixed-dim);
-    border-radius: var(--mdc-filled-button-container-shape) 0 0 var(--mdc-filled-button-container-shape);
+    border-radius: var(--mat-button-filled-container-shape) 0 0 var(--mat-button-filled-container-shape);
     &.plus {
-      border-radius: 0 var(--mdc-filled-button-container-shape) var(--mdc-filled-button-container-shape) 0;
+      border-radius: 0 var(--mat-button-filled-container-shape) var(--mat-button-filled-container-shape) 0;
       padding: 0 12px;
       min-width: 36px;
       border-left: var(--color-outline) 1px solid;

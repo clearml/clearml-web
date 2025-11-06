@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CommonProjectsPageComponent} from './containers/projects-page/common-projects-page.component';
+import {ProjectsPageComponent} from './containers/projects-page/projects-page.component';
 import {EffectsModule} from '@ngrx/effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsListComponent} from './dumb/projects-list/projects-list.component';
@@ -32,8 +32,8 @@ import {MatIcon} from '@angular/material/icon';
     MatButton,
     MatIcon,
   ],
-  declarations: [CommonProjectsPageComponent, ProjectsListComponent],
-  exports: [CommonProjectsPageComponent, ProjectsListComponent]
+  declarations: [ProjectsPageComponent, ProjectsListComponent],
+  exports: [ProjectsPageComponent, ProjectsListComponent]
 })
 export class CommonProjectsModule {
 }

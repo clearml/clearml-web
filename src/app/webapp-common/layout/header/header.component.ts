@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, signal, Type} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, OnInit, signal, Type} from '@angular/core';
 import {ChangesService} from '@common/shared/services/changes.service';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser, selectIsAdmin} from '../../core/reducers/users-reducer';
@@ -9,11 +9,11 @@ import {ConfigurationService} from '../../shared/services/configuration.service'
 import {
   GetCurrentUserResponseUserObjectCompany
 } from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {distinctUntilKeyChanged, filter} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
 import {WelcomeMessageComponent} from '../welcome-message/welcome-message.component';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, RouteConfigLoadEnd, Router} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
@@ -34,7 +34,7 @@ import {
   },
   standalone: false
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   private store = inject(Store);
   private dialog = inject(MatDialog);
   public tipsService = inject(TipsService);
@@ -65,7 +65,7 @@ export class HeaderComponent {
   public activeWorkspace = toSignal<GetCurrentUserResponseUserObjectCompany>(this.store.select(selectActiveWorkspace)
     .pipe(
       filter(workspace => !!workspace),
-      distinctUntilKeyChanged('id')
+      distinctUntilChanged()
     )
   );
 
@@ -82,20 +82,28 @@ export class HeaderComponent {
     }
   }
 
+  openGlobalSearchIfNeeded() {
+    if (this.dialog.openDialogs.length === 0 && (this.activeRoute.snapshot.queryParams.gq || this.activeRoute.snapshot.queryParams.tab)) {
+      this.openGlobalSearch();
+    }
+    this.getRouteData();
+  }
+
   constructor() {
     this.getRouteData();
-
     this.router.events
       .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        debounceTime(100),
         takeUntilDestroyed(),
-        filter((event) => event instanceof NavigationEnd)
       )
       .subscribe(() => {
-        if ( this.dialog.openDialogs.length === 0 && this.activeRoute.snapshot.queryParams.gq) {
-          this.openGlobalSearch();
-        }
-        this.getRouteData()
+        this.openGlobalSearchIfNeeded();
       });
+  }
+
+  ngOnInit(): void {
+    this.openGlobalSearchIfNeeded();
   }
 
   getRouteData() {
@@ -107,7 +115,7 @@ export class HeaderComponent {
       if (last.snapshot.data.search !== undefined) {
         active = last.snapshot.data.search;
       }
-      last = last.firstChild
+      last = last.firstChild;
     }
     this.showAutoRefresh.set(last.snapshot.data.showAutoRefresh);
     this.searchActive.set(active || last.snapshot.data.search);
@@ -142,7 +150,7 @@ export class HeaderComponent {
 
     this.searchComponentPromise.then(component => {
       this.dialog.open(component, {
-        width: '900px',
+        width: '920px',
         enterAnimationDuration: 0
       });
     });

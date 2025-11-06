@@ -9,12 +9,12 @@
     >
     <sm-button-toggle
       left-items
-      [value]="!!projectId"
+      [ngModel]="!!projectId"
       [options]="[
                   {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
                   {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-      (valueChanged)="!(!!projectId && $event) && toggleNestedView($event)"
+      (ngModelChange)="!(!!projectId && $event) && toggleNestedView($event)"
     ></sm-button-toggle>
     <button mat-flat-button (click)="createDataset()" data-id="New Dataset">
       <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
@@ -22,7 +22,7 @@
     </button>
   </sm-projects-header>
   @if (((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush)))||  searching) {
-    @for (project of projectsList$ | ngrxPush; track project.id + $index; let last = $last) {
+    @for (project of projectsList$ | ngrxPush; track project.id + $index) {
       <sm-open-dataset-card
         [hideMenu]="['All Tasks'].includes(project.name) || project['isRoot'] || isExample(project)"
         [hideProjectPathIcon]="!!projectId"

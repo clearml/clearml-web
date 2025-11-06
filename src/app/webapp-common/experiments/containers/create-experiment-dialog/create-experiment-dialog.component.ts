@@ -24,7 +24,7 @@ import {
 import {FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatInput} from '@angular/material/input';
-import {MatOption, MatSelect} from '@angular/material/select';
+import {MatOption, MatSelect, MatSelectTrigger} from '@angular/material/select';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {IOption} from '@common/constants';
@@ -33,7 +33,7 @@ import {
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
 import {Store} from '@ngrx/store';
 import {selectQueuesList} from '@common/experiments/shared/components/select-queue/select-queue.reducer';
-import {NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {MatDialogRef} from '@angular/material/dialog';
 import {getQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -49,6 +49,8 @@ import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-
 import {Ace} from 'ace-builds';
 import {containedInList} from '@common/shared/validators/containedInList.validator';
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {TaskTypeOptions} from '~/features/dashboard-search/dashboard-search.consts';
 
 const venvOptions = [
   {label: 'Discover', value: 'discover'},
@@ -61,6 +63,7 @@ export interface createExperimentDialogResult {
   id?: string;
   action: 'save' | 'run';
   name: string;
+  taskType: TaskTypeEnum;
   repo: string;
   type: 'branch' | 'commit' | 'tag';
   branch: string;
@@ -96,34 +99,35 @@ type ScriptType = typeof scriptTypes[number];
     templateUrl: './create-experiment-dialog.component.html',
     styleUrl: './create-experiment-dialog.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        MatStepper,
-        MatStep,
-        MatFormField,
-        ReactiveFormsModule,
-        DialogTemplateComponent,
-        MatStepperPrevious,
-        MatStepperNext,
-        MatInput,
-        MatLabel,
-        MatSelect,
-        MatOption,
-        MatCheckbox,
-        MatRadioGroup,
-        MatRadioButton,
-        PaginatedEntitySelectorComponent,
-        MatStepperIcon,
-        NgTemplateOutlet,
-        MatError,
-        MatButton,
-        MatIconButton,
-        MatIcon,
-        CodeEditorComponent,
-        MatSuffix,
-        MatExpansionPanel,
-        MatExpansionPanelHeader,
-        ButtonToggleComponent,
-    ],
+  imports: [
+    MatStepper,
+    MatStep,
+    MatFormField,
+    ReactiveFormsModule,
+    DialogTemplateComponent,
+    MatStepperPrevious,
+    MatStepperNext,
+    MatInput,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatCheckbox,
+    MatRadioGroup,
+    MatRadioButton,
+    PaginatedEntitySelectorComponent,
+    MatStepperIcon,
+    NgTemplateOutlet,
+    MatError,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    CodeEditorComponent,
+    MatSuffix,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    ButtonToggleComponent,
+    MatSelectTrigger,
+  ],
     providers: [
         {
             provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
@@ -138,6 +142,8 @@ export class CreateExperimentDialogComponent {
   private readonly dialog = inject(MatDialogRef);
   protected readonly venvOptions = venvOptions;
 
+  private readonly titleCase = new TitleCasePipe;
+
   private codeForm = viewChild<ElementRef<HTMLFormElement>>('codeForm');
   private codeEditor = viewChild(CodeEditorComponent);
 
@@ -149,6 +155,12 @@ export class CreateExperimentDialogComponent {
       this.queues()
   );
 
+  protected taskTypes = TaskTypeOptions.map(value => ({
+    value,
+    label:  this.titleCase.transform(value.replace('_', ' ')),
+    icon: `al-ico-type-${value ? (value.toString()).replace('_', '-') : 'training'}`
+  }));
+
   protected gitTypes = ['branch', 'commit', 'tag'];
   protected requirementOptions: IOption[] = [
     {label: 'Skip', value: 'skip'},
@@ -158,6 +170,7 @@ export class CreateExperimentDialogComponent {
 
   codeFormGroup = this.formBuilder.group({
     name: [null, [Validators.required, minLengthTrimmed(3)]],
+    taskType: ['training' as TaskTypeEnum],
     repo: [null as string],
     type: ['branch'],
     branch: ['master'],
@@ -353,7 +366,7 @@ index 000000000..ff86f39a4
     }
   }
 
-  venevTypeChange(value: VenvOption) {
-    this.envFormGroup.controls.venvType.setValue(value);
+  protected getSelectedTaskType() {
+    return this.taskTypes.find(type => type.value === this.codeFormGroup.controls.taskType.value);
   }
 }

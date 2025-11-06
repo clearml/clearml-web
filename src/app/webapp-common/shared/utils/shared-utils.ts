@@ -80,7 +80,7 @@ export const createModelLink = (uri, modelId, modelSignedUri) => {
 };
 
 export const allItemsAreSelected = (itemsInView: { id: string }[], selectedItems: { id: string }[]) => {
-  if (itemsInView?.length === 0 || selectedItems?.length === 0) {
+  if (!itemsInView?.length || !selectedItems?.length) {
     return false;
   } else {
     const selectedItemsIds = selectedItems?.map(item => item.id);

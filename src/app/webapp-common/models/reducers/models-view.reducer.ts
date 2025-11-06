@@ -9,7 +9,7 @@ import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {isEqual} from 'lodash-es';
 import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import { removeTagSuccess } from '../actions/models-menu.actions';
@@ -26,7 +26,7 @@ export interface ModelsViewState {
   projectColumnsWidth: Record<string, Record<string, number>>;
   hiddenTableCols: Record<string, boolean>;
   hiddenProjectTableCols: Record<string, Record<string, boolean | undefined>>;
-  selectedModels: TableModel[]; // TODO: declare type.
+  selectedModels: TableModel[];
   selectedModel: SelectedModel;
   noMoreModels: boolean;
   selectedModelSource: string;
@@ -139,10 +139,9 @@ export const modelsViewReducer = createReducer<ModelsViewState>(
   on(actions.resetGlobalFilter, (state): ModelsViewState =>
     ({...state, globalFilter: modelsInitialState.globalFilter})),
     on(actions.toggleColHidden, (state, action): ModelsViewState => {
-      const newHiddenCols = {
-        ...(state.hiddenProjectTableCols[action.projectId] || modelsInitialState.hiddenTableCols),
-        [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
-      };
+      let newHiddenCols = {...(state.hiddenProjectTableCols[action.projectId] || modelsInitialState.hiddenTableCols)};
+      newHiddenCols = {...newHiddenCols, [action.columnId]: !newHiddenCols?.[action.columnId]};
+
       if (!state.hiddenProjectTableCols[action.projectId] && isEqual(newHiddenCols, modelsInitialState.hiddenProjectTableCols)) {
         return state;
       }
@@ -283,10 +282,10 @@ export const modelsViewReducer = createReducer<ModelsViewState>(
   })),
   on(removeTagSuccess, (state, action): ModelsViewState => ({
     ...state,
-    models: state.models.map(model => action.models.includes(model.id) ? {
+    models: state.models ? state.models.map(model => action.models.includes(model.id) ? {
         ...model,
         tags: model.tags?.filter(tag => tag !== action.tag)
       } : model
-    ),
+    ) : null,
   }))
 );

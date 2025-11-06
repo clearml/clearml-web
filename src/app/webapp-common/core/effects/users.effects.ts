@@ -1,6 +1,5 @@
 import {LocationStrategy} from '@angular/common';
 import {inject, Injectable} from '@angular/core';
-import {Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {
@@ -19,23 +18,22 @@ import {ApiServerService} from '~/business-logic/api-services/server.service';
 import {ServerInfoResponse} from '~/business-logic/model/server/serverInfoResponse';
 import {UsersUpdateResponse} from '~/business-logic/model/users/usersUpdateResponse';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {BaseLoginService} from '@common/shared/services/login.service';
 
 @Injectable()
 export class CommonUserEffects {
+  private loginService = inject(BaseLoginService);
   private locationStrategy = inject(LocationStrategy);
-
-  constructor(
-    private actions: Actions, private userService: ApiUsersService,
-    private router: Router, private loginApi: ApiLoginService,
-    private serverService: ApiServerService,
-     private errorService: ErrorService
-  ) {
-  }
+  private actions = inject(Actions);
+  private userService = inject(ApiUsersService);
+  private loginApi = inject(ApiLoginService);
+  private serverService = inject(ApiServerService);
+  private errorService = inject(ErrorService);
 
   logoutFlow = createEffect(() => this.actions.pipe(
     ofType(logout),
     mergeMap(action => this.loginApi.loginLogout({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       redirect_url: window.location.origin + (this.locationStrategy.getBaseHref() === '/' ? '' : this.locationStrategy.getBaseHref()) + '/login',
       ...(action.provider && {provider: action.provider})
     }).pipe(
@@ -43,12 +41,13 @@ export class CommonUserEffects {
         if (res.redirect_url) {
           window.location.href = res.redirect_url;
         } else {
-          this.router.navigateByUrl('login');
+          this.loginService.logout();
         }
         return logoutSuccess();
       }),
-      catchError(err => [addMessage(MESSAGES_SEVERITY.ERROR, `Logout Failed
-${this.errorService.getErrorMsg(err?.error)}`)])
+      catchError(err => [
+        addMessage(MESSAGES_SEVERITY.ERROR, `Logout Failed ${this.errorService.getErrorMsg(err?.error)}`)
+      ])
     )),
   ));
 

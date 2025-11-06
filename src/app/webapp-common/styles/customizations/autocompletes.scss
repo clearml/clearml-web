@@ -1,0 +1,29 @@
+.cdk-overlay-pane .mat-mdc-autocomplete-panel.entity-selector {
+  mat-option {
+    line-height: normal;
+    padding-left: 0;
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled):not(.mat-mdc-option-multiple):hover {
+      background-color: color-mix(in srgb, var(--mat-option-selected-state-layer-color) 75%, transparent);
+    }
+
+    &.mat-mdc-option-active:not(.mdc-list-item--disabled):not(.mat-mdc-option-multiple):hover {
+      background-color: color-mix(in srgb, var(--color-surface-container-highest) 55%, transparent);
+    }
+
+    .item-row:hover {
+      background-color: unset;
+    }
+  }
+
+  .mdc-list-item__primary-text {
+    display: inline-block;
+    width: 100% !important;
+  }
+
+  sm-dots-load-more {
+    height: 60px;
+    align-items: center;
+  }
+}
+

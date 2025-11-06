@@ -1,5 +1,5 @@
 <sm-serving-header
-  [minimizedView]="minimizedView"
+  [minimizedView]="minimizedView()"
   [tableCols]="filteredTableCols$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
   [tableMode]="firstEndpoint ? (tableMode$ | ngrxPush) : 'table'"
@@ -24,12 +24,12 @@
             (gutterDblClick)="closePanel()"
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
-            (transitionEnd)="endpointsTable.table.resize(); endpointsTable.afterTableInit()"
-            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
-            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
+            (transitionEnd)="endpointsTable.table().resize(); endpointsTable.afterTableInit()"
+            [class.opened]="minimizedView && splitSize() <= 1"
+            [class.closed]="minimizedView && splitSize() >= 99"
   >
     <as-split-area
-      [size]="100 - splitInitialSize"
+      [size]="100 - splitSize()"
       [minSize]="1"
       [maxSize]="99"
       [visible]="true"
@@ -40,17 +40,16 @@
         selectionMode="single"
         [endpoints]="endpoints$ | ngrxPush"
         [tableCols]="tableCols$ | ngrxPush"
-        [minimizedView]="minimizedView"
+        [minimizedView]="minimizedView()"
         [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
-        [selectedEndpoints]="selectedEndpoints$ | ngrxPush"
-        [selectedEndpoint]="selectedEndpoint$ | ngrxPush"
-        [split]="selectSplitSize$ | ngrxPush"
+        [selectedEndpoints]="selectedEndpoints()"
+        [selectedEndpoint]="selectedEndpoint()"
         [enableMultiSelect]="true"
-        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed()"
         [modelNames]="modelNamesOptions$ | ngrxPush"
         [inputTypes]="inputTypesOptions$ | ngrxPush"
         [preprocessArtifact]="preprocessArtifactOptions$ | ngrxPush"
@@ -68,7 +67,7 @@
       >
       </sm-serving-table>
     </as-split-area>
-    <as-split-area [size]="splitInitialSize" [visible]="minimizedView">
+    <as-split-area [size]="splitSize()" [visible]="minimizedView()">
       <router-outlet></router-outlet>
     </as-split-area>
   </as-split>

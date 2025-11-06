@@ -18,23 +18,28 @@
       [placeholder]="placeholder()"
       (focusin)="focusInput(true)"
       (focusout)="focusInput(false)"
-      (input)="onValueChange()"
+      (input)="enableSearchOnSubmit()? validateValue() :onValueChange()"
       (keydown)="onKeyDown($event)"
     >
 
-    @if (hideIcons()) {
+    @if (enableSearchOnSubmit() && valueHasChanged() && !disabled()) {
+      <button mat-icon-button (click)="onValueChange()">
+        <mat-icon class="sm" fontSet="al" fontIcon="al-ico-success" data-id="searchIcon"></mat-icon>
+      </button>
+    } @else if (hideIcons()) {
       <ng-content></ng-content>
     } @else {
       @if (searchBar.value.length === 0) {
-        <button mat-icon-button  class="pointer-events-none">
+        <button mat-icon-button class="pointer-events-none">
         <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="searchIcon"></mat-icon>
       </button>
       } @else {
-        <button mat-icon-button  (click)="clear()">
+        <button mat-icon-button (click)="clear()">
         <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" data-id="searchCrossButton"></mat-icon>
       </button>
       }
     }
+    <ng-content select="[infoIcon]"></ng-content>
 
     @if (enableNavigation()) {
       @if (!searchResultsCount()) {

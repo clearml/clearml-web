@@ -25,7 +25,7 @@ export enum CircleTypeEnum {
   'model-labels' = 'model-labels'
 }
 
-export const EXPERIMENTS_STATUS_LABELS = {
+export const EXPERIMENTS_TYPE_LABELS = {
   [TaskStatusEnum.Created]     : 'Draft',
   [TaskStatusEnum.Queued]      : 'Pending',
   [TaskStatusEnum.InProgress]  : 'Running',

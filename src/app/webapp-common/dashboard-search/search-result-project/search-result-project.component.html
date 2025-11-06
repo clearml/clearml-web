@@ -1,0 +1,17 @@
+<sm-result-line
+  class="pointer"
+  (click)="this.projectSelected.emit(entity())"
+  [fontIcon]="'al-ico-project-path'"
+  [label]="entity().basename"
+  [statusOptionsLabels]="statusOptionsLabels()"
+  [tags]="entity().tags">
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ entity()?.name }}</span>
+          <span class="dot">●</span>
+          <span title="Last task run" class="sub-item">{{ entity().stats?.active.last_task_run | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ $any(entity().user)?.name }}</span>
+        </span>
+  </ng-container>
+</sm-result-line>

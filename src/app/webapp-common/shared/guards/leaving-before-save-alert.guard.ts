@@ -7,9 +7,8 @@ import {
 import {of, switchMap} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {Store} from '@ngrx/store';
+import {MemoizedSelector, Store} from '@ngrx/store';
 import {debounceTime, map} from 'rxjs/operators';
-import {MemoizedSelector} from '@ngrx/store/src/selector';
 
 
 export const leavingBeforeSaveAlertGuard = (inEditSelector: MemoizedSelector<any, boolean>): CanDeactivateFn<any>  =>

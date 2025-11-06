@@ -5,7 +5,7 @@ import {
   HostListener,
   Renderer2, input, output, viewChild, effect, model, inject
 } from '@angular/core';
-import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
+import {MatMenu, MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
@@ -59,6 +59,7 @@ export class MenuComponent {
   menuOpened = output();
   searchValueChanged = output<string>();
   trigger = viewChild(MatMenuTrigger);
+  menu = viewChild(MatMenu);
 
   @HostListener('document:click', ['$event'])
   clickOut(event: MouseEvent) {

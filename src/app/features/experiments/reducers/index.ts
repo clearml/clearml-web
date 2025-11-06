@@ -37,6 +37,7 @@ export const selectSelectedExperiment = createSelector(experimentInfo, state => 
 export const selectExperimentInfoData = createSelector(experimentInfo, state => state.infoData);
 export const selectShowExtraDataSpinner = createSelector(experimentInfo, state => state.showExtraDataSpinner);
 
+export const selectIsSharedAndNotInWorkSpaces = createSelector(selectSelectedExperiment, () => false);
 
 // output selectors
 export const experimentOutput = createSelector(experiments, state => (state.output ?? experimentOutputInitState) as ExperimentOutputState);

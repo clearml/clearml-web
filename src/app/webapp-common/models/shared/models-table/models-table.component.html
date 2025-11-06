@@ -1,44 +1,42 @@
 <sm-model-menu-extended
   #contextMenuExtended
-  [model]="contextModel"
-  [tableMode]="!minimizedView"
-  [selectedModel]="selectedModel"
-  [selectedModels]="singleRowContext ? (selectedModel? [selectedModel] : undefined ): checkedModels"
+  [model]="contextModel()"
+  [tableMode]="!minimizedView()"
+  [selectedModel]="selectedModel()"
+  [selectedModels]="singleRowContext ? (selectedModel() ? [selectedModel()] : undefined ): checkedModels()"
   [selectedDisableAvailableIsMultiple]="!singleRowContext"
-  [selectedDisableAvailable]="singleRowContext ? getSingleSelectedModelsDisableAvailable(selectedModel? selectedModel: contextModel) : selectedModelsDisableAvailable"
-  [numSelected]="singleRowContext ? 1 : checkedModels?.length"
-  [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
-  [projectTags]="projectTags$ | ngrxPush"
-  [companyTags]="companyTags$ | ngrxPush"
+  [selectedDisableAvailable]="singleRowContext ? singleSelectedModelsDisableAvailable() : selectedModelsDisableAvailable()"
+  [numSelected]="singleRowContext ? 1 : checkedModels()?.length"
+  [tagsFilterByProject]="tagsFilterByProject()"
+  [projectTags]="modelsProjectTags() ?? projectTags()"
+  [companyTags]="companyTags()"
   [activateFromMenuButton]="false"
   [useCurrentEntity]="singleRowContext"
   [backdrop]="menuBackdrop"
   (tagSelected)="addTag($event)"
-  (menuOpened)="setContextMenuStatus(true)"
-  (menuClosed)="setContextMenuStatus(false)"
 ></sm-model-menu-extended>
-<div class="table-container" [class.card-view]="minimizedView">
+<div class="table-container" [class.card-view]="minimizedView()">
   <sm-table
     [cardHeight]="114"
-    [cardsCollapsed]="cardsCollapsed"
+    [cardsCollapsed]="cardsCollapsed()"
     [initialColumns]="initialColumns"
-    [selectionMode]="selectionMode"
-    [tableData]="models"
-    [noMoreData]="noMoreModels"
-    [resizableColumns]="enableMultiSelect"
-    [columns]="tableCols"
-    [reorderableColumns]="reorderableColumns && enableMultiSelect"
+    [selectionMode]="selectionMode()"
+    [tableData]="models()"
+    [noMoreData]="noMoreModels()"
+    [resizableColumns]="enableMultiSelect()"
+    [columns]="columns()"
+    [reorderableColumns]="reorderableColumns() && enableMultiSelect()"
     [scrollable]="true"
-    [columnsOrder]="colsOrder"
+    [columnsOrder]="colsOrder()"
     [lazyLoading]="true"
-    [columnResizeMode]="columnResizeMode"
-    [selection]="selectedModel"
-    [checkedItems]="checkedModels"
-    [activeContextRow]="contextModel"
-    [contextMenuOpen]="contextMenuActive"
-    [minimizedView]="minimizedView"
+    [columnResizeMode]="columnResizeMode()"
+    [selection]="selectedModel()"
+    [checkedItems]="checkedModels()"
+    [activeContextRow]="contextModel()"
+    [contextMenuOpen]="contextMenuActive()"
+    [minimizedView]="minimizedView()"
     [minimizedTableHeader]="'MODEL LIST'"
-    [sortFields]="tableSortFields"
+    [sortFields]="tableSortFields()"
     [keyboardControl]="true"
     [autoLoadMore]="true"
     (colReordered)="columnsReordered.emit($event)"
@@ -51,18 +49,18 @@
     (columnResized)="columnResized.emit($event)"
     (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
     >
-    <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter [options]="filtersOptions"
-        [value]="filtersValues"
-        [subValue]="filtersSubValues[modelsTableColFields.TAGS]"
+    <ng-template pTemplate="cardFilter">
+      <sm-table-card-filter [options]="filtersOptions()"
+        [value]="filtersValues()"
+        [subValue]="filtersSubValues()[modelsTableColFields.TAGS]"
         [columns]="initialColumns"
-        [filterMatch]="filtersMatch"
+        [filterMatch]="filtersMatch()"
         fixedOptionsSubheader="System tags"
         (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-        (filterChanged)="tableAllFiltersChanged($event)"
+        (filterChanged)="tableFilterChanged({id: $event.col}, $event)"
         (menuOpened)="columnFilterOpened($event)"
         (menuClosed)="columnFilterClosed($event)"
-        (clearAll)="clearAllFilters.emit(tableFilters)"
+        (clearAll)="clearAllFilters.emit(tableFilters())"
       ></sm-table-card-filter>
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
@@ -74,7 +72,7 @@
                           class="header-checkbox"
                           data-id="Select All Loaded Tasks"
                           [formControl]="selectionChecked"
-                          [indeterminate]="selectionIndeterminate"
+                          [indeterminate]="selectionIndeterminate()"
                           [disableRipple]="true"
                           smClickStopPropagation
                           (change)="headerCheckboxClicked()">
@@ -96,12 +94,12 @@
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort
         [column]="col"
-        [value]="filtersValues[col.id]"
+        [value]="filtersValues()[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="filtersOptions[col.id] | filter:searchValues[col.id]:'label'"
-        [sortOrder]="tableSortFieldsObject[col.id]"
-        [fixedOptionsSubheader]="col.id === filtersOptions.TAGS ? 'System tags' : ''"
-        [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
+        [options]="filtersOptions()[col.id] | filter:searchValues[col.id]:'label'"
+        [sortOrder]="tableSortFieldsObject()[col.id]"
+        [fixedOptionsSubheader]="col.id === modelsTableColFields.TAGS ? 'System tags' : ''"
+        [andFilter]="col.andFilter ? filtersMatch()[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
         (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
@@ -155,7 +153,7 @@
         @case (modelsTableColFields.SELECTED) {
           <mat-checkbox #cb
                         smClickStopPropagation
-                        [checked]="checkedModels | isRowSelected:model"
+                        [checked]="checkedModels() | isRowSelected:model"
                         (click)="rowSelectedChanged({ value: cb.checked, event: $event}, model)">
           </mat-checkbox>
         }
@@ -177,16 +175,16 @@
       }
     </ng-template>
 
-    <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
+    <ng-template let-model="rowData" let-selected="selected" pTemplate="card">
       <sm-table-card
         [selected]="selected"
         [cardName]="model.name"
-        [columns]="tableCols"
+        [columns]="columns()"
         [rowData]="model"
-        [checked]="models | isRowSelected:model"
-        [activeContextRow]="contextModel"
-        [contextMenuOpen]="contextMenuActive"
-        [entityType]="entityType"
+        [checked]="models() | isRowSelected:model"
+        [activeContextRow]="contextModel()"
+        [contextMenuOpen]="contextMenuActive()"
+        [entityType]="entityType()"
         [tagsTemplate]="tagList"
         [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSysTags(model).length === 0 && model?.tags.length === 0"
@@ -196,7 +194,7 @@
           <i class="al-icon al-ico-link sm-md ms-2"></i>
         }
       </div>
-        @if (cardsCollapsed && model?.tags?.length > 0) {
+        @if (cardsCollapsed() && model?.tags?.length > 0) {
           <div sm-mini-tags class="d-flex align-items-center mini-tags-container">
             <sm-mini-tags-list class="d-flex align-items-center" [tags]="model.tags?.slice(0,10)">
             </sm-mini-tags-list>
@@ -207,22 +205,22 @@
         }
       <sm-status-icon-label
         [status]="model?.ready? 'published': 'created'"
-        [showLabel]="!cardsCollapsed">
+        [showLabel]="!cardsCollapsed()">
       </sm-status-icon-label>
         <mat-checkbox #cb
                       smClickStopPropagation
-                      [checked]="checkedModels | isRowSelected:model"
+                      [checked]="checkedModels() | isRowSelected:model"
                       [disableRipple]="true"
                       (click)="rowSelectedChanged({value: cb.checked, event: $event}, model)">
         </mat-checkbox>
     </sm-table-card>
     <ng-template #tagList>
-      @if (!cardsCollapsed) {
+      @if (!cardsCollapsed()) {
         <sm-tag-list [@inOutAnimation] [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
       }
     </ng-template>
     <ng-template #compactCol>
-      @if (!cardsCollapsed) {
+      @if (!cardsCollapsed()) {
         <div [@inOutAnimation] class="ellipsis compact-columns-data" [class.selected]="selected">
           Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
           @if (model.task) {

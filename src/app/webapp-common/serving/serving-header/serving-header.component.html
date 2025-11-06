@@ -4,9 +4,9 @@
       <sm-button-toggle
         [disabled]="!tableMode() || noData()"
         [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
-        [value]="!noData() && tableMode()"
         [rippleEffect]="rippleEffect()"
-        (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
+        [ngModel]="!noData() && tableMode()"
+        (ngModelChange)="tableModeChanged.emit($any($event))"></sm-button-toggle>
     }
     <sm-common-search [class.ms-3]="!hideNavigation()"></sm-common-search>
   </div>
