@@ -118,6 +118,11 @@ export const routes: Routes = [
   },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
   {
+    path: 'code',
+    loadChildren: () => import('./features/code/code.module').then(m => m.CodeModule),
+    data: {search: false}
+  },
+  {
     path: 'endpoints',
     loadChildren: () => import('./webapp-common/serving/serving.module').then(m => m.ServingModule),
     canDeactivate: [resetContextMenuGuard]

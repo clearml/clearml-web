@@ -15,6 +15,15 @@ $item-margin: 20px;
   .logo {
     width: 64px;
     height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
   }
 
   .items-container {

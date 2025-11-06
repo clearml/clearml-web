@@ -101,7 +101,7 @@ export const BASE_ENV = {
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',
   supportEmail: 'support@clear.ml',
-  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/small-logo-white.svg?=2'},
+  branding: {logo: 'assets/autothought.webp?v=7', logoSmall: 'assets/small-autothought.webp?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +
     'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors',

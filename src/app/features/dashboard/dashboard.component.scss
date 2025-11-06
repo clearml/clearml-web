@@ -5,23 +5,31 @@
   .dashboard-body {
     height: 100%;
     overflow: auto;
+    background-color: $autothought-grey-darkest;
+    color: $autothought-text-primary;
   }
 
   .recent {
     height: 100%;
     max-width: 2400px;
     margin: 0 auto;
+    padding: 24px;
   }
 
   .clear-search {
     font-size: 14px;
     text-align: center;
-    color: #a7b2d8;
+    color: $autothought-text-secondary;
   }
 
   .view-all {
     font-size: 12px;
     font-weight: bold;
+    color: $autothought-green-primary;
+
+    &:hover {
+      color: $autothought-green-light;
+    }
   }
 
   sm-dashboard-experiments {
@@ -35,5 +43,30 @@
     display: block;
     overflow: auto;
     height: 100%;
+    background-color: $autothought-grey-darkest;
+  }
+
+  .autothought-button {
+    background-color: $autothought-green-primary !important;
+    color: $autothought-white !important;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $autothought-green-light !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    &:active {
+      background-color: $autothought-green-dark !important;
+      transform: translateY(0);
+    }
+
+    mat-icon {
+      color: $autothought-white;
+    }
   }
 }

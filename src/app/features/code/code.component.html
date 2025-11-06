@@ -1,0 +1,135 @@
+<div class="code-page">
+  <div class="page-header">
+    <h1>Code Repositories</h1>
+    <p class="subtitle">Manage and monitor your code repositories</p>
+  </div>
+
+  <div class="content-grid">
+    <!-- Repositories Section -->
+    <div class="section repositories">
+      <mat-card class="stats-card">
+        <mat-card-header>
+          <mat-card-title>Repositories</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="repo-list">
+            @for (repo of repositories; track repo.id) {
+              <div class="repo-item"
+                   (click)="selectRepository(repo)"
+                   [class.selected]="selectedRepository?.id === repo.id">
+                <div class="repo-info">
+                  <div class="repo-name">
+                    <mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>
+                    <span>{{ repo.name }}</span>
+                    @if (repo.status === 'archived') {
+                      <mat-chip class="archived-chip">Archived</mat-chip>
+                    }
+                  </div>
+                  <div class="repo-meta">
+                    <span class="language">{{ repo.language }}</span>
+                    <span class="divider">•</span>
+                    <span class="last-commit">{{ repo.lastCommit }}</span>
+                    <span class="divider">•</span>
+                    <span class="stars">★ {{ repo.stars }}</span>
+                  </div>
+                </div>
+                <button mat-icon-button>
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Commits Section -->
+    <div class="section commits">
+      <mat-card class="commits-card">
+        <mat-card-header>
+          <mat-card-title>Commits</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (selectedRepository) {
+            <div class="branch-selector">
+              <mat-form-field appearance="outline">
+                <mat-label>Branch</mat-label>
+                <mat-select [(value)]="selectedBranch" (selectionChange)="onBranchChange()">
+                  @for (branch of selectedRepository.branches; track branch.name) {
+                    <mat-option [value]="branch.name">
+                      {{ branch.name }} <span class="commit-count">({{ branch.commitCount }} commits)</span>
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <div class="repo-info">
+                <mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>
+                <span>{{ selectedRepository.name }}</span>
+              </div>
+            </div>
+
+            @if (filteredCommits.length > 0) {
+              <table mat-table [dataSource]="filteredCommits" class="commits-table">
+                <ng-container matColumnDef="hash">
+                  <th mat-header-cell *matHeaderCellDef>Hash</th>
+                  <td mat-cell *matCellDef="let commit">
+                    <code class="commit-hash">{{ commit.hash }}</code>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="message">
+                  <th mat-header-cell *matHeaderCellDef>Message</th>
+                  <td mat-cell *matCellDef="let commit">{{ commit.message }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="author">
+                  <th mat-header-cell *matHeaderCellDef>Author</th>
+                  <td mat-cell *matCellDef="let commit">{{ commit.author }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="branch">
+                  <th mat-header-cell *matHeaderCellDef>Branch</th>
+                  <td mat-cell *matCellDef="let commit">
+                    <span class="branch-badge">{{ commit.branch }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="timestamp">
+                  <th mat-header-cell *matHeaderCellDef>Time</th>
+                  <td mat-cell *matCellDef="let commit">{{ getRelativeTime(commit.timestamp) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="changes">
+                  <th mat-header-cell *matHeaderCellDef>Changes</th>
+                  <td mat-cell *matCellDef="let commit">
+                    <span class="additions">+{{ commit.additions }}</span>
+                    <span class="deletions">-{{ commit.deletions }}</span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row
+                    *matRowDef="let row; columns: displayedColumns;"
+                    (click)="navigateToTask(row)"
+                    [class.clickable]="row.taskId"
+                    [class.linked]="row.taskId"
+                    [smTooltip]="row.taskId ? 'Click to view task: ' + row.taskName : null">
+                </tr>
+              </table>
+            } @else {
+              <div class="empty-state">
+                <mat-icon>code_off</mat-icon>
+                <p>No commits found for this branch</p>
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>
+              <p>Select a repository to view commits</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

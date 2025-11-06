@@ -148,3 +148,35 @@
     --color-empty-state: #{mat.get-theme-color($theme, neutral, 50)};
   }
 }
+
+// Autothought theme override
+.autothought-theme {
+  --color-primary: #10b981;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #d1fae5;
+  --color-on-primary-container: #10b981;
+
+  --color-surface: #1a1a1a;
+  --color-surface-dim: #0d0d0d;
+  --color-surface-bright: #2d2d2d;
+  --color-surface-container: #1a1a1a;
+  --color-surface-container-low: #2d2d2d;
+  --color-surface-container-high: #404040;
+  --color-surface-container-highest: #4d4d4d;
+
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #d4d4d4;
+  --color-outline: #404040;
+  --color-outline-variant: #2d2d2d;
+
+  --color-inverse-surface: #ffffff;
+  --color-inverse-on-surface: #1a1a1a;
+
+  // Update running/success colors to match green theme
+  --color-running: #10b981;
+  --color-running-container: #059669;
+  --color-success: #10b981;
+  --color-completed: #34d399;
+  --color-completed-container: #10b981;
+}
+
