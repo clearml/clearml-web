@@ -1,4 +1,4 @@
-import {MemoizedSelector} from '@ngrx/store/src/selector';
+import {MemoizedSelector} from '@ngrx/store';
 import {Observable, Observer} from 'rxjs';
 
 export interface IEntityObject<T> {

@@ -13,9 +13,9 @@
       [disabled]="!tableMode() || noData()"
       class="ms-3"
       [options]="toggleButtons()"
-      [value]="!noData() && tableMode()"
       [rippleEffect]="rippleEffect()"
-      (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
+      [ngModel]="!noData() && tableMode()"
+      (ngModelChange)="tableModeChanged.emit($any($event))"></sm-button-toggle>
     <sm-common-search class="ms-3"></sm-common-search>
 
   </div>

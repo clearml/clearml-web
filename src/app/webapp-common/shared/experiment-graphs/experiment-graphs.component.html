@@ -1,9 +1,10 @@
 @if (
   !loading() &&
   (hiddenList()?.length === 0 || graphsState().noGraphs()) &&
-  !(multipleSingleValueData()?.data.length > 0 && hiddenList()?.length !== 0) &&
+  !(multipleSingleValueData()?.data?.length > 0 && hiddenList()?.length !== 0) &&
   !(singleValueData()?.length > 0 && hiddenList()?.length !== 0)
   ) {
+
   <div class="no-output">
     <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
     @if (graphsState().graphList().length > 0 || multipleSingleValueData()?.data.length > 0 || singleValueData()?.length > 0) {
@@ -15,7 +16,7 @@
 }
 <!--faster outside @else-->
   <div #allMetrics class="metrics-section" [class.hidden]="hiddenList()?.length === 0">
-    @if (singleValueData()?.length > 0 && hiddenList()?.includes(singleValueChartTitle)) {
+    @if (singleValueData()?.length > 0 && hiddenList() && hiddenList().includes(singleValueChartTitle)) {
       <div class="d-flex align-items-center justify-content-center summary-container">
         @if (exportForReport()) {
           <sm-single-value-summary-table
@@ -33,7 +34,7 @@
         }
       </div>
     }
-    @if (plotlyReady() && multipleSingleValueData()?.data.length > 0) {
+    @if (plotlyReady() && multipleSingleValueData()?.data?.length > 0 && groupBy() === 'metric') {
       <div class="d-flex align-items-center justify-content-center summary-container">
         <sm-single-graph
           #singleValueGraph
@@ -55,6 +56,7 @@
     }
     <div [class.all-metrics]="graphsState().graphList()?.length > 0"
          [class.row]="!isGroupGraphs()"
+         [class.hidden]="isCompare() && multipleSingleValueData() === null && groupBy() === 'metric'"
     >
       @for (metric of (graphsState().graphList()); track metric) {
         <div class="metric-group-container less-padding"

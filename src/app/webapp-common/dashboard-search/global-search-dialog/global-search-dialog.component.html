@@ -1,29 +1,47 @@
-<sm-dialog-template>
+<sm-dialog-template class="neat">
   <div class="content">
     <div class="search-container">
       <sm-search
         #searchComponent
         class="outline"
-        [class.regex-error]="regexError"
+        [placeholder]="placeholder()"
+        [class.advanced]="advanced()"
+        [class.regex-error]="regexError()"
         [value]="(searchQuery$ | ngrxPush)?.query"
         [disableAnimation]="true"
+        [enableSearchOnSubmit]="advanced()"
         [hideIcons]="true"
+        [disabled]="!jsonValid()"
         [minimumChars]="3"
         (valueChanged)="search($event)"
+        (validateValueChange)="validateValue($event)"
       >
-        @if (regexError) {
-          <mat-icon class="error regexp" fontSet="al" fontIcon="al-ico-error-circle" inline [smTooltip]="regexError" [matTooltipPosition]="'below'"></mat-icon>
+        @if (regexError() || resultErrors()) {
+          <mat-icon class="error regexp" fontSet="al" fontIcon="al-ico-info-circle" inline [smTooltip]="regexError() || resultErrors()" [matTooltipPosition]="'below'"></mat-icon>
         }
-        <button mat-icon-button
-                class="regexp sm"
-                [class.active]="regExp"
-                smClickStopPropagation
-                [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
-                (click)="toggleRegExp(); searchComponent.searchBarInput().nativeElement.focus();"
-        >
-          <mat-icon fontSet="al" fontIcon="al-ico-regex" data-id="enableRegexButton"></mat-icon>
-        </button>
+        @if (!advanced()) {
+          <button mat-icon-button
+                  class="regexp sm"
+                  [class.active]="regExp()"
+                  smClickStopPropagation
+                  [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
+                  (click)="toggleRegExp(); searchComponent.searchBarInput().nativeElement.focus();"
+          >
+            <mat-icon fontSet="al" fontIcon="al-ico-regex" data-id="enableRegexButton"></mat-icon>
+          </button>
+        } @else {
+          <div class="json-info-icon" infoIcon>
+            <sm-multi-line-tooltip iconClass="al-ico-help-outlined" customClass="sm m-0">
+              <span [innerHTML]="advancedTooltip"></span>
+            </sm-multi-line-tooltip>
+          </div>
+        }
       </sm-search>
+      <button mat-icon-button (click)="enableAdvancedSearch()" [disabled]="activeLink()=== activeSearchLink.modelEndpoints"
+              [class.active]="advanced()" smTooltip="Advanced search">
+        <mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon>
+      </button>
+
     </div>
     <sm-dashboard-search (itemSelected)="closeDialog()"></sm-dashboard-search>
   </div>

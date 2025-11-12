@@ -1,0 +1,93 @@
+<header class="header">
+  <mat-slide-toggle [formControl]="localRunsControl">Include Local Runs</mat-slide-toggle>
+  <mat-divider [vertical]="true"></mat-divider>
+<!--  <mat-form-field appearance="outline" subscriptSizing="dynamic">-->
+<!--    <mat-select [formControl]="nominalControl">-->
+<!--      @for (option of nominalOptions; track option) {-->
+<!--        <mat-option [value]="option.value">-->
+<!--          {{ option.label }}-->
+<!--        </mat-option>-->
+<!--      }-->
+<!--    </mat-select>-->
+<!--  </mat-form-field>-->
+<!--  <mat-divider [vertical]="true"></mat-divider>-->
+  <mat-form-field appearance="outline" class="time-selector" subscriptSizing="dynamic">
+    <mat-select [formControl]="timeControl">
+      @for (timeFrame of timeFrameOptions; track timeFrame) {
+        <mat-option [value]="timeFrame.value">
+          {{ timeFrame.label }}
+        </mat-option>
+      }
+      <mat-divider class="mb-2"></mat-divider>
+      <mat-option [value]="'custom'" #customOption>
+        <mat-form-field class="custom-selector" subscriptSizing="dynamic" smClickStopPropagation>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate placeholder="Start date" (dateChange)="customOption.select(); startRange.set($event.value)">
+            <input matEndDate placeholder="End date" (dateChange)="customOption.select(); endRange.set($event.value)">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="picker">Custom</mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</header>
+@if(!data.isLoading()) {
+  @if(noData()) {
+    <div class="empty-state">
+      <div class="title-icon">
+        <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
+      </div>
+      <div class="title">No information available for the selected period</div>
+      <div class="sub-title">Run additional workloads to see resource utilization</div>
+    </div>
+  } @else {
+    <div class="graphs">
+      <div class="graph">
+        <div class="graph__header">
+          Resource Breakdown
+        </div>
+        <div class="graph__body">
+          <sm-line-chart
+            [data]="queueStats()" [colorScheme]="queueTotalsColors()" [showLoadingOverlay]="data.isLoading()"
+            yLabel="hours" minUnit="day" [yTickFormatter]="formatter" class="graph__line"
+          ></sm-line-chart>
+          @if (this.nominal() === 'gpu' && usesDefaultWeight(data.value().queues)) {
+            <div class="graph__notice">* weight wasn't reported, using the default</div>
+          }
+          <sm-donut class="graph__donut" [data]="queueTotals()" [colors]="queueTotalsColors()" units="h"></sm-donut>
+        </div>
+      </div>
+      <div class="graph">
+        <div class="graph__header">
+          Project Distribution
+        </div>
+        <div class="graph__body">
+          <sm-line-chart
+            [data]="projectsStats()" [colorScheme]="projectTotalsColors()" [showLoadingOverlay]="data.isLoading()"
+            yLabel="hours" minUnit="day" [yTickFormatter]="formatter" class="graph__line"
+          ></sm-line-chart>
+          @if (this.nominal() === 'gpu' && usesDefaultWeight(data.value().projects)) {
+            <div class="graph__notice">* weight wasn't reported, using the default</div>
+          }
+          <sm-donut class="graph__donut" [data]="projectsTotals()" [colors]="projectTotalsColors()" units="h"></sm-donut>
+        </div>
+      </div>
+      <div class="graph">
+        <div class="graph__header">
+          User Activity
+        </div>
+        <div class="graph__body">
+          <sm-line-chart
+            [data]="usersStats()" [colorScheme]="usersTotalsColors()" [showLoadingOverlay]="data.isLoading()"
+            yLabel="hours" minUnit="day" [yTickFormatter]="formatter" class="graph__line"
+          ></sm-line-chart>
+          @if (this.nominal() === 'gpu' && usesDefaultWeight(data.value().users)) {
+            <div class="graph__notice">* weight wasn't reported, using the default</div>
+          }
+          <sm-donut class="graph__donut" [data]="usersTotals()" [colors]="usersTotalsColors()" units="h"></sm-donut>
+        </div>
+      </div>
+    </div>
+  }
+}

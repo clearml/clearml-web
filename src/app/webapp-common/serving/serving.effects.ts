@@ -8,7 +8,7 @@ import {concatLatestFrom} from '@ngrx/operators';
 import {servingFeature} from '@common/serving/serving.reducer';
 import {addMultipleSortColumns} from '@common/shared/utils/shared-utils';
 import {setURLParams} from '@common/core/actions/router.actions';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '@common/core/actions/layout.actions';
 import {requestFailed} from '@common/core/actions/http.actions';

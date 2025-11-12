@@ -1,3 +1,7 @@
+:host {
+  display: block;
+  position: relative;
+}
 
 .item-snippet {
   width: 180px;
@@ -7,6 +11,13 @@
   text-align: center;
   background: var(--color-surface-container-high);
   border: 2px solid transparent;
+  overflow: hidden;
+
+  &.error {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
 
   video {
     cursor: pointer;

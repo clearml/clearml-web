@@ -9,14 +9,12 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {TasksEnqueueManyResponseSucceeded} from '~/business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
-import {
-  OrganizationPrepareDownloadForGetAllRequest
-} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {
   createExperimentDialogResult
 } from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
+import { OrganizationPrepareDownloadForGetAllRequest } from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
@@ -163,7 +161,7 @@ export const setTableFilters = createAction(
 
 export const setProjectsTypes = createAction(
   EXPERIMENTS_PREFIX + 'SET_PROJECT_TYPES',
-  props<{ types?: Array<string> }>()
+  props<{ types?: string[] }>()
 );
 
 export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES',

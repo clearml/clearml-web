@@ -3,12 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef,
+  DestroyRef, DOCUMENT,
   effect,
-  ElementRef,
   inject,
   input,
-  Renderer2,
   signal,
   TemplateRef,
   viewChild
@@ -20,7 +18,7 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {NtkmeButtonComponent, NtkmeButtonModule} from '@ctrl/ngx-github-buttons';
 import {PushPipe} from '@ngrx/component';
 import {Store} from '@ngrx/store';
-import {EMPTY, interval, Observable} from 'rxjs';
+import {EMPTY, interval, of} from 'rxjs';
 import {catchError, filter, finalize, map, mergeMap, startWith, switchMap, take, takeWhile, tap} from 'rxjs/operators';
 import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
 import {LoginMode, loginModes} from '../../shared/services/login.service';
@@ -41,6 +39,8 @@ import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
+import {User} from '~/business-logic/model/users/user';
+import {Title} from '@angular/platform-browser';
 
 
 @Component({
@@ -73,15 +73,14 @@ export class LoginComponent {
   private userPreferences = inject(UserPreferences);
   private config = inject(ConfigurationService);
   private cdr = inject(ChangeDetectorRef);
-  private ref = inject(ElementRef);
-  private renderer = inject(Renderer2);
   private destroy = inject(DestroyRef);
+  private document = inject(DOCUMENT);
+  private titleService = inject(Title);
 
   showSimpleLogin = input<boolean>();
   hideTou = input<boolean>();
   showBackground = input(true);
   errorTemplate = input<TemplateRef<unknown>>();
-  private nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
   private githubButton = viewChild(NtkmeButtonComponent);
   protected environment = this.config.configuration;
   protected loginMode = this.loginService.loginMode;
@@ -94,13 +93,20 @@ export class LoginComponent {
     password: new FormControl<string>(''),
   });
 
-  options: any[] = [];
-  filteredOptions$: Observable<any[]>;
+  options: User[] = [];
+  protected filteredOptions$ = this.loginForm.controls.name.valueChanges
+    .pipe(
+      startWith(''),
+      map(value => this._filter(value))
+    );
+
   public loginModeEnum = loginModes;
 
   protected loginFailed = signal(false);
   protected showSpinner = signal<boolean>(null);
   protected loginTitle = signal<string>(this.isInvite ? '' : 'Login');
+  private title = computed(() => this.config.configuration().branding?.faviconUrl ? '' : 'ClearML');
+  private titlePrefix = computed(() => this.title() ? this.title() + ' - ' : '')
   touLink = computed(() => this.environment().legal.TOULink);
   protected notice = computed(() => this.environment().loginNotice);
   protected showGitHub = computed(() => !this.environment().enterpriseServer && !this.environment().communityServer);
@@ -114,7 +120,17 @@ export class LoginComponent {
   }
 
   constructor() {
-    this.setTheme(this.environment().communityServer ? 'light' : 'dark');
+    if (!this.config.configuration().forceTheme) {
+      this.setTheme(this.environment().communityServer ? 'light' : 'dark');
+    }
+    this.titleService.setTitle(`${this.titlePrefix()}Login`);
+
+    effect(() => {
+      if (this.config.configuration()) {
+        const link = document.getElementById('favicon') as HTMLLinkElement;
+        link.href = this.config.configuration().branding?.faviconUrl ?? '/assets/favicon.ico';
+      }
+    });
 
     this.store.dispatch(setBreadcrumbs({
       breadcrumbs: [[{
@@ -136,10 +152,6 @@ export class LoginComponent {
         takeWhile(() => !this.githubButton()?.counter),
       )
       .subscribe();
-
-    effect(() => {
-      this.nameInput()?.nativeElement.focus();
-    });
 
     this.store.select(selectCurrentUser)
       .pipe(
@@ -167,41 +179,24 @@ export class LoginComponent {
       )
       .subscribe((params: Params) => {
         this.redirectUrl = params['redirect'] || '';
-        this.redirectUrl = this.redirectUrl.replace('/login', '/dashboard');
+        this.redirectUrl = this.redirectUrl.replace('/login', '');
       });
 
     this.loginService.getLoginMode()
       .pipe(
         takeUntilDestroyed(),
-        finalize(() => {
-          if (this.loginMode() === loginModes.simple) {
-            this.loginService.getUsers()
-              .pipe(take(1))
-              .subscribe(users => {
-                this.options = users;
-                this.cdr.markForCheck();
-              });
+        switchMap((loginMode: LoginMode) => {
+          if (loginMode === loginModes.password) {
+            this.loginForm.controls['password'].addValidators(Validators.required);
           }
-        }))
-      .subscribe((loginMode: LoginMode) => {
-        if (loginMode === loginModes.password) {
-          this.loginForm.controls['password'].addValidators(Validators.required);
-        }
-        this.cdr.markForCheck();
+          return this.loginMode() === loginModes.simple ?
+            this.loginService.getUsers() :
+            of(null)
+        })
+      )
+      .subscribe((users) => {
+        this.options = users ?? [];
       });
-
-    this.filteredOptions$ = this.loginForm.controls.name.valueChanges
-      .pipe(
-        startWith(''),
-        map(value => this._filter(value))
-      );
-
-    // this.loginForm.controls.name.valueChanges
-    //   .pipe(takeUntilDestroyed())
-    //   .subscribe((val: string) => {
-    //     this.loginForm.value.name = val.trim();
-    //     this.cdr.detectChanges();
-    //   });
 
     this.destroy.onDestroy(() => {
       this.setTheme(this.originalTheme());
@@ -268,14 +263,14 @@ export class LoginComponent {
       );
   }
 
-  private _filter(value: string): string[] {
+  private _filter(value: string) {
     const filterValue = value.toLowerCase();
 
-    return this.options.filter((option: any) => option.name.toLowerCase().includes(filterValue.toLowerCase()));
+    return this.options.filter(option => option.name.toLowerCase().includes(filterValue.toLowerCase()));
   }
 
   getNavigateUrl(): string {
-    return this.redirectUrl ? this.redirectUrl : '/dashboard';
+    return this.redirectUrl ? this.redirectUrl : '';
   }
 
 
@@ -295,5 +290,6 @@ export class LoginComponent {
 
   private setTheme(theme: 'light' | 'dark' | 'system') {
     this.store.dispatch(userThemeChanged({theme}));
+    this.document.body.parentElement.classList.add(`${theme}-mode`);
   }
 }

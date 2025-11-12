@@ -13,7 +13,7 @@ export const lastVisitedTabGuard: CanActivateFn = (route) => {
   const router = inject(Router);
 
   const addOutputSegment = route.parent.url.length === 2;
-  const routerProjectIdFromParams = route.root.firstChild?.firstChild?.params.projectId;
+  const routerProjectIdFromParams = route.root.firstChild?.firstChild?.firstChild?.params.projectId;
 
   return store.select(route.data.lastTabSelector)
     .pipe(

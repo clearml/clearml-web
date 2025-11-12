@@ -3,12 +3,11 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener, inject,
+  inject,
   Input,
   OnChanges,
   OnInit,
   Output,
-  Renderer2,
   signal,
   SimpleChanges,
   ViewChild
@@ -37,6 +36,7 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 
 declare let Plotly;
@@ -69,20 +69,23 @@ interface ParaPlotData {
   selector: 'sm-parallel-coordinates-graph',
   templateUrl: './parallel-coordinates-graph.component.html',
   styleUrls: ['./parallel-coordinates-graph.component.scss'],
+  host: {
+    '[class.maximized]': 'this.maximized()',
+    '(window:resize)': 'this.drawGraph$.next({})'
+  },
   imports: [
     SlicePipe,
     TooltipDirective,
     ChooseColorModule,
     ShowTooltipIfEllipsisDirective,
     MatIconButton,
-    MatIcon
+    MatIcon,
+    ChooseColorDirective
   ]
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit, OnChanges {
   private colorHash = inject(ColorHashService);
   private cdr = inject(ChangeDetectorRef);
-  private renderer = inject(Renderer2);
-  private elementRef = inject(ElementRef);
 
   private metricVariantToPathPipe = new MetricVariantToPathPipe();
   private metricVariantToNamePipe = new MetricVariantToNamePipe();
@@ -91,7 +94,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   public experimentsColors = {};
   public filteredExperiments = [];
   private timer: number;
-  private _parameters: string[];
+  private _parameters: {section: string; name: string}[];
 
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
   @ViewChild('legend', {static: true}) legend: ElementRef;
@@ -100,11 +103,6 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   private highlighted: ExtraTask;
   private dimensionsOrder: string[];
   protected maximized = signal(false);
-
-  @HostListener('window:resize')
-  redrawChart() {
-    this.drawGraph$.next({});
-  }
 
   @Input() set metricValueType(metricValueType: MetricValueType) {
     this._metricValueType = metricValueType;
@@ -118,7 +116,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     return this._metricValueType;
   }
 
-  @Input() set parameters(parameters) {
+  @Input() set parameters(parameters: {section: string; name: string}[]) {
     if (!isEqual(parameters, this.parameters)) {
       this._parameters = parameters;
       if (this.experiments) {
@@ -128,7 +126,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     }
   }
 
-  get parameters(): string[] {
+  get parameters() {
     return this._parameters;
   }
 
@@ -162,7 +160,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     tasks: string[];
     valueType: MetricValueType;
     metrics?: string[];
-    variants?: string[];
+    variants?: {section: string; name: string}[];
     domRect: DOMRect
   }>();
 
@@ -241,14 +239,13 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         type: 'parcoords',
         labelangle: 30,
         dimensions: this.parameters.map((parameter) => {
-          const splitted = parameter.split('.');
-          const newParameter = [splitted.shift(), splitted.join('.'), 'value'];
-          parameter = `${parameter}.value`;
-          const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.hyperparams, newParameter));
+          const allValuesIncludingNull = this.experiments.map(experiment => experiment.hyperparams[parameter.section]?.[parameter.name]?.value);
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
           const textVal = {} as Record<string, number>;
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
-          (allValuesIncludingNull.length > allValues.length) && (ticktext = ['N/A'].concat(ticktext));
+          if (allValuesIncludingNull.length > allValues.length) {
+            ticktext = ['N/A'].concat(ticktext);
+          }
           const tickvals = ticktext.map((text, index) => {
             textVal[text] = index;
             return index;
@@ -261,13 +258,15 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
             }
           }
           return {
-            label: parameter.replace(/\.value$/, ''),
+            label: `${parameter.section}.${parameter.name}`,
             ticktext,
             tickvals,
-            values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(experiment.hyperparams, parameter)) ? 'N/A' : get(experiment.hyperparams, parameter)])),
+            values: filteredExperiments.map((experiment) => {
+              const paramValue = experiment.hyperparams[parameter.section]?.[parameter.name]?.value;
+              return textVal[['', undefined].includes(paramValue) ? 'N/A' : paramValue]
+            }),
             range: [0, max(tickvals)],
             constraintrange
-
           };
         })
       } as ParaPlotData;
@@ -463,18 +462,13 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       tasks: this.experiments.map(exp => exp.id),
       valueType: this.metricValueType,
       metrics: this.metrics.map(mv => this.metricVariantToPathPipe.transform(mv, true)),
-      variants: this.parameters, domRect
+      variants: this.parameters,
+      domRect
     });
   }
 
   maximize() {
-    if (this.maximized()) {
-      this.renderer.removeClass(this.elementRef.nativeElement, 'maximized');
-      this.maximized.set(false);
-    } else {
-      this.renderer.addClass(this.elementRef.nativeElement, 'maximized');
-      this.maximized.set(true);
-    }
+    this.maximized.update(state => !state);
     window.setTimeout(() => this.prepareGraph());
   }
 }

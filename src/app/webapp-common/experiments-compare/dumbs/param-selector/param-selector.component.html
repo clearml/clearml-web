@@ -1,15 +1,15 @@
-@if (!single) {
+@if (!single()) {
   <div class="d-flex align-items-center title-container" (click)="paramSelect.openMenu()">
-    <span class="param-selector-title pointer">{{ title }}</span>
+    <span class="param-selector-title pointer">{{ title() }}</span>
     <sm-menu #paramSelect iconClass="al-ico-dropdown-arrow" (menuClosed)="checklist.searchQ('')"
              buttonTooltip="Select parameter" smMenuClass="light-theme custom-columns">
       <sm-grouped-checked-filter-list
         #checklist
         smClickStopPropagation class="filtered-list"
-        [itemsList]="itemsList"
-        [selectedItemsList]="selectedHyperParams"
-        [selectFilteredItems]="selectFilteredItems"
-        [selectedItemsListMapper]="selectedItemsListMapper"
+        [itemsList]="itemsList()"
+        [selectedItemsList]="selectedHyperParams()"
+        [selectFilteredItems]="selectFilteredItems()"
+        [selectedItemsListMapper]="selectedItemsListMapper()"
         selectedItemsListPrefix=""
         [limitSelection]="50"
         [single]="false"
@@ -17,11 +17,12 @@
         (clearSelection)="clearSelection.emit()"></sm-grouped-checked-filter-list>
     </sm-menu>
   </div>
-  @if (selectedHyperParams?.length > 0) {
+  @if (selectedHyperParams()?.length > 0) {
     <div class="selected-parameters">
-      @for (hyperParam of selectedHyperParams; track trackByIndex($index)) {
+      @for (hyperParam of selectedHyperParams(); track $index) {
         <div class="selected-parameter">
-          <span class="ellipsis parameter-name" smShowTooltipIfEllipsis [smTooltip]="hyperParam">{{ hyperParam }}</span>
+          @let cleanName = selectedItemsListMapper()(hyperParam);
+          <span class="ellipsis parameter-name" smShowTooltipIfEllipsis [smTooltip]="cleanName">{{ cleanName }}</span>
           <i class="al-icon sm al-ico-dialog-x pointer" (click)="removeHyperParam(hyperParam)"></i></div>
       }
     </div>
@@ -30,7 +31,10 @@
   }
 } @else {
   <div class="like-select pointer d-flex justify-content-between align-items-center" (click)="paramSelect.openMenu()">
-    <span class="ellipsis selected-parameter" smShowTooltipIfEllipsis [smTooltip]="selectedHyperParams?.[0] ?? ''">{{ selectedHyperParams?.[0] ?? 'Select Parameter' }}</span>
+    @let cleanName = selectedHyperParams()?.length > 0 ? selectedItemsListMapper()(selectedHyperParams()?.[0]) : null;
+    <span class="ellipsis selected-parameter" smShowTooltipIfEllipsis [smTooltip]="cleanName ?? ''">
+      {{ cleanName ?? 'Select Parameter' }}
+    </span>
     <sm-menu #paramSelect
              (menuClosed)="checklist.searchQ('')"
              iconClass="al-ico-dropdown-arrow"
@@ -39,10 +43,10 @@
       <sm-grouped-checked-filter-list #checklist
                                       smClickStopPropagation
                                       class="filtered-list"
-                                      [itemsList]="itemsList"
-                                      [selectedItemsList]="selectedHyperParams"
-                                      [selectFilteredItems]="selectFilteredItems"
-                                      [selectedItemsListMapper]="selectedItemsListMapper"
+                                      [itemsList]="itemsList()"
+                                      [selectedItemsList]="selectedHyperParams()"
+                                      [selectFilteredItems]="selectFilteredItems()"
+                                      [selectedItemsListMapper]="selectedItemsListMapper()"
                                       selectedItemsListPrefix=""
                                       [single]="true"
                                       (selectedItems)="selectedItems.emit($event)"

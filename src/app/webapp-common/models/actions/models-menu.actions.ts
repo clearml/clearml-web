@@ -25,7 +25,7 @@ export const removeTag = createAction(
 );
 
 export const removeTagSuccess = createAction(
-  MODELS_PREFIX + 'remove tag from experiment success',
+  MODELS_PREFIX + 'remove tag from model success',
   props<{ models: string[]; tag: string }>()
 );
 

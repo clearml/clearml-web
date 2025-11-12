@@ -11,13 +11,13 @@
       </sm-menu>
       <sm-main-pages-header-filter [allTags]="allTags()"></sm-main-pages-header-filter>
       <sm-button-toggle
-        [value]="!!projectId()"
+        [ngModel]="!!projectId()"
+        (ngModelChange)="!archive() && !(!!projectId() && $event) && toggleNestedView.emit($any($event))"
         [disabled]="archive()"
         [options]="[
              {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
              {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-        (valueChanged)="!archive() && !(!!projectId() && $event) && toggleNestedView.emit($any($event))"
       ></sm-button-toggle>
       <sm-common-search class="ms-3"></sm-common-search>
     </div>

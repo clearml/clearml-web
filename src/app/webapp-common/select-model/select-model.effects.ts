@@ -15,7 +15,7 @@ import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {addMultipleSortColumns} from '../shared/utils/shared-utils';
 import {of} from 'rxjs';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllExRequest';
 import {SortMeta} from 'primeng/api';
 import {createFiltersFromStore, encodeOrder, excludedKey, getTagsFilters} from '../shared/utils/tableParamEncode';

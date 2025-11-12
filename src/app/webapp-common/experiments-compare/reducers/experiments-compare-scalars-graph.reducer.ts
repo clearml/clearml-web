@@ -14,11 +14,11 @@ import {MetricVariantResult} from '~/business-logic/model/projects/metricVariant
 export interface ScalarsGraphState {
   showIdenticalHyperParams: boolean;
   metrics: MetricOption[];
-  metricVariantsResults: Array<MetricVariantResult>;
+  metricVariantsResults: MetricVariantResult[];
   hyperParams: GroupedHyperParams;
   tasks: any;
   valueType: MetricValueType;
-  paramsHoverInfo: string[];
+  paramsHoverInfo: {section: string; name: string}[];
   metricsHoverInfo: SelectedMetricVariant[];
 }
 

@@ -105,6 +105,7 @@ import {PushPipe} from '@ngrx/component';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {SelectModelModule} from '@common/select-model/select-model.module';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
@@ -234,6 +235,7 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     MatButton,
     MatIcon,
     MatIconButton,
+    ChooseColorDirective,
   ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},

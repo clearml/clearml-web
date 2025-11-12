@@ -1,8 +1,11 @@
 import {
-  Component, inject, afterNextRender, DestroyRef, input, viewChild } from '@angular/core';
+  Component, inject, afterNextRender, DestroyRef, input, viewChild,
+  DOCUMENT
+} from '@angular/core';
+
 import {CdkPortal, DomPortalOutlet} from '@angular/cdk/portal';
 import {DialogModule} from '@angular/cdk/dialog';
-import {DOCUMENT} from '@angular/common';
+
 
 @Component({
   selector: 'sm-portal',

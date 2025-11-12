@@ -304,7 +304,7 @@ export class CommonExperimentsMenuEffects {
         project_name: action.project.name
       })
         .pipe(
-          tap((res) => this.router.navigate(['projects', action.project.id ? action.project.id : res.project_id ?? '*', 'tasks', action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''], {queryParamsHandling: 'merge'})),
+          tap((res) => this.router.navigate(['projects', action.project.id ? action.project.id : res.project_id ?? '*', 'tasks', action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''], {queryParamsHandling: 'replace'})),
           concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
           mergeMap(([, selectedExperiment]) => [
             viewActions.resetExperiments({}),

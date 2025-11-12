@@ -11,7 +11,10 @@ import {MatDialog} from '@angular/material/dialog';
 import {AdminService} from '~/shared/services/admin.service';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {filter, map, take} from 'rxjs/operators';
-import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
+import {
+  MoveProjectData,
+  MoveProjectDialogComponent
+} from '@common/experiments/shared/components/move-project-dialog/move-project-dialog.component';
 import {
   fetchModelsRequested,
   modelSelectionChanged,
@@ -34,6 +37,7 @@ import {
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {Project} from '~/business-logic/model/projects/project';
 
 
 @Component({
@@ -101,22 +105,19 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   public moveToProjectPopup() {
     const selectedModels = this.selectedModels() ? selectionDisabledMoveTo(this.selectedModels()!).selectedFiltered : [this.model()];
     const currentProjects = Array.from(new Set(selectedModels.map(exp => exp.project?.id).filter(p => p)));
-    const dialog = this.dialog.open(ChangeProjectDialogComponent, {
+    this.dialog.open<MoveProjectDialogComponent, MoveProjectData, Project>(MoveProjectDialogComponent, {
       data: {
         currentProjects: currentProjects.length > 0 ? currentProjects : [selectedModels[0].project?.id],
         defaultProject: selectedModels[0].project,
         reference: selectedModels.length > 1 ? selectedModels : selectedModels[0]?.name,
-        type: 'model'
+        type: EntityTypeEnum.model
       }
-    });
-    dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
-      this.moveToProjectClicked(project, selectedModels);
-    });
-
-  }
-
-  moveToProjectClicked(project, selectedModels) {
-    this.store.dispatch(changeProjectRequested({selectedModels, project}));
+    }).afterClosed()
+      .pipe(
+        take(1),
+        filter(project => !!project)
+      )
+      .subscribe(project => this.store.dispatch(changeProjectRequested({selectedModels, project})));
   }
 
   public downloadModelFileClicked = () => {

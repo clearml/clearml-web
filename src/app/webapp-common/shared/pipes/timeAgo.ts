@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform, NgZone, ChangeDetectorRef, OnDestroy} from '@angular/core';
+import {Pipe, PipeTransform, NgZone, ChangeDetectorRef, OnDestroy, inject} from '@angular/core';
 
 @Pipe({
   name: 'timeAgo',
@@ -6,30 +6,36 @@ import {Pipe, PipeTransform, NgZone, ChangeDetectorRef, OnDestroy} from '@angula
   standalone: true
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly ngZone = inject(NgZone);
   private timer: number;
 
-  constructor(private changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone) {
-  }
-
-  transform(value: any) {
-    let d;
+  transform(value: unknown): string {
+    let d: Date;
     this.removeTimer();
-    if (Number.isInteger(value)) {
-      d = new Date(value);
-    } else {
+    if (typeof value === 'number') {
+      if (Number.isInteger(value)) {
+        d = new Date(value);
+      } else {
+        return `${value}`;
+      }
+    } else if (typeof value === 'string') {
       if (!(Date.parse(value) > 0)) {
         return value;
       }
-      if (!value.endsWith('+00:00')) {
-        value = value + '+00:00';
-      }
-      d = new Date(value);
+      d = new Date(value.endsWith('+00:00') ? value : `${value}+00:00`);
+    } else if (value instanceof Date) {
+      d = value;
+    } else if (value === null || value === undefined) {
+      return null;
+    } else {
+      return `${value}`;
     }
     // let d            = this.convertUTCDateToLocalDate(new Date(value));
-    const now          = new Date();
-    const seconds      = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
+    const now = new Date();
+    const seconds = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
     const timeToUpdate = (Number.isNaN(seconds)) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;
-    this.timer         = this.ngZone.runOutsideAngular(() => {
+    this.timer = this.ngZone.runOutsideAngular(() => {
       if (typeof window !== 'undefined') {
         return window.setTimeout(() => {
           this.ngZone.run(() => this.changeDetectorRef.markForCheck());
@@ -37,11 +43,11 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
       }
       return null;
     });
-    const minutes      = Math.round(Math.abs(seconds / 60));
-    const hours        = Math.round(Math.abs(minutes / 60));
-    const days         = Math.round(Math.abs(hours / 24));
-    const months       = Math.round(Math.abs(days / 30.416));
-    const years        = Math.round(Math.abs(days / 365));
+    const minutes = Math.round(Math.abs(seconds / 60));
+    const hours = Math.round(Math.abs(minutes / 60));
+    const days = Math.round(Math.abs(hours / 24));
+    const months = Math.round(Math.abs(days / 30.416));
+    const years = Math.round(Math.abs(days / 365));
     if (Number.isNaN(seconds)) {
       return '';
     } else if (seconds <= 45) {
@@ -82,7 +88,7 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
 
   private getSecondsUntilUpdate(seconds: number) {
     const min = 60;
-    const hr  = min * 60;
+    const hr = min * 60;
     const day = hr * 24;
     if (seconds < min) { // less than 1 min, update every 2 secs
       return 2;
@@ -98,8 +104,8 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
   convertUTCDateToLocalDate(date) {
     if (date) {
       const newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
-      const offset  = date.getTimezoneOffset() / 60;
-      const hours   = date.getHours();
+      const offset = date.getTimezoneOffset() / 60;
+      const hours = date.getHours();
       newDate.setHours(hours - offset);
       return newDate;
     }

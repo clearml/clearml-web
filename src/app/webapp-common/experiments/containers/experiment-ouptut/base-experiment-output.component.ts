@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import {interval, Subscription} from 'rxjs';
@@ -7,7 +7,7 @@ import {debounce, distinctUntilChanged, filter, map, tap, withLatestFrom} from '
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {
-  selectExperimentInfoData,
+  selectExperimentInfoData, selectIsSharedAndNotInWorkSpaces,
   selectIsSharedAndNotOwner,
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
@@ -58,7 +58,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   private route = inject(ActivatedRoute);
   private refresh = inject(RefreshService);
 
-  public selectedExperiment: IExperimentInfo;
+  public selectedExperiment = signal<IExperimentInfo>(null);
   private subs = new Subscription();
   public minimized: boolean;
   protected projectId: Project['id'];
@@ -68,6 +68,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   public isDevelopment: boolean;
   protected infoData$ = this.store.select(selectExperimentInfoData);
   protected isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
+  protected isSharedNotInWorkspaces$ = this.store.select((selectIsSharedAndNotInWorkSpaces));
   protected isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
   protected backdropActive$ = this.store.select(selectBackdropActive);
   protected selectSplitSize$ = this.store.select(selectSplitSize);
@@ -113,9 +114,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         distinctUntilChanged(),
         withLatestFrom(this.store.select(selectSelectedExperiments))
       ).subscribe(([experimentId, selectedExperiments]) => {
-        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId) as unknown as IExperimentInfo;
-        this.isExample = isReadOnly(this.selectedExperiment);
-        this.isDevelopment = isDevelopment(this.selectedExperiment);
+        this.selectedExperiment.set(selectedExperiments.find(experiment => experiment.id === experimentId) as unknown as IExperimentInfo);
+        this.isExample = isReadOnly(this.selectedExperiment());
+        this.isDevelopment = isDevelopment(this.selectedExperiment());
         this.store.dispatch(resetExperimentMetrics());
         this.store.dispatch(infoActions.resetExperimentInfo());
         this.store.dispatch(infoActions.getExperimentInfo({id: experimentId}));
@@ -139,9 +140,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.subs.add(this.store.select(selectSelectedExperiment)
       .pipe(filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
-        this.selectedExperiment = experiment;
-        this.isExample = isReadOnly(this.selectedExperiment);
-        this.isDevelopment = isDevelopment(this.selectedExperiment);
+        this.selectedExperiment.set(experiment);
+        this.isExample = isReadOnly(this.selectedExperiment());
+        this.isDevelopment = isDevelopment(this.selectedExperiment());
       })
     );
   }
@@ -175,7 +176,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
   updateExperimentName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
+      this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment().id, changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }

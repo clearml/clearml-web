@@ -9,12 +9,12 @@
     >
     <sm-button-toggle
       left-items
-      [value]="true"
       [options]="[
              {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
              {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-      (valueChanged)="toggleNestedView.emit($any($event))"
+      [ngModel]="true"
+      (ngModelChange)="toggleNestedView.emit($any($event))"
     ></sm-button-toggle>
     <div class="d-flex">
       <ng-content select="[create-button]"></ng-content>

@@ -34,7 +34,7 @@ export class ScatterPlotComponent {
   colors = input<string[]>();
   xAxisLabel = input<string>();
   yAxisLabel = input<string>();
-  extraHoverInfoParams = input<string[]>([]);
+  extraHoverInfoParams = input<{section: string; name: string}[]>([]);
   data = input<ScatterPlotSeries[]>();
   showLoadingOverlay = input<boolean>();
   xAxisType = input<'linear' | 'logarithmic' | 'category' | 'time' | 'timeseries'>();

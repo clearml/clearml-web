@@ -86,7 +86,7 @@ export class NotifierTimerService {
    * Finish up the timeout by resolving the timer promise
    */
   private finish(): void {
-    this.finishPromiseResolver(null);
+    this.finishPromiseResolver?.(null);
   }
 
 }

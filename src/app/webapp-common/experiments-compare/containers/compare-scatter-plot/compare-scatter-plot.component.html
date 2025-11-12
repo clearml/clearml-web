@@ -1,4 +1,4 @@
-@if (graphData?.length > 0) {
+@if (graphData()?.length > 0) {
   <div class="buttons">
     <button mat-icon-button smTooltip="Download" (click)="downloadImage()">
       <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
@@ -6,9 +6,9 @@
   </div>
 }
 <sm-scatter-plot
-  [xAxisType]="scalar ? 'linear' : 'category'"
-  [xAxisLabel]="params?.[0] ?? $any(params)"
-  [yAxisLabel]="metricName"
-  [extraHoverInfoParams]="extraHoverInfoParams"
-  [data]="graphData"
+  [xAxisType]="scalar() ? 'linear' : 'category'"
+  [xAxisLabel]="xAxisLabel()"
+  [yAxisLabel]="metricName()"
+  [extraHoverInfoParams]="extraHoverInfoParams()"
+  [data]="graphData()"
 ></sm-scatter-plot>

@@ -53,9 +53,7 @@
       Block running user's scripts in the browser
       <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info ms-3"
                 data-id="blockScriptsInfoIcon"
-                [smTooltip]="config.configuration().blockUserScript ?
-         'User scripts are blocked by system administrator. you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.' :
-         'Block any user and 3rd party scripts from running anywhere in the WebApp. Note that if this is turned on, you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.'"
+                [smTooltip]="blockScriptNotice()"
       ></mat-icon>
     </div>
   </mat-slide-toggle>

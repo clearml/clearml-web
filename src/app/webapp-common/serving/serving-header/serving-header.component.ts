@@ -1,6 +1,6 @@
-import {Component, computed, input, output } from '@angular/core';
+import {Component, input, output } from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {
@@ -27,7 +27,6 @@ export class ServingHeaderComponent extends BaseEntityHeaderComponent {
   rippleEffect = input<boolean>();
   hideNavigation = input<boolean>();
   tableCols = input<ISmCol[]>();
-  tableCols2 = computed(() => this.tableCols()?.filter(col => col.header !== ''));
 
   isArchivedChanged = output<boolean>();
   addModelClicked = output();

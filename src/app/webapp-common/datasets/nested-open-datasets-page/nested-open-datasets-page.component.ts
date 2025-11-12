@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {
   getProjectsTags,
@@ -14,9 +14,8 @@ import {
   selectDefaultNestedModeForFeature,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode,
-  selectProjectTags
 } from '@common/core/reducers/projects.reducer';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {getAllProjectsPageProjects, resetProjects} from '@common/projects/common-projects.actions';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
@@ -40,12 +39,11 @@ import {MatButton} from '@angular/material/button';
         MatButton
     ]
 })
-export class NestedOpenDatasetsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
+export class NestedOpenDatasetsPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
   entityTypeEnum = ProjectTypeEnum;
   circleTypeEnum = CircleTypeEnum;
   hideMenu = false;
   entityType = ProjectTypeEnum.datasets;
-  projectsTags$: Observable<string[]>;
   private mainPageFilterSub: Subscription;
 
   override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
@@ -77,7 +75,6 @@ export class NestedOpenDatasetsPageComponent extends CommonProjectsPageComponent
 
   override ngOnInit() {
     super.ngOnInit();
-    this.projectsTags$ = this.store.select(selectProjectTags);
     this.store.dispatch(getProjectsTags({entity: 'dataset'}));
     // Todo: 1 subscription at base, get function to supply relevant selectors
     this.mainPageFilterSub = combineLatest([
@@ -100,6 +97,7 @@ export class NestedOpenDatasetsPageComponent extends CommonProjectsPageComponent
 
   override ngOnDestroy() {
     super.ngOnDestroy();
+    this.subs.unsubscribe();
     this.mainPageFilterSub.unsubscribe();
     this.store.dispatch(setTags({tags: []}));
   }

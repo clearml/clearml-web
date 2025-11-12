@@ -28,11 +28,9 @@ export const getDeleteProjectPopupStatsBreakdown = (readyForDeletion, statsSubse
 
 export const readyForDeletionFilter = readyForDeletion => !(readyForDeletion.experiments === null || readyForDeletion.models === null);
 
-export const isDatasets = (snapshot: ActivatedRouteSnapshot) => snapshot.firstChild.routeConfig.path === 'datasets';
+export const isDatasets = (snapshot: ActivatedRouteSnapshot) => snapshot.firstChild.firstChild.routeConfig.path === 'datasets';
 
 export const routeConfToProjectType = (routeConf: string[]) => routeConf[0];
-export const getNoProjectsReRoute = (() => 'tasks');
-export const isNestedDatasets = (routeConf: string[]) => ['simple'].includes(routeConf?.[1]);
 
 export const getFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot, nested: boolean, searchQuery: any, selectedProjectName: any, selectedProjectId: any): ProjectsGetAllExRequest => {
   const pipelines = isPipelines(snapshot);

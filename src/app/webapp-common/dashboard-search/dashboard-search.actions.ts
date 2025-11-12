@@ -7,12 +7,13 @@ import {ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.con
 import {DASHBOARD_PREFIX} from '@common/dashboard/common-dashboard.const';
 import {IReport} from '@common/reports/reports.consts';
 import {TableFilter} from '@common/shared/utils/tableParamEncode';
-import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
+import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
+import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
 
 
 export const searchSetTerm = createAction(
   SEARCH_PREFIX + 'SET_TERM',
-  props<{ query: string; regExp?: boolean; force?: boolean }>()
+  props<{ query: string; regExp?: boolean; force?: boolean; advanced?: boolean }>()
 );
 
 export const searchStart = createAction(
@@ -20,9 +21,9 @@ export const searchStart = createAction(
   props<{ query: string; regExp?: boolean }>()
 );
 
-export const searchTableFilterChanged= createAction(
+export const searchTableFilterChanged = createAction(
   SEARCH_PREFIX + '[table filters changed]',
-  props<{filter: TableFilter}>()
+  props<{ filter: TableFilter }>()
 );
 export const searchSetTableFilters = createAction(
   SEARCH_PREFIX + ' [set table filters]',
@@ -49,13 +50,38 @@ export const searchReports = createAction(
   props<{ query: string; regExp?: boolean }>()
 );
 
+export const searchEndpoints = createAction(
+  SEARCH_PREFIX + 'SEARCH_ENDPOINTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const getEndpoints = createAction(
+  SEARCH_PREFIX + 'GET_ENDPOINTS'
+);
+
+
 export const setReportsResults = createAction(
-  'Set Reports Results',
-  props<{ reports: IReport[]; scrollId: string }>()
+  `${SEARCH_PREFIX}Set Reports Results`,
+  props<{ reports: IReport[]; page: number }>()
+);
+
+export const setEndpointsResults = createAction(
+  `${SEARCH_PREFIX}Set Endpoints Results`,
+  props<{ endpoints: EndpointStats[] }>()
+);
+
+export const setLoadingEndpointsResults = createAction(
+  `${SEARCH_PREFIX}Set Loading Endpoints Results`,
+  props<{ instances: ContainerInfo[] }>()
 );
 
 export const searchOpenDatasets = createAction(
   SEARCH_PREFIX + 'SEARCH_OPEN_DATASETS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const loadMoreOpenDatasets = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_OPEN_DATASETS',
   props<{ query: string; regExp?: boolean }>()
 );
 
@@ -64,23 +90,49 @@ export const loadMoreOpenDatasetsVersions = createAction(
   props<{ query: string; regExp?: boolean }>()
 );
 
+export const loadMoreModels = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_OPEN_DATASETS_MODELS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const loadMoreProjects = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_PROJECTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const loadMoreExperiments = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_EXPERIMENTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const loadMorePipelines = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_PIPELINES',
+  props<{ query: string; regExp?: boolean }>()
+);
+
 export const loadMorePipelineRuns = createAction(
   SEARCH_PREFIX + 'LOAD_MORE_PIPELINES_RUNS',
   props<{ query: string; regExp?: boolean }>()
 );
 
+export const loadMoreReports = createAction(
+  SEARCH_PREFIX + 'LOAD_MORE_REPORTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+
 export const setPipelinesResults = createAction(
-  'Set Pipelines Results',
-  props<{ pipelines: Project[] }>()
+  `${SEARCH_PREFIX}Set Pipelines Results`,
+  props<{ pipelines: Project[], page: number }>()
 );
 
 export const setOpenDatasetsResults = createAction(
-  'Set open datasets Results',
-  props<{ datasets: Project[]; scrollId: string }>()
+  `${SEARCH_PREFIX}Set open datasets Results`,
+  props<{ datasets: Project[]; page: number }>()
 );
 
 export const setProjectsResults = createAction(SEARCH_PREFIX + 'SET_PROJECTS',
-  props<{ projects: Project[] }>()
+  props<{ projects: Project[]; page: number }>()
 );
 
 export const searchExperiments = createAction(
@@ -90,7 +142,7 @@ export const searchExperiments = createAction(
 
 export const setExperimentsResults = createAction(
   SEARCH_PREFIX + 'SET_EXPERIMENTS',
-  props<{ tasks: Task[]; page: number}>()
+  props<{ tasks: Task[]; page: number }>()
 );
 
 export const searchModels = createAction(
@@ -100,12 +152,12 @@ export const searchModels = createAction(
 
 export const setModelsResults = createAction(
   SEARCH_PREFIX + 'SET_MODELS',
-  props<{ models: Model[]; scrollId: string }>()
+  props<{ models: Model[]; page: number }>()
 );
 
 export const setResultsCount = createAction(
   SEARCH_PREFIX + 'SET_COUNTS',
-  props<{ counts: Map<ActiveSearchLink, number> }>()
+  props<{ counts: Record<ActiveSearchLink, number>, errors: Record<ActiveSearchLink, string> }>()
 );
 export const getCurrentPageResults = createAction(
   DASHBOARD_PREFIX + '[get current page results]',
@@ -120,6 +172,6 @@ export const getResultsCount = createAction(
   DASHBOARD_PREFIX + '[get results count]',
   props<{ query: string; regExp?: boolean; force?: boolean }>());
 
-export const clearSearchResults = createAction(DASHBOARD_PREFIX + '[clear search results]',
-  props<{ dontClearCount?: boolean }>());
+export const clearSearchResults = createAction(DASHBOARD_PREFIX + '[clear search results]');
+
 export const clearSearchFilters = createAction(DASHBOARD_PREFIX + '[clear search filters]');

@@ -1,9 +1,13 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, Observable, Subscription, take} from 'rxjs';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnDestroy
+} from '@angular/core';
+import {debounceTime, distinctUntilChanged, filter, combineLatest, Subscription, take} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
-import {flatten, has, isArray, isEqual} from 'lodash-es';
+import {castArray, flatten, isEqual} from 'lodash-es';
 import {setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {
   selectCompareIdsFromRoute,
@@ -26,7 +30,7 @@ import {
   setParamsHoverInfo,
   setShowIdenticalHyperParams
 } from '../../actions/experiments-compare-scalars-graph.actions';
-import {GroupedHyperParams, MetricOption} from '../../reducers/experiments-compare-charts.reducer';
+import {MetricOption} from '../../reducers/experiments-compare-charts.reducer';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -34,98 +38,83 @@ import {MetricValueType, SelectedMetricVariant} from '@common/experiments-compar
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
-  ExtraTask
-} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
-import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {
   SelectionEvent
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
+import {encodeMetric} from '@common/shared/utils/tableParamEncode';
+import {mapArray} from 'ngxtension/map-array';
 
 
 @Component({
-    selector: 'sm-experiment-compare-hyper-params-graph',
-    templateUrl: './experiment-compare-hyper-params-graph.component.html',
-    styleUrls: ['./experiment-compare-hyper-params-graph.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-compare-hyper-params-graph',
+  templateUrl: './experiment-compare-hyper-params-graph.component.html',
+  styleUrls: ['./experiment-compare-hyper-params-graph.component.scss'],
+  host: {
+    '(document:click)': 'clickOut()',
+    '(window:beforeunload)': 'unloadHandler()'
+  },
+  standalone: false
 })
-export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDestroy {
+export class ExperimentCompareHyperParamsGraphComponent implements OnDestroy {
+  private store = inject(Store);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private refresh = inject(RefreshService);
+  private reportEmbed = inject(ReportCodeEmbedService);
+  private cdr = inject(ChangeDetectorRef);
+
+  protected readonly decodeURIComponent = decodeURIComponent;
   private subs = new Subscription();
-
-  public selectHideIdenticalHyperParams$: Observable<boolean>;
-  public hyperParams$: Observable<GroupedHyperParams>;
-  public metricsOptions$: Observable<MetricOption[]>;
-  public selectedHyperParamsSettings$: Observable<string[]>;
-  public experiments$: Observable<ExtraTask[]>;
-
-  public graphs: { [key: string]: ExtFrame };
-  public selectedHyperParams: string[] = [];
-  public selectedMetric: SelectedMetricVariant;
-  public hyperParams: { [section: string]: any };
-  public showIdenticalParamsActive: boolean;
-  public plotlyReady$ = this.store.select(selectPlotlyReady);
-  public metricVariantToPathPipe = new MetricVariantToPathPipe;
-  public metrics: MetricOption[];
-  public listOpen = true;
   private initView = true;
   private taskIds: string[];
-
-  public scatter: boolean;
-  public metricsResults$: Observable<MetricVariantResult[]>;
-
-  public selectedMetricSettings$: Observable<SelectedMetricVariant>;
-  public selectedParamsHoverInfo$: Observable<string[]>;
-  public selectedMetricsHoverInfo$: Observable<SelectedMetricVariant[]>;
-  private: string[] = [];
-  private selectedParamsHoverInfo: string[];
+  private selectedParamsHoverInfo: {section: string; name: string}[];
   private selectedMetricsHoverInfo: SelectedMetricVariant[];
-  private compareIdsFromRoute$: Observable<string>;
-  private selectedHyperParamsHoverInfoSettings$: Observable<Array<string>>;
-  private selectedMetricsHoverInfoSettings$: Observable<SelectedMetricVariant[]>;
-  private selectedMetricsSettings$: Observable<SelectedMetricVariant[]>;
   private routeWasLoaded: boolean;
   private settingsLoaded: boolean;
+  protected graphs: Record<string, ExtFrame>;
+  protected selectedHyperParams: {section: string; name: string}[] = [];
+  protected encodedHyperParams: string[];
+  protected selectedMetric: SelectedMetricVariant;
+  protected hyperParams: Record<string, Record<string, string>>;
+  protected showIdenticalParamsActive: boolean;
+  protected plotlyReady$ = this.store.select(selectPlotlyReady);
+  protected metricVariantToPathPipe = new MetricVariantToPathPipe;
+  protected metrics: MetricOption[];
+  protected listOpen = true;
+  protected scatter: boolean;
 
-  public selectedItemsListMapper(data) {
-    return decodeURIComponent(data);
+  protected metricsOptions$ = this.store.select(selectScalarsGraphMetrics);
+  protected metricsResults$ = this.store.select(selectScalarsGraphMetricsResults);
+  protected hyperParams$ = this.store.select(selectScalarsGraphHyperParams);
+  protected selectedHyperParamsSettings$ = this.store.select(selectSelectedSettingsHyperParams);
+  protected selectedHyperParamsHoverInfoSettings$ = this.store.select(selectSelectedSettingsHyperParamsHoverInfo);
+  protected selectedParamsHoverInfo$ = this.store.select(selectScalarsParamsHoverInfo);
+  protected selectedParamsHoverInfoEncoded$ = this.selectedParamsHoverInfo$
+    .pipe(mapArray(param => this.paramEncoder(param)));
+  protected selectedMetricsHoverInfo$ = this.store.select(selectScalarsMetricsHoverInfo);
+  protected selectedMetricSettings$ = this.store.select(selectSelectedSettingsMetric);
+  protected selectedMetricsSettings$ = this.store.select(selectSelectedSettingsMetrics);
+  protected selectedMetricsHoverInfoSettings$ = this.store.select(selectSelectedSettingsMetricsHoverInfo);
+  protected selectHideIdenticalHyperParams$ = this.store.select(selectHideIdenticalFields);
+  protected experiments$ = this.store.select(selectScalarsGraphTasks);
+  protected compareIdsFromRoute$ = this.store.select(selectCompareIdsFromRoute);
+  protected selectedMetrics: SelectedMetricVariant[] = [];
+
+
+  protected paramEncoder({section, name}: {section: string; name: string}) {
+    return `${encodeMetric(section)}.${encodeMetric(name)}`
   }
 
-  @ViewChild('searchMetric') searchMetricRef: ElementRef;
-  selectedMetrics: SelectedMetricVariant[] = [];
-
-  @HostListener('document:click', [])
-  clickOut() {
-    if (!this.initView) {
-      this.listOpen = false;
-    }
+  protected paramEncoderOnlyDotsForBE({section, name}: {section: string; name: string}) {
+    return `${section.replaceAll('.', '%2E')}.${name.replaceAll('.', '%2E')}`
   }
 
-  @HostListener('window:beforeunload', ['$event']) unloadHandler() {
-    this.saveSettingsState();
+  protected paramDecoder(data: string) {
+    const [section, name] = data.split('.');
+    return {section: decodeURIComponent(section), name: decodeURIComponent(name)};
   }
 
-  constructor(private store: Store,
-              private route: ActivatedRoute,
-              private router: Router,
-              private refresh: RefreshService,
-              private reportEmbed: ReportCodeEmbedService,
-              private cdr: ChangeDetectorRef) {
-    this.metricsOptions$ = this.store.select(selectScalarsGraphMetrics);
-    this.metricsResults$ = this.store.select(selectScalarsGraphMetricsResults);
-    this.hyperParams$ = this.store.select(selectScalarsGraphHyperParams);
-    this.selectedHyperParamsSettings$ = this.store.select(selectSelectedSettingsHyperParams);
-    this.selectedHyperParamsHoverInfoSettings$ = this.store.select(selectSelectedSettingsHyperParamsHoverInfo);
-    this.selectedParamsHoverInfo$ = this.store.select(selectScalarsParamsHoverInfo);
-    this.selectedMetricsHoverInfo$ = this.store.select(selectScalarsMetricsHoverInfo);
-    this.selectedMetricSettings$ = this.store.select(selectSelectedSettingsMetric);
-    this.selectedMetricsSettings$ = this.store.select(selectSelectedSettingsMetrics);
-    this.selectedMetricsHoverInfoSettings$ = this.store.select(selectSelectedSettingsMetricsHoverInfo);
-    this.selectHideIdenticalHyperParams$ = this.store.select(selectHideIdenticalFields);
-    this.experiments$ = this.store.select(selectScalarsGraphTasks);
-    this.compareIdsFromRoute$ = this.store.select(selectCompareIdsFromRoute);
-  }
-
-  ngOnInit() {
+  constructor() {
     this.scatter = this.route.snapshot.data?.scatter;
     this.subs.add(combineLatest([this.hyperParams$, this.selectHideIdenticalHyperParams$])
       .pipe(
@@ -148,9 +137,10 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
             }
             return acc;
           }, {});
-        const selectedHyperParams = this.selectedHyperParams?.filter(selectedParam => has(this.hyperParams, selectedParam.split('.').slice(0, 1).join('.')));
-        selectedHyperParams && this.updateServer(this.selectedMetric, selectedHyperParams);
-        this.cdr.detectChanges();
+        const selectedHyperParams = this.selectedHyperParams?.filter(selectedParam =>
+          this.hyperParams[selectedParam.section]?.[selectedParam.name]) ?? [];
+        this.updateServer(this.selectedMetric, selectedHyperParams);
+        this.cdr.markForCheck();
       }));
 
     this.subs.add(combineLatest([this.metricsOptions$, this.hyperParams$, this.store.select(selectRouterQueryParams)]).pipe(
@@ -197,13 +187,14 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
         }
 
         if (queryParams.params) {
-          this.selectedHyperParams = Array.isArray(queryParams.params) ? queryParams.params.map(this.selectedItemsListMapper) : [queryParams.params].map(this.selectedItemsListMapper);
+          this.encodedHyperParams = queryParams.params;
+          this.selectedHyperParams = castArray(queryParams.params).map(this.paramDecoder);
         }
       } else {
         this.selectedMetric = null;
         this.selectedMetrics = [];
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     }));
 
 
@@ -224,20 +215,37 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
         this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds, autoRefresh}))
       ));
 
-    this.subs.add(combineLatest([this.selectedMetricSettings$, this.selectedHyperParamsSettings$,
-      this.selectedMetricsHoverInfoSettings$, this.selectedHyperParamsHoverInfoSettings$, this.selectedMetricsSettings$]).pipe(
-      take(1)
-    )
+    this.subs.add(combineLatest([
+      this.selectedMetricSettings$,
+      this.selectedHyperParamsSettings$,
+      this.selectedMetricsHoverInfoSettings$,
+      this.selectedHyperParamsHoverInfoSettings$,
+      this.selectedMetricsSettings$
+    ])
+      .pipe(take(1))
       .subscribe(([selectedMetric, selectedParams, selectedMetricsHoverInfo, selectedParamsHoverInfo, selectedMetrics]) => {
-        selectedMetricsHoverInfo?.length > 0 && this.store.dispatch(setMetricsHoverInfo({metricsHoverInfo: selectedMetricsHoverInfo as SelectedMetricVariant[]}));
-        selectedParamsHoverInfo?.length > 0 && this.store.dispatch(setParamsHoverInfo({paramsHoverInfo: selectedParamsHoverInfo}));
-        this.updateServer(selectedMetric, selectedParams, false, null, selectedMetrics, true);
+        if (selectedMetricsHoverInfo?.length > 0) {
+          this.store.dispatch(setMetricsHoverInfo({metricsHoverInfo: selectedMetricsHoverInfo as SelectedMetricVariant[]}));
+          this.store.dispatch(setParamsHoverInfo({paramsHoverInfo: selectedParamsHoverInfo.map(this.paramDecoder)}));
+        }
+        this.updateServer(selectedMetric, selectedParams?.map(this.paramDecoder) ?? [], false, null, selectedMetrics, true);
         this.settingsLoaded = true;
       }));
+
     this.subs.add(this.selectedParamsHoverInfo$
       .subscribe(p => this.selectedParamsHoverInfo = p));
     this.subs.add(this.selectedMetricsHoverInfo$
       .subscribe(p => this.selectedMetricsHoverInfo = p));
+  }
+
+  clickOut() {
+    if (!this.initView) {
+      this.listOpen = false;
+    }
+  }
+
+  unloadHandler() {
+    this.saveSettingsState();
   }
 
   ngOnDestroy() {
@@ -253,11 +261,14 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   selectedParamsChanged({param}) {
-    param = decodeURI(param);
+    const selected = this.paramDecoder(param);
+    const included = this.selectedHyperParams.some(p => p.name === selected.name && p.section === selected.section);
     if (this.scatter) {
-      this.updateServer(this.selectedMetric, this.selectedHyperParams.includes(param) ? [] : [param]);
+      this.updateServer(this.selectedMetric, included ? [] : [selected]);
     } else {
-      const newSelectedParamsList = this.selectedHyperParams.includes(param) ? this.selectedHyperParams.filter(i => i !== param) : [...this.selectedHyperParams, param];
+      const newSelectedParamsList = included ?
+        this.selectedHyperParams.filter(p => !(p.name === selected.name && p.section === selected.section)) :
+        [...this.selectedHyperParams, selected];
       this.updateServer(this.selectedMetric, newSelectedParamsList);
     }
   }
@@ -272,7 +283,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
 
 
   updateServer(selectedMetric?: SelectedMetricVariant,
-               selectedParams?: string[],
+               selectedParams?: {section: string; name: string}[],
                skipNavigation?: boolean,
                valueType?: SelectedMetricVariant['valueType'],
                selectedMetrics?: SelectedMetricVariant[],
@@ -281,9 +292,9 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       this.router.navigate([], {
         queryParams: {
           metricPath: selectedMetric ? `${selectedMetric?.metric_hash}.${selectedMetric?.variant_hash}` : undefined,
-          ...(isArray(selectedMetrics) && {metricVariants: selectedMetrics.map(mv => this.metricVariantToPathPipe.transform(mv, true)).toString()}),
+          ...(Array.isArray(selectedMetrics) && {metricVariants: selectedMetrics.map(mv => this.metricVariantToPathPipe.transform(mv, true)).toString()}),
           metricName: selectedMetric ? `${selectedMetric?.metric}/${selectedMetric?.variant}` : undefined,
-          ...(selectedParams && {params: selectedParams}),
+          ...(selectedParams && {params: selectedParams.map(param => this.paramEncoder(param))}),
           valueType: selectedMetric ? selectedMetric?.valueType || valueType || 'value' : undefined
         },
         queryParamsHandling: 'merge',
@@ -297,14 +308,15 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     tasks: string[];
     valueType: MetricValueType;
     metrics?: string[];
-    variants?: string[];
+    variants?: {section: string; name: string}[];
     domRect: DOMRect
   }) {
     this.reportEmbed.createCode({
       type: 'parcoords',
       objects: event.tasks,
       objectType: 'task',
-      ...event
+      ...event,
+      variants: event.variants.map(this.paramEncoderOnlyDotsForBE)
     });
   }
 
@@ -314,8 +326,8 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       changes: {
         selectedMetric: this.selectedMetric,
         selectedMetrics: this.selectedMetrics,
-        selectedHyperParams: this.selectedHyperParams,
-        selectedParamsHoverInfo: this.selectedParamsHoverInfo,
+        selectedHyperParams: this.selectedHyperParams.map(this.paramEncoder),
+        selectedParamsHoverInfo: this.selectedParamsHoverInfo.map(this.paramEncoder),
         selectedMetricsHoverInfo: this.selectedMetricsHoverInfo
       }
     }));
@@ -331,8 +343,11 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   selectedParamsForHoverChanged({param}) {
-    param = decodeURI(param);
-    const newSelectedParamsList = this.selectedParamsHoverInfo.includes(param) ? this.selectedParamsHoverInfo.filter(i => i !== param) : [...this.selectedParamsHoverInfo, param].map(this.selectedItemsListMapper);
+    const selected = this.paramDecoder(param);
+    const included = this.selectedParamsHoverInfo.some(p => p.name === selected.name && p.section === selected.section);
+    const newSelectedParamsList = included ?
+      this.selectedParamsHoverInfo.filter(p => !(p.name === selected.name && p.section === selected.section)) :
+      [...this.selectedParamsHoverInfo, selected];
     this.store.dispatch(setParamsHoverInfo({paramsHoverInfo: newSelectedParamsList}));
 
   }

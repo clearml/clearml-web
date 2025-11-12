@@ -6,20 +6,18 @@
   }
 
   .has-header {
-    ::ng-deep .p-datatable-scrollable, ::ng-deep .p-datatable {
-      & > .p-datatable-table-container .p-datatable-table > .p-datatable-thead {
-        z-index: 20;
+    ::ng-deep .p-datatable-thead {
+      z-index: 20;
 
-        &:after {
-          content: "";
-          position: absolute;
-          z-index: -1;
-          left: 0;
-          right: 0;
-          top: 0;
-          height: var(--table-row-height);
-          background-color: var(--row-header-color);
-        }
+      &:after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: var(--table-row-height);
+        background-color: var(--row-header-color);
       }
     }
   }
@@ -190,7 +188,7 @@
       background-color: var(--row-selected-color);
       color: var(--row-selected-text-color);
 
-      --mdc-checkbox-unselected-icon-color: var(--color-on-surface);
+      --mat-checkbox-unselected-icon-color: var(--color-on-surface);
 
       ::ng-deep mat-checkbox:not(.mat-mdc-checkbox-checked) {
         .mdc-checkbox:hover .mdc-checkbox__background {

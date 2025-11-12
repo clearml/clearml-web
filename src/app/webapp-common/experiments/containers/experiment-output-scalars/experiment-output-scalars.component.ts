@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, EffectRef, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, EffectRef, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {
@@ -54,7 +54,6 @@ import {ExperimentSettings} from '@common/experiments/reducers/experiment-output
 export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   protected store = inject(Store);
   protected activeRoute = inject(ActivatedRoute);
-  private changeDetection = inject(ChangeDetectorRef);
   private reportEmbed = inject(ReportCodeEmbedService);
   private refreshService = inject(RefreshService);
 
@@ -125,17 +124,18 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.mainEffectRef1 = explicitEffect(
       [this.listOfHidden], ([hiddenList]) => {
         if (this.scalars() && this.groupBy() && hiddenList) {
-          this.dataHandler(this.scalars(), hiddenList, this.groupBy(), true);
+          this.dataHandler(this.scalars(), hiddenList, this.groupBy(), this.graphs());
         }
       });
 
     this.mainEffectRef2 = explicitEffect(
-      [this.groupBy, this.scalars, this.xAxisType], ([groupBy, scalars]) => {
+      [this.groupBy, this.scalars, this.xAxisType], ([groupBy, scalars, xAxisType]) => {
         if (groupBy && scalars &&
           // prevent rendering chart with misfit x-axis type and data
           ( Object.values(scalars || {}).length === 0 ||
-            (this.xAxisType() !== 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] > 1600000000000) ||
-            (this.xAxisType() === 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] < 1600000000000))
+            !this.graphs() ||
+            (xAxisType !== 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] > 1600000000000) ||
+            (xAxisType === 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] < 1600000000000))
         ) {
           this.dataHandler(scalars, this.listOfHidden(), groupBy, false);
         }

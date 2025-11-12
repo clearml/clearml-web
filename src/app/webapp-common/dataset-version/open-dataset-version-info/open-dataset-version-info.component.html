@@ -65,13 +65,13 @@
       }
     </div>
     <sm-button-toggle
-      [value]="detailsPanelMode()"
+      [ngModel]="detailsPanelMode()"
         [options]="[
           {label: 'CONTENT', value: statusOption.content},
           {label: 'PREVIEW', value: statusOption.preview},
           {label: 'CONSOLE', value: statusOption.log}
         ]"
-      (valueChanged)="detailsPanelMode.set($event)"
+      (ngModelChange)="detailsPanelMode.set($event)"
     ></sm-button-toggle>
     <div class="close gap-3">
       <button mat-icon-button (click)="toggleResultSize()" data-id="expandButton">

@@ -8,7 +8,6 @@ import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
-import * as routerActions from './webapp-common/core/actions/router.actions';
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
 import {selectAvailableUpdates} from './core/reducers/view.reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
@@ -23,6 +22,7 @@ import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 import {ThemeService} from '@common/shared/services/theme.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {RouterEffects} from '@common/core/effects/router.effects';
 
 @Component({
     selector: 'sm-root',
@@ -41,6 +41,7 @@ export class AppComponent {
   private tipsService = inject(TipsService);
   private renderer = inject(Renderer2);
   private config = inject(ConfigurationService);
+  private routerSerice = inject(RouterEffects);
   private breadcrumbsService = inject(BreadcrumbsService); // don't delete
   private themeService = inject(ThemeService); // don't delete
 
@@ -72,7 +73,7 @@ export class AppComponent {
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.store.dispatch(routerActions.navigationEnd()));
+      .subscribe(() => this.routerSerice.routerNavigationEnd());
 
     this.store.select(selectCurrentUser)
       .pipe(

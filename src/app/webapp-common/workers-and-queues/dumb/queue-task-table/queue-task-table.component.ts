@@ -4,12 +4,23 @@ import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {DatePipe} from '@angular/common';
+import {PrimeTemplate} from 'primeng/api';
 
 @Component({
-    selector: 'sm-queue-task-table',
-    templateUrl: './queue-task-table.component.html',
-    styleUrls: ['./queue-task-table.component.scss'],
-    standalone: false
+  selector: 'sm-queue-task-table',
+  templateUrl: './queue-task-table.component.html',
+  styleUrls: ['./queue-task-table.component.scss'],
+  imports: [
+    TableComponent,
+    TooltipDirective,
+    TimeAgoPipe,
+    DatePipe,
+    PrimeTemplate
+  ]
 })
 export class QueueTaskTableComponent {
 

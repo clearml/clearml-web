@@ -1,16 +1,22 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild, viewChildren} from '@angular/core';
-import {ActionCreator, Store} from '@ngrx/store';
-import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
-import {Project} from '~/business-logic/model/projects/project';
 import {
-  selectIsArchivedMode,
+  Component, computed,
+  DestroyRef, effect,
+  inject,
+  OnDestroy,
+  Signal,
+  viewChild
+} from '@angular/core';
+import {Action, ActionCreator, MemoizedSelector, Store} from '@ngrx/store';
+import {combineLatest, Observable, of, switchMap} from 'rxjs';
+import {debounceTime, filter, map, take, tap} from 'rxjs/operators';
+import {
+  selectDefaultNestedModeForFeature,
+  selectIsArchivedMode, selectIsDeepMode, selectMinimizedView, selectRouterProjectId,
   selectSelectedProject,
   selectSelectedProjectUsers,
   selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
-import {SplitAreaComponent, SplitComponent, SplitGutterInteractionEvent} from 'angular-split';
-import {selectRouterParams} from '../../core/reducers/router-reducer';
+import {SplitComponent, SplitGutterInteractionEvent} from 'angular-split';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items/footer-items.models';
 import {
@@ -31,14 +37,14 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
 import {setTableModeAwareness} from '@common/projects/common-projects.actions';
-import {User} from '~/business-logic/model/users/user';
 import {neverShowPopupAgain, toggleCardsCollapsed} from '../../core/actions/layout.actions';
 import {selectNeverShowPopups, selectTableCardsCollapsed} from '../../core/reducers/view.reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {HeaderMenuService} from '@common/shared/services/header-menu.service';
-import {selectProjectId} from '@common/models/reducers';
+import {HeaderMenuService} from '~/shared/services/header-menu.service';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {concatLatestFrom} from '@ngrx/operators';
 import {resetTablesFilterParentsOptions} from '@common/experiments/actions/common-experiments-view.actions';
 
 @Component({
@@ -46,49 +52,44 @@ import {resetTablesFilterParentsOptions} from '@common/experiments/actions/commo
   template: '',
   standalone: false
 })
-export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export abstract class BaseEntityPageComponent implements OnDestroy {
   protected store = inject(Store);
   protected route = inject(ActivatedRoute);
   protected router = inject(Router);
   protected dialog = inject(MatDialog);
   protected refresh = inject(RefreshService);
   protected contextMenuService = inject(HeaderMenuService);
+  protected readonly destroyRef = inject(DestroyRef);
 
   protected entities = [];
-  protected entityType: EntityTypeEnum;
-  public selectedProject$: Observable<Project>;
-  protected setSplitSizeAction: ActionCreator<string, any>;
-  protected addTag: ActionCreator<string, any>;
-  protected abstract setTableModeAction: ActionCreator<string, any>;
+  protected setSplitSizeAction: ActionCreator<string, (props: {splitSize: number}) => ({splitSize: number} & Action)>;
+  protected addTag: ActionCreator<string, (props: {tag: string}) => ({tag: string} & Action)>;
+  protected abstract setTableModeAction: ActionCreator<string, (props: {mode: string}) => ({mode: string} & Action)>;
   public shouldOpenDetails = false;
-  protected sub = new Subscription();
   public checkedExperiments: IExperimentInfo[];
-  public projectId: string;
-  public isExampleProject: boolean;
-  protected selectSplitSize$?: Observable<number>;
+  public projectId = this.store.selectSignal(selectRouterProjectId);
+  protected splitSize?: Signal<number>;
   public infoDisabled: boolean;
-  public splitInitialSize: number;
-  public minimizedView: boolean;
   public footerItems = [] as ItemFooterModel[];
   public footerState$: Observable<IFooterState<{ id: string }>>;
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
-  private destroy$ = new Subject();
-  public users$: Observable<User[]>;
-  public projectsOptions$: Observable<Project[]>;
+  protected users = this.store.selectSignal(selectSelectedProjectUsers);
+  protected projectsOptions = this.store.selectSignal(selectTablesFilterProjectsOptions);
+  protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
+  protected projectDeepMode = this.store.selectSignal(selectIsDeepMode);
+  protected cardsCollapsed = this.store.selectSignal(selectTableCardsCollapsed(this.entityType));
+  protected selectedProject = this.store.selectSignal(selectSelectedProject);
+  protected allProjects = computed(() => this.selectedProject()?.id === '*');
+  protected exampleProject = computed(() => isReadOnly(this.selectedProject()));
+  protected tableMode: Signal<'info' | 'table' | 'compare'>;
   protected parents = [];
-  // public compareViewMode: 'scalars' | 'plots';
 
-  @ViewChild('split') split: SplitComponent;
-  splitAreas = viewChildren(SplitAreaComponent);
-  protected abstract inEditMode$: Observable<boolean>;
-  public selectedProject: Project;
+  protected split = viewChild(SplitComponent);
   private currentSelection: { id: string }[];
   protected showAllSelectedIsActive$: Observable<boolean>;
-  private allProjects: boolean;
-  public cardsCollapsed$: Observable<boolean>;
-  protected minimizedView$: Observable<boolean>;
-  protected selectSplitSize: number;
+  protected minimizedView = this.store.selectSignal(selectMinimizedView(this.getParamId));
+  protected inArchivedMode = this.store.selectSignal(selectIsArchivedMode);
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -105,82 +106,51 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     return this.route.parent.snapshot.params.projectId;
   }
 
-  protected projectId$ = this.store.selectSignal(selectProjectId);
-  protected isArchivedMode = this.store.selectSignal(selectIsArchivedMode);
+  get selectEditMode(): MemoizedSelector<unknown, boolean> | undefined {
+    return undefined;
+  }
+  protected get entityType(): EntityTypeEnum {
+    return undefined;
+  };
+
   protected constructor() {
+    effect(() => {
+      if (this.tableMode) {
+        this.shouldOpenDetails = this.tableMode() !== 'table';
+      }
+    });
 
-    this.users$ = this.store.select(selectSelectedProjectUsers);
-    this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
-      this.selectedProject = project;
-      this.allProjects = project?.id === '*';
-      this.isExampleProject = isReadOnly(project);
-    }));
-    this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
-
-    this.minimizedView$ = this.store.select(selectRouterParams).pipe(
-      map(params => !!this.getParamId(params) || Object.hasOwn(params, 'ids'))
-    );
     this.tableModeAwareness$ = this.store.select(selectTableModeAwareness)
       .pipe(
         filter(featuresAwareness => featuresAwareness !== null && featuresAwareness !== undefined),
         tap(aware => this.tableModeAwareness = aware)
       );
 
-  }
 
-  ngOnInit() {
-    this.cardsCollapsed$ = this.store.select(selectTableCardsCollapsed(this.entityType)).pipe(distinctUntilChanged());
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.selectSplitSize$?.pipe(filter(x => !!x), take(1))
-      .subscribe(x => this.splitInitialSize = x);
-
-    this.sub.add(this.minimizedView$.subscribe(minimized => {
-        if (this.split && this.minimizedView === true && !minimized) {
-          this.splitInitialSize = this.selectSplitSize;
-        }
-        if (this.selectSplitSize === 99) {
-          this.store.dispatch(this.setSplitSizeAction({splitSize: this.splitInitialSize}));
-        }
-        this.minimizedView = minimized;
-      }
-    ));
-
-    this.sub.add(this.refresh.tick
+    this.refresh.tick
       .pipe(
-        withLatestFrom(this.inEditMode$, this.showAllSelectedIsActive$),
+        takeUntilDestroyed(),
+        concatLatestFrom(() => [
+          ...(this.selectEditMode ? [this.store.select(this.selectEditMode)] : []),
+          this.showAllSelectedIsActive$]
+        ),
         filter(([tick, edit, showAllSelectedIsActive]) => !tick && !edit && !showAllSelectedIsActive),
         map(([auto]) => auto)
       )
-      .subscribe(auto => this.refreshList(auto !== false))
-    );
+      .subscribe(auto => this.refreshList(auto !== false));
     this.setupBreadcrumbsOptions();
-
-
-    // please refactor to signals
-    this.selectSplitSize$?.pipe(takeUntil(this.destroy$))
-      .subscribe(size => this.selectSplitSize = size);
   }
 
-  ngAfterViewInit() {
-    if (this.setSplitSizeAction) {
-      this.sub.add(this.split.dragProgress$.pipe(throttleTime(100))
-        .subscribe((progress) => this.store.dispatch(this.setSplitSizeAction({splitSize: progress.sizes[1] as number})))
-      );
-    }
-  }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
     this.footerItems = [];
     this.store.dispatch(setCustomMetrics({metrics: null}));
-    this.destroy$.next(null);
-    this.destroy$.complete();
   }
 
   closePanel(queryParams?: Params) {
     window.setTimeout(() => this.infoDisabled = false);
     this.store.dispatch(this.setTableModeAction({mode: 'table'}));
-    return this.router.navigate(this.minimizedView ? [{}] : [], {
+    return this.router.navigate(this.minimizedView() ? [{}] : [], {
       relativeTo: this.route,
       queryParamsHandling: 'merge',
       queryParams
@@ -192,8 +162,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   splitSizeChange(event: SplitGutterInteractionEvent) {
+    const size = event.sizes[1] as number;
     if (this.setSplitSizeAction) {
-      this.store.dispatch(this.setSplitSizeAction({splitSize: event.sizes[1] as number}));
+      this.store.dispatch(this.setSplitSizeAction({splitSize: size}));
     }
     this.infoDisabled = false;
   }
@@ -233,9 +204,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       config.selected$,
       config.data$,
       config.showAllSelectedIsActive$,
-      this.allProjects ? of(null) : config.companyTags$,
-      this.allProjects ? config.companyTags$ : config.projectTags$,
-      this.allProjects ? of(true) : config.tagsFilterByProject$
+      this.allProjects() ? of(null) : config.companyTags$,
+      this.allProjects() ? config.companyTags$ : config.projectTags$,
+      this.allProjects() ? of(true) : config.tagsFilterByProject$
     );
   }
 
@@ -261,7 +232,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
         tagsFilterByProject$
       ]
     ).pipe(
-      takeUntil(this.destroy$),
+      takeUntilDestroyed(this.destroyRef),
       debounceTime(100),
       filter(([selected, , showAllSelectedIsActive]) => selected.length > 1 || this.currentSelection?.length > 1 || showAllSelectedIsActive),
       tap(([selected]) => this.currentSelection = selected),
@@ -269,7 +240,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           const _selectionAllHasExample = selectionAllHasExample(selected);
           const _selectionHasExample = selectionHasExample(selected);
           const _selectionExamplesCount = selectionExamplesCount(selected);
-          const isArchive = this.isArchivedMode() ?? selectionAllIsArchive(selected);
+          const isArchive = this.inArchivedMode() ?? selectionAllIsArchive(selected);
           return {
             selectionHasExample: _selectionHasExample,
             selectionAllHasExample: _selectionAllHasExample,
@@ -288,8 +259,8 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     );
   }
 
-  archivedChanged(isArchived: boolean) {
-    const navigate = () => this.closePanel({archive: isArchived || null}).then(() => {
+  archivedChanged(archived: boolean) {
+    const navigate = () => this.closePanel({archive: archived || null}).then(() => {
       this.afterArchiveChanged();
       this.store.dispatch(resetProjectSelection());
     });
@@ -327,25 +298,24 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     if (colId === 'project.name') {
-      if ((this.projectId || this.selectedProjectId) === '*') {
+      if ((this.projectId() || this.selectedProjectId) === '*') {
         this.store.dispatch(getTablesFilterProjectsOptions({
           searchString: value.value || '',
           loadMore: value.loadMore
         }));
       } else {
         this.store.dispatch(setTablesFilterProjectsOptions({
-          projects: this.selectedProject ? [this.selectedProject,
-            ...(this.selectedProject?.sub_projects ?? [])] : [], scrollId: null
+          projects: this.selectedProject() ? [this.selectedProject(),
+            ...(this.selectedProject()?.sub_projects ?? [])] : [], scrollId: null
         }));
       }
     }
   }
 
-  public setupBreadcrumbsOptions() {
-  }
+  setupBreadcrumbsOptions() {}
 
   public setupContextMenu(entitiesType: string, archive: boolean) {
-    this.contextMenuService.setupProjectContextMenu(entitiesType, this.projectId, archive);
+    this.contextMenuService.setupProjectContextMenu(entitiesType, this.selectedProjectId, archive);
   }
 
   cardsCollapsedToggle() {
@@ -355,4 +325,5 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(resetTablesFilterParentsOptions());
   }
+
 }

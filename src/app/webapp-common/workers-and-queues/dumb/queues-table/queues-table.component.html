@@ -31,7 +31,7 @@
         [class.first]="col.id === QUEUES_TABLE_COL_FIELDS.NAME"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         [column]="col"
-        [sortOrder]="tableSortFieldsObject[col.id]">
+        [sortOrder]="tableSortFieldsObject()[col.id]">
       </sm-table-filter-sort>
     </ng-template>
     <ng-template let-col let-queue="rowData" pTemplate="body">

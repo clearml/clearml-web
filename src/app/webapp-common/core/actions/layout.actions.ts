@@ -21,11 +21,12 @@ export const setCompareAutoRefresh = createAction(
 
 export const setServerError = createAction(
   VIEW_PREFIX + '[set server error]',
-  (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) => ({
+  (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false, errorHeader?: string) => ({
     serverError: omit(serverError, ['headers']) as Omit<HttpErrorResponse, 'headers'>,
     contextSubCode,
     customMessage,
-    aggregateSimilar
+    aggregateSimilar,
+    errorHeader
   })
 );
 

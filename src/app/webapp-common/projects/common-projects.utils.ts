@@ -1,9 +1,13 @@
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {ActivatedRouteSnapshot} from '@angular/router';
+import {ActivatedRouteSnapshot, Params} from '@angular/router';
 import ChildrenTypeEnum = ProjectsGetAllExRequest.ChildrenTypeEnum;
+import {Observable, pairwise, startWith, filter, map} from 'rxjs';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {isEqual} from 'lodash-es';
 
 export const getPipelineRequest = (nested, searchQuery, selectedProjectName, selectedProjectId): ProjectsGetAllExRequest => ({
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   ...(nested ? {
     children_type: ChildrenTypeEnum.Pipeline,
     shallow_search: true,
@@ -21,7 +25,7 @@ export const getPipelineRequest = (nested, searchQuery, selectedProjectName, sel
 });
 
 export const getReportRequest = (nested, searchQuery, selectedProjectName, selectedProjectId): ProjectsGetAllExRequest => ({
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   children_type: ChildrenTypeEnum.Report,
   shallow_search: nested,
   search_hidden: !nested && selectedProjectName,
@@ -31,7 +35,7 @@ export const getReportRequest = (nested, searchQuery, selectedProjectName, selec
 
 
 export const getDatasetsRequest = (nested: boolean, searchQuery: any, selectedProjectName: any, selectedProjectId: any) => ({
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   ...(nested ? {
     children_type: ChildrenTypeEnum.Dataset,
     shallow_search: true, ...(selectedProjectName && {parent: [selectedProjectId]}),
@@ -48,5 +52,28 @@ export const getDatasetsRequest = (nested: boolean, searchQuery: any, selectedPr
   stats_with_children: nested
 });
 
-export const isPipelines = (snapshot: ActivatedRouteSnapshot)=> snapshot.firstChild.routeConfig.path === 'pipelines';
-export const isReports = (snapshot: ActivatedRouteSnapshot)=> snapshot.firstChild.routeConfig.path === 'reports';
+export const distinctParamsUntilChanged$ = (observable: Observable<readonly [string, Params, ISmCol[]?]>) => {
+  let initial = true;
+  return observable.pipe(
+    startWith([null, {} as Params]),
+    takeUntilDestroyed(),
+    map(([projectId, queryParams]) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {q, qreg, gq, gqreg, tab, gsfilter, ...queryParamsWithoutSearch} = (queryParams ?? {});
+      return [projectId, queryParamsWithoutSearch];
+    }),
+    pairwise(),
+    filter(([[prevProjectId, prevQueryParams], [projectId, queryParams]]) => {
+      if (!projectId) {
+        return false;
+      }
+      const equal = !initial && projectId === prevProjectId && isEqual(queryParams, prevQueryParams);
+      initial = false;
+      return !equal;
+    }),
+    map(([[prev,], [projectId, queryParams]]) => [prev, projectId, queryParams] as [string, string, Params])
+  )
+};
+
+export const isPipelines = (snapshot: ActivatedRouteSnapshot)=> snapshot.firstChild.firstChild.routeConfig.path === 'pipelines';
+export const isReports = (snapshot: ActivatedRouteSnapshot)=> snapshot.firstChild.firstChild.routeConfig.path === 'reports';

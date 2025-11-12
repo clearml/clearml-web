@@ -6,20 +6,20 @@
   --mat-form-field-subscript-text-tracking: 0;
   --mat-form-field-container-height: 36px;
   --mat-form-field-container-vertical-padding: 8px;
-  --mdc-outlined-text-field-focus-outline-width: 1px;
+  --mat-form-field-outlined-focus-outline-width: 1px;
   --mat-form-field-subscript-text-size: 12px;
 
-  --mdc-outlined-text-field-hover-outline-color: var(--color-outline);
-  --mdc-outlined-text-field-outline-color: var(--color-outline-variant);
-  --mdc-outlined-text-field-label-text-color: var(--color-on-surface-variant);
-  --mdc-outlined-text-field-hover-label-text-color: var(--color-on-surface);
+  --mat-form-field-outlined-hover-outline-color: var(--color-outline);
+  --mat-form-field-outlined-outline-color: var(--color-outline-variant);
+  --mat-form-field-outlined-label-text-color: var(--color-on-surface-variant);
+  --mat-form-field-outlined-hover-label-text-color: var(--color-on-surface);
 
   --mat-form-field-state-layer-color: transparent;
-  --mdc-filled-text-field-container-color: transparent;
-  --mdc-outlined-text-field-input-text-placeholder-color: var(--color-outline);
+  --mat-form-field-filled-container-color: transparent;
+  --mat-form-field-outlined-input-text-placeholder-color: var(--color-outline);
 
-  --mdc-checkbox-unselected-icon-color: var(--color-primary);
-  --mdc-checkbox-selected-icon-color: var(--color-primary);
+  --mat-checkbox-unselected-icon-color: var(--color-primary);
+  --mat-checkbox-selected-icon-color: var(--color-primary);
   --mat-radio-label-text-size: 14px;
 
   --mat-select-panel-background-color: var(--color-surface-container-lowest);
@@ -40,14 +40,14 @@
   }
 
   .mdc-text-field--outlined {
-    padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
-    padding-right: max(8px, var(--mdc-outlined-text-field-container-shape));
+    padding-left: max(12px, var(--mat-form-field-outlined-container-shape));
+    padding-right: max(12px, var(--mat-form-field-outlined-container-shape));
   }
 
   .mat-mdc-form-field-hint-wrapper,
   .mat-mdc-form-field-error-wrapper {
     padding: 0;
-    --mdc-typography-caption-letter-spacing: 0;
+    --mat-typography-caption-letter-spacing: 0;
   }
 
 }
@@ -84,8 +84,8 @@
 
   .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
     margin-top: 20px;
-    padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
-    padding-right: max(8px, var(--mdc-outlined-text-field-container-shape));
+    padding-left: max(12px, var(--mat-form-field-outlined-container-shape));
+    padding-right: max(8px, var(--mat-form-field-outlined-container-shape));
 
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {
@@ -104,7 +104,6 @@
     //mat-form-field background color
     .mdc-notched-outline {
       z-index: 0;
-      border-radius: 4px;
     }
   }
 }
@@ -114,7 +113,6 @@
   .mat-mdc-form-field-flex {
     .mdc-notched-outline {
       z-index: 0;
-      border-radius: 4px;
     }
 
     .mat-mdc-notch-piece {
@@ -132,6 +130,7 @@
 .cdk-overlay-pane .mat-mdc-select-panel,
 .cdk-overlay-pane .mat-mdc-autocomplete-panel {
   --mat-menu-item-label-text-size: 14px;
+  --mat-autocomplete-background-color: var(--color-surface);
   padding: 4px;
 
   .mat-mdc-option {
@@ -178,7 +177,7 @@
 
 
 sm-table {
-  --mdc-checkbox-state-layer-size: 18px;
+  --mat-checkbox-state-layer-size: 18px;
 
   .mdc-checkbox__background {
     background-color: var(--color-on-primary);
@@ -195,4 +194,13 @@ input[type=number]::-webkit-outer-spin-button {
 // hide arrows for number inputs (FireFox)
 input[type=number] {
   -moz-appearance: textfield !important;
+}
+
+
+:root.dark-mode {
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    --mat-autocomplete-background-color: var(--color-surface-container-high);
+    border: 1px solid var(--color-outline-variant);
+  }
 }

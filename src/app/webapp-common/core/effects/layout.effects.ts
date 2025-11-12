@@ -70,7 +70,7 @@ export class LayoutEffects {
       }
       const resultMessage = this.error.getErrorMsg(action.serverError.error);
       this.alertDialogRef = this.dialog.open(AlertDialogComponent, {
-        data: {alertMessage: 'Error', alertSubMessage: customMessage, resultMessage}
+        data: {alertMessage: action.errorHeader ?? 'Error', alertSubMessage: customMessage, resultMessage}
       });
 
       this.alertDialogRef.beforeClosed().pipe(take(1)).subscribe(() => this.dialog.closeAll());

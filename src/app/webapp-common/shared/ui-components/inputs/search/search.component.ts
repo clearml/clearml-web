@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect, ElementRef,
+  effect,
+  ElementRef,
   input,
   OnChanges,
   OnDestroy,
@@ -12,7 +13,7 @@ import {
   viewChild
 } from '@angular/core';
 import {Subject, Subscription, timer} from 'rxjs';
-import {debounce, distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {debounce, filter, tap} from 'rxjs/operators';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
@@ -26,7 +27,7 @@ import {HesitateDirective} from '@common/shared/ui-components/directives/hesitat
   imports: [
     MatIcon,
     MatIconButton,
-    HesitateDirective
+    HesitateDirective,
   ]
 })
 export class SearchComponent implements OnInit, OnChanges, OnDestroy {
@@ -41,14 +42,18 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   placeholder = input<string>('Type to search');
   hideIcons = input<boolean>(false);
   expandOnHover = input(false);
+  disabled = input(false);
   disableAnimation = input(false);
   enableNavigation = input(false);
+  enableSearchOnSubmit = input(false);
   searchResultsCount = input<number>(null);
   searchCounterIndex = input(-1);
   value = input<string>('');
 
   valueChanged = output<string>();
+  validateValueChange = output<string>();
   searchBarInput = viewChild<ElementRef>('searchBar');
+  protected valueHasChanged = signal(false);
 
   constructor() {
     effect(() => {
@@ -84,14 +89,22 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       this.clear();
     } else if (event.key === 'Enter' &&
       (!this.enableNavigation() || (this.searchCounterIndex() + 1 < this.searchResultsCount())) &&
-      this.searchBarInput().nativeElement.value.length > 0
+      this.searchBarInput().nativeElement.value.length > 0 && !this.disabled()
     ) {
+      window.setTimeout(() => this.valueHasChanged.set(false), this.debounceTime());
       this.valueChanged.emit(this.searchBarInput().nativeElement.value);
     }
   }
 
   onValueChange() {
+    window.setTimeout(() => this.valueHasChanged.set(false), this.debounceTime());
     this.value$.next(this.searchBarInput().nativeElement.value);
+  }
+
+  validateValue() {
+    this.valueHasChanged.set(true)
+    this.empty.set(this.searchBarInput().nativeElement.value.length === 0);
+    this.validateValueChange.emit(this.searchBarInput().nativeElement.value);
   }
 
   clear(focus = true) {

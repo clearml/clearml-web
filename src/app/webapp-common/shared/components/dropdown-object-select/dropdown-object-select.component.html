@@ -1,0 +1,65 @@
+<mat-form-field appearance="outline" [class.no-bottom]="!embeddedErrors()" [floatLabel]="'always'">
+  @if (label(); as label) {
+    <mat-label>{{ label }}
+      @if (info()) {
+        <sm-multi-line-tooltip [smallIcon]="true" class="more-info-tooltip"><span [innerHTML]="info() | purify"></span></sm-multi-line-tooltip>
+      }
+    </mat-label>
+  }
+  <input #inputRef matInput type="text"
+         [matAutocomplete]="auto"
+         [formControl]="control"
+         [placeholder]="placeHolder()"
+         (input)="getEntitiesFn({label: inputRef.value})"
+         (keydown.enter)="control.markAsTouched()"
+         (focusout)="onTouched && onTouched()"
+  >
+  <mat-error>
+    <ng-content></ng-content>
+  </mat-error>
+  @if (createNewSuffix()) {
+    <span matSuffix class="creat-new-suffix">(Create New)</span>
+  }
+  @if (inputRef.value && !control.disabled) {
+    <button class="sm" mat-icon-button matSuffix (click)="$event.stopPropagation(); control.setValue(null); getEntities.emit(null); inputRef.focus(); previousLength = 0;">
+      <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="p-0"></mat-icon>
+    </button>
+  } @else {
+    <mat-icon fontSet="al" fontIcon="al-ico-search" matSuffix class="p-0"></mat-icon>
+  }
+  <mat-autocomplete #auto="matAutocomplete"
+                    [class]="'entity-selector'"
+                    [displayWith]="displayFn.bind(this)"
+                    (closed)="autocompleteClosed.emit()"
+                    (opened)="opened()"
+                    autoActiveFirstOption>
+    @if (createNewSuffix()) {
+      <mat-option class="item" [value]="control.value" (onSelectionChange)="createNewSelected.emit($event.source.value)">
+        "{{ control.value }}" <span class="new">(Create New)</span>
+      </mat-option>
+    }
+
+    @for (entity of data(); track entity['id'] ?? entity.label) {
+      @if (compRef()) {
+        <mat-option [value]="entity">
+          <ng-container *ngComponentOutlet="compRef(); inputs: {entity};"></ng-container>
+        </mat-option>
+      } @else {
+        <mat-option [value]="entity">
+          <div [smSearchText]="$any(control.value)">{{ displayFn(entity) }}</div>
+        </mat-option>
+      }
+    }
+
+    @if (data() === null) {
+      <div class="py-4 pe-none">
+        <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      </div>
+    }
+    <sm-dots-load-more [class.hidden]="data() === null || noMoreOptions" [loading]="state().loading()" (loadMore)="!state().loading() && loadMoreEntities({label: inputRef.value})"></sm-dots-load-more>
+    <!-- Empty mat-option, so the autocomplete menu will always pop -->
+    @if (data()?.length > 0){
+      <mat-option disabled style="height: 0; min-height: 0; padding:0"></mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

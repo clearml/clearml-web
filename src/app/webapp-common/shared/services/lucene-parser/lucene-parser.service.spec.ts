@@ -6,12 +6,12 @@ describe('LuceneParserService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const lucene: LuceneParserService = TestBed.get(LuceneParserService);
+    const lucene: LuceneParserService = TestBed.inject(LuceneParserService);
     expect(lucene).toBeTruthy();
   });
 
   it('should be a valid query', () => {
-    const lucene: LuceneParserService = TestBed.get(LuceneParserService);
+    const lucene: LuceneParserService = TestBed.inject(LuceneParserService);
 
     expect(lucene.isValid('keywords:"labels"')).toBeTruthy();
     expect(lucene.isValid('keywords:* ')).toBeTruthy();
@@ -22,7 +22,7 @@ describe('LuceneParserService', () => {
   });
 
   it('should not be a valid query', () => {
-    const lucene: LuceneParserService = TestBed.get(LuceneParserService);
+    const lucene: LuceneParserService = TestBed.inject(LuceneParserService);
 
     expect(lucene.isValid(null)).toBeFalsy();
     expect(lucene.isValid('keywords:')).toBeFalsy();

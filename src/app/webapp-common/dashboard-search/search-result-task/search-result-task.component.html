@@ -1,0 +1,19 @@
+<sm-result-line
+  class="pointer"
+  (click)="taskSelected.emit(entity())"
+  [fontIcon]="'al-ico-type-' + (entity().type ? (entity().type.toString()).replace('_', '-') : 'training')"
+  [label]="entity().name"
+  [status]="entity().status"
+  [statusOptionsLabels]="statusOptionsLabels()"
+  [tags]="entity().tags"
+>
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ entity().project?.basename }}</span>
+          <span class="dot">●</span>
+          <span title="Updated" class="sub-item">{{ entity().last_change | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ entity().user?.name }}</span>
+        </span>
+  </ng-container>
+</sm-result-line>

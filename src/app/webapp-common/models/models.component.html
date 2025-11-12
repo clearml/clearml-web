@@ -1,7 +1,7 @@
 <sm-model-header
-  [minimizedView]="minimizedView"
+  [minimizedView]="minimizedView()"
   [isArchived]="isArchived$ | ngrxPush"
-  [disableCreateNewButton]="isExampleProject"
+  [disableCreateNewButton]="exampleProject()"
   [tableCols]="filteredTableCols$ | ngrxPush"
   [sharedView]="isSharedAndNotOwner$|ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
@@ -25,20 +25,20 @@
 
 ></sm-model-header>
 <div class="models-body">
-  <as-split #split
-            [gutterSize]=1
-            [useTransition]="true"
-            [gutterDblClickDuration]="400"
-            (gutterClick)="clickOnSplit()"
-            (gutterDblClick)="closePanel()"
-            (dragEnd)="splitSizeChange($event)"
-            (dragStart)="disableInfoPanel()"
-            (transitionEnd)="modelsTable.table.resize(); modelsTable.afterTableInit()"
-            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
-            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
+  <as-split
+    [gutterSize]=1
+    [useTransition]="true"
+    [gutterDblClickDuration]="400"
+    (gutterClick)="clickOnSplit()"
+    (gutterDblClick)="closePanel()"
+    (dragEnd)="splitSizeChange($event)"
+    (dragStart)="disableInfoPanel()"
+    (transitionEnd)="modelsTable.table().resize(); modelsTable.afterTableInit()"
+    [class.opened]="minimizedView() && splitSize() <= 1"
+    [class.closed]="minimizedView() && splitSize() >= 99"
   >
     <as-split-area
-      [size]="100 - splitInitialSize"
+      [size]="100 - splitSize()"
       [minSize]="1"
       [maxSize]="99"
       [visible]="(isSharedAndNotOwner$ | ngrxPush) !== true"
@@ -48,26 +48,26 @@
         class="w-100 align-self-stretch"
         selectionMode="single"
         [models]="models$ | ngrxPush"
-        [projects]="(projectsOptions$ | ngrxPush)"
+        [projects]="projectsOptions()"
         [tableCols]="tableCols$ | ngrxPush"
-        [minimizedView]="minimizedView"
+        [minimizedView]="minimizedView()"
         [noMoreModels]="noMoreModels$ | ngrxPush"
-        [users]="users$ |ngrxPush"
+        [users]="users()"
         [frameworks]="frameworks$ |ngrxPush"
         [tags]="tags$ | ngrxPush"
+        [modelsProjectTags]="tags$ | ngrxPush"
         [metadataValuesOptions]="metadataColsOptions$ | ngrxPush"
         [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
-        [checkedModels]="checkedModels$ | ngrxPush"
+        [checkedModels]="checkedModels()"
         [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | ngrxPush"
         [selectedModel]="selectionState().highlited()"
-        [split]="selectSplitSize$ | ngrxPush"
         [enableMultiSelect]="true"
         [entityType]="entityTypeEnum.model"
-        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed()"
         (columnsReordered)="columnsReordered($event)"
         (modelSelectionChanged)="modelSelectionChanged($event)"
         (modelsSelectionChanged)="modelsSelectionChanged($event)"
@@ -84,13 +84,13 @@
       >
       </sm-models-table>
     </as-split-area>
-    <as-split-area [size]="splitInitialSize" class="light-theme" [visible]="minimizedView">
+    <as-split-area [size]="splitSize()" [visible]="minimizedView()">
       <router-outlet></router-outlet>
     </as-split-area>
   </as-split>
 </div>
 <sm-entity-footer
-  [class.footer-visible]="(models$ | ngrxPush) && (checkedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)"
+  [class.footer-visible]="(models$ | ngrxPush) && checkedModels()?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)"
   [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"

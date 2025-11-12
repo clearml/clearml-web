@@ -37,6 +37,7 @@
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
     <sm-experiment-graphs
+      [class.hidden]="loading()"
       [metrics]="graphs"
       [list]="graphList"
       [hiddenList]="settings.selectedMetricsScalar"
@@ -48,7 +49,7 @@
       [xAxisType]="settings.xAxisType"
       [groupBy]="settings.groupBy"
       [showOriginals]="settings.showOriginals"
-      [multipleSingleValueData]="singleValues"
+      [multipleSingleValueData]="singleValuesChart"
       [exportForReport]="!modelsFeature"
       [minimized]="minimized"
       [breakPoint]="900"

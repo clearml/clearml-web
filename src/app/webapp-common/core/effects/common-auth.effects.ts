@@ -1,10 +1,10 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
 import {setCredentialLabel, setSignedUrls} from '../actions/common-auth.actions';
 import {requestFailed} from '../actions/http.actions';
-import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime} from 'rxjs/operators';
 import {AuthGetCredentialsResponse} from '~/business-logic/model/auth/authGetCredentialsResponse';
 import {Action, Store} from '@ngrx/store';
@@ -30,21 +30,18 @@ import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {concatLatestFrom} from '@ngrx/operators';
 import {selectCompanyPreSignServices, selectExtraCredentials} from '~/core/reducers/auth.reducers';
 import {ErrorService} from '@common/shared/services/error.service';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class CommonAuthEffects {
+  private actions = inject(Actions);
+  private credentialsApi = inject(ApiAuthService);
+  private store = inject(Store);
+  private adminService = inject(AdminService);
+  private errorService = inject(ErrorService);
+  private matDialog = inject(MatDialog);
   private signAfterPopup: Action[] = [];
   private openPopup: Record<string, boolean> = {};
-
-  constructor(
-    private actions: Actions,
-    private credentialsApi: ApiAuthService,
-    private store: Store,
-    private adminService: AdminService,
-    private errorService: ErrorService,
-    private matDialog: MatDialog
-  ) {
-  }
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(authActions.getAllCredentials, authActions.createCredential),
@@ -97,7 +94,7 @@ export class CommonAuthEffects {
         ]),
         catchError(error => [
           requestFailed(error),
-          setServerError(error, null, this.errorService.getErrorMsg(error?.error)),
+          addMessage(MESSAGES_SEVERITY.ERROR, this.errorService.getErrorMsg(error?.error)),
           authActions.addCredential({newCredential: {}, workspaceId: action.workspace?.id}),
           deactivateLoader(action.type)])
       ))
@@ -236,12 +233,18 @@ export class CommonAuthEffects {
 
   s3popup = createEffect(() => this.actions.pipe(
     ofType(authActions.showS3PopUp),
-    concatLatestFrom(() => this.store.select(selectDontShowAgainForBucketEndpoint)),
     throttleTime(500),
+    concatLatestFrom(() => [
+      this.store.select(selectDontShowAgainForBucketEndpoint),
+      this.store.select(selectS3BucketCredentialsBucketCredentials)
+    ]),
     filter(([action, dontShowAgain]) =>
       action?.credentials?.Bucket + action?.credentials?.Endpoint !== dontShowAgain &&
-      !this.openPopup[action?.credentials?.Bucket]
-    ),
+      !this.openPopup[action?.credentials?.Bucket]),
+    filter(([action, , bucketCredentials]) => {
+        const creExists = bucketCredentials.find(cred => cred.Bucket === action?.credentials?.Bucket);
+        return creExists?.Key !== '' && creExists?.Secret !== '';
+      }),
     switchMap(([action]) => {
       if (action?.credentials?.Bucket) {
         this.openPopup[action.credentials.Bucket] = true;

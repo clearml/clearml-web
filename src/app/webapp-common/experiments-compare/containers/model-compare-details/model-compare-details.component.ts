@@ -18,11 +18,11 @@ import {ModelDetail} from '@common/experiments-compare/shared/experiments-compar
   standalone: false
 })
 export class ModelCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
+  override entityType = EntityTypeEnum.model;
   public showEllipsis = true;
 
   constructor() {
     super();
-    this.entityType = EntityTypeEnum.model;
     this.experiments$ = this.store.select(selectModelsDetails);
   }
 

@@ -1,4 +1,4 @@
 <sm-dialog-template iconClass="al-ico-queues" [header]="queue.id ? 'UPDATE QUEUE' : 'NEW QUEUE'">
-  <sm-create-new-queue-form (queueCreated)="createQueue($event)" [queue]="queue" [queues]="queues$| ngrxPush">
+  <sm-create-new-queue-form (queueCreated)="createQueue($event)" [queue]="queue" [queues]="queues()">
   </sm-create-new-queue-form>
 </sm-dialog-template>

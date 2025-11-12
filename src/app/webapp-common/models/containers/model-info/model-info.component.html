@@ -1,11 +1,11 @@
 <sm-info-header-status-icon-label
-  [status]="getReadyStatus((selectedTableModel$ | ngrxPush)?.ready || selectedModel?.ready)"
+  [status]="getReadyStatus((selectedTableModel$ | ngrxPush)?.ready || selectedModel()?.ready)"
 >
 </sm-info-header-status-icon-label>
 <div class="model-info-container light-theme">
   <sm-model-info-header
-    [model]="((selectedTableModel$ | ngrxPush) || selectedModel)"
-    [editable]="!isExample"
+    [model]="((selectedTableModel$ | ngrxPush) || selectedModel())"
+    [editable]="!isExample()"
     [backdropActive]="backdropActive$ | ngrxPush"
     [minimized]="minimized"
     (minimizeClicked)="minimizeView()"

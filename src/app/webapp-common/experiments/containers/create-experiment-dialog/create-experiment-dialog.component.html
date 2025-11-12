@@ -21,27 +21,47 @@
     <mat-stepper [linear]="false" color="accent">
       <mat-step [stepControl]="codeFormGroup" label="Code">
         <form #codeForm [formGroup]="codeFormGroup">
-          <mat-form-field appearance="outline">
-            <mat-label>Task Name</mat-label>
-            <input matInput placeholder="my task" formControlName="name">
-            @if (codeFormGroup.controls.name.invalid) {
-              <mat-error>
-                @if (codeFormGroup.controls.name.errors?.minlength) {
-                  Name should be at least 3 characters long
+          <div class="d-flex align-item-center gap-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Task Name</mat-label>
+              <input matInput placeholder="my task" formControlName="name">
+              @if (codeFormGroup.controls.name.invalid) {
+                <mat-error>
+                  @if (codeFormGroup.controls.name.errors?.required) {
+                    Name is required
+                  }
+                  @else if (codeFormGroup.controls.name.errors?.minlength) {
+                    Name should be at least 3 characters long
+                  }
+                </mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 300px">
+              <mat-label>Task type</mat-label>
+              <mat-select formControlName="taskType">
+                <mat-select-trigger>
+                  @let selectedType = getSelectedTaskType();
+                  <div class="d-flex align-item-center gap-2">
+                    <mat-icon fontSet="al" [fontIcon]="selectedType.icon"></mat-icon>
+                    {{ selectedType.label }}
+                  </div>
+                </mat-select-trigger>
+                @for (type of taskTypes; track type) {
+                  <mat-option [value]="type.value">
+                    <mat-icon fontSet="al" [fontIcon]="type.icon"></mat-icon>
+                    {{type.label}}
+                  </mat-option>
                 }
-                @else if (codeFormGroup.controls.name.errors?.required) {
-                  Name is required
-                }
-              </mat-error>
-            }
-          </mat-form-field>
+              </mat-select>
+            </mat-form-field>
+          </div>
           <mat-expansion-panel class="mt-3">
             <mat-expansion-panel-header>Git</mat-expansion-panel-header>
             <section>
               <mat-form-field appearance="outline">
                 <mat-label>Repository URL</mat-label>
                 <input
-                  matInput placeholder="git@github.com:allegroai/clearml.git" formControlName="repo"
+                  matInput placeholder="git@github.com:clearml/clearml.git" formControlName="repo"
                   (focusout)="typeChange(codeFormGroup.controls.type.value)"
                 >
               </mat-form-field>
@@ -199,9 +219,8 @@
             <div class="venv">
               <sm-button-toggle
                 [disabled]="envFormGroup.controls.poetry.value"
-                [value]="envFormGroup.controls.venvType.value"
                 [options]="venvOptions"
-                (valueChanged)="venevTypeChange($any($event))"
+                formControlName="venvType"
               ></sm-button-toggle>
               <mat-form-field appearance="outline"
                               [style.visibility]="envFormGroup.controls.venvType.value === 'discover' ? 'hidden' : null"

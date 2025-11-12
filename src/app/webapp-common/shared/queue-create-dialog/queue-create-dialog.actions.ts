@@ -1,8 +1,8 @@
 import {CreationStatusEnum} from './queue-create-dialog.reducer';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {QueuesUpdateRequest} from '~/business-logic/model/queues/queuesUpdateRequest';
 import {QueuesCreateRequest} from '~/business-logic/model/queues/queuesCreateRequest';
 import {createAction, props} from '@ngrx/store';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 export const getQueues = createAction('[CREATE_QUEUE_DIALOG] GET_QUEUES');
 export const setQueues = createAction('[CREATE_QUEUE_DIALOG] SET_QUEUES', props<{ queues: Queue[] }>());

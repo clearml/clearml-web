@@ -1,18 +1,52 @@
-import {ChangeDetectorRef, Component, HostListener, OnInit, input, output, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  input,
+  output,
+  inject,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {MatDialog} from '@angular/material/dialog';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {SelectQueueComponent} from '@common/experiments/shared/components/select-queue/select-queue.component';
 import {Task} from '~/business-logic/model/tasks/task';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {RouterLink} from '@angular/router';
+import {SimpleTableComponent} from '@common/shared/ui-components/data/simple-table/simple-table.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {MatIconModule} from '@angular/material/icon';
+import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
 
 @Component({
-    selector: 'sm-queue-info',
-    templateUrl: './queue-info.component.html',
-    styleUrls: ['./queue-info.component.scss'],
-    standalone: false
+  selector: 'sm-queue-info',
+  templateUrl: './queue-info.component.html',
+  styleUrls: ['./queue-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MenuItemComponent,
+    MenuComponent,
+    RouterLink,
+    SimpleTableComponent,
+    MatIconModule,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    MatIconButton,
+    MatTab,
+    MatTabGroup,
+    SelectQueueModule
+  ]
 })
-export class QueueInfoComponent implements OnInit {
+export class QueueInfoComponent {
   private changeDetector = inject(ChangeDetectorRef);
   private blTaskService = inject(BlTasksService);
   private dialog = inject(MatDialog);
@@ -30,10 +64,9 @@ export class QueueInfoComponent implements OnInit {
     previous: number;
   }>();
 
-  public activeTab: string;
   public menuSelectedExperiment: Task;
-  public menuOpen: boolean;
-  public menuPosition: { x: number; y: number };
+  public menuOpen = signal(false);
+  public menuPosition = signal<{ x: number; y: number }>(null);
   public readonly experimentsCols = [
     {header: '', class: ''},
     {header: '', class: ''},
@@ -47,17 +80,13 @@ export class QueueInfoComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   clickHandler(event) {
     if (event.button != 2) { // Bug in firefox: right click triggers `click` event
-      this.menuOpen = false;
+      this.menuOpen.set(false);
     }
   }
 
   get routerTab() {
     const url = new URL(window.location.href);
     return url.searchParams.get('tab');
-  }
-
-  ngOnInit() {
-    this.activeTab = this.routerTab === 'workers' ? 'workers' : 'tasks';
   }
 
   findQueueById(id) {
@@ -79,10 +108,10 @@ export class QueueInfoComponent implements OnInit {
   openContextMenu(e, task) {
     this.menuSelectedExperiment = task;
     e.preventDefault();
-    this.menuOpen = false;
+    this.menuOpen.set(false);
     setTimeout(() => {
-      this.menuPosition = {x: e.clientX, y: e.clientY};
-      this.menuOpen     = true;
+      this.menuPosition.set({x: e.clientX, y: e.clientY});
+      this.menuOpen.set(true);
       this.changeDetector.detectChanges();
     }, 0);
   }

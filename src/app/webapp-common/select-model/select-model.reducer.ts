@@ -5,7 +5,7 @@ import {TABLE_SORT_ORDER} from '@common/shared/ui-components/data/table/table.co
 import {SelectedModel} from '@common/models/shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '@common/models/shared/models.const';
 import * as actions from './select-model.actions';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 
 export interface SelectModelState {

@@ -17,7 +17,7 @@ import * as experimentsActions from '../../../experiments/actions/common-experim
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {
@@ -108,7 +108,7 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
+    window.setTimeout(() => this.table.table().rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.select(selectRouterParams)
       .pipe(
         debounceTime(150),

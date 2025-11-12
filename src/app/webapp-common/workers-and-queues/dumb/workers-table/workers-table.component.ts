@@ -1,18 +1,38 @@
-import {Component, effect, input, output, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, input, output, viewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash-es';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {PrimeTemplate} from 'primeng/api';
+import {DurationFormaterPipe} from '@common/shared/pipes/duration-formater.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  TableFilterSortComponent
+} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 
 @Component({
-    selector: 'sm-workers-table',
-    templateUrl: './workers-table.component.html',
-    styleUrls: ['./workers-table.component.scss'],
-    standalone: false
+  selector: 'sm-workers-table',
+  templateUrl: './workers-table.component.html',
+  styleUrls: ['./workers-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TableComponent,
+    PrimeTemplate,
+    DurationFormaterPipe,
+    TooltipDirective,
+    TableFilterSortComponent,
+    ShowTooltipIfEllipsisDirective,
+  ]
 })
 export class WorkersTableComponent extends BaseTableView {
+  override entitiesKey = 'workers';
+  override selectedEntitiesKey = 'selectedWorker';
 
   protected cols = [
     {
@@ -60,10 +80,10 @@ export class WorkersTableComponent extends BaseTableView {
     super();
     effect(() => {
       if (this.workers() && this.selectedWorker()) {
-        this.table?.focusSelected();
+        this.table()?.focusSelected();
         const index = this.workers().findIndex(w => w.id === this.selectedWorker().id)
         if (index > -1) {
-          this.tables.forEach(table => table.scrollToIndex(index))
+          this.table().scrollToIndex(index);
         }
       }
     });

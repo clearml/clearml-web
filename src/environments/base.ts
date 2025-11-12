@@ -19,6 +19,10 @@ export interface Legal {
   pricingLink?: string;
 }
 
+export interface InterfaceCustomizations {
+  clonePrefix: string;
+}
+
 export interface Environment {
   production: boolean;
   apiBaseUrl: string;
@@ -67,6 +71,7 @@ export interface Environment {
   forceTheme?: 'light' | 'dark';
   defaultTheme?: 'light' | 'dark';
   customStyle?: string;
+  interfaceCustomization?: InterfaceCustomizations| undefined;
 }
 
 export const BASE_ENV = {

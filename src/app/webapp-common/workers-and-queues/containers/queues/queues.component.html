@@ -12,7 +12,7 @@
 <as-split
   class="flex-grow-1"
   [gutterSize]=1 [useTransition]="true"
-  (transitionEnd)="table.table.resize(); table.afterTableInit()"
+  (transitionEnd)="table.table().resize(); table.afterTableInit()"
 >
   <as-split-area [size]="selectedQueue() ? 50 : 100">
     <sm-queues-table

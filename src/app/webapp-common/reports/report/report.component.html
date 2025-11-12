@@ -1,9 +1,9 @@
 <div class="header">
-  <div class="name ellipsis" [smTooltip]="report?.name" smShowTooltipIfEllipsis>{{report?.name}}</div>
+  <div class="name ellipsis" [smTooltip]="report()?.name" smShowTooltipIfEllipsis>{{report()?.name}}</div>
   @if ((editMode$ | ngrxPush) !== true) {
     <div class="actions">
       <sm-tag-list
-        [tags]="report?.tags"
+        [tags]="report()?.tags"
         (add)="openTagMenu($event, tagsMenuTrigger, tagsMenu)"
         (remove)="removeTag($event)"
       ></sm-tag-list>
@@ -22,18 +22,18 @@
         <button mat-icon-button (click)="moveToProject()" smTooltip="Move to Project">
           <mat-icon fontSet="al" fontIcon="al-ico-move-to"></mat-icon>
         </button>
-        <button mat-icon-button (click)="archive()" [smTooltip]="archived ? 'Restore' : 'Archive'">
-          <mat-icon fontSet="al" [fontIcon]="archived ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
+        <button mat-icon-button (click)="archive()" [smTooltip]="archived() ? 'Restore' : 'Archive'">
+          <mat-icon fontSet="al" [fontIcon]="archived() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
         </button>
-        @if (archived) {
+        @if (archived()) {
           <button mat-icon-button (click)="deleteReport()" smTooltip="Delete">
             <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
           </button>
         }
-        @if (draft) {
+        @if (draft()) {
           <button mat-flat-button
-            [disabled]="!this.report.report?.trim()"
-            [smTooltip]="!this.report.report?.trim() ? 'Can\'t publish an empty report' : ''"
+            [disabled]="!this.report()?.report?.trim()"
+            [smTooltip]="!this.report()?.report?.trim() ? 'Can\'t publish an empty report' : ''"
             (click)="publish()"
             >
             <mat-icon fontSet="al" fontIcon="al-ico-publish"></mat-icon>
@@ -51,7 +51,7 @@
         ></span>
         <sm-tags-menu
           #tagsMenu
-          [tags]="report?.tags"
+          [tags]="report()?.tags"
           [projectTags]="reportTags$ | ngrxPush"
           [companyTags]="null"
           [tagsFilterByProject]="true"
@@ -60,7 +60,7 @@
       </div>
     }
   </div>
-  @if (report) {
+  @if (report()) {
     <div class="content report">
       @if (!editor.editMode) {
         <div class="hover-button">
@@ -79,7 +79,7 @@
           (closed)="showDescription = false"
           >
           <div class="description">
-            @if (!example && report && !editDesc) {
+            @if (!example() && report() && !editDesc) {
               <button mat-stroked-button
                 class="edit-button"
                 (click)="editReportDesc(descElement)"
@@ -91,7 +91,7 @@
               #descElement
               [disabled]="!editDesc"
               (keyup)="cdr.detectChanges()"
-            >{{report?.comment || ''}}</textarea>
+            >{{report()?.comment || ''}}</textarea>
             @if (editDesc) {
               <div class="buttons">
                 <button mat-stroked-button (click)="descElement.value = orgDesc; editDesc = false">CANCEL</button>
@@ -103,11 +103,11 @@
         <mat-drawer-content>
           <sm-markdown-editor
             #editor
-            [class.edit]="editor.editMode || !report?.report"
+            [class.edit]="editor.editMode || !report()?.report"
             [class.full-width]="widthExpanded"
-            [data]="report?.['report'] ?? ''"
-            [readOnly]="!draft || example"
-            [resources]="resources"
+            [data]="report()?.['report'] ?? ''"
+            [readOnly]="!draft() || example()"
+            [resources]="resources()"
             [handleUpload]="handleUpload"
             [blockUserScripts]="blockUserScripts$ | ngrxPush"
             (saveInfo)="save($event)"
@@ -116,7 +116,7 @@
             (deleteResource)="deleteResource($event)"
             (imageMenuOpened)="calculateUnusedResources($event)"
             >
-            @if (!example && report && draft) {
+            @if (!example() && report() && draft()) {
               <div no-data class="flex-middle empty-state">
                 <i class="al-icon al-ico-reports xxl"></i>
                 <div class="no-data-title">THERE'S NOTHING HERE YET…</div>

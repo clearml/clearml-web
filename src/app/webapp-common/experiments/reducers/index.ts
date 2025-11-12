@@ -12,7 +12,7 @@ import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {selectCompareAddTableFilters, selectCompareAddTableSortFields, selectIsCompare, selectIsModels} from '../../experiments-compare/reducers';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {selectModelExperimentsTableFilters} from '@common/models/reducers';
@@ -35,7 +35,7 @@ export const selectExperimentsHiddenTableCols = createSelector(experimentsView, 
 export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
 export const selectMetricVariantsPlots = createSelector(experimentsView, state => state.metricVariantsPlots);
 export const selectExperimentViewMode = createSelector(selectRouterConfig,
-  config => config.at(-2) === 'compare' ? 'compare' : config.includes(':experimentId') ? 'info' : 'table');
+  config => config?.at(-2) === 'compare' ? 'compare' : config?.includes(':experimentId') ? 'info' : 'table');
 export const selectTableCompareView = createSelector(experimentsView, state => state.tableCompareView);
 export const selectMetricVariantForView = createSelector(selectExperimentViewMode, selectTableCompareView, selectMetricVariants, selectMetricVariantsPlots,
   (viewMode, compareView, scalarVars, plotVars) => viewMode === 'compare' && compareView === 'plots' ? plotVars : scalarVars);
@@ -107,11 +107,15 @@ export const selectTableSortFields = createSelector(
   (state, params, isCompare, compareSortFields): SortMeta[] =>
     (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? [...INITIAL_EXPERIMENT_COLS_ORDER]
 );
+
+
+export const selectExperimentsTableFilters = createSelector(experimentsView, selectRouterParams,
+  (state, params) => state.projectColumnFilters?.[params?.projectId] ?? {} as Record<string, FilterMetadata>);
+
 export const selectTableFilters = createSelector(
-  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableFilters, selectIsModels, selectModelExperimentsTableFilters,
-  (state, params, isCompare, compareFilters, isModels, modelExperimentsFilters) =>
-    isModels ? modelExperimentsFilters : isCompare ? compareFilters : state.projectColumnFilters?.[params?.projectId] ?? {} as Record<string, FilterMetadata>);
-export const selectExperimentsTableFilters = createSelector(experimentsView, selectRouterParams, (state, params) => state.projectColumnFilters?.[params?.projectId] ?? {} as Record<string, FilterMetadata>);
+  experimentsView, selectExperimentsTableFilters, selectIsCompare, selectCompareAddTableFilters, selectIsModels, selectModelExperimentsTableFilters,
+  (state, experimentFilters, isCompare, compareFilters, isModels, modelExperimentsFilters) =>
+    isModels ? modelExperimentsFilters : isCompare ? compareFilters : experimentFilters ?? {} as Record<string, FilterMetadata>);
 
 export const selectSelectedExperiments = createSelector(experimentsView, state => state.selectedExperiments);
 export const selectSelectedExperimentsDisableAvailable = createSelector(experimentsView, (state) => state.selectedExperimentsDisableAvailable);

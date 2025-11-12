@@ -2,7 +2,7 @@ import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-c
 import {servingLoadingTableColFields, servingTableColFields} from '@common/serving/serving.actions';
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {escapeRegExp, get, parseInt} from 'lodash-es';
 import { ContainerInfo } from '~/business-logic/model/serving/containerInfo';

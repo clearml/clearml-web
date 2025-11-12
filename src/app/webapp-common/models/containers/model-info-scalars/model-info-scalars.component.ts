@@ -33,6 +33,7 @@ import {computedPrevious} from 'ngxtension/computed-previous';
   standalone: false
 })
 export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent {
+  override entityType = 'model' as const;
   protected override experiment = this.store.selectSignal(selectSelectedModel);
   protected override experimentId = this.store.selectSignal(selectModelId);
   protected override xAxisType = this.store.selectSignal(selectModelSettingsXAxisType);
@@ -50,7 +51,6 @@ export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent 
     super();
     this.tableSelectedMetrics = this.store.selectSignal(selectSelectedSettingsModelTableMetric);
     this.entitySelector = this.store.select(selectModelId);
-    this.entityType = 'model';
     this.exportForReport = !this.activeRoute.snapshot?.parent?.parent?.data?.setAllProject;
 
     this.groupBy = this.store.selectSignal(selectModelSettingsGroupBy);

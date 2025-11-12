@@ -41,7 +41,7 @@
   }
 
 
-  @if ($any(add).listeners) {
+  @if ($any(add).listeners && showAddTag()) {
     <sm-user-tag
       class="add-button"
       [class.show-only-on-hover]="showAddTagOnlyOnHover()"

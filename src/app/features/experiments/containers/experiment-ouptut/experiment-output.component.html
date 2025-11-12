@@ -1,10 +1,10 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-info-header-status-icon-label
-  [status]=" (selectedExperiment)?.status || selectedExperiment?.status"
+  [status]=" (selectedExperiment())?.status || selectedExperiment()?.status"
 ></sm-info-header-status-icon-label>
 <div class="experiment-output-container light-theme" [class.minimized]="minimized">
   <sm-experiment-info-header
-    [experiment]="selectedExperiment"
+    [experiment]="selectedExperiment()"
     [infoData]="infoData$ | ngrxPush"
     [editable]="!isExample"
     [showMenu]="true"

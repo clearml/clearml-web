@@ -2,34 +2,40 @@
   @if (scatter) {
     <div class="metric-title">Plot axes</div>
     <div class="label">Y-axis</div>
-    <sm-metric-variant-selector [title]="scatter? 'Metric' :'Select Performance Metric'" class="param-selector"
-                                [selectedMetricVariants]="selectedMetric? [selectedMetric]: []"
-                                [metricVariants]="metricsResults$ | ngrxPush"
-                                (selectMetricVariant)="metricVariantSelected($event)"
-                                (clearSelection)="clearMetricsSelection()"
+    <sm-metric-variant-selector
+      class="param-selector"
+      [title]="'Metric'"
+      [selectedMetricVariants]="selectedMetric ? [selectedMetric]: []"
+      [metricVariants]="metricsResults$ | ngrxPush"
+      (selectMetricVariant)="metricVariantSelected($event)"
+      (clearSelection)="clearMetricsSelection()"
     ></sm-metric-variant-selector>
   } @else {
     <div class="metric-title">Coordinates</div>
-    <sm-metric-variant-selector class="param-selector" [title]="'Performance Metrics'"
-                                [selectedMetricVariants]="selectedMetrics" [multiSelect]="true" [skipValueType]="false"
-                                [metricVariants]="metricsResults$ | ngrxPush"
-                                (selectMetricVariant)="multiMetricVariantSelected($event)"
-                                (removeMetric)="multiMetricVariantSelected({addCol: false, variant: $event, valueType:$event.valueType})"
-                                (clearSelection)="clearMetricsSelection()"
+    <sm-metric-variant-selector
+      class="param-selector"
+      [title]="'Performance Metrics'"
+      [selectedMetricVariants]="selectedMetrics" [multiSelect]="true" [skipValueType]="false"
+      [metricVariants]="metricsResults$ | ngrxPush"
+      (selectMetricVariant)="multiMetricVariantSelected($event)"
+      (removeMetric)="multiMetricVariantSelected({addCol: false, variant: $event, valueType:$event.valueType})"
+      (clearSelection)="clearMetricsSelection()"
     ></sm-metric-variant-selector>
   }
   @if (scatter) {
     <div class="label">X-axis</div>
   }
-  <sm-param-selector class="param-selector"
-                     [itemsList]="hyperParams"
-                     [title]="'Hyperparameters'"
-                     [selectedHyperParams]="selectedHyperParams"
-                     [single]="scatter"
-                     [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
-                     [selectedItemsListMapper]="selectedItemsListMapper"
-                     (selectedItems)="selectedParamsChanged($event)"
-                     (clearSelection)="clearParamsSelection()"></sm-param-selector>
+  <sm-param-selector
+    class="param-selector"
+    [itemsList]="hyperParams"
+    [title]="'Hyperparameters'"
+    [selectedHyperParams]="encodedHyperParams"
+    [single]="scatter"
+    [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
+    [selectedItemsListMapper]="decodeURIComponent"
+    (selectedItems)="selectedParamsChanged($event)"
+    (clearSelection)="clearParamsSelection()"
+  ></sm-param-selector>
   @if (scatter) {
     <hr class="separate-margins">
     <div class="metric-title">Additional data point information</div>
@@ -46,10 +52,10 @@
     <sm-param-selector class="param-selector"
                        [title]="'Hyperparameters'"
                        [itemsList]="hyperParams"
-                       [selectedHyperParams]="selectedParamsHoverInfo$ | ngrxPush"
+                       [selectedHyperParams]="selectedParamsHoverInfoEncoded$ | ngrxPush"
                        [single]="false"
                        [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
-                       [selectedItemsListMapper]="selectedItemsListMapper"
+                       [selectedItemsListMapper]="decodeURIComponent"
                        (selectedItems)="selectedParamsForHoverChanged($event)"
                        (clearSelection)="clearParamsForHoverSelection()"></sm-param-selector>
   }

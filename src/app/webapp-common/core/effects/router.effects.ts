@@ -1,31 +1,29 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {ActivatedRoute, NavigationExtras, Params, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {uniq} from 'lodash-es';
-import {map, tap} from 'rxjs/operators';
+import {tap} from 'rxjs/operators';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
-import {navigationEnd, setRouterSegments, setURLParams} from '../actions/router.actions';
+import {setRouterSegments, setURLParams} from '../actions/router.actions';
+import {Store} from '@ngrx/store';
 
 
 @Injectable()
 export class RouterEffects {
+  private store = inject(Store);
+  private actions$ = inject(Actions);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  constructor(
-    private actions$: Actions, private router: Router,
-    private route: ActivatedRoute
-  ) {
-  }
-
-  routerNavigationEnd = createEffect(() => this.actions$.pipe(
-    ofType(navigationEnd),
-    map(() => setRouterSegments({
+  public routerNavigationEnd () {
+    this.store.dispatch(setRouterSegments({
       url: this.getRouterUrl(),
       params: this.getRouterParams(),
       config: this.getRouterConfig(),
       queryParams: this.route.snapshot.queryParams,
-      data: this.route.snapshot.firstChild?.data
-    }))
-  ));
+      data: this.getRouterData()
+    }));
+  }
 
   setTableParams = createEffect(() => this.actions$.pipe(
     ofType(setURLParams),
@@ -42,6 +40,7 @@ export class RouterEffects {
           ...(action.gsFilters && {gsfilter: encodeFilters(action.gsFilters)}),
           ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
           ...(action.isDeep && {deep: true}),
+          ...(action.isAdvanced && {advanced  : true}),
           ...(action.version && {version: action.version}),
           ...(action.others && action.others)
         }
@@ -59,6 +58,19 @@ export class RouterEffects {
       route = route.firstChild;
     }
     return params;
+  }
+
+  getRouterData(): Params {
+    let route = this.route.snapshot.firstChild;
+    let datas = {};
+
+    while (route) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {selector, lastTabAction, ...cleanData} = route.data;
+      datas = {...datas, ...cleanData};
+      route = route.firstChild;
+    }
+    return datas;
   }
 
   getRouterConfig(): string[] {

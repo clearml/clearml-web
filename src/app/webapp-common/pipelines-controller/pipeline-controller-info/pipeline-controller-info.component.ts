@@ -4,7 +4,6 @@ import {
   DestroyRef,
   effect,
   ElementRef,
-  HostListener,
   inject,
   OnDestroy,
   signal,
@@ -30,10 +29,11 @@ import {getBoxToBoxArrow} from 'curved-arrows';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
-import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {uniq} from 'lodash-es';
 // import {pipelineDummyConfiguration} from '@common/pipelines-controller/pipeline-controller-info/pipeline-dummydata';
 import {animate, state, style, transition, trigger} from '@angular/animations';
+import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 
 export interface PipelineItem extends DagModelItem {
   name: string;
@@ -60,25 +60,25 @@ export enum StatusOption {
 
 
 @Component({
-    selector: 'sm-pipeline-controller-diagram',
-    templateUrl: './pipeline-controller-info.component.html',
-    styleUrls: ['./pipeline-controller-info.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [DagManagerUnsortedService],
-    animations: [
-        trigger('shrinkRegular', [
-            state('shrink', style({
-                opacity: '0',
-            })),
-            state('regular', style({
-                opacity: '1',
-            })),
-            transition('shrink => regular', [animate('1s')]),
-        ]),
-    ],
-    standalone: false
+  selector: 'sm-pipeline-controller-diagram',
+  templateUrl: './pipeline-controller-info.component.html',
+  styleUrls: ['./pipeline-controller-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DagManagerUnsortedService],
+  host: {'(document:keydown)': 'onKeyDown($event)'},
+  animations: [
+    trigger('shrinkRegular', [
+      state('shrink', style({
+        opacity: '0',
+      })),
+      state('regular', style({
+        opacity: '1',
+      })),
+      transition('shrink => regular', [animate('1s')]),
+    ]),
+  ],
+  standalone: false
 })
-
 export class PipelineControllerInfoComponent implements OnDestroy {
   private readonly _dagManager = inject(DagManagerUnsortedService<PipelineItem>);
   protected readonly store = inject(Store);
@@ -98,8 +98,8 @@ export class PipelineControllerInfoComponent implements OnDestroy {
   protected enableStaging = signal<boolean>(false);
   protected pipelineController: PipelineItem[];
   private skipAutoCenter: boolean;
-  private scale = toSignal(this.store.select(selectScaleFactor)
-    .pipe(map(factor => 100 / factor)));
+  private scale = this.store.selectSignal(selectScaleFactor);
+  private ratio = computed(() => this.scale() / 100);
   showLog = signal(false);
   public infoData: IExperimentInfo;
   protected stepDiff = signal<string>(null);
@@ -108,8 +108,7 @@ export class PipelineControllerInfoComponent implements OnDestroy {
 
   public maximizeResults: boolean;
   protected selected$ = this.store.select(selectPipelineSelectedStepWithFallback);
-  protected projectId$ = this.store.select(selectRouterParams)
-    .pipe(map(params => params?.projectId));
+  protected projectId$ = this.store.select(selectRouterProjectId);
 
   protected dagModel$ = this._dagManager.dagModel$
     .pipe(filter(model => model?.length > 0), tap(model =>
@@ -134,7 +133,6 @@ export class PipelineControllerInfoComponent implements OnDestroy {
   protected shrink = false;
 
 
-  @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
     if ((e.key == 'Escape')) {
       this.showLog = signal(false);
@@ -353,8 +351,8 @@ export class PipelineControllerInfoComponent implements OnDestroy {
             const fromRect = parent.nativeElement.getBoundingClientRect();
             const toRect = self.nativeElement.getBoundingClientRect();
             const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae] = getBoxToBoxArrow(
-              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width / this.scale(), fromRect.height / this.scale(),
-              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width / this.scale(), toRect.height / this.scale(),
+              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width / this.ratio(), fromRect.height / this.ratio(),
+              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width / this.ratio(), toRect.height / this.ratio(),
               {padStart: 0, padEnd: 7}
             );
             arrows.push({

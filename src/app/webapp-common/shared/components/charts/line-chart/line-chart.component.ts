@@ -10,7 +10,7 @@ import {
   ChartData,
   ChartOptions,
   ChartType,
-  Plugin, TooltipItem
+  Plugin, TimeUnit, TooltipItem
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import {fileSizeConfigCount} from '@common/shared/pipes/filesize.pipe';
@@ -90,17 +90,18 @@ export class LineChartComponent {
   }];
   public lineChartType: ChartType = 'line';
 
-  private chart = viewChild(BaseChartDirective);
-  animationDuration = computed(() => this.data()?.[0]?.dates.length > 0 ? 0 : 500);
-
   colorScheme = input(['#a4a1fb', '#ff8a15']);
   yTickFormatter = input<(value: number) => string>(val => filesize(val, fileSizeConfigCount));
   yLabel = input<string>();
+  hideLegend = input<boolean>();
+  minUnit= input<TimeUnit>('minute');
   showLoadingOverlay = input(false);
   data = input<Topic[]>();
+  private chart = viewChild(BaseChartDirective);
 
   darkTheme = this.store.selectSignal(selectDarkTheme);
 
+  animationDuration = computed(() => this.data()?.[0]?.dates.length > 0 ? 0 : 500);
   chartData = computed<ChartData<'line', Topic['dates']>>(() => {
     const topics = this.data();
     if (topics && !(topics?.length > 0)) {
@@ -122,7 +123,7 @@ export class LineChartComponent {
     },
     elements: {
       line: {
-        tension: 0.5
+        tension: 0
       }
     },
     interaction: {
@@ -140,7 +141,8 @@ export class LineChartComponent {
           ...(this.darkTheme() && {color: '#c1cdf3'}),
         },
         time: {
-          tooltipFormat: 'P pp',
+          tooltipFormat: this.minUnit() === 'day' ? 'P' : 'P pp',
+          minUnit: this.minUnit(),
           displayFormats: {
             month: 'MMM yyyy',
             day: 'dd MMM',
@@ -178,7 +180,7 @@ export class LineChartComponent {
 
     plugins: {
       legend: {
-        display: true,
+        display: !this.hideLegend(),
         position: 'bottom',
         labels: {
           ...(this.darkTheme() && {color: '#dce0ee'}),
@@ -216,21 +218,22 @@ export class LineChartComponent {
       yAxisKey: 'value'
     }
   } as ChartOptions<'line'>));
-  private reservedColors: Record<string, string> = {};
+
   private createDataset(topic: Topic, index: number) {
+    const reservedColors: Record<string, string> = {};
     const currentChart = this.chart().chart;
     const newIndex = currentChart?.data.datasets.findIndex(dataset => dataset.label === topic.topicName);
-    this.reservedColors[topic.topicName] = this.reservedColors[topic.topicName] ?? this.colorScheme()[index % this.colorScheme().length];
+    reservedColors[topic.topicName] = reservedColors[topic.topicName] ?? this.colorScheme()[index % this.colorScheme().length];
     return {
       data: topic.dates,
       label: topic.topicName,
-      pointRadius: 0,
+      pointRadius: topic.dates?.length < 2 ? 4 : 0,
       pointBorderColor: '#1a1e2c',
       borderWidth: 1.4,
-      lineTension: 0.1,
-      pointBackgroundColor: this.reservedColors[topic.topicName],
-      borderColor: this.reservedColors[topic.topicName],
-      backgroundColor: this.reservedColors[topic.topicName],
+      lineTension: 0,
+      pointBackgroundColor: reservedColors[topic.topicName],
+      borderColor: reservedColors[topic.topicName],
+      backgroundColor: reservedColors[topic.topicName],
       ...(newIndex > -1 && currentChart?.data.datasets.length > newIndex && {hidden: !currentChart.isDatasetVisible(newIndex)})
     };
   }
@@ -239,8 +242,12 @@ export class LineChartComponent {
   constructor() {
     effect(() => {
       if (this.data()?.[0]?.dates.length > 0) {
-        this.chart().update();
+        window.setTimeout(() => this.update(), 50);
       }
     });
+  }
+
+  update() {
+    this.chart().update();
   }
 }

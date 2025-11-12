@@ -81,35 +81,35 @@ export const routes: Routes = [
     path: '',
     component: ControllersComponent,
     children: [
-  {
-    path: 'compare',
-    canActivate: [compareNavigationGuard],
-    children: []
-  },
-  {
-    path: 'compare/scalars',
-    canActivate: [compareViewStateGuard],
-    component: ExperimentCompareScalarChartsComponent,
-    data: {minimized: true},
-    providers: [
-      {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-      importProvidersFrom(
-        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-      ),
-    ],
-  },
-  {
-    path: 'compare/plots',
-    canActivate: [compareViewStateGuard],
-    component: ExperimentComparePlotsComponent,
-    data: {minimized: true},
-    providers: [
-      {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-      importProvidersFrom(
-        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-      ),
-    ],
-  },
+      {
+        path: 'compare',
+        canActivate: [compareNavigationGuard],
+        children: []
+      },
+      {
+        path: 'compare/scalars',
+        canActivate: [compareViewStateGuard],
+        component: ExperimentCompareScalarChartsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+          importProvidersFrom(
+            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+          ),
+        ],
+      },
+      {
+        path: 'compare/plots',
+        canActivate: [compareViewStateGuard],
+        component: ExperimentComparePlotsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+          importProvidersFrom(
+            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+          ),
+        ],
+      },
       {
         path: ':controllerId', component: PipelineControllerInfoComponent,
       },

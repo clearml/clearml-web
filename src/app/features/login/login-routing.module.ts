@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import {LoginComponent} from '../../webapp-common/login/login/login.component';
+import {LoginComponent} from '@common/login/login/login.component';
+import {loginRequiredGuard} from '@common/login/login.guard';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent },
-  { path: 'signup', component: LoginComponent }
+  { path: '', component: LoginComponent, canActivate: [loginRequiredGuard]}
 ];
 
 @NgModule({

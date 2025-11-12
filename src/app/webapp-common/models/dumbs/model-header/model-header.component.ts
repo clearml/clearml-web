@@ -1,6 +1,6 @@
 import {Component, computed, input, output } from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {

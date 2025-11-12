@@ -17,7 +17,7 @@ export const setMetricsList = createAction(
 
 export const setMetricsResults = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_METRICS_RESULTS',
-  props<{   metricVariantsResults: Array<MetricVariantResult> }>()
+  props<{   metricVariantsResults: MetricVariantResult[] }>()
 );
 export const setTasks = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_TASKS',
@@ -30,7 +30,7 @@ export const setValueType = createAction(
 
 export const setParamsHoverInfo = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_PARAMS_HOVER_INFO',
-  props<{ paramsHoverInfo: string[] }>()
+  props<{ paramsHoverInfo: {section: string; name: string}[] }>()
 );
 
 export const setMetricsHoverInfo = createAction(

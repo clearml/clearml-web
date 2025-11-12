@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  computed, DestroyRef,
   ElementRef,
   inject,
   input,
@@ -17,17 +17,31 @@ import {selectStats, selectStatsErrorNotice, selectStatsParams, selectStatsTimeF
 import {timeFrameOptions} from '@common/constants';
 import {combineLatest, interval, switchMap} from 'rxjs';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {FormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {MatIconModule} from '@angular/material/icon';
+import {LineChartComponent} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
-    selector: 'sm-workers-graph',
-    templateUrl: './workers-stats.component.html',
-    styleUrls: ['./workers-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-workers-graph',
+  templateUrl: './workers-stats.component.html',
+  styleUrls: ['./workers-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatFormFieldModule,
+    FormsModule,
+    MatSelectModule,
+    MatIconModule,
+    LineChartComponent,
+    TooltipDirective
+  ]
 })
 export class WorkersStatsComponent {
   private store = inject(Store);
+  private destroyRef = inject(DestroyRef);
 
   protected statsError = this.store.selectSignal(selectStatsErrorNotice);
   protected currentTimeFrame = this.store.selectSignal<string>(selectStatsTimeFrame);
@@ -61,9 +75,10 @@ export class WorkersStatsComponent {
           this.store.dispatch(getWorkerStats({maxPoints}));
 
           return interval(granularity * 1000)
-            .pipe(map(() => {
-              this.store.dispatch(getWorkerStats({maxPoints}));
-            }));
+            .pipe(
+              takeUntilDestroyed(this.destroyRef),
+              tap(() => this.store.dispatch(getWorkerStats({maxPoints})))
+            );
         })
       )
       .subscribe()
@@ -73,7 +88,7 @@ export class WorkersStatsComponent {
   public chartParamOptions: IOption[] = [
     {label: 'CPU and GPU Usage', value: 'cpu_usage;gpu_usage'},
     {label: 'Memory Usage', value: 'memory_used'},
-    {label: 'Video Memory', value: 'gpu_memory_used'},
+    {label: 'GPU Memory', value: 'gpu_memory_used'},
     {label: 'Network Usage', value: 'network_rx;network_tx'}
     //    {label: 'Frames Processed', value: 'frames'},
   ];

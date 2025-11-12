@@ -127,8 +127,8 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     const baseColor = new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]});
     let colorString: string;
     if (!this.showOriginals()) {
-      colorString = baseColor.setAlpha(this.isSmooth ? 0 : 1).toRgbString();
-    } else if (this.isSmooth) {
+      colorString = baseColor.setAlpha(this.isSmooth && trace.type !== 'bar' ? 0 : 1).toRgbString();
+    } else if (this.isSmooth && trace.type !== 'bar') {
       const hslColor = baseColor.toHsl();
       hslColor.l = (this.isSmooth && !trace.isSmoothed) ? (this.isDarkTheme() ? hslColor.l < 0.20 ? hslColor.l : 20 : hslColor.l > 0.8 ? hslColor.l :80) : 0;
       colorString = new TinyColor(hslColor).toRgbString();

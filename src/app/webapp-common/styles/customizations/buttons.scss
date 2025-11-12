@@ -42,7 +42,7 @@
   .mat-mdc-unelevated-button {
 
     .mat-mdc-button-touch-target {
-      height: var(--mdc-filled-button-container-height);
+      height: var(--mat-button-filled-container-height);
     }
 
     .mat-icon.al-icon {
@@ -55,18 +55,18 @@
     }
 
     &.icon-only {
-      --mat-filled-button-horizontal-padding: 0;
+      --mat-button-filled-horizontal-padding: 0;
       min-width: 36px;
 
       & > .mat-icon {
-        --mat-filled-button-icon-offset: 0;
-        --mat-filled-button-icon-spacing: 0;
+        --mat-button-filled-icon-offset: 0;
+        --mat-button-filled-icon-spacing: 0;
       }
     }
   }
 
   .mat-mdc-outlined-button {
-    --mdc-outlined-button-label-text-size: 12px;
+    --mat-button-outlined-label-text-size: 12px;
     .mat-icon.al-icon {
       height: 16px;
       width: 16px;
@@ -77,16 +77,16 @@
     }
 
     &.icon-only {
-      --mat-outlined-button-horizontal-padding: 0;
+      --mat-button-outlined-horizontal-padding: 0;
       min-width: 36px;
 
       & > .mat-icon {
-        --mat-outlined-button-icon-offset: 0;
-        --mat-outlined-button-icon-spacing: 0;
+        --mat-button-outlined-icon-offset: 0;
+        --mat-button-outlined-icon-spacing: 0;
       }
     }
     &.sm {
-      --mat-outlined-button-icon-offset: 0;
+      --mat-button-outlined-icon-offset: 0;
     }
   }
 
@@ -102,7 +102,7 @@
   }
 
   .mat-button-toggle-appearance-standard {
-    --mat-standard-button-toggle-label-text-size: 12px;
+    --mat-button-toggle-label-text-size: 12px;
   }
 
   // icon + text
@@ -118,19 +118,19 @@
     }
     // icon
     &.icon-only {
-      --mat-text-button-with-icon-horizontal-padding: 0;
+      --mat-button-text-with-icon-horizontal-padding: 0;
       min-width: 36px;
 
       & > .mat-icon {
-        --mat-text-button-icon-offset: 0;
-        --mat-text-button-icon-spacing: 0;
+        --mat-button-text-icon-offset: 0;
+        --mat-button-text-icon-spacing: 0;
         height: 20px;
         width: 20px;
         line-height: 20px;
         font-size: 20px;
       }
       &.sm {
-        --mdc-text-button-container-height: 24px;
+        --mat-button-text-container-height: 24px;
         min-width: 24px;
         & > .mat-icon {
           height: 16px;
@@ -143,15 +143,15 @@
   }
 
   .mdc-icon-button {
-    --mdc-icon-button-icon-size: 20px;
+    --mat-icon-button-icon-size: 20px;
     .mat-mdc-button-touch-target {
-      height: var(--mdc-icon-button-state-layer-size);
-      width: var(--mdc-icon-button-state-layer-size);
+      height: var(--mat-icon-button-state-layer-size);
+      width: var(--mat-icon-button-state-layer-size);
     }
     // add class for small buttons size
     &.sm {
-      --mdc-icon-button-icon-size: 16px;
-      --mdc-icon-button-state-layer-size: 24px;
+      --mat-icon-button-icon-size: 16px;
+      --mat-icon-button-state-layer-size: 24px;
       .mat-icon {
         height: 16px;
         width: 16px;
@@ -163,8 +163,8 @@
       }
     }
     &.xs {
-      --mdc-icon-button-icon-size: 14px;
-      --mdc-icon-button-state-layer-size: 16px;
+      --mat-icon-button-icon-size: 14px;
+      --mat-icon-button-state-layer-size: 16px;
       .mat-icon {
         height: 14px;
         width: 14px;
@@ -181,7 +181,7 @@
       height: 36px;
       border: 1px solid var(--color-outline);
       border-radius: 18px;
-      --mdc-icon-button-state-layer-size: 34px;
+      --mat-icon-button-state-layer-size: 34px;
     }
   }
 }
@@ -189,7 +189,7 @@
 
 @mixin buttons($theme) {
   .mat-mdc-button-base {
-    --mdc-icon-button-icon-color: #{mat.get-theme-color($theme, primary)};
+    --mat-icon-button-icon-color: #{mat.get-theme-color($theme, primary)};
   }
 
   .secondary-button {

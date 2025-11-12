@@ -4,7 +4,7 @@ import {
   ISmCol,
   TABLE_SORT_ORDER
 } from '../ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {hasValue} from './helpers.util';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
@@ -49,11 +49,15 @@ export const getTagsFilters = (tagsFilterAnd: boolean, tagsFilter: (string | nul
 
 export const encodeOrder = (orders: SortMeta[]): string[] => orders.map(order => `${order.order === TABLE_SORT_ORDER.DESC ? '-' : ''}${order.field}`);
 
-export const decodeOrder = (orders: string[]): SortMeta[] => {
+export const decodeOrder = (orders: string[], allowedOrderFields?: string[], defaultOrder?:string ): SortMeta[] => {
   if (typeof orders === 'string') {
     orders = [orders];
   }
+
   return orders.map(order => {
+    if (allowedOrderFields && defaultOrder && !order.includes('hdmd.') && !allowedOrderFields.includes(order.replace('-',''))) {
+      order = defaultOrder;
+    }
     if (order[0] === '-') {
       return {field: order.slice(1), order: -1} as SortMeta;
     } else {
@@ -68,7 +72,7 @@ export const encodeFilters = (filters: Record<string, FilterMetadata>) => {
       .filter((key: string) => filters[key].value?.length)
       .map((key: string) => {
         const val = filters[key] as FilterMetadata;
-        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${encodeURIComponent(val?.value.join('+$+'))}`;
+        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${encodeURIComponent(Array.isArray(val.value) ? val.value.join('+$+') : val.value)}`;
       }).join(',');
   }
   return null;
@@ -79,23 +83,24 @@ export const decodeFilter = (filters: string): TableFilter[] => {
     return [];
   }
   return filters.split(',').map((filter: string) => {
-  let mode: string;
-  const index = filter.indexOf(':AND');
-  if (index > -1) {
-    mode = 'AND';
-    filter = filter.replace(':AND', '');
-  }
-  const [col, values] = filter.split(/:(.*)/);
-  // if (parts.length === 3) {
-  //   mode = parts[1];
-  //   parts[1] = parts[2];
-  // }
-  return {col, filterMatchMode: mode, value: decodeURIComponent(values)?.split('+$+').map(x => x === '' ? null : x)};
-})}
+    let mode: string;
+    const index = filter.indexOf(':AND');
+    if (index > -1) {
+      mode = 'AND';
+      filter = filter.replace(':AND', '');
+    }
+    const [col, values] = filter.split(/:(.*)/);
+    // if (parts.length === 3) {
+    //   mode = parts[1];
+    //   parts[1] = parts[2];
+    // }
+    return {col, filterMatchMode: mode, value: decodeURIComponent(values)?.split('+$+').map(x => x === '' ? null : x)};
+  });
+};
 
 export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
 
-const encodeMetric = (name) => encodeURIComponent(name).replaceAll('.', '%2e');
+export const encodeMetric = (name) => encodeURIComponent(name).replaceAll('.', '%2E');
 
 export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] => {
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);
@@ -244,4 +249,4 @@ export const convertFiltersToRecord = (filters: TableFilter[]
     // Return the updated accumulator for the next iteration.
     return accumulator;
   }, initialValue);
-}
+};

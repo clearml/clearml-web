@@ -1,11 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {ProfileNameComponent} from '@common/settings/admin/profile-name/profile-name.component';
-import {WebappConfigurationComponent} from '~/features/settings/containers/webapp-configuration/webapp-configuration.component';
-import {WorkspaceConfigurationComponent} from '@common/settings/workspace-configuration/workspace-configuration.component';
-import {SettingsComponent} from './settings.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {StorageCredentialsComponent} from '@common/settings/storage-credentials/storage-credentials.component';
 
 const settingsBreadcrumb = {
   name: 'Settings',
@@ -16,7 +11,7 @@ const settingsBreadcrumb = {
 const routes: Routes = [
   {
     path: '',
-    component: SettingsComponent,
+    loadComponent: () => import('./settings.component').then(m => m.SettingsComponent),
     children: [
       {
         path: '',
@@ -24,7 +19,7 @@ const routes: Routes = [
         pathMatch: 'full'
       },
       {path: 'profile',
-        component: ProfileNameComponent,
+        loadComponent: () => import('./containers/admin/profile-name/profile-name.component').then(m => m.ProfileNameComponent),
         data: {
         staticBreadcrumb:[[settingsBreadcrumb, {
             name: 'Profile',
@@ -33,7 +28,7 @@ const routes: Routes = [
       },
       {
         path: 'webapp-configuration',
-        component: WebappConfigurationComponent,
+        loadComponent: () => import('~/features/settings/containers/webapp-configuration/webapp-configuration.component').then(m => m.WebappConfigurationComponent),
         data: {workspaceNeutral: true, staticBreadcrumb:[[settingsBreadcrumb, {
             name: 'Configuration',
             type: CrumbTypeEnum.SubFeature
@@ -41,7 +36,7 @@ const routes: Routes = [
       },
       {
         path: 'workspace-configuration',
-        component: WorkspaceConfigurationComponent,
+        loadComponent: () => import('@common/settings/workspace-configuration/workspace-configuration.component').then(m => m.WorkspaceConfigurationComponent),
         data: {workspaceNeutral: true, staticBreadcrumb:[[settingsBreadcrumb, {
             name: 'Workspace',
             type: CrumbTypeEnum.SubFeature
@@ -49,7 +44,7 @@ const routes: Routes = [
       },
       {
         path: 'storage-credentials',
-        component: StorageCredentialsComponent,
+        loadComponent: () => import('@common/settings/storage-credentials/storage-credentials.component').then(m => m.StorageCredentialsComponent),
         data: {
           workspaceNeutral: true,
           route: '/settings/storage-credentials',

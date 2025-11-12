@@ -4,7 +4,7 @@ import {initSearch, resetSearch, setSearching, setSearchQuery} from './common-se
 
 export interface SearchState {
   isSearching: boolean;
-  searchQuery: {query: string; regExp?: boolean; original?: string};
+  searchQuery: { query: string; regExp?: boolean; original?: string; advanced?: boolean };
   placeholder: string;
   active: boolean;
   initiated: boolean;
@@ -14,8 +14,8 @@ const searchInitState: SearchState = {
   isSearching: false,
   searchQuery: {query: '', regExp: false},
   placeholder: null,
-  active     : false,
-  initiated  : false
+  active: false,
+  initiated: false
 };
 
 export const searchReducer = createReducer(
@@ -31,11 +31,11 @@ export const searchReducer = createReducer(
 );
 
 export const selectCommonSearch = createFeatureSelector<SearchState>('commonSearch');
-export const selectIsSearching  = createSelector(selectCommonSearch, state => state.isSearching);
-export const selectSearchQuery  = createSelector(selectCommonSearch, state => state.searchQuery);
-export const selectSearchQueryFilter  = createSelector(selectSearchQuery, query => query?.query);
-export const selectSearchQueryRegex  = createSelector(selectSearchQuery, query => query?.regExp);
-export const selectPlaceholder  = createSelector(selectCommonSearch, state => state.placeholder);
+export const selectIsSearching = createSelector(selectCommonSearch, state => state.isSearching);
+export const selectSearchQuery = createSelector(selectCommonSearch, state => state.searchQuery);
+export const selectSearchQueryFilter = createSelector(selectSearchQuery, query => query?.query);
+export const selectSearchQueryRegex = createSelector(selectSearchQuery, query => query?.regExp);
+export const selectPlaceholder = createSelector(selectCommonSearch, state => state.placeholder);
 export const selectActiveSearch = createSelector(selectSearchQueryFilter, filter => filter?.length >= 1);
 
 

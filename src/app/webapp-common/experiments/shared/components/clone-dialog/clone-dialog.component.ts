@@ -17,6 +17,7 @@ import {CloneExperimentPayload} from '@common/experiments/shared/common-experime
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
+import {CloneNamingService} from '~/features/experiments/shared/services/clone-naming.service';
 
 export interface CloneDialogData {
   type: string;
@@ -38,6 +39,7 @@ export class CloneDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<CloneDialogComponent>);
   protected data = inject<CloneDialogData>(MAT_DIALOG_DATA);
   private readonly builder = inject(FormBuilder);
+  private readonly naming = inject(CloneNamingService);
 
   public reference: string;
   public header: string;
@@ -51,7 +53,6 @@ export class CloneDialogComponent {
   });
 
   private readonly defaultProjectId: string;
-  private readonly cloneNamePrefix: string;
 
   isAutoCompleteOpen: boolean;
   public extend: boolean;
@@ -66,17 +67,14 @@ export class CloneDialogComponent {
   protected projectsNames = computed(() => this.projects()?.map(p => p.name) ?? []);
   protected readOnlyProjects = this.store.selectSignal(selectReadOnlyProjects);
 
-  constructor(
-  ) {
+  constructor() {
     this.defaultProjectId = this.data.defaultProject;
     this.header = `${this.data.extend ? 'Extend' : 'Clone'} ${this.data.type}`;
-    this.cloneNamePrefix = this.data.extend ? '' : 'Clone Of ';
     this.type = this.data.type.toLowerCase();
     this.reference = this.data.defaultName;
     this.extend = this.data.extend;
     setTimeout(() => {
       this.cloneForm.patchValue({
-        name: this.extend ? null : this.cloneNamePrefix + this.data.defaultName,
         comment: this.data.defaultComment || '',
       });
     });
@@ -84,7 +82,7 @@ export class CloneDialogComponent {
 
     effect(() => {
       if (this.projects()?.length && this.cloneForm.controls.project.value === null && !this.defaultProject) {
-        this.defaultProject = this.projects().find(project => project.id === this.defaultProjectId) ?? this.projects[0] ?? null;
+        this.defaultProject = this.projects().find(project => project.id === this.defaultProjectId) ?? this.projects()[0] ?? null;
         this.cloneForm.controls.project.setValue(this.defaultProject?.name);
         this.cloneForm.controls.project.markAsTouched({emitEvent: false})
       }
@@ -92,6 +90,13 @@ export class CloneDialogComponent {
 
     effect(() => {
       this.cloneForm.controls.forceParent.setValue(this.forceParent());
+    });
+
+    effect(() => {
+      const name = this.naming.getClonePrefix(this.data.defaultName);
+      if (name) {
+        this.cloneForm.patchValue({name})
+      }
     });
   }
 

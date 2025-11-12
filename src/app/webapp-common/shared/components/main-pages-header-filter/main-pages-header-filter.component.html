@@ -1,5 +1,5 @@
 <button mat-icon-button class='cell' [matMenuTriggerFor]="menu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
-  <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) ? 'al-ico-filter-on' : 'al-ico-filter-off')">
+  <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0)? 'al-ico-filter-on' : 'al-ico-filter-off')">
     <span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span>
   </mat-icon>
 </button>
@@ -16,6 +16,14 @@
     ></mat-icon>
     <span data-id="TagOption">Tags</span>
   </button>
+  <button mat-menu-item [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" [disabled]="showOnlyUserWork()">
+    <mat-icon matIconPrefix fontSet="al"
+              [fontIcon]="!(usersFilters()?.length > 0) ? '' : 'al-ico-success'"
+              data-id="TagCheckbox"
+    ></mat-icon>
+    <span data-id="TagOption">Users</span>
+  </button>
+
   <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu()">
     <form class="filter-form">
       <mat-form-field appearance="fill"  smClickStopPropagation class="tags-menu-input w-100 no-bottom">
@@ -45,9 +53,17 @@
       <div class="column-explanation">Click to include tag. Click again to exclude.</div>
     }
   </mat-menu>
+  <sm-table-filter-sort #usersSubMenu
+                        (filterChanged)="emitUsersFilterChangedCheckBox($event)"
+                        (searchValueChanged)="usersSearchValueChanged($event)"
+                        [column]="usersColumn"
+                        [options]="usersOptions() | filter: usersSearchTerm():'label'"
+                        [value]="usersFilters()"
+                        class="hidden"></sm-table-filter-sort>
+
   <hr/>
   <button mat-menu-item
-    [disabled]="!(showOnlyUserWork() ||  (tagsFilters()?.length > 0))"
+    [disabled]="!(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0))"
     smClickStopPropagation
     class="user-filter-button"
     (click)="clearAll()"

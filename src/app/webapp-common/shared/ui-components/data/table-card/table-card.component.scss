@@ -24,7 +24,7 @@
   }
 
   &.checked.selected {
-    --mdc-checkbox-unselected-icon-color: var(--color-on-surface);
+    --mat-checkbox-unselected-icon-color: var(--color-on-surface);
 
     ::ng-deep mat-checkbox:not(.mat-mdc-checkbox-checked) {
       .mdc-checkbox:hover .mdc-checkbox__background {

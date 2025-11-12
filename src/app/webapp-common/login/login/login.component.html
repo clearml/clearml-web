@@ -20,7 +20,6 @@
               <mat-form-field appearance="outline">
                 <mat-label>{{ loginMode() === loginModeEnum.password ? 'Username' : 'Full Name' }}</mat-label>
                 <input matInput
-                       name="name"
                        formControlName="name"
                        [matAutocomplete]="auto"
                 >
@@ -33,7 +32,6 @@
                 <mat-label>Password</mat-label>
                 <input matInput
                        type="password"
-                       name="password"
                        formControlName="password"
                 >
               </mat-form-field>
@@ -45,8 +43,7 @@
             </div>
           }
           @if (showLogin()) {
-            <button mat-flat-button (click)="login()"
-                    [disabled]="(!loginForm.valid || showSpinner())">
+            <button mat-flat-button (click)="login()" [disabled]="(!loginForm.valid || showSpinner())">
               @if (showSpinner()) {
                 <mat-spinner class="spinner" diameter="16" color="accent"></mat-spinner>
               }
@@ -94,8 +91,8 @@
   </div>
   @if (showGitHub()) {
     <div class="marketing-content-bottom">
-      <ntkme-github-button user="allegroai" repo="clearml" size="large" [count]="true"></ntkme-github-button>
-      <div class="github-text mb-3">If you ❤️ ClearML, ⭐ us on <a class="link" href="https://github.com/allegroai/clearml">GitHub</a></div>
+      <ntkme-github-button user="clearml" repo="clearml" size="large" [count]="true"></ntkme-github-button>
+      <div class="github-text mb-3">If you ❤️ ClearML, ⭐ us on <a class="link" href="https://github.com/clearml/clearml">GitHub</a></div>
       <div class="community-links">
         <a class="link" target="_blank" [href]="environment().slackLink">
           <i class="al-icon sm al-ico-slack"></i>

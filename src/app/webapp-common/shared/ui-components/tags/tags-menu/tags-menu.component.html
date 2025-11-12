@@ -2,7 +2,7 @@
   <span cdkTrapFocus (keydown.tab)="$event.stopPropagation()" (keydown.shift.tab)="$event.stopPropagation()">
     <form class="filter-form"
           smClickStopPropagation
-          (submit)="filterText?.trim().length > 0 && (!disableCreateNew() || allTags?.includes(filterText)) && addTag(filterText);"
+          (submit)="filterText?.trim().length > 0 && (!disableCreateNew() || allTags()?.includes(filterText)) && addTag(filterText);"
           (keydown)="$event.stopPropagation()"
           (keyup.arrowDown)="createButtons.first ? createButtons.first.focus() : buttons.first?.focus()"
     >
@@ -20,7 +20,7 @@
           autocomplete="off"
         >
         <div matSuffix class="d-flex-center mx-2">
-          @if (!disableFilterByProject() && companyTags() !== null && (disableFilterByProject$ | ngrxPush) === false) {
+          @if (!disableFilterByProject() && companyTags() !== null && isAllProject() === false) {
             <i
               class="icon sm-md me-3 mb-2 pointer"
               [class]="tagsFilterByProject() ? 'i-project-tags-filter-active' : 'i-project-tags-filter'"
@@ -35,7 +35,7 @@
       </mat-form-field>
     </form>
     <div class="buttons-container" [class.searching]="filterText">
-      @if (!disableCreateNew() && filterText?.trim().length > 0 && !allTags?.includes(filterText)) {
+      @if (!disableCreateNew() && filterText?.trim().length > 0 && !allTags()?.includes(filterText)) {
         <button
           #tagCreateButton
           mat-menu-item
@@ -44,7 +44,7 @@
           (keyup.arrowUp)="focus($event)"
         >"{{ filterText.trim() }}" <span class="new" data-id="createNewTag">(Create New)</span></button>
       }
-      @for (tag of allTags | filter:tags() | filter:filterText; track tag; let i = $index) {
+      @for (tag of allTags() | filter:tags() | filter:filterText; track tag; let i = $index) {
         <button
           #tagButton
           mat-menu-item
@@ -56,7 +56,7 @@
         >{{ tag }}</button>
       }
       </div>
-    @if (!disableColorMangement()) {
+    @if (!disableColorManagement()) {
       <hr>
       <button mat-menu-item data-id="TagColors" class="item" (click)="openTagColors()">Tag Colors</button>
     }

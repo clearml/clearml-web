@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {pageSize} from '@common/projects/common-projects.consts';
-import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {
   addProjectTags,
-  getProjectsTags, setBreadcrumbsOptions,
+  setBreadcrumbsOptions,
   setDefaultNestedModeForFeature,
   setSelectedProjectId,
   setTags
@@ -13,7 +13,7 @@ import {
   selectDefaultNestedModeForFeature,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode,
-  selectProjectTags
+  selectMainPageUsersFilter
 } from '@common/core/reducers/projects.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
@@ -38,7 +38,7 @@ import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-p
     styleUrls: ['./pipelines-page.component.scss'],
     standalone: false
 })
-export class PipelinesPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
+export class PipelinesPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
   initPipelineCode = `from clearml import PipelineDecorator
 
 @PipelineDecorator.component(cache=True, execution_queue="default")
@@ -67,7 +67,6 @@ if __name__ == '__main__':
   pageSize = pageSize;
   protected entityType = ProjectTypeEnum.pipelines;
   isExample = isExample;
-  public projectsTags$: Observable<string[]>;
   public showExamples$: Observable<boolean>;
   private headerUserFocusSub: Subscription;
   private mainPageFilterSub: Subscription;
@@ -75,12 +74,11 @@ if __name__ == '__main__':
 
   override ngOnInit() {
     super.ngOnInit();
-    this.store.dispatch(getProjectsTags({entity: this.getName()}));
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
-    this.projectsTags$ = this.store.select(selectProjectTags);
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
-      this.store.select(selectMainPageTagsFilterMatchMode)
+      this.store.select(selectMainPageTagsFilterMatchMode),
+      this.store.select(selectMainPageUsersFilter),
     ]).pipe(debounceTime(0), skip(1))
       .subscribe(() => {
         this.store.dispatch(resetProjects());
@@ -91,6 +89,7 @@ if __name__ == '__main__':
 
   override ngOnDestroy() {
     super.ngOnDestroy();
+    this.subs.unsubscribe();
     this.headerUserFocusSub?.unsubscribe();
     this.mainPageFilterSub.unsubscribe();
     this.store.dispatch(setTags({tags: []}));

@@ -6,6 +6,7 @@ import {SortMeta} from 'primeng/api';
 export interface Queue extends Omit<BLQueue, 'id'> {
   id: string;
   caption: string;
+  profile_connection: {profile: string; policy: string; user_group: string; policy_name?: string}
 }
 
 export const queueActions = createActionGroup({

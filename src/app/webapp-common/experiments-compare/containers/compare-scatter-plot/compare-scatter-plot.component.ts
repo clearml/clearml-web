@@ -1,9 +1,9 @@
-import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, computed, ElementRef, inject, input} from '@angular/core';
 import {ScatterPlotSeries} from '@common/core/reducers/projects.reducer';
 import {
   ExtraTask
 } from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
-import {get, isEqual} from 'lodash-es';
+import {get} from 'lodash-es';
 import {from} from 'rxjs';
 import domtoimage from 'dom-to-image';
 import {take} from 'rxjs/operators';
@@ -17,54 +17,55 @@ import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-pa
     styleUrls: ['./compare-scatter-plot.component.scss'],
     standalone: false
 })
-export class CompareScatterPlotComponent implements OnChanges {
-  public metricVariantToPathPipe = new MetricVariantToPathPipe;
-  public graphData: ScatterPlotSeries[];
-  public scalar: boolean;
-
-  @Input() metric: string;
-  @Input() metricName!: string;
-  @Input() params: string | string[];
-  @Input() extraHoverInfoParams: string[] = [];
-  @Input() extraHoverInfoMetrics: SelectedMetricVariant[] = [];
-  @Input() experiments: ExtraTask[];
-
+export class CompareScatterPlotComponent {
   private ref = inject(ElementRef);
+  public metricVariantToPathPipe = new MetricVariantToPathPipe;
 
+  metric = input<string>();
+  metricName = input<string>();
+  params = input<{section: string; name: string}[]>();
+  extraHoverInfoParams = input<{section: string; name: string}[]>([]);
+  extraHoverInfoMetrics = input<SelectedMetricVariant[]>([]);
+  experiments = input<ExtraTask[]>();
 
-  ngOnChanges(changes:SimpleChanges): void {
-    this.scalar = true;
-    if (this.experiments && this.params && this.metric) {
-      const newGraphData = [{
+  protected xAxisLabel = computed(() => this.params()?.[0] ? `${this.params()?.[0].section}.${this.params()?.[0].name}` : '');
+
+  protected scalar = computed(() => this.experiments()
+    .map(point => point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value)
+    .filter((paramValue) => paramValue !== undefined)
+    .some(paramValue => isNaN(parseFloat(paramValue)))
+  );
+
+  protected graphData = computed<ScatterPlotSeries[]>(() => {
+    if (this.experiments() && this.params() && this.metric()) {
+      return [{
         label: '',
         backgroundColor: '#14aa8c',
-        data: this.experiments
-          .map(point => [point, get(point.hyperparams, Array.isArray(this.params) ? `${this.params[0]}.value` : this.params)])
-          .filter(([, param]) => param !== undefined)
-          .map(([point, param]) => {
-            const numericParam = parseFloat(param);
-            if (isNaN(numericParam)) {
-              this.scalar = false;
-            }
+        data: this.experiments()
+          .map(point => [point, point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value])
+          .filter(([, paramValue]) => paramValue !== undefined)
+          .map(([point, paramValue]) => {
+            const numericParam = parseFloat(paramValue);
             return {
-              x: isNaN(numericParam) ? numericParam : param,
-              y: get(point.last_metrics, this.metric),
+              x: !isNaN(numericParam) ? numericParam : paramValue,
+              y: get(point.last_metrics, this.metric()),
               id: point.id,
               name: point.name,
-              extraParamsHoverInfo: this.extraHoverInfoParams.map(param => `${param}: ${get(point.hyperparams, param)?.value}`).concat(
-                this.extraHoverInfoMetrics.map(metric => {
-                  const metricVar = get(point.last_metrics, this.metricVariantToPathPipe.transform(metric));
-                  return `${metric?.metric}/${metric?.variant}: value: ${metricVar?.value}, min: ${metricVar?.min_value}, max: ${metricVar?.max_value}`;
-                })
-              )
+              extraParamsHoverInfo: this.extraHoverInfoParams()
+                .map(param =>
+                  `${param.section}.${param.name}: ${point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value}`
+                )
+                .concat(this.extraHoverInfoMetrics().map(metric => {
+                    const metricVar = get(point.last_metrics, this.metricVariantToPathPipe.transform(metric));
+                    return `${metric?.metric}/${metric?.variant}: value: ${metricVar?.value}, min: ${metricVar?.min_value}, max: ${metricVar?.max_value}`;
+                  })
+                )
             };
           }),
       } as ScatterPlotSeries];
-      if (!isEqual(newGraphData, this.graphData)  || (changes.metricName?.currentValue!== changes.metricName?.previousValue) || (changes.params?.currentValue!== changes.params?.previousValue)) {
-        this.graphData = newGraphData;
-      }
     }
-  }
+    return [];
+  });
 
   downloadImage() {
     from(domtoimage.toBlob(this.ref.nativeElement))
@@ -74,7 +75,7 @@ export class CompareScatterPlotComponent implements OnChanges {
         const a = document.createElement('a');
         a.href = url;
         a.target = '_blank';
-        a.download = `Hyperparam scatter ${Array.isArray(this.params) ? this.params[0] : this.params} x ${this.metric}`;
+        a.download = `Hyperparam scatter ${Array.isArray(this.params()) ? this.params()[0] : this.params()} x ${this.metric()}`;
         a.click();
       });
   }

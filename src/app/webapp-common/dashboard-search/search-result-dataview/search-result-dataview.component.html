@@ -1,0 +1,19 @@
+<sm-result-line
+  class="pointer"
+  (click)="this.dataviewSelected.emit(entity())"
+  [fontIcon]="'al-ico-dataviews'"
+  [label]="entity().name"
+  [status]="entity().status === 'draft' ? 'created': entity().status"
+  [statusOptionsLabels]="statusOptionsLabels()"
+  [tags]="entity().tags"
+>
+  <ng-container subtitle>
+        <span class="d-flex sub-title">
+          <span class="project ellipsis">{{ entity().project?.name | shortProjectName }}</span>
+          <span class="dot">●</span>
+          <span title="Created" class="sub-item">{{ entity().created | timeAgo }}</span>
+          <span class="dot">●</span>
+          <span title="Created by" class="sub-item">{{ entity().user?.name }}</span>
+        </span>
+  </ng-container>
+</sm-result-line>

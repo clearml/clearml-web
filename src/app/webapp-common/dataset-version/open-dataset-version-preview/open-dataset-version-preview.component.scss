@@ -19,6 +19,10 @@
   display: flex !important;
 }
 
+.no-data {
+  color: var(--color-empty-state);
+}
+
 sm-debug-images {
   height: unset;
 }

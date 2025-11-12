@@ -15,6 +15,7 @@ import {PushPipe} from '@ngrx/component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 
 
@@ -36,7 +37,8 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
     PushPipe,
     MatIconButton,
     MatIcon,
-    MatSlideToggle
+    MatSlideToggle,
+    ChooseColorDirective
   ]
 })
 export class SingleGraphModule { }

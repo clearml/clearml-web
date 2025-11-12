@@ -10,7 +10,7 @@
          (keydown.enter)="control.markAsTouched()"
          (focusout)="onTouched && onTouched()"
   >
-  @if (createNewSuffix()) {
+  @if (createNewSuffix() && !state().loading()) {
     <span matSuffix class="creat-new-suffix">(Create New)</span>
   }
   @if (control.value) {
@@ -24,13 +24,13 @@
                     [displayWith]="displayFn.bind(this)"
                     (opened)="(!data()?.length || control.value) && getEntitiesFn(control.value)"
                     autoActiveFirstOption>
-    @if (createNewSuffix()) {
+    @if (createNewSuffix() && !state().loading()) {
       <mat-option class="item" [value]="control.value" (onSelectionChange)="createNewSelected.emit($event.source.value)">
         "{{ control.value }}" <span class="new">(Create New)</span>
       </mat-option>
     }
     @for (entity of data(); track entity.id) {
-      <mat-option [value]="entity.name">
+      <mat-option [value]="entity.name" [disabled]="entity.disabled">
         <div [smSearchText]="control.value">{{ entity[this.displayField()] }}</div>
       </mat-option>
     }

@@ -1,24 +1,24 @@
 :root {
   .mdc-switch {
-    --mdc-switch-track-width: 32px;
-    --mdc-switch-track-height: 16px;
-    --mdc-switch-handle-width: 14px;
-    --mat-switch-with-icon-handle-size: 14px;
-    --mat-switch-selected-handle-horizontal-margin: 0 2px;
-    --mat-switch-selected-with-icon-handle-horizontal-margin: 0 -1px;
-    --mat-switch-unselected-with-icon-handle-horizontal-margin: 0 1px;
-    --mat-switch-selected-pressed-handle-horizontal-margin: 0 -2px;
-    --mat-switch-unselected-pressed-handle-horizontal-margin: 0 0;
-    --mat-switch-pressed-handle-size: 16px;
-    --mdc-switch-state-layer-size: 32px;
-    --mdc-switch-selected-icon-size: 12px;
-    --mdc-switch-unselected-icon-size: 12px;
-    --mat-switch-track-outline-width: 0;
-    --mat-switch-selected-track-outline-width: 0;
+    --mat-slide-toggle-track-width: 32px;
+    --mat-slide-toggle-track-height: 16px;
+    --mat-slide-toggle-handle-width: 14px;
+    --mat-slide-toggle-with-icon-handle-size: 14px;
+    --mat-slide-toggle-selected-handle-horizontal-margin: 0 2px;
+    --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 -1px;
+    --mat-slide-toggle-unselected-with-icon-handle-horizontal-margin: 0 1px;
+    --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 -2px;
+    --mat-slide-toggle-unselected-pressed-handle-horizontal-margin: 0 0;
+    --mat-slide-toggle-pressed-handle-size: 16px;
+    --mat-slide-toggle-state-layer-size: 32px;
+    --mat-slide-toggle-selected-icon-size: 12px;
+    --mat-slide-toggle-unselected-icon-size: 12px;
+    --mat-slide-toggle-track-outline-width: 0;
+    --mat-slide-toggle-selected-track-outline-width: 0;
   }
 
   .mat-mdc-slide-toggle  {
-    --mat-switch-label-text-size: 14px;
+    --mat-slide-toggle-label-text-size: 14px;
   }
 
   .mat-mdc-slide-toggle .mdc-label {

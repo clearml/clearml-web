@@ -215,7 +215,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   }
 
   buildUrl(target: { name: string; tags: string[]; systemTags: string[], id: string, project: { id: string } }) {
-    const projectOrPipeline = this.activatedRoute.root.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
+    const projectOrPipeline = this.activatedRoute.root.firstChild.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
     const targetEntity = this.activatedRoute.snapshot.parent.data.entityType === EntityTypeEnum.model ? EntityTypeEnum.model : EntityTypeEnum.experiment;
     return [`/${projectOrPipeline}`, target.project?.id || '*', `${targetEntity}s`, target.id];
   }

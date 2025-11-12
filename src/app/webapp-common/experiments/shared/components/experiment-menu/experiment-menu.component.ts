@@ -10,7 +10,7 @@ import {CloneExperimentPayload} from '../../common-experiment-model.model';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
 import {abortAllChildren, archiveSelectedExperiments} from '../../../actions/common-experiments-menu.actions';
-import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
+import {MoveProjectData, MoveProjectDialogComponent} from '@common/experiments/shared/components/move-project-dialog/move-project-dialog.component';
 import {CloneDialogComponent, CloneDialogData} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
@@ -54,6 +54,7 @@ import {
 import {headerActions} from '@common/core/actions/router.actions';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {Task} from '~/business-logic/model/tasks/task';
+import {Project} from '~/business-logic/model/projects/project';
 
 
 @Component({
@@ -75,7 +76,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   public open: boolean;
 
   selectedExperiment = input<IExperimentInfo>();
-  isSharedAndNotOwner = input(false);
+  isSharedNotInWorkspaces = input(false);
   tagsFilterByProject = input<boolean>();
   projectTags = input<string[]>();
   companyTags = input<string[]>();
@@ -308,7 +309,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   public moveToProjectPopup() {
     const selectedExperiments = this.selectedExperiments() ? selectionDisabledMoveTo(this.selectedExperiments()).selectedFiltered : [this.experiment()];
     const currentProjects = Array.from(new Set(selectedExperiments.map(exp => exp.project?.id).filter(p => p)));
-    const dialog = this.dialog.open(ChangeProjectDialogComponent, {
+    const dialog = this.dialog.open<MoveProjectDialogComponent, MoveProjectData, Project>(MoveProjectDialogComponent, {
       data: {
         currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId()],
         defaultProject: this.experiment()?.project,
@@ -316,16 +317,15 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         type: EntityTypeEnum.experiment
       }
     });
-    dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
-      this.moveToProjectClicked(project, selectedExperiments);
-    });
-  }
-
-  moveToProjectClicked(project, selectedExperiments) {
-    this.store.dispatch(commonMenuActions.changeProjectRequested({
-      selectedEntities: selectedExperiments,
-      project
-    }));
+    dialog.afterClosed()
+      .pipe(
+        take(1),
+        filter(project => !!project)
+      )
+      .subscribe(project => this.store.dispatch(commonMenuActions.changeProjectRequested({
+          selectedEntities: selectedExperiments,
+          project
+        })));
   }
 
   viewWorkerClicked() {

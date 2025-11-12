@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, effect, input, model, output, signal,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  model,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {
@@ -57,6 +67,8 @@ export class TableFilterSortComponent {
   public options = input<{ label: string; value: string; tooltip?: string }[]>();
   public subOptions = input<{ label: string; value: string }[]>();
   public tooltip = input(false);
+  smMenu = viewChild(MenuComponent);
+
 
   // Outputs
   public filterChanged = output<{ value: string[]; andFilter?: boolean }>();
@@ -67,7 +79,7 @@ export class TableFilterSortComponent {
   public searchValueChanged = output<{ value: string; loadMore?: boolean }>();
 
   // Internal State Signals
-  private pageNumber = signal(1);
+  protected pageNumber = signal(1);
   private lengthBeforeLoad = signal<number | null>(null);
   protected loading = signal(false); // For "load more" spinner
   protected searching = signal(false); // For initial search spinner
@@ -76,12 +88,12 @@ export class TableFilterSortComponent {
   // Computed Signals
   protected paginatedOptions = computed(() => {
     // When a new search is happening, return null to trigger the spinner in the child component.
-    if (this.searching()) {
+    if (this.searching() && !this.noMoreOptions()) {
       return null;
     }
 
     const col = this.column();
-    if (!col.paginatedFilterPageSize) {
+    if (!col.paginatedFilterPageSize || this.noMoreOptions()) {
       return this.options();
     }
     return this.options()?.slice(0, col.paginatedFilterPageSize * this.pageNumber());
@@ -89,30 +101,33 @@ export class TableFilterSortComponent {
 
   protected noMoreOptions = computed(() => {
     const col = this.column();
-    // Logic for non-async filters remains the same
+    const options = this.options();
+
+    // Logic for non-async filters (Cycle is removed here)
     if (!col.asyncFilter) {
-      return this.paginatedOptions()?.length === this.options()?.length;
+      if (!options?.length || !col.paginatedFilterPageSize) {
+        return true; // No options or no pagination means there are no more to load.
+      }
+      // Calculate if the number of items that should be displayed exceeds the total available.
+      const displayedCount = col.paginatedFilterPageSize * this.pageNumber();
+      return displayedCount >= options.length;
     }
 
-    // If we are actively loading more data, we can't know if there are more options yet.
+    // Logic for async filters (remains the same)
     if (this.loading()) {
       return false;
     }
 
-    const options = this.options();
     const prevLength = this.lengthBeforeLoad();
 
-    // After the very first search (prevLength is null), if we get less than a full page, we're done.
     if (prevLength === null && options && options.length < col.paginatedFilterPageSize) {
       return true;
     }
 
-    // After a "loadMore" action, if the total number of options hasn't increased, it means we've reached the end.
     if (prevLength !== null && options && options.length === prevLength) {
       return true;
     }
 
-    // Default for async: if no other condition is met, assume there could be more until proven otherwise.
     return false;
   });
 
@@ -174,7 +189,8 @@ export class TableFilterSortComponent {
   }
 
   public onMenuClose(): void {
-    this.pageNumber.set(1);
+    // Need to wait until menu actually close, otherwise loadMore because 3dots is visible
+    setTimeout(() => this.pageNumber.set(1), 500);
     this.menuClosed.emit();
   }
 
