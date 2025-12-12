@@ -21,6 +21,37 @@
           (changeSmoothType)="changeSmoothType($event)"
           (changeShowOrigin)="changeShowOriginals($event)"
         ></sm-graph-settings-bar>
+        <div class="line-width-control">
+          <div class="label">Line Width</div>
+          <div class="slider-row">
+            <mat-slider [min]="0.3" [max]="7" [step]="0.1">
+              <input matSliderThumb [value]="lineWidth" (valueChange)="changeLineWidth($any($event))"/>
+            </mat-slider>
+            <input class="line-width-input" type="number" step="0.1" [min]="0.3" [max]="7" [value]="lineWidth" (input)="changeLineWidth($any($event.target.value))"/>
+          </div>
+        </div>
+        <div class="runs-sidebar-list">
+          <div class="runs-sidebar-header">Runs</div>
+          @if (experiments$ | ngrxPush) {
+            <div class="runs-list">
+              @for (run of (experiments$ | ngrxPush); track run.id) {
+                <div
+                  class="run-row"
+                  (mouseenter)="highlightRun(run.id)"
+                  (mouseleave)="clearHighlight()"
+                >
+                  <mat-checkbox
+                    class="run-visibility"
+                    [checked]="!hiddenRuns.has(run.id)"
+                    (change)="setRunVisibility(run.id, $event.checked)"
+                  ></mat-checkbox>
+                  <span class="run-color" [style.background-color]="experimentsColor[run.id]"></span>
+                  <span class="run-name ellipsis" [attr.title]="run.name">{{ run.name }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }
       @if (!minimized) {
         <sm-selectable-grouped-filter-list
@@ -92,5 +123,14 @@
       (changeSmoothType)="changeSmoothType($event)"
       (changeShowOrigin)="changeShowOriginals($event)"
     ></sm-graph-settings-bar>
+    <div class="line-width-control">
+      <div class="label">Line Width</div>
+      <div class="slider-row">
+        <mat-slider [min]="0.3" [max]="7" [step]="0.1">
+          <input matSliderThumb [value]="lineWidth" (valueChange)="changeLineWidth($any($event))"/>
+        </mat-slider>
+        <input class="line-width-input" type="number" step="0.1" [min]="0.3" [max]="7" [value]="lineWidth" (input)="changeLineWidth($any($event.target.value))"/>
+      </div>
+    </div>
   </mat-menu>
 }

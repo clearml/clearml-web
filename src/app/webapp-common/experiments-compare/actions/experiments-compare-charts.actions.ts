@@ -70,7 +70,7 @@ export const getGlobalLegendData = createAction(
 );
 export const setGlobalLegendData = createAction(
   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[set global legend data]',
-  props<{data: {name: string, tags: string[], systemTags: string[], id: string, project: {id: string}}[]}>()
+  props<{data: {name: string, tags: string[], systemTags: string[], id: string, project: {id: string}, last_update?: string, created?: string}[]}>()
 );
 
 // export const setScalarsHoverMode = createAction(

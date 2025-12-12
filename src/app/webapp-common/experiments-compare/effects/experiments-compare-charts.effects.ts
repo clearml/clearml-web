@@ -47,11 +47,11 @@ export class ExperimentsCompareChartsEffects {
     switchMap(action => iif(() => action.entity === EntityTypeEnum.model,
         this.modelsApi.modelsGetAllEx({
           id: action.ids,
-          only_fields: ['name', 'tags', 'project', 'system_tags']
+          only_fields: ['name', 'tags', 'project', 'system_tags', 'last_update', 'created']
         }),
         this.tasksApi.tasksGetAllEx({
           id: action.ids,
-          only_fields: ['name', 'tags', 'project', 'system_tags']
+          only_fields: ['name', 'tags', 'project', 'system_tags', 'last_update', 'created']
         })).pipe(
         map(res => {
           const data = Object.values(res)[0] as {
@@ -59,7 +59,9 @@ export class ExperimentsCompareChartsEffects {
             tags: string[],
             system_tags: string[],
             name: string,
-            project: { id: string }
+            project: { id: string },
+            last_update?: string,
+            created?: string
           }[]
           const ordered = action.ids.map(id => data.find(exp => exp.id === id)).filter(exp => exp)
             .map(exp => ({...exp, systemTags: exp.system_tags}));
