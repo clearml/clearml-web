@@ -45,7 +45,14 @@
                     [checked]="!hiddenRuns.has(run.id)"
                     (change)="setRunVisibility(run.id, $event.checked)"
                   ></mat-checkbox>
-                  <span class="run-color" [style.background-color]="experimentsColor[run.id]"></span>
+                  <span
+                    #runColor
+                    class="run-color"
+                    [style.background-color]="experimentsColor[run.id]"
+                    [colorButtonRef]="runColor"
+                    [smChooseColor]="experimentsColor[run.id]"
+                    [stringToColor]="run.name + '-' + run.id"
+                  ></span>
                   <span class="run-name ellipsis" [attr.title]="run.name">{{ run.name }}</span>
                   <button mat-icon-button [matMenuTriggerFor]="runMenu" class="run-actions" (click)="$event.stopPropagation()">
                     <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>

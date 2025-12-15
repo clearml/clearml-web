@@ -159,6 +159,7 @@ $list-width: 359px;
       border-radius: 50%;
       border: 1px solid var(--color-surface-container-high);
       flex-shrink: 0;
+      cursor: url(../../../assets/icons/pallete-cursor.svg) 6 0, pointer;
     }
 
     .run-name {

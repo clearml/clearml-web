@@ -57,6 +57,7 @@ import {PushPipe} from '@ngrx/component';
 import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
@@ -92,6 +93,7 @@ import {ICONS} from '@common/constants';
     MatSliderModule,
     MatCheckboxModule,
     MatMenuModule,
+    ChooseColorDirective,
     FormsModule
   ]
 })
@@ -581,7 +583,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         body: `Are you sure you want to delete "<b>${run.name}</b>"? This action cannot be undone.`,
         yes: 'Delete',
         no: 'Cancel',
-        iconClass: 'al-ico-danger',
+        iconClass: 'al-ico-trash',
         width: 520,
         containerClass: 'neat',
         headerClass: 'no-uppercase',
