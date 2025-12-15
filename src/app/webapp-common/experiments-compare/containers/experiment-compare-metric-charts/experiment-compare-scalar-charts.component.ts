@@ -14,7 +14,7 @@ import {
   getMultiSingleScalars,
   resetExperimentMetrics, setExperimentHistogram,
   setExperimentMetricsSearchTerm, setExperimentMultiScalarSingleValue,
-  setExperimentSettings,
+  setExperimentSettings, getGlobalLegendData,
   setSelectedExperiments
 } from '../../actions/experiments-compare-charts.actions';
 import {
@@ -55,7 +55,7 @@ import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {PushPipe} from '@ngrx/component';
 import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
-import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
@@ -66,6 +66,13 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
+import {Router} from '@angular/router';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {TemplateRef, ViewChild as NgViewChild} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {ICONS} from '@common/constants';
 
 
 @Component({
@@ -78,23 +85,27 @@ import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-s
     SelectableGroupedFilterListComponent,
     PushPipe,
     GraphSettingsBarComponent,
-    MatMenu,
-    MatMenuTrigger,
     ClickStopPropagationDirective,
     ExperimentGraphsComponent,
     MatIconModule,
     MatButtonModule,
     MatSliderModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatMenuModule,
+    FormsModule
   ]
 })
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly changeDetection = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly refresh = inject(RefreshService);
   private readonly reportEmbed = inject(ReportCodeEmbedService);
   private readonly colorHash = inject(ColorHashService);
+  private readonly tasksApi = inject(ApiTasksService);
+  private readonly dialog = inject(MatDialog);
+  public icons = ICONS;
 
   protected metrics$ = this.store.select(selectCompareTasksScalarCharts)
     .pipe(
@@ -134,6 +145,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   public lineWidth = 2;
   public experimentsColor: Record<string, string> = {};
   public hiddenRuns = new Set<string>();
+  public renameValue = '';
+  @NgViewChild('renameRunDialog') renameTemplate: TemplateRef<any>;
 
   private subs = new Subscription();
 
@@ -524,6 +537,79 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     }
     this.hiddenRuns = hiddenRuns;
     this.updateGraphStyles();
+  }
+
+  viewRun(run: {id: string; project?: {id: string}}) {
+    const projectId = run.project?.id ?? this.projectId();
+    const url = `/projects/${projectId}/tasks/${run.id}/execution`;
+    window.open(url, '_blank');
+  }
+
+  renameRun(run: {id: string; name: string}) {
+    this.renameValue = run.name;
+    const ref = this.dialog.open<ConfirmDialogComponent, any, {isConfirmed: boolean} | boolean>(ConfirmDialogComponent, {
+      data: {
+        title: 'Rename run',
+        template: this.renameTemplate,
+        templateContext: {$implicit: run},
+        yes: 'Save',
+        no: 'Cancel',
+        width: 500,
+        containerClass: 'neat',
+        headerClass: 'no-uppercase',
+        buttonsClass: 'align-end'
+      },
+      panelClass: 'rename-run-dialog'
+    });
+    ref.afterClosed().subscribe(result => {
+      if ((result as any)?.isConfirmed || result === true) {
+        const newName = this.renameValue?.trim();
+        if (newName && newName !== run.name) {
+          this.tasksApi.tasksUpdate({task: run.id, name: newName}).subscribe(() => {
+            this.refreshLegendData();
+          });
+        }
+      }
+      this.renameValue = '';
+    });
+  }
+
+  deleteRun(run: {id: string; name: string}) {
+    const ref = this.dialog.open<ConfirmDialogComponent, any, {isConfirmed: boolean} | boolean>(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete run',
+        body: `Are you sure you want to delete "<b>${run.name}</b>"? This action cannot be undone.`,
+        yes: 'Delete',
+        no: 'Cancel',
+        iconClass: 'al-ico-danger',
+        width: 520,
+        containerClass: 'neat',
+        headerClass: 'no-uppercase',
+        buttonsClass: 'align-end'
+      },
+      panelClass: 'rename-run-dialog'
+    });
+    ref.afterClosed().subscribe(result => {
+      if ((result as any)?.isConfirmed || result === true) {
+        this.tasksApi.tasksDelete({task: run.id, force: true}).subscribe(() => {
+          const remaining = (this.taskIds || []).filter(id => id !== run.id);
+          this.taskIds = remaining;
+          this.hiddenRuns.delete(run.id);
+          this.router.navigate([{ids: remaining}], {
+            relativeTo: this.route,
+            replaceUrl: true,
+            queryParamsHandling: 'preserve'
+          });
+          this.refreshLegendData(remaining);
+        });
+      }
+    });
+  }
+
+  private refreshLegendData(ids = this.taskIds) {
+    if (ids?.length > 0) {
+      this.store.dispatch(getGlobalLegendData({ids, entity: this.entityType}));
+    }
   }
 
   changeChartSettings($event: { id: string; changes: Partial<ExperimentSettings> }) {

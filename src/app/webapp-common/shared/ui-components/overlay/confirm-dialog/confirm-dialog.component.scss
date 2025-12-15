@@ -33,6 +33,24 @@
     .yes-button {
       margin-right: 16px;
     }
+
+    &.align-end {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      transform: none;
+      left: auto;
+      margin-top: 24px;
+
+      button {
+        text-transform: none;
+        min-width: 110px;
+      }
+
+      .yes-button {
+        margin-right: 0;
+      }
+    }
   }
 
   .chkbx-label {

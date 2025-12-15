@@ -47,6 +47,23 @@
                   ></mat-checkbox>
                   <span class="run-color" [style.background-color]="experimentsColor[run.id]"></span>
                   <span class="run-name ellipsis" [attr.title]="run.name">{{ run.name }}</span>
+                  <button mat-icon-button [matMenuTriggerFor]="runMenu" class="run-actions" (click)="$event.stopPropagation()">
+                    <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
+                  </button>
+                  <mat-menu #runMenu="matMenu">
+                    <button mat-menu-item (click)="viewRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>
+                      <span>View run</span>
+                    </button>
+                    <button mat-menu-item (click)="renameRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>
+                      <span>Rename</span>
+                    </button>
+                    <button mat-menu-item (click)="deleteRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>
+                      <span>Delete</span>
+                    </button>
+                  </mat-menu>
                 </div>
               }
             </div>
@@ -134,3 +151,10 @@
     </div>
   </mat-menu>
 }
+
+<ng-template #renameRunDialog let-run>
+  <div class="rename-dialog">
+    <label for="run-name-input">New name</label>
+    <input id="run-name-input" type="text" [(ngModel)]="renameValue" class="rename-input" />
+  </div>
+</ng-template>
