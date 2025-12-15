@@ -1,4 +1,5 @@
 import {ChangeDetectorRef, Component, effect, HostListener, OnDestroy, OnInit, ViewChild, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
@@ -93,6 +94,7 @@ import {ICONS} from '@common/constants';
     MatSliderModule,
     MatCheckboxModule,
     MatMenuModule,
+    CommonModule,
     ChooseColorDirective,
     FormsModule
   ]
@@ -149,6 +151,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   public hiddenRuns = new Set<string>();
   public renameValue = '';
   @NgViewChild('renameRunDialog') renameTemplate: TemplateRef<any>;
+  private styleUpdateScheduled = false;
 
   private subs = new Subscription();
 
@@ -473,7 +476,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   changeLineWidth(width: number) {
-    const numericWidth = Math.round(Number(width) * 10) / 10;
+    const numericWidth = Math.round((Number.isFinite(Number(width)) ? Number(width) : this.lineWidth ?? 2) * 10) / 10;
     const boundedWidth = Math.min(7, Math.max(0.3, numericWidth));
     this.lineWidth = boundedWidth;
     this.settings = {...this.settings, lineWidth: boundedWidth};
@@ -659,6 +662,17 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   private updateGraphStyles() {
+    if (this.styleUpdateScheduled) {
+      return;
+    }
+    this.styleUpdateScheduled = true;
+    requestAnimationFrame(() => {
+      this.applyGraphStyles();
+      this.styleUpdateScheduled = false;
+    });
+  }
+
+  private applyGraphStyles() {
     if (!this.graphs) {
       return;
     }
