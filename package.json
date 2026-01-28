@@ -94,7 +94,7 @@
     "@angular-devkit/schematics": "^20.1.6",
     "@angular-devkit/schematics-cli": "^20.1.6",
     "@angular/build": "^20.1.6",
-    "@angular/cli": "^20.1.6",
+    "@angular/cli": "^20.3.15",
     "@angular/compiler-cli": "^20.1.7",
     "@angular/language-service": "^20.1.7",
     "@cypress/schematic": "^3.0.0",
