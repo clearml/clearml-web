@@ -1,7 +1,8 @@
 import {ChangeDetectorRef, Component, effect, HostListener, OnDestroy, OnInit, ViewChild, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {distinctUntilChanged, filter, take, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {
   createMultiSingleValuesChart,
@@ -14,14 +15,14 @@ import {
   getMultiSingleScalars,
   resetExperimentMetrics, setExperimentHistogram,
   setExperimentMetricsSearchTerm, setExperimentMultiScalarSingleValue,
-  setExperimentSettings,
+  setExperimentSettings, getGlobalLegendData,
   setSelectedExperiments
 } from '../../actions/experiments-compare-charts.actions';
 import {
   selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm,
   selectMultiSingleValues,
   selectSelectedExperiments,
-  selectSelectedExperimentSettings
+  selectSelectedExperimentSettings, selectGlobalLegendData
 } from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {GroupByCharts, groupByCharts, setChartSettings} from '@common/experiments/actions/common-experiment-output.actions';
@@ -55,11 +56,25 @@ import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {PushPipe} from '@ngrx/component';
 import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
-import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatSliderModule} from '@angular/material/slider';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
+import {Router} from '@angular/router';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {TemplateRef, ViewChild as NgViewChild} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {ICONS} from '@common/constants';
 
 
 @Component({
@@ -72,18 +87,29 @@ import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-s
     SelectableGroupedFilterListComponent,
     PushPipe,
     GraphSettingsBarComponent,
-    MatMenu,
-    MatMenuTrigger,
     ClickStopPropagationDirective,
-    ExperimentGraphsComponent
+    ExperimentGraphsComponent,
+    MatIconModule,
+    MatButtonModule,
+    MatSliderModule,
+    MatCheckboxModule,
+    MatMenuModule,
+    CommonModule,
+    ChooseColorDirective,
+    FormsModule
   ]
 })
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly changeDetection = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly refresh = inject(RefreshService);
   private readonly reportEmbed = inject(ReportCodeEmbedService);
+  private readonly colorHash = inject(ColorHashService);
+  private readonly tasksApi = inject(ApiTasksService);
+  private readonly dialog = inject(MatDialog);
+  public icons = ICONS;
 
   protected metrics$ = this.store.select(selectCompareTasksScalarCharts)
     .pipe(
@@ -97,15 +123,42 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     filter(params => params.ids !== undefined),
     distinctUntilChanged()
   );
+  protected experiments$ = combineLatest([
+    this.store.select(selectGlobalLegendData),
+    this.colorHash.getColorsObservable()
+  ]).pipe(
+    map(([experiments]) => experiments),
+    filter((experiments): experiments is NonNullable<typeof experiments> => !!experiments),
+    map(experiments => [...experiments].sort((a, b) => {
+      const aTime = new Date(a.last_update ?? a.created ?? 0).getTime();
+      const bTime = new Date(b.last_update ?? b.created ?? 0).getTime();
+      return bTime - aTime;
+    })),
+    map(experiments => {
+      this.experimentsColor = experiments.reduce((acc, exp) => {
+        acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.name}-${exp.id}`));
+        return acc;
+      }, {} as Record<string, string>);
+      return experiments;
+    })
+  );
   protected showSettingsBar = this.store.selectSignal(selectShowCompareScalarSettings);
   protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   public searchTerm$: Observable<string>;
+  public highlightedRunId: string = null;
+  public lineWidth = 2;
+  public experimentsColor: Record<string, string> = {};
+  public hiddenRuns = new Set<string>();
+  public renameValue = '';
+  @NgViewChild('renameRunDialog') renameTemplate: TemplateRef<any>;
+  private styleUpdateScheduled = false;
 
   private subs = new Subscription();
 
   public graphList: GroupedList = {};
   private taskIds: string[];
   public graphs: Record<string, ExtFrame[]>;
+  private rawGraphs: Record<string, ExtFrame[]>;
   private metrics: GroupedList;
   groupByOptions = [
     {
@@ -132,7 +185,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     smoothType: smoothTypeEnum.exponential,
     xAxisType: ScalarKeyEnum.Iter,
     selectedMetricsScalar: [],
-    showOriginals: true
+    showOriginals: true,
+    lineWidth: 2
   };
   private originalSettings: ExperimentCompareSettings;
   public minimized = false;
@@ -191,6 +245,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
           const previousTaskIds = this.taskIds;
           this.taskIds = params.ids.split(',').sort().filter(id => !!id);
           this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
+          this.hiddenRuns = new Set<string>();
+          this.highlightedRunId = null;
           if ((metrics === null || metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds))) {
             this.store.dispatch(getCustomMetricsPerType({ids: this.taskIds, metricsType: EventTypeEnum.TrainingStatsScalar, isModel: this.entityType === EntityTypeEnum.model}));
 
@@ -238,6 +294,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.subs.add(this.settings$.pipe(take(1)).subscribe(settings => {
       this.originalSettings = settings;
       this.settings = settings ? {...this.initialSettings, ...settings, ...(this.settings ?? {})} : {...this.initialSettings, ...(this.settings ?? {})} as ExperimentCompareSettings;
+      this.lineWidth = this.settings.lineWidth ?? 2;
+      this.settings.lineWidth = this.lineWidth;
     }));
 
     this.subs.add(this.store.select(selectMetricVariants)
@@ -320,8 +378,11 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         merged = this.settings.groupBy === 'metric' ? mergeMultiMetricsGroupedVariant(metrics) : {...mergeMultiMetrics(metrics), ...(singleValues?.length > 0 && {' Summary': singleValues})};
       }
       // this.graphList = {...(this.settings.groupBy === 'metric' ? this.buildNestedListWithoutChildren(merged) : metrics), ...(singleValues?.data.length > 0 && {[singleValueChartTitle]: {}})};
-      if (!this.graphs || !isEqual(merged, this.graphs)) {
+      const graphsChanged = !this.rawGraphs || !isEqual(merged, this.rawGraphs);
+      if (graphsChanged) {
+        this.rawGraphs = merged;
         this.graphs = merged;
+        this.updateGraphStyles();
       }
       this.changeDetection.detectChanges();
     }
@@ -414,6 +475,14 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.settings = {...this.settings, showOriginals: $event};
   }
 
+  changeLineWidth(width: number) {
+    const numericWidth = Math.round((Number.isFinite(Number(width)) ? Number(width) : this.lineWidth ?? 2) * 10) / 10;
+    const boundedWidth = Math.min(7, Math.max(0.3, numericWidth));
+    this.lineWidth = boundedWidth;
+    this.settings = {...this.settings, lineWidth: boundedWidth};
+    this.updateGraphStyles();
+  }
+
   changeXAxisType($event: ScalarKeyEnum) {
     this.settings = {...this.settings, xAxisType: $event};
     if (this.taskIds.length > 0) {
@@ -445,6 +514,106 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       entity: this.entityType,
       metrics: this.settings.groupBy === 'none' ? this.selectedVariants : selectedMetricsWithoutVariants
     }));
+    }
+  }
+
+  highlightRun(id: string) {
+    if (this.highlightedRunId === id) {
+      return;
+    }
+    this.highlightedRunId = id;
+    this.updateGraphStyles();
+  }
+
+  clearHighlight() {
+    if (!this.highlightedRunId) {
+      return;
+    }
+    this.highlightedRunId = null;
+    this.updateGraphStyles();
+  }
+
+  setRunVisibility(runId: string, isVisible: boolean) {
+    const hiddenRuns = new Set(this.hiddenRuns);
+    if (isVisible) {
+      hiddenRuns.delete(runId);
+    } else {
+      hiddenRuns.add(runId);
+    }
+    this.hiddenRuns = hiddenRuns;
+    this.updateGraphStyles();
+  }
+
+  viewRun(run: {id: string; project?: {id: string}}) {
+    const projectId = run.project?.id ?? this.projectId();
+    const url = `/projects/${projectId}/tasks/${run.id}/execution`;
+    window.open(url, '_blank');
+  }
+
+  renameRun(run: {id: string; name: string}) {
+    this.renameValue = run.name;
+    const ref = this.dialog.open<ConfirmDialogComponent, any, {isConfirmed: boolean} | boolean>(ConfirmDialogComponent, {
+      data: {
+        title: 'Rename run',
+        template: this.renameTemplate,
+        templateContext: {$implicit: run},
+        yes: 'Save',
+        no: 'Cancel',
+        width: 500,
+        containerClass: 'neat',
+        headerClass: 'no-uppercase',
+        buttonsClass: 'align-end'
+      },
+      panelClass: 'rename-run-dialog'
+    });
+    ref.afterClosed().subscribe(result => {
+      if ((result as any)?.isConfirmed || result === true) {
+        const newName = this.renameValue?.trim();
+        if (newName && newName !== run.name) {
+          this.tasksApi.tasksUpdate({task: run.id, name: newName}).subscribe(() => {
+            this.refreshLegendData();
+          });
+        }
+      }
+      this.renameValue = '';
+    });
+  }
+
+  deleteRun(run: {id: string; name: string}) {
+    const ref = this.dialog.open<ConfirmDialogComponent, any, {isConfirmed: boolean} | boolean>(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete run',
+        body: `Are you sure you want to delete "<b>${run.name}</b>"? This action cannot be undone.`,
+        yes: 'Delete',
+        no: 'Cancel',
+        iconClass: 'al-ico-trash',
+        width: 520,
+        containerClass: 'neat',
+        headerClass: 'no-uppercase',
+        buttonsClass: 'align-end'
+      },
+      panelClass: 'rename-run-dialog'
+    });
+    ref.afterClosed().subscribe(result => {
+      if ((result as any)?.isConfirmed || result === true) {
+        this.tasksApi.tasksDelete({task: run.id, force: true}).subscribe(() => {
+          const remaining = (this.taskIds || []).filter(id => id !== run.id);
+          this.taskIds = remaining;
+          this.hiddenRuns.delete(run.id);
+          this.router.navigate([{ids: remaining}], {
+            relativeTo: this.route,
+            replaceUrl: true,
+            queryParamsHandling: 'preserve'
+          });
+          this.refreshLegendData(remaining);
+        });
+      }
+    });
+  }
+
+  private refreshLegendData(ids = this.taskIds) {
+    if (ids?.length > 0) {
+      this.store.dispatch(getGlobalLegendData({ids, entity: this.entityType}));
     }
   }
 
@@ -490,6 +659,48 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     if (!isEqual(cleanSettings, this.originalSettings)) {
       this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: cleanSettings}));
     }
+  }
+
+  private updateGraphStyles() {
+    if (this.styleUpdateScheduled) {
+      return;
+    }
+    this.styleUpdateScheduled = true;
+    requestAnimationFrame(() => {
+      this.applyGraphStyles();
+      this.styleUpdateScheduled = false;
+    });
+  }
+
+  private applyGraphStyles() {
+    if (!this.graphs) {
+      return;
+    }
+    const highlighted = this.highlightedRunId;
+    const baseLineWidth = Math.min(7, Math.max(0.3, this.settings?.lineWidth ?? this.lineWidth ?? 2));
+    this.lineWidth = baseLineWidth;
+    const sourceGraphs = this.rawGraphs ?? this.graphs ?? {};
+    const updatedGraphs = Object.entries(sourceGraphs).reduce((acc, [metric, frames]) => {
+      acc[metric] = frames?.map(frame => {
+        const updatedData = frame.data?.map(trace => {
+          const taskId = trace.task || frame.task;
+          const isHidden = this.hiddenRuns.has(taskId);
+          const isHighlighted = highlighted && taskId === highlighted;
+          const effectiveVisible = isHidden ? false : (trace.visible ?? true);
+          const effectiveOpacity = isHidden ? 0 : highlighted ? (isHighlighted ? 1 : 0.3) : 1;
+          return {
+            ...trace,
+            line: {...trace.line, width: highlighted ? (isHighlighted ? baseLineWidth + 2 : baseLineWidth) : baseLineWidth},
+            opacity: effectiveOpacity,
+            visible: effectiveVisible
+          };
+        }) ?? [];
+        return {...frame, data: updatedData};
+      }) ?? [];
+      return acc;
+    }, {} as Record<string, ExtFrame[]>);
+    this.graphs = updatedGraphs;
+    this.changeDetection.detectChanges();
   }
 
   private missingVariantGraphInStore() {

@@ -85,4 +85,167 @@ $list-width: 359px;
     right: 120px;
     top: 110px;
   }
+
+  .line-width-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--color-surface-container-high);
+
+    .label {
+      font-size: 14px;
+      color: var(--color-on-surface-variant);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    mat-slider {
+      flex: 1;
+    }
+
+    .line-width-input {
+      width: 70px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--color-surface-container-high);
+      background: var(--color-surface-container-lowest);
+      color: var(--color-on-surface);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .runs-sidebar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--color-surface-container-high);
+
+    .runs-sidebar-header {
+      font-size: 14px;
+      color: var(--color-on-surface-variant);
+    }
+
+    .runs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .run-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+      cursor: default;
+
+      &:hover {
+        background-color: var(--color-surface-container-low);
+      }
+    }
+
+    .run-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--color-surface-container-high);
+      flex-shrink: 0;
+      cursor: url(../../../assets/icons/pallete-cursor.svg) 6 0, pointer;
+    }
+
+    .run-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .run-visibility {
+      padding: 0;
+      margin: 0;
+      min-width: 18px;
+    }
+
+    .run-actions {
+      width: 32px;
+      height: 32px;
+      margin-left: auto;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+      color: var(--color-on-surface-variant);
+
+      mat-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+    }
+
+    .run-row:hover .run-actions {
+      opacity: 1;
+      color: var(--color-on-surface);
+    }
+  }
+
+}
+
+::ng-deep .rename-run-dialog .mat-mdc-dialog-container {
+  padding: 0;
+}
+
+::ng-deep .rename-run-dialog .mdc-dialog__surface {
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+::ng-deep .rename-run-dialog sm-dialog-template .generic-container {
+  padding: 20px 24px 18px;
+}
+
+::ng-deep .rename-run-dialog .create-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  text-transform: none;
+}
+
+::ng-deep .rename-run-dialog .rename-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+::ng-deep .rename-run-dialog .rename-dialog label {
+  font-size: 14px;
+  color: var(--color-on-surface-variant);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+::ng-deep .rename-run-dialog .rename-dialog .rename-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-surface-container-high);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+  }
+
 }

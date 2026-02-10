@@ -34,7 +34,7 @@ export interface IExperimentCompareChartsState {
   searchTerm: string;
   showSettingsBar: boolean;
   selectedExperiments: string[];
-  globalLegendData: { name: string, tags: string[], systemTags: string[], id: string, project: { id: string } }[];
+  globalLegendData: { name: string, tags: string[], systemTags: string[], id: string, project: { id: string }, last_update?: string, created?: string }[];
   // scalarsHoverMode: ChartHoverModeEnum;
 }
 
@@ -44,6 +44,7 @@ export interface ExperimentCompareSettings extends Omit<ExperimentSettings, 'id'
   selectedMetrics: SelectedMetricVariant[];
   selectedParamsHoverInfo: string[];
   selectedMetricsHoverInfo: SelectedMetricVariant[];
+  lineWidth: number;
 }
 
 export const initialState: IExperimentCompareChartsState = {
@@ -82,6 +83,7 @@ export const experimentsCompareChartsReducer = createReducer(
     const sortedIds = [...(action.id ?? [])].sort();
     const changesWithTimestamp = {
       ...action.changes,
+      lineWidth: action.changes?.lineWidth ?? state.settingsList?.[sortedIds.join()]?.lineWidth ?? 2,
       id: sortedIds,
       lastModified: (new Date()).getTime()
     } as ExperimentCompareSettings;

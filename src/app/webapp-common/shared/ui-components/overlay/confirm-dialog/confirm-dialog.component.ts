@@ -5,7 +5,7 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
-import { NgTemplateOutlet } from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {MatButton} from '@angular/material/button';
 
 @Component({
@@ -17,6 +17,7 @@ import {MatButton} from '@angular/material/button';
         MatCheckboxModule,
         FormsModule,
         NgTemplateOutlet,
+        NgClass,
         SaferPipe,
         MatButton
     ]
@@ -40,6 +41,9 @@ export class ConfirmDialogComponent {
   public reference: string;
   neverShowAgain: boolean;
   centerText: boolean;
+  containerClass?: string;
+  headerClass?: string;
+  buttonsClass?: string;
 
   displayX = input(true);
 
@@ -56,6 +60,9 @@ export class ConfirmDialogComponent {
     this.codeSnippet = this.data.codeSnippet || '';
     this.showNeverShowAgain = this.data.showNeverShowAgain || false;
     this.centerText = this.data.centerText ?? false;
+    this.containerClass = this.data.containerClass;
+    this.headerClass = this.data.headerClass;
+    this.buttonsClass = this.data.buttonsClass;
     const width = this.data.width || 640;
 
     this.renderer.setStyle(this.ref.nativeElement, 'width', `${width}px`);

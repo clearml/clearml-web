@@ -21,6 +21,53 @@
           (changeSmoothType)="changeSmoothType($event)"
           (changeShowOrigin)="changeShowOriginals($event)"
         ></sm-graph-settings-bar>
+        <ng-container [ngTemplateOutlet]="lineWidthControl"></ng-container>
+        <div class="runs-sidebar-list">
+          <div class="runs-sidebar-header">Runs</div>
+          @if (experiments$ | ngrxPush) {
+            <div class="runs-list">
+              @for (run of (experiments$ | ngrxPush); track run.id) {
+                <div
+                  class="run-row"
+                  (mouseenter)="highlightRun(run.id)"
+                  (mouseleave)="clearHighlight()"
+                >
+                  <mat-checkbox
+                    class="run-visibility"
+                    [checked]="!hiddenRuns.has(run.id)"
+                    (change)="setRunVisibility(run.id, $event.checked)"
+                  ></mat-checkbox>
+                  <span
+                    #runColor
+                    class="run-color"
+                    [style.background-color]="experimentsColor[run.id]"
+                    [colorButtonRef]="runColor"
+                    [smChooseColor]="experimentsColor[run.id]"
+                    [stringToColor]="run.name + '-' + run.id"
+                  ></span>
+                  <span class="run-name ellipsis" [attr.title]="run.name">{{ run.name }}</span>
+                  <button mat-icon-button [matMenuTriggerFor]="runMenu" class="run-actions" (click)="$event.stopPropagation()">
+                    <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
+                  </button>
+                  <mat-menu #runMenu="matMenu">
+                    <button mat-menu-item (click)="viewRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>
+                      <span>View run</span>
+                    </button>
+                    <button mat-menu-item (click)="renameRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>
+                      <span>Rename</span>
+                    </button>
+                    <button mat-menu-item (click)="deleteRun(run)">
+                      <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>
+                      <span>Delete</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }
       @if (!minimized) {
         <sm-selectable-grouped-filter-list
@@ -92,5 +139,25 @@
       (changeSmoothType)="changeSmoothType($event)"
       (changeShowOrigin)="changeShowOriginals($event)"
     ></sm-graph-settings-bar>
+    <ng-container [ngTemplateOutlet]="lineWidthControl"></ng-container>
   </mat-menu>
 }
+
+<ng-template #lineWidthControl>
+  <div class="line-width-control">
+    <div class="label">Line Width</div>
+    <div class="slider-row">
+      <mat-slider [min]="0.3" [max]="7" [step]="0.1">
+        <input matSliderThumb [value]="lineWidth" (valueChange)="changeLineWidth($any($event))"/>
+      </mat-slider>
+      <input class="line-width-input" type="number" step="0.1" [min]="0.3" [max]="7" [value]="lineWidth" (input)="changeLineWidth($any($event.target.value))"/>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #renameRunDialog let-run>
+  <div class="rename-dialog">
+    <label for="run-name-input">New name</label>
+    <input id="run-name-input" type="text" [(ngModel)]="renameValue" class="rename-input" />
+  </div>
+</ng-template>
