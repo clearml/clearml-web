@@ -1,6 +1,8 @@
 import {Component, computed} from '@angular/core';
 import {DashboardSearchBaseComponent} from '@common/dashboard/dashboard-search.component.base';
 import {activeLinksList} from '~/features/dashboard-search/dashboard-search.consts';
+import {PushPipe} from '@ngrx/component';
+import {SearchResultsTableComponent} from '@common/dashboard-search/search-results-table/search-results-table.component';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
 
@@ -8,10 +10,14 @@ import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
   selector: 'sm-dashboard-search',
   templateUrl: './dashboard-search.component.html',
   styleUrls: ['./dashboard-search.component.scss'],
-  standalone: false
+  imports: [
+    SearchResultsTableComponent,
+    PushPipe
+  ]
 })
 export class DashboardSearchComponent extends DashboardSearchBaseComponent {
   protected links = computed(() => activeLinksList);
+
   modelEndpointSelected(endpoint: EndpointStats) {
     this.router.navigate(['/endpoints', 'active', endpoint.id]);
     this.itemSelected.emit();

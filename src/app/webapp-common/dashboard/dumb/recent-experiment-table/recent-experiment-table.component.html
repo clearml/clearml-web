@@ -1,9 +1,9 @@
-<sm-table [tableData]="tasks"
+<sm-table [tableData]="tasks()"
   [columns]="cols"
   [rowHeight]="52"
   selectionMode="single"
   [scrollable]="true"
-  (rowClicked)="onExperimentSelected($event)"
+  (rowClicked)="taskSelected.emit($event.data)"
   >
   <ng-template let-col
     let-experiment="rowData"

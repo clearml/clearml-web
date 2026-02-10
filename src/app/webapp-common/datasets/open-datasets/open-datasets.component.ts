@@ -12,12 +12,30 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {OpenDatasetCardComponent} from '@common/datasets/open-dataset-card/open-dataset-card.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {ProjectsHeaderComponent} from '@common/projects/dumb/projects-header/projects-header.component';
+import {MatIconModule} from '@angular/material/icon';
+import {FormsModule} from '@angular/forms';
+import {MatButton} from '@angular/material/button';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
-    selector: 'sm-open-datasets',
-    templateUrl: './open-datasets.component.html',
-    styleUrls: ['./open-datasets.component.scss'],
-    standalone: false
+  selector: 'sm-open-datasets',
+  templateUrl: './open-datasets.component.html',
+  styleUrls: ['./open-datasets.component.scss'],
+  imports: [
+    DatasetEmptyComponent,
+    DotsLoadMoreComponent,
+    OpenDatasetCardComponent,
+    ButtonToggleComponent,
+    ProjectsHeaderComponent,
+    MatIconModule,
+    FormsModule,
+    MatButton,
+    PushPipe
+  ]
 })
 export class OpenDatasetsComponent extends PipelinesPageComponent implements OnInit {
 

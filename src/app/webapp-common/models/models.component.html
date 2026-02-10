@@ -53,6 +53,7 @@
         [minimizedView]="minimizedView()"
         [noMoreModels]="noMoreModels$ | ngrxPush"
         [users]="users()"
+        [currentUserId]="currentUser()?.id"
         [frameworks]="frameworks$ |ngrxPush"
         [tags]="tags$ | ngrxPush"
         [modelsProjectTags]="tags$ | ngrxPush"

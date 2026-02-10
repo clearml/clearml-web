@@ -1,5 +1,3 @@
-<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
-<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
 <sm-compare-card-list
   [experiments]="experiments"
   [tasksLimitExceeded]="experiments?.length && (taskIds$ | ngrxPush)?.length > experiments?.length"
@@ -15,12 +13,14 @@
       (copyIdClicked)="copyIdToClipboard()">
     </sm-experiment-compare-general-data>
   </div>
+  <!--        #treeCardBody is in used by base class-->
   <div #treeCardBody class="tree-card-body" *compareCardBody="let experiment; let i = index">
     @if (experimentsDataControl[experiment.id]) {
       <div class="section h-100">
         <!--      TODO: move is-not-origin class outside nodes tree-->
         @let dataSource = experimentsDataControl[experiment.id][0];
         @let treeControl = experimentsDataControl[experiment.id][1];
+<!--        #virtualScrollRef is in used by base class-->
         <cdk-virtual-scroll-viewport
           #virtualScrollRef
           class="virtual-scroll-container"

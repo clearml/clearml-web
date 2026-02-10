@@ -197,7 +197,7 @@ export class CommonExperimentsViewEffects {
       case actions.setColsOrderForProject.type:
         return [`experiments.view.colsOrder.${action.projectId}`];
       case cloneExperiment.type:
-        return ['experiments.view.cloneForceParent'];
+        return ['experiments.view.cloneDefaultOptions'];
     }
     return [];
   }
@@ -760,6 +760,7 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectSelectedExperiments),
       this.store.select(selectExperimentsList)
     ]),
+    filter(([action]) => !!action.ids),
     mergeMap(([action, selectedExperiments, experiments]) =>
       iif(() => selectedExperiments.length > 0,
         [setSelectedExperiments({experiments: selectedExperiments.slice(0, 100)})],
@@ -1055,24 +1056,24 @@ export class CommonExperimentsViewEffects {
       ofType(exActions.createExperiment),
       concatLatestFrom(() => this.store.select(selectSelectedProjectId)),
       switchMap(([action, projectId]) => this.apiTasks.tasksCreate({
-        project: projectId,
-        name: action.data.name,
-        type: action.data.taskType ?? 'training',
-        script: {
-          repository: action.data.repo,
-          ...(action.data.type === 'branch' ?
-              {branch: action.data.branch ?? 'master'} :
-              action.data.type === 'tag' ?
-                {tag: action.data.tag} :
-                {version_num: action.data.commit}
-          ),
-          working_dir: action.data.directory,
-          entry_point: action.data.script,
-          binary: action.data.binary,
-          requirements: action.data.requirements === 'manual' ? {pip: action.data.pip} : null,
-          diff: action.data.uncommited
-        },
-        hyperparams: {
+          project: projectId,
+          name: action.data.name,
+          type: action.data.taskType ?? 'training',
+          script: {
+            repository: action.data.repo,
+            ...(action.data.type === 'branch' ?
+                {branch: action.data.branch ?? 'master'} :
+                action.data.type === 'tag' ?
+                  {tag: action.data.tag} :
+                  {version_num: action.data.commit}
+            ),
+            working_dir: action.data.directory,
+            entry_point: action.data.script,
+            binary: action.data.binary,
+            requirements: action.data.requirements === 'manual' ? {pip: action.data.pip} : null,
+            diff: action.data.uncommited
+          },
+          hyperparams: {
           Args: action.data.args
             .filter(arg => arg.key?.length > 0)
             .reduce((acc, arg) => {
@@ -1080,19 +1081,19 @@ export class CommonExperimentsViewEffects {
               acc[name] = {name, value: arg.value, section: 'Args'};
               return acc;
             }, {})
-        },
-        ...(action.data.output && {output_dest: action.data.output}),
-        container: {
-          ...(action.data.docker.image && {
-            image: action.data.docker.image,
-            setup_shell_script: action.data.docker.script
-          }),
-          arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venvType === 'manual' ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
-            .concat(action.data.vars?.map(v => ` -e ${v.key}:${v.value}`).join('') ?? '')
-            .trimStart()
-        }
-      } as TasksCreateRequest).pipe(
-        map((res: TasksCreateResponse) => exActions.createExperimentSuccess({data: {...action.data, id: res.id}, project: projectId}))
+          },
+          ...(action.data.output && {output_dest: action.data.output}),
+          container: {
+            ...(action.data.docker.image && {
+              image: action.data.docker.image,
+              setup_shell_script: action.data.docker.script
+            }),
+            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venvType === 'manual' ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
+              .concat(action.data.vars?.map(v => ` -e ${v.key}:${v.value}`).join('') ?? '')
+              .trimStart()
+          }
+        } as TasksCreateRequest).pipe(
+          map((res: TasksCreateResponse) => exActions.createExperimentSuccess({data: {...action.data, id: res.id}, project: projectId}))
       )),
       catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to create tasks.\n${this.errService.getErrorMsg(error.error)}`)])
     );

@@ -7,12 +7,13 @@ import {debounce, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {resetLoader} from '@common/core/actions/layout.actions';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {interval} from 'rxjs';
+import {AsyncPipe} from "@angular/common";
 
 
 @Component({
     selector: 'sm-spinner',
     template: `
-    @if (loading$ | ngrxPush) {
+    @if (loading$ | async) {
       <div class="loader-container">
         <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
       </div>
@@ -22,7 +23,7 @@ import {interval} from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatProgressSpinnerModule,
-    PushPipe
+    AsyncPipe
   ]
 })
 export class SpinnerComponent {

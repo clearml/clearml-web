@@ -3,8 +3,7 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 
 @Directive({
   selector: '[smEllipsisMiddleDirective]',
-  standalone: true
-})
+  })
 export class EllipsisMiddleDirective implements AfterViewInit {
   @Input() smEllipsisMiddleDirective: string;
   @Input() delay: number;

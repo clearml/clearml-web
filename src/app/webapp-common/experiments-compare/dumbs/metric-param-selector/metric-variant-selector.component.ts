@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
-import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {uniqBy} from 'lodash-es';
 import {SelectionEvent, SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
@@ -14,7 +13,6 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     selector: 'sm-metric-variant-selector',
     imports: [
         MenuComponent,
-        ExperimentCompareSharedModule,
         MetricVariantToNamePipe,
         TooltipDirective,
         SelectMetricForCustomColComponent,

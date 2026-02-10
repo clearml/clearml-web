@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, viewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, Subject, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
@@ -17,16 +17,35 @@ import {setChartSettings, setExperimentSettings} from '@common/experiments/actio
 import {GroupedList} from '@common/tasks/tasks.model';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-model-info-plot',
-    templateUrl: './model-info-plots.component.html',
-    styleUrls: [
-        './model-info-plots.component.scss',
-        '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-model-info-plot',
+  templateUrl: './model-info-plots.component.html',
+  styleUrls: [
+    './model-info-plots.component.scss',
+    '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExperimentGraphsComponent,
+    SelectableGroupedFilterListComponent,
+    MatIconModule,
+    MatDrawerContainer,
+    MatDrawer,
+    MatDrawerContent,
+    TooltipDirective,
+    MatIconButton,
+    MatButton,
+    PushPipe
+  ]
 })
 export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private store = inject(Store);
@@ -114,7 +133,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     this.sub.add(this.store.select(selectModelPlots)
       .pipe(
         distinctUntilChanged(),
-        filter(metrics => !!metrics),
+        filter(metrics => !!metrics)
       )
       .subscribe(metricsPlots => {
         this.refreshDisabled = false;
@@ -140,20 +159,16 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
 
   getPlotsList(groupedPlots: Record<string, ExtMetricsPlotEvent[]>) {
     return Object.keys(groupedPlots).sort().reduce((acc, metric) => {
-      if (groupedPlots[metric].length < 2) {
-        acc[metric + groupedPlots[metric][0].variant] = {__displayName: metric} as any;
-      } else {
-        acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
-          acc2[plot.variant] = {};
-          return acc2;
-        }, {});
-      }
+      acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
+        acc2[plot.variant] = {};
+        return acc2;
+      }, {});
       return acc;
     }, {} as GroupedList);
   }
 
   metricSelected(id: string) {
-    this.graphsComponent()?.scrollToGraph(id);
+    this.graphsComponent()?.scrollToGraph(id, true);
   }
 
   hiddenListChanged(hiddenList: string[]) {

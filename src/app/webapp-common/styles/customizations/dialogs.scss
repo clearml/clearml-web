@@ -24,6 +24,15 @@ html.cdk-global-scrollblock {
     max-width: 100vw;
   }
 
+  &.mobile-dialog {
+    --mat-dialog-container-min-width: unset;
+    --mat-dialog-container-small-max-width: 300px;
+
+    .generic-container {
+      padding: 32px !important;
+      max-height: unset !important;
+    }
+  }
 }
 
 .allow-impersonation-popup {

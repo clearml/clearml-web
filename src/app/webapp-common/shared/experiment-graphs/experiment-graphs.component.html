@@ -7,7 +7,9 @@
 
   <div class="no-output">
     <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
-    @if (graphsState().graphList().length > 0 || multipleSingleValueData()?.data.length > 0 || singleValueData()?.length > 0) {
+    @if (routeParams().ids === '') {
+      <h4>SELECT TASKS FROM THE LIST TO SHOW THEIR PLOTS</h4>
+    } @else if (!graphsState().noGraphs() && (graphsState().graphList().length > 0 || multipleSingleValueData()?.data.length > 0 || singleValueData()?.length > 0)) {
       <h4>ALL CHARTS ARE HIDDEN</h4>
     } @else {
       <h4>NO CHART DATA</h4>
@@ -40,6 +42,7 @@
           #singleValueGraph
           class="w-100 single-value-summary-section"
           [graphsNumber]="1"
+          [hideLegend]="hideLegend()"
           [legendStringLength]="legendStringLength()"
           [chart]="multipleSingleValueData()"
           [id]="'singleValues'"
@@ -51,6 +54,7 @@
           [chartSettings]="(chartSettings['singleValues'] | ngrxPush)"
           (createEmbedCode)="creatingEmbedCode(null, $event)"
           (chartPreferencesChanged)="chartPreferencesChanged({metric:'singleValues'}, $event)"
+          (maximizeClicked)="maximize($event)"
         ></sm-single-graph>
       </div>
     }
@@ -66,7 +70,7 @@
         >
           <div [id]="experimentGraphidPrefix + metric" class="graph-id">
             <div #groupElement>
-              @if (isGroupGraphs()) {
+              @if (isGroupGraphs() && graphsData()?.[metric]) {
                 <div class="metric-group-header" [class.disable-resize]="disableResize()" (click)="collapseGroup(groupElement)">
                   <div class="flex-placeholder"></div>
                   <div class="header-text">{{ metric }}
@@ -117,6 +121,7 @@
                           [class.two-in-a-row]="isGroupGraphs() && chartItem?.data[0]?.type !== 'table' && graphsData()?.[metric].length > 1 && isWidthBigEnough()"
                           [graphsNumber]="graphsState().numIterations()"
                           [legendStringLength]="legendStringLength()"
+                          [hideLegend]="hideLegend()"
                           [chart]="chartItem"
                           [id]="chartItem.id"
                           [isCompare]="isCompare()"
@@ -135,6 +140,7 @@
                           [exportForReport]="exportForReport()"
                           (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
                           (chartPreferencesChanged)="chartPreferencesChanged(chartItem, $event)"
+                          (maximizeClicked)="maximize($event)"
                         ></sm-single-graph>
                       } @placeholder {
                         <div
@@ -170,6 +176,9 @@
             </div>
           </div>
         </div>
+      }
+      @if (graphsState().graphList()?.length) {
+        <div style="height: 100px;" class="w-100"></div>
       }
     </div>
   </div>

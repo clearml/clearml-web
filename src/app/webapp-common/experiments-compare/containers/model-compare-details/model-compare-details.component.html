@@ -1,5 +1,3 @@
-<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
-<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
 <sm-compare-card-list
   [experiments]="experiments"
   [tasksLimitExceeded] = "experiments?.length && (taskIds$ | ngrxPush)?.length > experiments?.length"
@@ -8,26 +6,25 @@
   (experimentListChanged)="syncUrl($event)"
   (toggled)="afterResize()"
   >
-  <div *compareCardHeader="let experiment; let i = index">
+  <div *compareCardHeader="let experiment">
     <sm-experiment-compare-general-data
       [experiment]="experiment"
       [tags]="experimentTags[experiment.id]"
       (copyIdClicked)="copyIdToClipboard()">
     </sm-experiment-compare-general-data>
   </div>
-  <div #treeCardBody class="tree-card-body" *compareCardBody="let experiment; let i = index">
+  <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
     @if (experimentsDataControl[experiment.id]) {
       <div class="section h-100">
         <!--      TODO: move is-not-origin class outside nodes tree-->
           @let dataSource = experimentsDataControl[experiment.id][0];
           @let treeControl = experimentsDataControl[experiment.id][1];
           <cdk-virtual-scroll-viewport
-            #virtualScrollRef
             class="virtual-scroll-container"
             [class.is-not-origin]="i > 0"
             itemSize="28" minBufferPx="280" maxBufferPx="560"
             >
-            <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
+            <ng-container *cdkVirtualFor="let node of dataSource">
               <div class="node" [class.parent]="node.hasChildren">
                 @if (node.hasChildren) {
                   <div class="section" [class]="'depth-' + node.level"

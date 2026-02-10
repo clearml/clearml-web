@@ -7,6 +7,7 @@ export function minLengthTrimmed(len: number): ValidatorFn {
     if (!val && !required || val?.length >= len) {
       return null;
     }
-    return {minlength: true};
+    // In case of only spaces: -1 (true but < 1)
+    return {minlength: val?.length || -1};
   }
 }

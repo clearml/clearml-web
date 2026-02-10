@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
-import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {NestedProjectViewPageComponent, ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
-import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import { AsyncPipe } from '@angular/common';
 import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
@@ -18,15 +17,16 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
         '../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss',
         '../../../webapp-common/datasets/open-datasets/open-datasets.component.scss'
     ],
-    imports: [
-        ProjectsSharedModule,
-        AsyncPipe,
-        CircleCounterComponent,
-        TagListComponent,
-        MatButton,
-        MatIcon,
-        ClickStopPropagationDirective
-    ]
+  imports: [
+    AsyncPipe,
+    CircleCounterComponent,
+    TagListComponent,
+    MatButton,
+    MatIcon,
+    ClickStopPropagationDirective,
+    NestedProjectViewPageComponent,
+    DatasetEmptyComponent
+  ]
 })
 export class NestedDatasetsPageComponent extends ProjectsPageComponent {
   entityTypeEnum = ProjectTypeEnum;

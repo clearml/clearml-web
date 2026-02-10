@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'allHidden',
-  standalone: true
-})
+  })
 export class AllHiddenPipe implements PipeTransform {
 
   transform(arr: any[]): boolean {

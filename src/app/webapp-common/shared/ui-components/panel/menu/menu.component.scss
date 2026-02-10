@@ -8,6 +8,7 @@
     text-decoration: none;
     cursor: pointer;
     min-width: 36px;
+    max-width: 100%;
   }
 
   .hidden-button {
@@ -25,6 +26,10 @@
     mat-icon {
       --mat-icon-color: var(--row-selected-text-color);
     }
+  }
+
+  ::ng-deep .mdc-button__label {
+    max-width: 100%;
   }
 
 }

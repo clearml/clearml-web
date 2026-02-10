@@ -1,4 +1,4 @@
-import {Component, OnDestroy, Signal, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable, of} from 'rxjs';
@@ -8,7 +8,7 @@ import {FilterMetadata} from 'primeng/api';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {distinctUntilChanged, filter, skip} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
-import {Params} from '@angular/router';
+import {Params, RouterOutlet} from '@angular/router';
 import {decodeColumns, decodeFilter, decodeOrder} from '@common/shared/utils/tableParamEncode';
 import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
 import {BaseEntityPageComponent} from '@common/shared/entity-page/base-entity-page';
@@ -19,12 +19,22 @@ import {servingFeature} from '@common/serving/serving.reducer';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {headerActions} from '@common/core/actions/router.actions';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
+import {ServingHeaderComponent} from '@common/serving/serving-header/serving-header.component';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
-    selector: 'sm-serving-loading',
-    templateUrl: './serving.component.html',
-    styleUrl: './serving.component.scss',
-    standalone: false
+  selector: 'sm-serving-loading',
+  templateUrl: './serving.component.html',
+  styleUrl: './serving.component.scss',
+  imports: [
+    ServingTableComponent,
+    RouterOutlet,
+    SplitAreaComponent,
+    SplitComponent,
+    ServingHeaderComponent,
+    PushPipe,
+  ]
 })
 export class ServingLoadingComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = servingLoadingTableCols;

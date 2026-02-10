@@ -31,9 +31,25 @@ import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {uniq} from 'lodash-es';
-// import {pipelineDummyConfiguration} from '@common/pipelines-controller/pipeline-controller-info/pipeline-dummydata';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {PushPipe} from '@ngrx/component';
+import {
+  ExperimentOutputLogComponent
+} from '@common/experiments/containers/experiment-output-log/experiment-output-log.component';
+import {PipelinesControllerModule} from '@common/pipelines-controller/pipelines-controller.module';
+import {
+  OpenDatasetVersionPreviewComponent
+} from '@common/dataset-version/open-dataset-version-preview/open-dataset-version-preview.component';
+import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {FormsModule} from '@angular/forms';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {PipelineInfoComponent} from '@common/pipelines-controller/pipeline-details/pipeline-info.component';
+import {MatIconModule} from '@angular/material/icon';
+import {
+  PipelineControllerStepComponent
+} from '@common/pipelines-controller/pipeline-controller-step/pipeline-controller-step.component';
+// import {pipelineDummyConfiguration} from '@common/pipelines-controller/pipeline-controller-info/pipeline-dummydata';
 
 export interface PipelineItem extends DagModelItem {
   name: string;
@@ -66,18 +82,20 @@ export enum StatusOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DagManagerUnsortedService],
   host: {'(document:keydown)': 'onKeyDown($event)'},
-  animations: [
-    trigger('shrinkRegular', [
-      state('shrink', style({
-        opacity: '0',
-      })),
-      state('regular', style({
-        opacity: '1',
-      })),
-      transition('shrink => regular', [animate('1s')]),
-    ]),
-  ],
-  standalone: false
+  imports: [
+    PushPipe,
+    OpenDatasetVersionPreviewComponent,
+    ExperimentOutputLogComponent,
+    ButtonToggleComponent,
+    CodeEditorComponent,
+    PipelinesControllerModule,
+    FormsModule,
+    MatIconModule,
+    MatIconButton,
+    MatButton,
+    PipelineInfoComponent,
+    PipelineControllerStepComponent
+  ]
 })
 export class PipelineControllerInfoComponent implements OnDestroy {
   private readonly _dagManager = inject(DagManagerUnsortedService<PipelineItem>);
@@ -130,7 +148,7 @@ export class PipelineControllerInfoComponent implements OnDestroy {
     return this.focusOnStage()?.id;
   });
   protected hasStages = signal(false);
-  protected shrink = false;
+  protected shrink = signal(false);
 
 
   onKeyDown(e: KeyboardEvent) {
@@ -155,9 +173,17 @@ export class PipelineControllerInfoComponent implements OnDestroy {
         this.store.dispatch(setSelectedPipelineStep({step: null}));
       });
 
-    combineLatest([this.store.select(selectSelectedExperiment), toObservable(this.enableStaging)])
-      .pipe(takeUntilDestroyed())
-      .subscribe(([task,]) => {
+    combineLatest([
+      this.store.select(selectSelectedExperiment),
+      toObservable(this.enableStaging),
+      toObservable(this.diagramContainer)
+    ])
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(0),
+        filter(([, , diagramContainer]) => !!diagramContainer?.nativeElement)
+      )
+      .subscribe(([task, , container]) => {
         if (task?.id !== this.infoData?.id) {
           this.enableStaging.set(false);
           this.focusOnStage.set(false);
@@ -166,7 +192,7 @@ export class PipelineControllerInfoComponent implements OnDestroy {
           this.detailsPanelMode.set(this.getPanelMode());
         }
         this.infoData = task;
-        const width = this.diagramContainer()?.nativeElement.getBoundingClientRect().width;
+        const width = container.nativeElement.getBoundingClientRect().width;
         this.chartWidth = Math.max(Number.isNaN(width) ? 0 : width, 4000);
         const pipelineObject = this.getTreeObject(task);
         this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
@@ -175,10 +201,10 @@ export class PipelineControllerInfoComponent implements OnDestroy {
         this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
         window.setTimeout(() => {
           if (!this.skipAutoCenter) {
-            const element = this.diagramContainer().nativeElement;
+            const element = container.nativeElement;
             element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
           }
-        }, 0);
+        });
 
         if (this.selectedEntity()) {
           this.selectStep(this.selectedEntity());
@@ -420,8 +446,9 @@ export class PipelineControllerInfoComponent implements OnDestroy {
     }
   }
 
-  openLog(show = true) {
-    this.showLog = signal(show);
+  openLog(step?: PipelineItem) {
+    this.selectStep(step);
+    this.showLog.set(true);
   }
 
   toggleResultSize() {
@@ -444,14 +471,15 @@ export class PipelineControllerInfoComponent implements OnDestroy {
   }
 
   expandStage(step) {
-    this.shrink = true;
+    this.shrink.set(true);
     this.focusOnStage.set(step);
     this.skipAutoCenter = false;
     this.enableStaging.set(false);
+    window.setTimeout(() => this.shrink.set(false), 1000);
   }
 
   goBackToStagesMode() {
-    this.shrink = false;
+    this.shrink.set(false);
     this.focusOnStage.set(undefined);
     this.skipAutoCenter = false;
     this.enableStaging.set(true);
@@ -468,11 +496,5 @@ export class PipelineControllerInfoComponent implements OnDestroy {
 
   expandStageAnimationStarted() {
     this.chartWidth = 0;
-  }
-
-  shrinkDone(event) {
-    if (event.fromState === 'regular') {
-      this.shrink = false;
-    }
   }
 }

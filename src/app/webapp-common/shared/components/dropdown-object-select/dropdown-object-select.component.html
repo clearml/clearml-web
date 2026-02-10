@@ -4,6 +4,19 @@
       @if (info()) {
         <sm-multi-line-tooltip [smallIcon]="true" class="more-info-tooltip"><span [innerHTML]="info() | purify"></span></sm-multi-line-tooltip>
       }
+      @if(configurationInfo()){
+        <sm-multi-line-tooltip [smallIcon]="true" [customClass]="'color-tertiary'"
+                               class="xs pointer ms-1 color-tertiary"
+                               iconClass="al-ico-settings">
+          <span class="me-2">Field key: <b>{{configurationInfo()}}</b></span>
+          <sm-copy-clipboard [smallIcon]="true"
+                             [clipboardText]="configurationInfo()"
+                             (copySuccess)="copied.emit()"
+                             label=""
+                             class="inverse-theme"
+          ></sm-copy-clipboard>
+        </sm-multi-line-tooltip>
+      }
     </mat-label>
   }
   <input #inputRef matInput type="text"

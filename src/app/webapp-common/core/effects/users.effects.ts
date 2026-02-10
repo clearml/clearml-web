@@ -34,8 +34,9 @@ export class CommonUserEffects {
     ofType(logout),
     mergeMap(action => this.loginApi.loginLogout({
 
-      redirect_url: window.location.origin + (this.locationStrategy.getBaseHref() === '/' ? '' : this.locationStrategy.getBaseHref()) + '/login',
-      ...(action.provider && {provider: action.provider})
+      redirect_url: action.redirectUrl ?? window.location.origin + (this.locationStrategy.getBaseHref() === '/' ? '' : this.locationStrategy.getBaseHref()) + '/login',
+      ...(action.provider && {provider: action.provider}),
+      // ...(action.tenant && {tenant: action.tenant})
     }).pipe(
       map((res: LoginLogoutResponse) => {
         if (res.redirect_url) {

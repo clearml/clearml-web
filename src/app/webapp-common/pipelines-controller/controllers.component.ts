@@ -1,4 +1,4 @@
-import {Component, effect, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, viewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -25,12 +25,34 @@ import {DeleteFooterItem} from '@common/shared/entity-page/footer-items/delete-f
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {RouterOutlet} from '@angular/router';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-controllers',
-    templateUrl: './controllers.component.html',
-    styleUrls: ['./controllers.component.scss'],
-    standalone: false
+  selector: 'sm-controllers',
+  templateUrl: './controllers.component.html',
+  styleUrls: ['./controllers.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SplitAreaComponent,
+    SplitComponent,
+    RouterOutlet,
+    EntityFooterComponent,
+    ExperimentsTableComponent,
+    ExperimentHeaderComponent,
+    OverlayComponent,
+    MatIconModule,
+    PushPipe,
+    MatButton,
+    PipelineControllerMenuComponent
+  ]
 })
 export class ControllersComponent extends ExperimentsComponent {
 

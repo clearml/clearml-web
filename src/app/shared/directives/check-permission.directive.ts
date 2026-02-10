@@ -6,8 +6,7 @@ import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/get
 
 @Directive({
   selector: '[smCheckPermission]',
-  standalone: true,
-})
+  })
 export class CheckPermissionDirective implements OnDestroy{
   private userDataSubscription: Subscription;
   private elseTemplateRef: TemplateRef<any>|null = null;

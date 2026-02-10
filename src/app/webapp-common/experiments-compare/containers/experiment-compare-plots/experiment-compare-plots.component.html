@@ -7,7 +7,7 @@
         [checkedList]="settings.selectedMetricsPlot"
         [searchTerm]="searchTerm$ | ngrxPush"
         (itemSelect)="metricSelected($event)"
-        (hiddenChanged)="selectedListChanged($event)"
+        (selectedChanged)="selectedListChanged($event)"
         (searchTermChanged)="searchTermChanged($event)"
       ></sm-selectable-grouped-filter-list>
     </div>
@@ -15,6 +15,7 @@
   <div class="graphs-container h-100 w-100">
     <sm-experiment-graphs
       [metrics]="graphs"
+      [hideLegend]="minimized"
       [list]="graphList"
       [isCompare]="true"
       [isGroupGraphs]="true"

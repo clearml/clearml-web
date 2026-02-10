@@ -80,11 +80,13 @@ export const experimentOutputReducer = createReducer(
     metricsHistogramCharts: experimentOutputInitState.metricsHistogramCharts,
     metricsPlotsCharts: experimentOutputInitState.metricsPlotsCharts
   })),
-  on(actions.getExperimentLog, (state, action): ExperimentOutputState => ({...state, logLoading: !action.autoRefresh})),
+  on(actions.getExperimentLog, (state, action): ExperimentOutputState => ({
+    ...state, logLoading: !action.autoRefresh, ...(action.direction === null && {experimentLog: null})
+  })),
   on(actions.setExperimentLogLoading, (state, action): ExperimentOutputState => ({...state, logLoading: action.loading})),
-  on(actions.setExperimentLog, (state, action) => {
+  on(actions.setExperimentLog, (state, action): ExperimentOutputState => {
     const events = Array.from(action?.events || []).reverse();
-    let currLog: any[];
+    let currLog: Log[];
     let atStart = false;
     if (action.direction) {
       if (action.refresh) {

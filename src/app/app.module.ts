@@ -7,23 +7,19 @@ import {AppComponent} from './app.component';
 import {routes} from './app.routes';
 import {SMCoreModule} from './core/core.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {CommonLayoutModule} from '@common/layout/layout.module';
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import {WebappInterceptor} from '@common/core/interceptors/webapp-interceptor';
 import {CustomReuseStrategy} from '@common/core/router-reuse-strategy';
 import {UserPreferences} from '@common/user-preferences';
 import {AngularSplitModule} from 'angular-split';
 import {NotifierModule} from '@common/angular-notifier';
-import {LayoutModule} from './layout/layout.module';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {SharedModule} from './shared/shared.module';
-import {ProjectsSharedModule} from './features/projects/shared/projects-shared.module';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {loadUserAndPreferences} from '~/core/app-init';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 import {UpdateNotifierComponent} from '@common/shared/ui-components/overlay/update-notifier/update-notifier.component';
-import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spinner.component';
 import {MatIconRegistry} from '@angular/material/icon';
 import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
@@ -31,6 +27,10 @@ import {PushPipe} from '@ngrx/component';
 import { providePrimeNG } from 'primeng/config';
 import {cmlPreset} from '@common/styles/prime.preset';
 import {AppRootComponent} from '~/app';
+import {HeaderComponent} from '@common/layout/header/header.component';
+import {ServerNotificationDialogContainerComponent} from '@common/layout/server-notification-dialog-container/server-notification-dialog-container.component';
+import {SideNavComponent} from '~/layout/side-nav/side-nav.component';
+import {ColorPickerWrapperComponent} from '@common/shared/ui-components/inputs/color-picker/color-picker-wrapper.component';
 
 @NgModule({
   declarations   : [AppComponent, AppRootComponent],
@@ -39,7 +39,6 @@ import {AppRootComponent} from '~/app';
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
-    ProjectsSharedModule,
     BrowserModule,
     SMCoreModule,
     BusinessLogicModule,
@@ -59,13 +58,15 @@ import {AppRootComponent} from '~/app';
         horizontal: {position: 'right', distance: 12}
       }
     }),
-    CommonLayoutModule,
-    LayoutModule,
     SharedModule,
     UpdateNotifierComponent,
-    ChooseColorModule,
     SpinnerComponent,
     PushPipe,
+    HeaderComponent,
+    HeaderComponent,
+    ServerNotificationDialogContainerComponent,
+    SideNavComponent,
+    ColorPickerWrapperComponent,
   ],
   providers: [
     UserPreferences,

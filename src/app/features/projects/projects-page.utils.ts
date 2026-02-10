@@ -7,6 +7,8 @@ import {
   isReports
 } from '@common/projects/common-projects.utils';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
+import {getTagsFilters} from '@common/shared/utils/tableParamEncode';
 
 export const isDeletableProject = readyForDeletion => (readyForDeletion.experiments.unarchived + readyForDeletion.models.unarchived) === 0;
 
@@ -45,3 +47,29 @@ export const getFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot, neste
 export const activeFeatureToProjectType = (activeFeature: string) => activeFeature === 'simple' ? 'datasets' : null;
 
 export const getSelfFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot) => ({ });
+
+export const showRootFolder = (snapshot: ActivatedRouteSnapshot) => isReports(snapshot);
+
+export const rootCardQuery = (
+  snapshot: ActivatedRouteSnapshot,
+  projectsApi: ApiProjectsService,
+  userId: string,
+  showOnlyUserWork: boolean,
+  mainPageUsersFilter: string[],
+  mainPageTagsFilter: string[],
+  mainPageTagsFilterMatchMode: string
+) => projectsApi.projectsGetAllEx({
+    name: '^\\.reports$',
+    search_hidden: true,
+    children_type: 'report',
+    stats_with_children: false,
+    stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
+    include_stats: true,
+    check_own_contents: true, // in order to check if project is empty
+    ...(mainPageUsersFilter?.length > 0 && {active_users: mainPageUsersFilter}),
+    ...(showOnlyUserWork && {active_users: [userId]}),
+    only_fields: ['id', 'company'],
+    ...(mainPageTagsFilter?.length > 0 && {
+      children_tags_filter: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter)
+    }),
+  });

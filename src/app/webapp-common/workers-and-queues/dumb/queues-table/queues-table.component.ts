@@ -1,14 +1,14 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
+  Component, computed, effect,
   inject,
   input,
   output,
   signal
 } from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {find, get} from 'lodash-es';
+import {get} from 'lodash-es';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
@@ -107,9 +107,9 @@ export class QueuesTableComponent extends BaseTableView {
   contextQueue: Queue;
 
   queues = input<Queue[]>();
-  selectedQueue = input<Queue>();
+  selectedQueue = input<Queue[]>();
   short = input(true);
-  queueSelected = output<Queue>();
+  queueSelected = output<string>();
   deleteQueue = output<Queue>();
   renameQueue = output<Queue>();
   clearQueue = output<Queue>();
@@ -119,24 +119,22 @@ export class QueuesTableComponent extends BaseTableView {
     }>();
   copySuccess = output<string>();
 
+  constructor() {
+    super();
+    const effectRef = effect(() => {
+      if (this.table() && this.selectedQueue()?.length && this.queues()?.length) {
+        window.setTimeout(() => {
+          this.table()?.scrollToElement(this.selectedQueue()?.[0]);
+        }, 50);
+        effectRef.destroy();
+      }
+    });
+  }
 
   public menuPosition = signal<{ x: number; y: number }>(null);
 
   getBodyData(rowData: any, col: ISmCol) {
     return get(rowData, col.id);
-  }
-
-  getQNames(queues) {
-    return queues.map(queue => this.getQName(queue));
-  }
-
-  getQName(queue) {
-    const queueIns: any = find(this.queues(), {id: queue});
-    return queueIns ? queueIns.name : queue;
-  }
-
-  onRowClicked(event) {
-    this.queueSelected.emit(event.data);
   }
 
   openContextMenu(data: {e: MouseEvent; rowData: Queue}) {
@@ -152,15 +150,11 @@ export class QueuesTableComponent extends BaseTableView {
 
   }
 
-
   onSortChanged(isShift: boolean, colId: ISmCol['id']) {
     this.sortedChanged.emit({isShift, colId});
     this.scrollTableToTop();
   }
 
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitSelection(selection: any[]) {
   }
-
 }

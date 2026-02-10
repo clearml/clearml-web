@@ -47,6 +47,7 @@
         class="align-self-stretch"
         selectionMode="single"
         [projects]="projectsOptions()"
+        [currentUserId]="currentUser()?.id"
         [initialColumns]="tableCols"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [tableCols]="tableCols$ | ngrxPush"

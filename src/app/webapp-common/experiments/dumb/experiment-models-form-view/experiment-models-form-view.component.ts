@@ -8,13 +8,26 @@ import {BaseClickableArtifactComponent} from '../base-clickable-artifact.compone
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {resetSelectModelState} from '@common/select-model/select-model.actions';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @Component({
-    selector: 'sm-experiment-models-form-view',
-    templateUrl: './experiment-models-form-view.component.html',
-    styleUrls: ['./experiment-models-form-view.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-models-form-view',
+  templateUrl: './experiment-models-form-view.component.html',
+  styleUrls: ['./experiment-models-form-view.component.scss'],
+  imports: [
+    LabeledRowComponent,
+    CopyClipboardComponent,
+    IdBadgeComponent,
+    MatIconModule,
+    TooltipDirective,
+    MatIconButton
+  ]
 })
 export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent implements OnDestroy{
   private dialog = inject(MatDialog);

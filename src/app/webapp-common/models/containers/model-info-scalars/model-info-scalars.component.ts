@@ -22,6 +22,20 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {selectSelectedModelSettings} from '~/features/experiments/reducers';
 import {explicitEffect} from 'ngxtension/explicit-effect';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {
+  ExperimentMetricDataTableComponent
+} from '@common/shared/experiment-graphs/experiment-metric-data-table/experiment-metric-data-table.component';
+import {
+  GraphSettingsBarComponent
+} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
   selector: 'sm-model-info-scalars',
@@ -30,7 +44,19 @@ import {computedPrevious} from 'ngxtension/computed-previous';
     '../../../experiments/containers/experiment-output-scalars/experiment-output-scalars.component.scss',
     '../../../experiments/containers/experiment-output-scalars/shared-experiment-output.scss'
   ],
-  standalone: false
+  imports: [
+    ExperimentGraphsComponent,
+    SelectableGroupedFilterListComponent,
+    ExperimentMetricDataTableComponent,
+    GraphSettingsBarComponent,
+    MatIconModule,
+    MatDrawer,
+    MatDrawerContent,
+    MatDrawerContainer,
+    MatIconButton,
+    MatButton,
+    TooltipDirective
+  ]
 })
 export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent {
   override entityType = 'model' as const;

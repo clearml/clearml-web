@@ -4,21 +4,21 @@
       #search
       class="outline"
       placeholder="Start typing model name or ID to add to your comparison"
-      [value]="searchValue"
+      [value]="searchValue()"
       (valueChanged)="onSearchValueChanged($event)"
       (focusout)="onSearchFocusOut()">
     </sm-search>
   </div>
   <div class="d-flex-center">
-    @if (!hideArchiveToggle) {
+    @if (!hideArchiveToggle()) {
       <mat-slide-toggle
         class="me-2"
-        [checked]="isShowArchived"
+        [checked]="isShowArchived()"
         (change)="isArchivedChanged.emit($event.checked)"
       >Include Archived</mat-slide-toggle>
     }
     <sm-clear-filters-button
-      [tableFilters]="tableFilters"
+      [tableFilters]="tableFilters()"
       (clearTableFilters)="clearFilters.emit()"
     ></sm-clear-filters-button>
   </div>

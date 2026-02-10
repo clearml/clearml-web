@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {CommonProjectReadyForDeletion, selectNoMoreProjects, selectProjectReadyForDeletion, selectProjects, selectProjectsOrderBy, selectProjectsSortOrder} from '../../common-projects.reducer';
 import {checkProjectForDeletion, getAllProjectsPageProjects, resetProjects, resetProjectsSearchQuery, resetReadyToDelete, setCurrentScrollId, setProjectsOrderBy, setProjectsSearchQuery, updateProject} from '../../common-projects.actions';
@@ -12,7 +12,6 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import * as coreProjectsActions from '@common/core/actions/projects.actions';
 import {
   getProjectsTags,
-  getProjectUsers,
   setDeep,
   setSelectedProjectId
 } from '@common/core/actions/projects.actions';
@@ -25,7 +24,6 @@ import {CommonDeleteDialogComponent, DeleteData} from '@common/shared/entity-pag
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {
-  selectAllProjectsUsers,
   selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode, selectMainPageUsersFilter, selectProjectTags,
   selectRouterProjectId,
   selectSelectedProject
@@ -38,16 +36,29 @@ import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-
 import {ProjectSettingsDialogComponent, ProjectSettingsDialogConfig} from '@common/shared/project-dialog/project-settings/project-settings-dialog.component';
 import {ProjectSettingsDialog} from '@common/projects/common-projects.consts';
 import {setExperimentMetricsSearchTerm} from '@common/experiments/actions/common-experiment-output.actions';
-import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ProjectsListComponent} from '../../dumb/projects-list/projects-list.component';
+import {ProjectsHeaderComponent} from '../../dumb/projects-header/projects-header.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {PushPipe} from '@ngrx/component';
+import {CommonModule} from '@angular/common';
+
 
 @Component({
   selector: 'sm-projects-page',
   templateUrl: './projects-page.component.html',
   styleUrls: ['./projects-page.component.scss'],
-  standalone: false
+  imports: [
+    CommonModule,
+    ProjectsListComponent,
+    ProjectsHeaderComponent,
+    MatButtonModule,
+    MatIconModule,
+    PushPipe,
+  ]
 })
-export class ProjectsPageComponent implements OnInit, OnDestroy {
+export class ProjectsPageComponent implements OnDestroy {
   protected store = inject(Store);
   protected router = inject(Router);
   protected route = inject(ActivatedRoute);
@@ -80,7 +91,10 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   protected noMoreProjects$ = this.store.select(selectNoMoreProjects);
   protected selectedProjectId$ = this.store.select(selectRouterProjectId);
   protected projectsTags$ = this.store.select(selectProjectTags);
-  protected selectedProject$ = this.store.select(selectSelectedProject).pipe(tap(selectedProject => this.selectedProject = selectedProject));
+  protected get selectedProject$() {
+    return this.store.select(selectSelectedProject)
+      .pipe(tap(selectedProject => this.selectedProject = selectedProject));
+  }
   protected projectsList$ = combineLatest([
     this.store.select(selectProjects),
     this.store.select(selectSelectedProject)
@@ -111,7 +125,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
 
   public projectId: string;
   public subs = new Subscription();
-  private selectedProject: Project;
+  protected selectedProject: Project;
   public loading: boolean;
 
   constructor() {
@@ -132,22 +146,13 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
         this.store.dispatch(getAllProjectsPageProjects())
       });
 
-    this.store.select(selectAllProjectsUsers)
-      .pipe(
-        takeUntilDestroyed(),
-        filter(users => users?.length > 0),
-        take(1)
-      )
-      .subscribe(() =>
-      {
-        this.store.dispatch(getProjectUsers({projectId: ALL_PROJECTS_OBJECT.id}));
-      });
-
     this.selectedProjectId$
       .pipe(
         takeUntilDestroyed(),
       )
-      .subscribe((projectId) => this.projectId = projectId);
+      .subscribe(projectId => {
+        this.projectId = projectId;
+      });
 
     this.selectedProject$
       .pipe(
@@ -211,10 +216,6 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
       basename: 'All Tasks',
       sub_projects: null
     } as ProjectsGetAllResponseSingle];
-  }
-
-  ngOnInit() {
-
   }
 
   protected getDeletePopupEntitiesList() {
@@ -357,7 +358,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.store.dispatch(resetProjectsSearchQuery());
         this.store.dispatch(getAllProjectsPageProjects());
-        this.store.dispatch(coreProjectsActions.getAllSystemProjects());
+        this.store.dispatch(coreProjectsActions.getAllSystemProjects({force: true}));
       });
   }
 

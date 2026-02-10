@@ -3,10 +3,19 @@
   gap: 4px;
   align-items: center;
   width: 100%;
+  overflow: hidden;
+
+  .item-container {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .measure {
   opacity: 0;
+  flex: none !important;
 }
 
 .hidden-items {

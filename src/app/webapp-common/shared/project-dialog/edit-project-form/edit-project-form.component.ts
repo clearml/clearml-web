@@ -9,8 +9,8 @@ import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.co
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {debounceTime, skip} from 'rxjs/operators';
-import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 import {MatError} from '@angular/material/form-field';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 
 @Component({
@@ -32,7 +32,7 @@ export class EditProjectFormComponent {
   public readonly projectsRoot = 'Projects root';
 
   projectForm = this.formBuilder.group({
-    name: ['', [Validators.required, minLengthTrimmed(3), Validators.pattern(/^[^\/]*$/)]],
+    name: ['', [Validators.required, minLengthTrimmed(1), Validators.pattern(/^[^\/]*$/)]],
     parent: [{value: null as string, disabled: true}],
     default_output_destination: [{value: null as string, disabled: false}, [Validators.pattern(OutputDestPattern)]],
     system_tags: [[]]

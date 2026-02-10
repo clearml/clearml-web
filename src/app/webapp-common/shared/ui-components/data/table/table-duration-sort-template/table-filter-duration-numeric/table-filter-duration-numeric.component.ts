@@ -23,6 +23,7 @@ import {
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
+import {integerPattern} from '@common/shared/utils/validation-utils';
 
 const getDurationValue = (value: IDurationThan) => value.checked ? `${value.value}` : '';
 
@@ -45,11 +46,10 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
 })
 export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent {
   immediate = new ImmediateErrorStateMatcher();
-  numericPattern = `^[-+]?\\d*\\.?\\d+$`;
 
   iterationsForm = new FormGroup( {
-    greaterThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)]),
-    lessThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)])
+    greaterThan: new FormControl<string>('', [Validators.pattern(integerPattern)]),
+    lessThan: new FormControl<string>('', [Validators.pattern(integerPattern)])
   });
 
   constructor() {
@@ -62,9 +62,13 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBaseCo
         distinctUntilChanged((a, b) => isEqual(a, b))
       )
       .subscribe( ({greaterThan, lessThan}) => {
-        !!greaterThan != this.greaterThan.checked && this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);
+        if (!!greaterThan != this.greaterThan.checked) {
+          this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);
+        }
         this.timeStampChanged(greaterThan ? parseFloat(greaterThan) : greaterThan, 'greaterThan');
-        !!lessThan != this.lessThan.checked && this.setCheckBox(!this.lessThan.checked, 'lessThan', false);
+        if(!!lessThan != this.lessThan.checked) {
+          this.setCheckBox(!this.lessThan.checked, 'lessThan', false);
+        }
         this.timeStampChanged(lessThan ? parseFloat(lessThan) : lessThan, 'lessThan');
       });
   }

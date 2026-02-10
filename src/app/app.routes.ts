@@ -57,8 +57,8 @@ export const routes: Routes = [
               {path: '', pathMatch: 'full', children: [], canActivate: [projectRedirectGuardGuard]},
               {
                 path: 'overview',
-                data: {search: false},
-                loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule),
+                data: {search: false, archiveLabel: ''},
+                loadComponent: () => import('./webapp-common/project-info/project-info.component').then(c => c.ProjectInfoComponent),
                 canDeactivate: [resetContextMenuGuard]
               },
               {
@@ -148,7 +148,7 @@ export const routes: Routes = [
       {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
       {
         path: 'endpoints',
-        data: {search: true, autoSearchTab: 'modelEndpoints'},
+        data: {autoSearchTab: 'modelEndpoints'},
         loadChildren: () => import('./webapp-common/serving/serving.module').then(m => m.ServingModule),
         canDeactivate: [resetContextMenuGuard]
       },
@@ -162,6 +162,6 @@ export const routes: Routes = [
   {path: 'login', canActivate: [authenticationRequiredGuard],
     loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule)
   },
-  {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
-  {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
+  {path: '404', loadComponent: () => import('./features/not-found/not-found/not-found.component').then(c => c.NotFoundComponent)},
+  {path: '**', loadComponent: () => import('./features/not-found/not-found/not-found.component').then(c => c.NotFoundComponent)},
 ];

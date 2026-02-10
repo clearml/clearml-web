@@ -15,14 +15,27 @@ import {selectBlockUserScript} from '@common/core/reducers/projects.reducer';
 import {isHtmlOrText} from '@common/shared/utils/shared-utils';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {DebugSampleEvent} from '@common/debug-images/debug-images-types';
+import {SnippetErrorComponent} from '@common/shared/ui-components/indicators/snippet-error/snippet-error.component';
+import {ClipboardModule} from 'ngx-clipboard';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {SafePipe} from '@common/shared/pipes/safe.pipe';
+import {AsyncPipe} from '@angular/common';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 // import {Event} from '@common/debug-images/debug-images-types';
 
 @Component({
-    selector: 'sm-debug-image-snippet',
-    templateUrl: './debug-image-snippet.component.html',
-    styleUrls: ['./debug-image-snippet.component.scss'],
-    standalone: false
+  selector: 'sm-debug-image-snippet',
+  templateUrl: './debug-image-snippet.component.html',
+  styleUrls: ['./debug-image-snippet.component.scss'],
+  imports: [
+    SnippetErrorComponent,
+    ClipboardModule,
+    TooltipDirective,
+    SafePipe,
+    AsyncPipe,
+    ShowTooltipIfEllipsisDirective
+  ]
 })
 export class DebugImageSnippetComponent implements OnDestroy{
   private store = inject(Store);
@@ -35,7 +48,9 @@ export class DebugImageSnippetComponent implements OnDestroy{
   frame$ = toObservable(this.frame);
   protected source$ = this.frame$
     .pipe(
-      switchMap(frame => getSignedUrlOrOrigin$(frame.url, this.store))
+      switchMap(frame => {
+        return getSignedUrlOrOrigin$(frame.url, this.store)
+      })
     );
 
   protected type= computed(() => {
@@ -63,7 +78,7 @@ export class DebugImageSnippetComponent implements OnDestroy{
   constructor() {
     this.source$
       .pipe(takeUntilDestroyed())
-      .subscribe(signed => {
+        .subscribe(signed => {
       this.loadError.set(!signed?.startsWith('http'));
     })
   }

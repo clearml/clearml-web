@@ -1,11 +1,24 @@
-import {Component, computed, effect, input, OnInit, output, signal, viewChild} from '@angular/core';
-import {trackById, trackByIndex, trackByValue} from '@common/shared/utils/forms-track-by';
+import {ChangeDetectionStrategy, Component, computed, input, OnInit, output, signal} from '@angular/core';
 import {Task} from '~/business-logic/model/tasks/task';
-import {FormControl} from '@angular/forms';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {sortMetricsList} from '@common/tasks/tasks.utils';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
-import {Table} from 'primeng/table';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {MatFormField, MatSuffix} from '@angular/material/form-field';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {TableModule} from 'primeng/table';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatInput} from '@angular/material/input';
+import {UpperCasePipe} from '@angular/common';
+import {MatIconModule} from '@angular/material/icon';
 
 interface tableRow {
   metricId: string;
@@ -20,13 +33,30 @@ interface tableRow {
 }
 
 @Component({
-    selector: 'sm-experiment-metric-data-table',
-    styleUrls: [
-        '../../../experiments-compare/containers/experiment-compare-metric-values/experiment-compare-metric-values.component.scss',
-        './experiment-metric-data-table.component.scss'
-    ],
-    templateUrl: './experiment-metric-data-table.component.html',
-    standalone: false
+  selector: 'sm-experiment-metric-data-table',
+  styleUrls: [
+    '../../../experiments-compare/containers/experiment-compare-metric-values/experiment-compare-metric-values.component.scss',
+    './experiment-metric-data-table.component.scss'
+  ],
+  templateUrl: './experiment-metric-data-table.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SelectableGroupedFilterListComponent,
+    MatFormField,
+    MatIconModule,
+    MatDrawerContainer,
+    MatDrawer,
+    MatDrawerContent,
+    TableModule,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    ClickStopPropagationDirective,
+    ReactiveFormsModule,
+    MatIconButton,
+    MatInput,
+    UpperCasePipe,
+    MatSuffix
+  ]
 })
 
 
@@ -42,15 +72,6 @@ export class ExperimentMetricDataTableComponent implements OnInit {
   protected filterOpen: boolean;
   protected filterValue = signal<string>('');
   protected listSearchTerm = signal<string>('');
-  private table = viewChild(Table);
-
-  constructor() {
-    effect(() => {
-      if (this.table() && this.dataTableFiltered()) {
-        window.setTimeout(() => this.table().scroller?.setSize(), 50);
-      }
-    });
-  }
 
   ngOnInit(): void {
     this.variantFilter.valueChanges.subscribe((value) => this.filterValue.set(value));
@@ -80,10 +101,13 @@ export class ExperimentMetricDataTableComponent implements OnInit {
         return [];
       }
       this.initialSelectedMetricsScalar = [];
-      sortMetricsList(Object.keys(this.lastMetrics())).map((metricId) => Object.keys(this.lastMetrics()[metricId])
-        .map(variantId => {
-          this.initialSelectedMetricsScalar.push(`${this.lastMetrics()[metricId][variantId].metric}${this.lastMetrics()[metricId][variantId].variant}`);
-        }));
+      sortMetricsList(Object.keys(this.lastMetrics())).map((metricId) => {
+        this.initialSelectedMetricsScalar.push((Object.values(this.lastMetrics()[metricId])[0] as any).metric);
+        Object.keys(this.lastMetrics()[metricId])
+          .map(variantId => {
+            this.initialSelectedMetricsScalar.push(`${this.lastMetrics()[metricId][variantId].metric}${this.lastMetrics()[metricId][variantId].variant}`);
+          })
+      });
       return this.initialSelectedMetricsScalar;
     } else {
       return this.selectedMetricsScalar();
@@ -142,9 +166,4 @@ export class ExperimentMetricDataTableComponent implements OnInit {
   });
 
   colKeys = ['first', 'last', 'min', 'max', 'mean'];
-  protected readonly trackById = trackById;
-  protected readonly trackByValue = trackByValue;
-  protected readonly trackByIndex = trackByIndex;
-
-
 }

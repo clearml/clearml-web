@@ -9,20 +9,27 @@ import {ConfigurationService} from '../../shared/services/configuration.service'
 import {
   GetCurrentUserResponseUserObjectCompany
 } from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
 import {WelcomeMessageComponent} from '../welcome-message/welcome-message.component';
-import {ActivatedRoute, NavigationEnd, RouteConfigLoadEnd, Router} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, RouterLink} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {selectDarkTheme, selectForcedTheme} from '@common/core/reducers/view.reducer';
 import {AppearanceComponent} from '../appearance/appearance.component';
-import {
-  GlobalSearchDialogComponent
-} from '@common/dashboard-search/global-search-dialog/global-search-dialog.component';
+import {BreadcrumbsComponent} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
+import {ShowOnlyUserWorkComponent} from '@common/shared/components/show-only-user-work/show-only-user-work.component';
+import {HeaderNavbarTabsComponent} from '@common/layout/header-navbar-tabs/header-navbar-tabs.component';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {NgOptimizedImage} from '@angular/common';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-header',
@@ -32,7 +39,21 @@ import {
   host: {
     '(document:keydown)': 'globalSearchTrigger($event)'
   },
-  standalone: false
+  imports: [
+    BreadcrumbsComponent,
+    RefreshButtonComponent,
+    HeaderUserMenuActionsComponent,
+    ShowOnlyUserWorkComponent,
+    HeaderNavbarTabsComponent,
+    MatIconModule,
+    MatMenu,
+    RouterLink,
+    MatMenuItem,
+    MatMenuTrigger,
+    NgOptimizedImage,
+    TooltipDirective,
+    MatIconButton
+  ]
 })
 export class HeaderComponent implements OnInit {
   private store = inject(Store);
@@ -43,7 +64,7 @@ export class HeaderComponent implements OnInit {
   private router = inject(Router);
   private activeRoute = inject(ActivatedRoute);
   private configService = inject(ConfigurationService);
-  private searchComponentPromise: Promise<Type<GlobalSearchDialogComponent>>;
+  private searchComponentPromise: Promise<Type<unknown>>;
 
   isShareMode = input<boolean>();
   isLogin = input<boolean>();

@@ -248,17 +248,15 @@ export class LoginComponent {
   }
 
   private afterLogin() {
-
     return this.userPreferences.loadPreferences()
       .pipe(
         take(1),
-        catchError(() => {
-          return this.router.navigateByUrl(this.getNavigateUrl());
-        }),
         map(res => this.store.dispatch(setPreferences({payload: res}))),
-        tap(() => {
+        finalize(() => {
           this.store.dispatch(fetchCurrentUser());
           this.openLoginNotice();
+          this.loginService.clearLoginCache();
+          return this.router.navigateByUrl(this.getNavigateUrl());
         }),
       );
   }

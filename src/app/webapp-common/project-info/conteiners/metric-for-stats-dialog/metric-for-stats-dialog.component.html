@@ -5,15 +5,15 @@
   >
   <div class="layout">
     <sm-select-metric-for-custom-col
-      [metricVariants]="variants"
-      [tableCols]="metricVariantSelection"
+      [metricVariants]="data.variants"
+      [tableCols]="metricVariantSelection()"
       (selectedMetricToShow)="selectionChange($event)"
     ></sm-select-metric-for-custom-col>
     <div class="selected">
       <div class="selected-head">
         <a href="#" (click)="$event.preventDefault(); clear()">Clear all</a>
       </div>
-      @for (metric of metricVariantSelection; track trackById($index, metric)) {
+      @for (metric of metricVariantSelection(); track trackById($index, metric)) {
         <div data-id="selectedMetric" class="metric">
           <span class="name ellipsis" [smTooltip]="metric.header" smShowTooltipIfEllipsis>{{metric.header}}</span>
           <button mat-icon-button class="remove sm" (click)="removeExperiment(metric)" data-id="removeMetricButton">
@@ -25,6 +25,6 @@
   </div>
   <div class="d-flex align-items-center justify-content-center w-100 mt-2" style="gap: 12px">
     <button mat-stroked-button (click)="close()">CANCEL</button>
-    <button mat-flat-button (click)="close(this.metricVariantSelection)">APPLY</button>
+    <button mat-flat-button (click)="close(this.metricVariantSelection())">APPLY</button>
   </div>
 </sm-dialog-template>

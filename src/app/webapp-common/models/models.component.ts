@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, effect, OnDestroy, signal, ViewChild} from '@angular/core';
 import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
-import {distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
 import {
   getCompanyTags, getProjectUsers,
   getTags,
@@ -67,6 +67,11 @@ import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {MemoizedSelector} from '@ngrx/store';
 import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 import {distinctParamsUntilChanged$} from '@common/projects/common-projects.utils';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {RouterOutlet} from '@angular/router';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {PushPipe} from '@ngrx/component';
+import {ModelHeaderComponent} from '@common/models/dumbs/model-header/model-header.component';
 
 
 @Component({
@@ -74,7 +79,15 @@ import {distinctParamsUntilChanged$} from '@common/projects/common-projects.util
   templateUrl: './models.component.html',
   styleUrls: ['./models.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    SplitAreaComponent,
+    SplitComponent,
+    RouterOutlet,
+    ModelsTableComponent,
+    EntityFooterComponent,
+    PushPipe,
+    ModelHeaderComponent
+  ]
 })
 export class ModelsComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = MODELS_TABLE_COLS;
@@ -269,6 +282,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnDestro
       ])
         .pipe(
           takeUntilDestroyed(),
+          debounceTime(0),
           withLatestFrom(this.store.select(selectTableMode)),
           map(([[id, models], mode]) => {
             this.firstModel = models?.[0];

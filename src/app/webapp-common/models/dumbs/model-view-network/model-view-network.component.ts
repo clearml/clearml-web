@@ -7,13 +7,23 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {SelectedModel} from '@common/models/shared/models.model';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-model-view-network',
-    templateUrl: './model-view-network.component.html',
-    styleUrls: ['./model-view-network.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-model-view-network',
+  templateUrl: './model-view-network.component.html',
+  styleUrls: ['./model-view-network.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    EditableSectionComponent,
+    SectionHeaderComponent,
+    ScrollTextareaComponent,
+    MatIconModule,
+    MatButton
+  ]
 })
 export class ModelViewNetworkComponent {
   private dialog = inject(MatDialog);

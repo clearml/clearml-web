@@ -8,8 +8,7 @@ export function sortByArr(a, b, colsOrder = []) {
 
 @Pipe({
   name: 'showSelectedFirst',
-  standalone: true
-})
+  })
 export class ShowSelectedFirstPipe implements PipeTransform {
   transform(arr: Array<any>, selectedArr: Array<any>): Array<any> {
     if (arr.length > 0 && selectedArr.length > 0) {

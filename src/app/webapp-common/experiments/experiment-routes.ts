@@ -1,48 +1,12 @@
 import {Routes} from '@angular/router';
-import {ExperimentsComponent} from '@common/experiments/experiments.component';
-import {
-  ExperimentInfoExecutionComponent
-} from './containers/experiment-info-execution/experiment-info-execution.component';
 import {leavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
-import {
-  ExperimentInfoArtifactsComponent
-} from './containers/experiment-info-aritfacts/experiment-info-artifacts.component';
-import {ExperimentInfoModelComponent} from './containers/experiment-info-model/experiment-info-model.component';
-import {
-  ExperimentInfoArtifactItemComponent
-} from './containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
-import {
-  ExperimentInfoHyperParametersComponent
-} from './containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component';
-import {
-  ExperimentInfoTaskModelComponent
-} from './containers/experiment-info-task-model/experiment-info-task-model.component';
-import {
-  ExperimentInfoHyperParametersFormContainerComponent
-} from './containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
-import {ExperimentInfoGeneralComponent} from './containers/experiment-info-general/experiment-info-general.component';
-import {
-  ExperimentOutputComponent
-} from '~/features/experiments/containers/experiment-ouptut/experiment-output.component';
-import {
-  ExperimentOutputScalarsComponent
-} from './containers/experiment-output-scalars/experiment-output-scalars.component';
-import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plots/experiment-output-plots.component';
-import {DebugImagesComponent} from '../debug-images/debug-images.component';
-import {ExperimentOutputLogComponent} from './containers/experiment-output-log/experiment-output-log.component';
 import {selectIsExperimentInEditMode, selectLastVisitedTasksTab} from '@common/experiments/reducers';
-import {
-  ExperimentCompareScalarChartsComponent
-} from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
 import {
   COMPARE_CONFIG_TOKEN,
   COMPARE_STORE_KEY,
   getCompareConfig
 } from '@common/experiments-compare/experiments-compare.module';
 import {UserPreferences} from '@common/user-preferences';
-import {
-  ExperimentComparePlotsComponent
-} from '@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component';
 import {importProvidersFrom} from '@angular/core';
 import {StoreModule} from '@ngrx/store';
 import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
@@ -55,7 +19,7 @@ import {setLastTasksTab} from '@common/experiments/actions/common-experiments-in
 export const routes: Routes = [
   {
     path: '',
-    component: ExperimentsComponent,
+    loadComponent: () => import('@common/experiments/experiments.component').then(m => m.ExperimentsComponent),
     children: [
       {
         path: 'compare',
@@ -65,7 +29,7 @@ export const routes: Routes = [
       {
         path: 'compare/scalars',
         canActivate: [compareViewStateGuard],
-        component: ExperimentCompareScalarChartsComponent,
+        loadComponent: () => import('@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component').then(m => m.ExperimentCompareScalarChartsComponent),
         data: {minimized: true},
         providers: [
           {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
@@ -77,7 +41,7 @@ export const routes: Routes = [
       {
         path: 'compare/plots',
         canActivate: [compareViewStateGuard],
-        component: ExperimentComparePlotsComponent,
+        loadComponent: () => import('@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component').then(m => m.ExperimentComparePlotsComponent),
         data: {minimized: true},
         providers: [
           {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
@@ -87,46 +51,100 @@ export const routes: Routes = [
         ],
       },
       {
-        path: ':experimentId', component: ExperimentOutputComponent, canDeactivate: [lastVisitedSettingTabGuard], data: {lastTabAction: setLastTasksTab},
+        path: ':experimentId',
+        loadComponent: () =>
+          import('~/features/experiments/containers/experiment-ouptut/experiment-output.component').then(m => m.ExperimentOutputComponent),
+        canDeactivate: [lastVisitedSettingTabGuard], data: {lastTabAction: setLastTasksTab},
         children: [
-          {path: '', pathMatch: 'full', children: [], canActivate: [lastVisitedTabGuard], data: {lastTabSelector: selectLastVisitedTasksTab}},
+          {
+            path: '',
+            pathMatch: 'full',
+            children: [],
+            canActivate: [lastVisitedTabGuard],
+            data: {lastTabSelector: selectLastVisitedTasksTab}
+          },
           {
             path: 'execution',
-            component: ExperimentInfoExecutionComponent,
+            loadComponent: () =>
+              import('./containers/experiment-info-execution/experiment-info-execution.component').then(m => m.ExperimentInfoExecutionComponent),
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
             data: {minimized: true}
           },
           {
             path: 'artifacts',
-            component: ExperimentInfoArtifactsComponent,
+            loadComponent: () =>
+              import('./containers/experiment-info-aritfacts/experiment-info-artifacts.component').then(m => m.ExperimentInfoArtifactsComponent),
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
-            data     : {minimized: true},
+            data: {minimized: true},
             children: [
               {path: '', redirectTo: 'input-model', pathMatch: 'full'},
-              {path: 'input-model/:modelId', component: ExperimentInfoModelComponent, data: {outputModel: false}},
-              {path: 'output-model/:modelId', component: ExperimentInfoModelComponent , data: {outputModel: true}},
+              {
+                path: 'input-model/:modelId',
+                loadComponent: () => import('./containers/experiment-info-model/experiment-info-model.component').then(m => m.ExperimentInfoModelComponent),
+                data: {outputModel: false}},
+              {
+                path: 'output-model/:modelId',
+                loadComponent: () => import('./containers/experiment-info-model/experiment-info-model.component').then(m => m.ExperimentInfoModelComponent),
+                data: {outputModel: true}
+              },
               {
                 path: 'artifact/:artifactId',
-                children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]
+                children: [{
+                  path: ':mode',
+                  loadComponent: () => import('./containers/experiment-info-artifact-item/experiment-info-artifact-item.component').then(m => m.ExperimentInfoArtifactItemComponent)
+                }]
               },
-              {path: 'other/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]}
+              {
+                path: 'other/:artifactId',
+                children: [{
+                  path: ':mode',
+                  loadComponent: () => import('./containers/experiment-info-artifact-item/experiment-info-artifact-item.component').then(m => m.ExperimentInfoArtifactItemComponent)
+                }]
+              },
+
             ]
           },
           {
             path: 'hyper-params',
-            component: ExperimentInfoHyperParametersComponent,
+            loadComponent: () => import('./containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component').then(m => m.ExperimentInfoHyperParametersComponent),
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
-            data     : {minimized: true},
+            data: {minimized: true},
             children: [
-              {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
-              {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
+              {
+                path: 'configuration/:configObject',
+                loadComponent: () => import('./containers/experiment-info-task-model/experiment-info-task-model.component').then(m => m.ExperimentInfoTaskModelComponent)
+              },
+              {
+                path: 'hyper-param/:hyperParamId',
+                loadComponent: () => import('./containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component').then(m => m.ExperimentInfoHyperParametersFormContainerComponent)
+              }
             ]
           },
-          {path: 'general', component: ExperimentInfoGeneralComponent, data: {minimized: true}, canDeactivate: []},
-          {path: 'scalars', component: ExperimentOutputScalarsComponent, data: {minimized: true}, pathMatch: 'full'},
-          {path: 'plots', component: ExperimentOutputPlotsComponent, data: {minimized: true}, pathMatch: 'full'},
-          {path: 'debugImages', component: DebugImagesComponent, data: {minimized: true}},
-          {path: 'log', component: ExperimentOutputLogComponent, data: {minimized: true}, pathMatch: 'full'},
+          {
+            path: 'general',
+            loadComponent: () => import('./containers/experiment-info-general/experiment-info-general.component').then(m => m.ExperimentInfoGeneralComponent),
+            data: {minimized: true}
+          },
+          {
+            path: 'scalars', pathMatch: 'full',
+            loadComponent: () => import('./containers/experiment-output-scalars/experiment-output-scalars.component').then(m => m.ExperimentOutputScalarsComponent),
+            data: {minimized: true}
+          },
+          {
+            path: 'plots', pathMatch: 'full',
+            loadComponent: () => import('./containers/experiment-output-plots/experiment-output-plots.component').then(m => m.ExperimentOutputPlotsComponent),
+            data: {minimized: true}
+          },
+          {
+            path: 'debugImages',
+            loadComponent: () => import('../debug-images/debug-images.component').then(m => m.DebugImagesComponent),
+            data: {minimized: true}
+          },
+          {
+            path: 'log', pathMatch: 'full',
+            loadComponent: () => import('./containers/experiment-output-log/experiment-output-log.component').then(m => m.ExperimentOutputLogComponent),
+            data: {minimized: true}
+          },
           {path: 'info-output', redirectTo: ''},
           {path: 'info-output/metrics/scalar', redirectTo: 'scalars'},
           {path: 'info-output/metrics/plots', redirectTo: 'plots'},
@@ -139,43 +157,89 @@ export const routes: Routes = [
 
   {
     path: ':experimentId/output',
-    component: ExperimentOutputComponent,
+    loadComponent: () => import('~/features/experiments/containers/experiment-ouptut/experiment-output.component').then(m => m.ExperimentOutputComponent),
     data: {search: false, lastTabAction: setLastTasksTab},
     canDeactivate: [lastVisitedSettingTabGuard],
     children: [
-      {path: '', pathMatch: 'full', children: [], canActivate: [lastVisitedTabGuard], data: {lastTabSelector: selectLastVisitedTasksTab}},
-      {path: 'execution',
-        component: ExperimentInfoExecutionComponent,
+      {
+        path: '',
+        pathMatch: 'full',
+        children: [],
+        canActivate: [lastVisitedTabGuard],
+        data: {lastTabSelector: selectLastVisitedTasksTab}
+      },
+      {
+        path: 'execution',
+        loadComponent: () => import('./containers/experiment-info-execution/experiment-info-execution.component').then(m => m.ExperimentInfoExecutionComponent),
         canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)]
       },
       {
         path: 'hyper-params',
-        component: ExperimentInfoHyperParametersComponent,
+        loadComponent: () => import('./containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component').then(m => m.ExperimentInfoHyperParametersComponent),
         data: {},
         canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
         children: [
-          {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
-          {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
+          {
+            path: 'configuration/:configObject',
+            loadComponent: () => import('./containers/experiment-info-task-model/experiment-info-task-model.component').then(m => m.ExperimentInfoTaskModelComponent)
+          },
+          {
+            path: 'hyper-param/:hyperParamId',
+            loadComponent: () => import('./containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component').then(m => m.ExperimentInfoHyperParametersFormContainerComponent)
+          }
         ]
       },
       {
         path: 'artifacts',
-        component: ExperimentInfoArtifactsComponent,
+        loadComponent: () => import('./containers/experiment-info-aritfacts/experiment-info-artifacts.component').then(m => m.ExperimentInfoArtifactsComponent),
         data: {},
         canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
         children: [
           {path: '', redirectTo: 'input-model', pathMatch: 'full'},
-          {path: 'input-model/:modelId', component: ExperimentInfoModelComponent , data: {outputModel: false}},
-          {path: 'output-model/:modelId', component: ExperimentInfoModelComponent , data: {outputModel: true}},
-          {path: 'artifact/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]},
-          {path: 'other/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]}
+          {
+            path: 'input-model/:modelId',
+            loadComponent: () => import('./containers/experiment-info-model/experiment-info-model.component').then(m => m.ExperimentInfoModelComponent),
+            data: {outputModel: false}
+          },
+          {
+            path: 'output-model/:modelId',
+            loadComponent: () => import('./containers/experiment-info-model/experiment-info-model.component').then(m => m.ExperimentInfoModelComponent),
+            data: {outputModel: true}
+          },
+          {
+            path: 'artifact/:artifactId', children: [{
+              path: ':mode', loadComponent: () =>
+                import('./containers/experiment-info-artifact-item/experiment-info-artifact-item.component').then(m => m.ExperimentInfoArtifactItemComponent)
+            }]
+          },
+          {
+            path: 'other/:artifactId', children: [{
+              path: ':mode', loadComponent: () =>
+                import('./containers/experiment-info-artifact-item/experiment-info-artifact-item.component').then(m => m.ExperimentInfoArtifactItemComponent)
+            }]
+          }
         ]
       },
-      {path: 'general', component: ExperimentInfoGeneralComponent, data: {}},
-      {path: 'scalars', component: ExperimentOutputScalarsComponent, data: {}},
-      {path: 'plots', component: ExperimentOutputPlotsComponent, data: {}},
-      {path: 'debugImages', component: DebugImagesComponent},
-      {path: 'log', component: ExperimentOutputLogComponent},
+      {
+        path: 'general',
+        loadComponent: () => import('./containers/experiment-info-general/experiment-info-general.component').then(m => m.ExperimentInfoGeneralComponent),
+      },
+      {
+        path: 'scalars',
+        loadComponent: () => import('./containers/experiment-output-scalars/experiment-output-scalars.component').then(m => m.ExperimentOutputScalarsComponent),
+      },
+      {
+        path: 'plots',
+        loadComponent: () => import('./containers/experiment-output-plots/experiment-output-plots.component').then(m => m.ExperimentOutputPlotsComponent),
+      },
+      {
+        path: 'debugImages',
+        loadComponent: () => import('../debug-images/debug-images.component').then(m => m.DebugImagesComponent)
+      },
+      {
+        path: 'log',
+        loadComponent: () => import('./containers/experiment-output-log/experiment-output-log.component').then(m => m.ExperimentOutputLogComponent)
+      },
       {path: 'metrics/scalar', redirectTo: 'scalars'},
       {path: 'metrics/plots', redirectTo: 'plots'},
     ]

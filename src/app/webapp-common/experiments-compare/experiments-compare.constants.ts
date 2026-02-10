@@ -98,18 +98,18 @@ export const LIMITED_VIEW_LIMIT = 10;
 
 export const EXPERIMENTS_COMPARE_ROUTES = [
   {header: 'details'},
-  {header: 'hyperparameters', featureLink: 'hyper-params'},
+  {header: 'hyperparameters', featureName: 'hyper-params', featureLink: 'hyper-params'},
   {header: 'scalars'},
-  {header: 'plots', featureLink: 'metrics-plots'},
-  {header: 'debug samples', featureLink: 'debug-images'},
+  {header: 'plots', featureName: 'metrics-plots', featureLink: 'metrics-plots'},
+  {header: 'debug samples', featureName: 'debug-images', featureLink: 'debug-images'},
 ] as HeaderNavbarTabConfig[];
 
 
 export const MODELS_COMPARE_ROUTES = [
-  {header: 'details', featureLink: 'models-details'},
+  {header: 'details', featureName: 'models-details', featureLink: 'models-details'},
   {header: 'network'},
   {header: 'scalars'},
-  {header: 'plots', featureLink: 'metrics-plots'},
+  {header: 'plots', featureName: 'metrics-plots', featureLink: 'metrics-plots'},
 ] as HeaderNavbarTabConfig[];
 
 export const HIDDEN_PLOTS_BY_DEFAULT = ['Pipeline - Execution Flow', 'Pipeline Details - Execution Details'];

@@ -10,7 +10,6 @@ import {BreadcrumbsEllipsisPipe} from '@common/shared/pipes/breadcrumbs-ellipsis
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
@@ -29,7 +28,6 @@ import { MatIconModule } from '@angular/material/icon';
     TooltipDirective,
     BreadcrumbsEllipsisPipe,
     ShowTooltipIfEllipsisDirective,
-    ProjectsSharedModule,
     CircleCounterComponent,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,

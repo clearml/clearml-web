@@ -1,4 +1,5 @@
 import {computed, inject, Injectable} from '@angular/core';
+import {template} from 'lodash-es';
 import {format} from 'date-fns';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 
@@ -8,17 +9,14 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 export class CloneNamingService {
   private readonly config = inject(ConfigurationService);
 
-  public readonly deafultTempalte = 'Clone of ${name}'
-
+  public readonly defaultTemplate = 'Clone of ${name}'
 
   private compiled =  computed(() => {
-    const templateStr =  this.config.configuration().interfaceCustomization?.clonePrefix ||
-      this.deafultTempalte;
-    return templateStr;
+    const templateStr = this.config.configuration().interfaceCustomization?.clonePrefix ?? this.defaultTemplate;
+    return template(templateStr);
   });
 
-  getClonePrefix(name: string) {
-    const replacements = {name, date: format(new Date(), 'Ppp')};
-    return  this.compiled().replace(/\${\s*([^}|\s]+)\s*}/g, (match, key) => replacements[key] ?? '');
+  getTaskCloneTemplate(name: string) {
+    return this.compiled()({name, date: format(new Date(), 'Ppp')});
   }
 }

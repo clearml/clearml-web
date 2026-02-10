@@ -3,8 +3,7 @@ import {SelectedMetric, SelectedMetricVariant} from '@common/experiments-compare
 
 @Pipe({
   name: 'metricResultToSelectedMetric',
-  standalone: true
-})
+  })
 export class MetricResultToSelectedMetricPipe implements PipeTransform {
 
   transform(metricVariant: SelectedMetricVariant): SelectedMetric {

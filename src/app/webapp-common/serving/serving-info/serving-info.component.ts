@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -10,16 +10,31 @@ import {servingFeature} from '@common/serving/serving.reducer';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {ServingActions} from '@common/serving/serving.actions';
 import {Link} from '~/features/experiments/experiments.consts';
+import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
+import {MatIconButton} from '@angular/material/button';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @Component({
-    selector: 'sm-serving-info',
-    templateUrl: './serving-info.component.html',
-    styleUrls: ['./serving-info.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-serving-info',
+  templateUrl: './serving-info.component.html',
+  styleUrls: ['./serving-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterOutlet,
+    RouterTabNavBarComponent,
+    MatIconModule,
+    MatIconButton,
+    PushPipe
+  ]
 })
 export class ServingInfoComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private store = inject(Store);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
+
   public minimized: boolean;
 
   public selectedModel: EndpointStats;
@@ -33,12 +48,7 @@ export class ServingInfoComponent implements OnInit, OnDestroy {
   public isSharedAndNotOwner$: Observable<boolean>;
   private modelsFeature: boolean;
 
-  constructor(
-    private router: Router,
-    private store: Store,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor( ) {
     this.splitSize$ = this.store.select(servingFeature.selectSplitSize);
     this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
     this.modelsFeature = this.route.snapshot.data?.setAllProject;

@@ -45,6 +45,7 @@ export class CommonAuthEffects {
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(authActions.getAllCredentials, authActions.createCredential),
+    filter(action => !(action as any).autorefresh),
     map(action => activeLoader(action.type))
   ));
 
@@ -54,7 +55,12 @@ export class CommonAuthEffects {
       {userId: action.userId}).pipe(
       concatLatestFrom(() => this.store.select(selectCurrentUser)),
       mergeMap(([res, user]: [AuthGetCredentialsResponse, GetCurrentUserResponseUserObject]) => [
-        authActions.updateAllCredentials({credentials: res.credentials, extra: res?.['additional_credentials'], workspace: user.company.id}),
+        authActions.updateAllCredentials({
+          credentials: res.credentials,
+          extra: res?.additional_credentials,
+          workspace: user.company.id,
+          maxCredentials: res.max_credentials
+        }),
         deactivateLoader(action.type)
       ]),
       catchError(error => [requestFailed(error), deactivateLoader(action.type)])

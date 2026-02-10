@@ -12,10 +12,9 @@ import { escapeRegex } from '@common/shared/utils/escape-regex';
 
 @Directive({
   selector: '[smSearchText]',
-  standalone: true
-})
+  })
 export class SearchTextDirective {
-  readonly smSearchText = input<string | undefined | null>(undefined);
+  readonly smSearchText = input<any>(undefined);
   readonly highlightClass = input<string>('font-weight-bold');
   readonly caseSensitive = input<boolean>(false);
 

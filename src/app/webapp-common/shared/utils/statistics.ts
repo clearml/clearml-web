@@ -1,18 +1,12 @@
 import {last} from 'lodash-es';
 import {maxInArray} from '@common/shared/utils/helpers.util';
 import {ResourceUsageSeries} from '~/business-logic/model/workers/resourceUsageSeries';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 export interface DataPoint {
   date: string;
   originalDate?: number;
   value: number;
-}
-
-export interface Topic {
-  topicName: string;
-  topicID?: string;
-  topic: number;
-  dates: DataPoint[];
 }
 
 export interface RequestParam {
@@ -32,13 +26,11 @@ const defaultMaxValHandler = {
 export function addStats(current: Topic[], data, maxPoints: number,
   requestedKeys: RequestParam[],
   entityParamName: string,
-  paramInfo: {
-    [key: string]: {
+  paramInfo: Record<string, {
       title: string;
       multiply: number;
       suffix?: string;
-    };
-  }) {
+    }>) {
   const topicIDs = new Proxy({}, defaultMaxValHandler);
   let dataByTopic: Topic[];
   if (current) {

@@ -1,37 +1,61 @@
 import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal} from '@angular/core';
 import {TIME_FORMAT_STRING} from '@common/constants';
-import {FilterMetadata} from 'primeng/api';
+import {FilterMetadata, PrimeTemplate} from 'primeng/api';
 import {get, parseInt} from 'lodash-es';
 import {getRoundedNumber} from '@common/experiments/shared/common-experiments.utils';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
-import {animate, style, transition, trigger} from '@angular/animations';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {ServingActions, servingLoadingTableColFields, servingTableColFields} from '@common/serving/serving.actions';
 import {servingTableCols} from '@common/serving/serving.consts';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import { EntityTypeEnum } from '~/shared/constants/non-common-consts';
-import {fileSizeConfigCount, fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
+import {fileSizeConfigCount, fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {ServingEmptyStateComponent} from '~/features/serving/empty-state/serving-empty-state.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {
+  HyperParamMetricColumnComponent
+} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
+import {
+  TableFilterSortComponent
+} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
+import {
+  TableCardFilterComponent
+} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter.component';
+import {TableCardComponent} from '@common/shared/ui-components/data/table-card/table-card.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ColGetterPipe} from '@common/shared/pipes/col-getter.pipe';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
+import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'sm-serving-table',
   templateUrl: './serving-table.component.html',
   styleUrl: './serving-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('inOutAnimation', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('0.25s ease-in', style({ opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ opacity: 1 }),
-        animate('0.2s ease-in', style({ opacity: 0 }))
-      ])
-    ])
-  ],
-  standalone: false
+  imports: [
+    ServingEmptyStateComponent,
+    TableComponent,
+    HyperParamMetricColumnComponent,
+    TableFilterSortComponent,
+    TableCardFilterComponent,
+    TableCardComponent,
+    PrimeTemplate,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    FileSizePipe,
+    ColGetterPipe,
+    DurationPipe,
+    IsRowSelectedPipe,
+    FilterPipe,
+    DecimalPipe,
+  ]
 })
 export class ServingTableComponent extends BaseTableView {
   override entitiesKey = 'endpoints';
@@ -142,6 +166,7 @@ export class ServingTableComponent extends BaseTableView {
       ...createFiltersFromStore(filters || {}, false)
     };
   });
+  protected sortByFilterValues = signal<Record<string, string[]>>(this.filtersValues());
 
   protected filtersOptions = computed(() => ({
     [servingTableColFields.modelName]: this.sortOptionsList(
@@ -149,21 +174,21 @@ export class ServingTableComponent extends BaseTableView {
         label: modelName,
         value: modelName
       })),
-      this.filtersValues()[servingTableColFields.modelName]
+      this.sortByFilterValues()[servingTableColFields.modelName]
     ),
     [servingLoadingTableColFields.inputType]: this.sortOptionsList(
       this.inputTypes().map(inputType => ({
         label: inputType,
         value: inputType
       })),
-      this.filtersValues()[servingLoadingTableColFields.inputType]
+      this.sortByFilterValues()[servingLoadingTableColFields.inputType]
     ),
     [servingLoadingTableColFields.preprocessArtifact]: this.sortOptionsList(
       this.preprocessArtifact().map(preprocessArtifact => ({
         label: preprocessArtifact,
         value: preprocessArtifact
       })),
-      this.filtersValues()[servingLoadingTableColFields.preprocessArtifact]
+      this.sortByFilterValues()[servingLoadingTableColFields.preprocessArtifact]
     ),
     ...Object.entries(this.metadataValuesOptions() || {}).reduce((acc, [id, values]) => {
       acc![id] = values === null ? null : [{
@@ -240,6 +265,7 @@ export class ServingTableComponent extends BaseTableView {
   }
 
   columnFilterOpened(col: ISmCol) {
+    this.sortByFilterValues.set(this.filtersValues());
     if (col.type !== 'hyperparams') {
       this.store.dispatch(ServingActions.getCustomMetrics());
     }

@@ -14,11 +14,6 @@ export const toggleCardsCollapsed = createAction(
   VIEW_PREFIX + '[toggle table cards collapsed]',
   props<{ entityType: EntityTypeEnum }>()
 );
-export const setCompareAutoRefresh = createAction(
-  VIEW_PREFIX + '[set compare auto refresh]',
-  props<{ autoRefresh: boolean }>()
-);
-
 export const setServerError = createAction(
   VIEW_PREFIX + '[set server error]',
   (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false, errorHeader?: string) => ({
@@ -126,15 +121,14 @@ export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_
   popupId: string;
   reset?: boolean
 }>());
-export const neverShowChangesAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_CHANGES_AGAIN', props<{
-  version: string
-}>());
+export const neverShowChangesAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_CHANGES_AGAIN',
+  props<{ version: string }>()
+);
 export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{
   redactedArguments: { key: string } []
 }>());
-export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{
-  hide: boolean
-}>());
+export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS',
+  props<{ hide: boolean }>());
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
 export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
 export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]');

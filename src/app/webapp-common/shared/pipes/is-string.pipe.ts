@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'isString',
-  standalone: true
-})
+  })
 
 export class IsStringPipe implements PipeTransform {
 

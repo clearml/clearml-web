@@ -1,19 +1,15 @@
-import {Component, Inject, OnDestroy} from '@angular/core';
+import {Component, computed, inject, DestroyRef} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {Observable} from 'rxjs';
 import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {ReportsCreateRequest} from '~/business-logic/model/reports/models';
-import {map} from 'rxjs/operators';
-import {Project} from '~/business-logic/model/projects/project';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {
   CreateNewReportFormComponent,
   NewReportData
 } from '@common/reports/report-dialog/create-new-report-form/create-new-report-form.component';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
-import {PushPipe} from '@ngrx/component';
 
 export interface IReportsCreateRequest extends ReportsCreateRequest {
   projectName?: string;
@@ -25,28 +21,25 @@ export interface IReportsCreateRequest extends ReportsCreateRequest {
     styleUrls: ['./report-dialog.component.scss'],
     imports: [
         DialogTemplateComponent,
-        PushPipe,
         CreateNewReportFormComponent
     ]
 })
-export class ReportDialogComponent implements OnDestroy{
-  public projects$: Observable<Project[]>;
-  public readOnlyProjectsNames$: Observable<string[]>;
+export class ReportDialogComponent {
+  private readonly store = inject(Store);
+  private readonly matDialogRef = inject<MatDialogRef<ReportDialogComponent>>(MatDialogRef<ReportDialogComponent>);
+  private readonly destroy = inject(DestroyRef);
+  public readonly data = inject<{ defaultProjectId?: string }>(MAT_DIALOG_DATA);
+  protected projects = this.store.selectSignal(selectTablesFilterProjectsOptions);
+  protected readOnlyProjectsNames = computed(() => this.projects()
+    ?.filter(project => isReadOnly(project))
+    .map(project => project.name)
+  );
 
-
-  constructor(
-    private store: Store,
-    private matDialogRef: MatDialogRef<ReportDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { defaultProjectId: string }
-  ) {
-    this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
-    this.readOnlyProjectsNames$ = this.store.select(selectTablesFilterProjectsOptions)
-      .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project => project.name)));
+  constructor() {
+    this.destroy.onDestroy(() => {
+      this.store.dispatch(resetTablesFilterProjectsOptions());
+    });
   }
-
-  ngOnDestroy(): void {
-        this.store.dispatch(resetTablesFilterProjectsOptions());
-    }
 
   public createReport(reportForm: NewReportData) {
     const report = this.convertFormToReport(reportForm);

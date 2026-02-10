@@ -3,33 +3,54 @@ import {
   input,
   inject,
   forwardRef,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  linkedSignal
 } from '@angular/core';
-import {ControlValueAccessor, FormBuilder, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
+import {ControlValueAccessor, FormBuilder, NG_VALUE_ACCESSOR, ReactiveFormsModule, Validators} from '@angular/forms';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {debounceTime, filter, map, startWith} from 'rxjs/operators';
 import {pairwise} from 'rxjs';
+import {buildGitRepoUrl} from '@common/experiments/shared/common-experiments.utils';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {MatInput, MatLabel} from '@angular/material/input';
+import {ReplaceViaMapPipe} from '@common/shared/pipes/replaceViaMap';
+import {MatError, MatFormField} from '@angular/material/form-field';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-experiment-execution-source-code',
-    templateUrl: './experiment-execution-source-code.component.html',
-    styleUrls: ['./experiment-execution-source-code.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => ExperimentExecutionSourceCodeComponent),
-            multi: true
-        }
-    ],
-    standalone: false
+  selector: 'sm-experiment-execution-source-code',
+  templateUrl: './experiment-execution-source-code.component.html',
+  styleUrls: ['./experiment-execution-source-code.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => ExperimentExecutionSourceCodeComponent),
+      multi: true
+    }
+  ],
+  imports: [
+    TooltipDirective,
+    LabeledRowComponent,
+    ReactiveFormsModule,
+    MatFormField,
+    MatOption,
+    MatSelect,
+    MatInput,
+    MatIconModule,
+    ReplaceViaMapPipe,
+    MatError,
+    MatLabel
+  ]
 })
 export class ExperimentExecutionSourceCodeComponent implements ControlValueAccessor {
   private formBuilder = inject(FormBuilder);
 
   editable = input<boolean>();
-
+  protected readonly sourceTypesEnum = sourceTypesEnum;
   sourceCodeForm = this.formBuilder.group({
     repository: [''],
     scriptType: [sourceTypesEnum.Branch, Validators.required],
@@ -41,9 +62,20 @@ export class ExperimentExecutionSourceCodeComponent implements ControlValueAcces
     binary: [''],
   });
 
-  readonly sourceTypesEnum = sourceTypesEnum;
+  private formData = toSignal(this.sourceCodeForm.valueChanges
+    .pipe(startWith(this.sourceCodeForm.value))
+  );
+  protected repoData = linkedSignal(() =>
+    buildGitRepoUrl(this.formData().repository, this.formData().branch, this.formData().scriptType === sourceTypesEnum.Tag ?
+      this.formData().tag :
+      this.formData().scriptType === sourceTypesEnum.VersionNum ?
+        this.formData().version_num :
+        undefined
+    )
+  );
 
-  scriptTypeOptions = [
+
+  protected scriptTypeOptions = [
     {
       value: sourceTypesEnum.VersionNum,
       label: 'Commit Id'
@@ -58,19 +90,19 @@ export class ExperimentExecutionSourceCodeComponent implements ControlValueAcces
     },
   ];
 
-  scriptPlaceHolders = {
+  protected readonly scriptPlaceHolders = {
     [sourceTypesEnum.VersionNum]: 'Insert commit id',
     [sourceTypesEnum.Tag]       : 'Insert tag name',
     [sourceTypesEnum.Branch]    : 'Insert branch name',
   };
 
-  flagNameMap = {
+  protected readonly flagNameMap = {
     [sourceTypesEnum.VersionNum]: 'COMMIT ID',
     [sourceTypesEnum.Tag]       : 'TAG NAME',
     [sourceTypesEnum.Branch]    : 'BRANCH NAME'
   };
 
-  binaryValidationRegexp = /(^python.*)|(^sh$)|(^bash$)|(^zsh$)/;
+  protected readonly binaryValidationRegexp = /(^python.*)|(^sh$)|(^bash$)|(^zsh$)/;
   private onChange: (val: Partial<IExecutionForm['source']>) => void;
   private onTouched: () => void;
   private originalData: IExecutionForm['source'];
@@ -141,7 +173,15 @@ export class ExperimentExecutionSourceCodeComponent implements ControlValueAcces
 
   writeValue(data: IExecutionForm['source']) {
     this.originalData = data;
-    this.sourceCodeForm.patchValue(data, {emitEvent: false});
+    if (data) {
+      this.sourceCodeForm.patchValue(data, {emitEvent: false});
+      this.repoData.set(buildGitRepoUrl(data.repository, data.branch, data.scriptType === sourceTypesEnum.Tag ?
+        data.tag :
+        data.scriptType === sourceTypesEnum.VersionNum ?
+          data.version_num :
+          undefined
+      ));
+    }
     this.setValidators();
   }
 

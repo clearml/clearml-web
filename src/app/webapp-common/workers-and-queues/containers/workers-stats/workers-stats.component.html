@@ -35,6 +35,8 @@
 <div #chart class="line-chart-container">
   <sm-line-chart
     class="h-100"
+    [unit]="units[currentParam()]"
+    [yTickFormatter]="formatY()"
     [colorScheme]="['#a4a1fb', '#ff8a15', '#1da9ff', '#a5dcff', '#3f3f3f','#464b37','#848871','#52489f','#4c7273', '#ffd4a8' ]"
     [showLoadingOverlay]="chartState().refreshChart()"
     [data]="chartData()"

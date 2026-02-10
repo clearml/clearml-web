@@ -34,6 +34,7 @@ export interface AuthState {
   localFilesPopupURLs: Array<string>;
   revokeSucceed: boolean;
   credentials: { [workSpaceId: string]: CredentialKeyExt[] };
+  maxCredentials: number;
   newCredential: CredentialKeyExt;
   dontShowAgainForBucketEndpoint: string;
   s3BucketCredentials: { bucketCredentials: Credentials[] };
@@ -45,6 +46,7 @@ export const initAuth: AuthState = {
   localFilesPopupURLs: [],
   revokeSucceed: false,
   credentials: {},
+  maxCredentials: null,
   newCredential: null,
   dontShowAgainForBucketEndpoint: '',
   s3BucketCredentials: {
@@ -58,6 +60,7 @@ export const selectAuth = state => state.auth as AuthState;
 // Auth selectors
 export const selectRevokeSucceed = createSelector(selectAuth, state => state.revokeSucceed);
 export const selectCredentials = createSelector(selectAuth, state => state.credentials);
+export const selectMaxCredentials = createSelector(selectAuth, state => state.maxCredentials);
 export const selectNewCredential = createSelector(selectAuth, state => state.newCredential);
 export const selectS3BucketCredentials = createSelector(selectAuth, state => state?.s3BucketCredentials);
 export const selectS3BucketCredentialsBucketCredentials = createSelector(selectAuth, state => state?.s3BucketCredentials?.bucketCredentials);
@@ -147,7 +150,9 @@ export const commonAuthReducer = [
   })),
   on(updateAllCredentials, (state, action) => ({
     ...state,
-    credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra}, revokeSucceed: false
+    credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra},
+    revokeSucceed: false,
+    maxCredentials: action.maxCredentials
   })),
   on(setSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: {signed: action.signed, expires: action.expires}}})),
   on(setSignedUrls, (state, action) => ({...state, signedUrls: {

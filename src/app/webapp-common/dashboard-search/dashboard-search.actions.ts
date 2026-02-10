@@ -31,7 +31,7 @@ export const searchSetTableFilters = createAction(
 );
 
 export const searchClear = createAction(SEARCH_PREFIX + 'SEARCH_CLEAR');
-export const searchActivate = createAction(SEARCH_PREFIX + 'ACTIVATE');
+export const searchActivated = createAction(SEARCH_PREFIX + 'ACTIVATE');
 export const searchDeactivate = createAction(SEARCH_PREFIX + 'DEACTIVATE');
 export const searchLoadMoreDeactivate = createAction(SEARCH_PREFIX + 'LOAD_MORE_DEACTIVATE');
 
@@ -175,3 +175,8 @@ export const getResultsCount = createAction(
 export const clearSearchResults = createAction(DASHBOARD_PREFIX + '[clear search results]');
 
 export const clearSearchFilters = createAction(DASHBOARD_PREFIX + '[clear search filters]');
+export const getTagsOptionsForSearch = createAction(DASHBOARD_PREFIX + '[get tags options for search]');
+export const getProjectsTagsOptionsForSearch = createAction(DASHBOARD_PREFIX + '[get projects tags options for search]');
+export const setSearchProjectsTags = createAction(
+  DASHBOARD_PREFIX + '[set tags options for search]',
+  props<{ tags: string[] }>());

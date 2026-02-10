@@ -43,9 +43,10 @@
           ></i></div>
         <sm-selectable-grouped-filter-list
           [list]="scalarList()"
+          [nested]="settingsGroupBy() === 'none'"
           [checkedList]="selectedMetrics()"
           [searchTerm]="searchTerm()"
-          (hiddenChanged)="hiddenListChanged($event)"
+          (selectedChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
       </div>

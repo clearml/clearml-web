@@ -11,7 +11,7 @@ import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {combineLatest} from 'rxjs';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {debounceTime, filter, withLatestFrom} from 'rxjs/operators';
 import {
   getExperimentConfigurationNames,
@@ -20,13 +20,26 @@ import {
 } from '../../actions/common-experiments-info.actions';
 import {min} from 'lodash-es';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {PushPipe} from '@ngrx/component';
+import {
+  ExperimentHyperParamsNavbarComponent
+} from '@common/experiments/dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
 
 
 @Component({
-    selector: 'sm-experiment-info-hyper-parameters',
-    templateUrl: './experiment-info-hyper-parameters.component.html',
-    styleUrls: ['./experiment-info-hyper-parameters.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-info-hyper-parameters',
+  templateUrl: './experiment-info-hyper-parameters.component.html',
+  styleUrls: ['./experiment-info-hyper-parameters.component.scss'],
+  imports: [
+    OverlayComponent,
+    RouterOutlet,
+    SplitAreaComponent,
+    SplitComponent,
+    PushPipe,
+    ExperimentHyperParamsNavbarComponent
+  ]
 })
 export class ExperimentInfoHyperParametersComponent {
   private store = inject(Store);

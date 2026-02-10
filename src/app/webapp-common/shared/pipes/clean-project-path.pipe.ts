@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'cleanProjectPath',
-  standalone: true
-})
+  })
 export class CleanProjectPathPipe implements PipeTransform {
 
   transform(value: string, showLastSegment: boolean= true): string {

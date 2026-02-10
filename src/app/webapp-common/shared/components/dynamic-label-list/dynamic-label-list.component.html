@@ -1,12 +1,12 @@
 @for (label of items(); track label) {
-  <div #itemContainer [class.measure]="measure" [class.d-none]="$index > visibleLabelsLen">
+  <div #itemContainer class="item-container" [class.measure]="measure" [class.d-none]="$index > visibleLabelsLen">
     <ng-container [ngTemplateOutlet]="itemTemplate()" [ngTemplateOutletContext]="{$implicit: label}"></ng-container>
   </div>
 }
 @if (hiddenLabels.length > 0) {
   <div
-    class="hidden-items"
-    [smTooltip]="hiddenLabels.join(', ')">
+    class="hidden-items" customClass="break-line scrollable"
+    [smTooltip]="hiddenLabels.join('\n')" matTooltipPosition="right">
     +{{hiddenLabels.length}}
   </div>
 }

@@ -4,7 +4,7 @@
     <span class="panel" [class]="node.parent ? 'child-node' : 'parent-node2'"
           [class.last-child]="node.lastChild">
       <span class="ellipsis flex-grow-1"
-            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList()) : !checkedList()?.includes(node.name)"
+            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList()) : shouldUncheckParent()[node.name]"
             [smTooltip]="node.displayName ?? node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis
             (click)="itemSelect.emit(node.parent + node.name)">{{ node.displayName ?? node.name }}</span>
 
@@ -21,7 +21,7 @@
   <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding [cdkTreeNodeTypeaheadLabel]="node.name" class="parent">
     <span matTreeNodeToggle class="panel parent-node"
           [class.expanded]="tree().isExpanded(node)"
-          [class.unchecked]="!(node.childrenNames | arrayIncludedInArray:checkedList())">
+          [class.unchecked]="shouldUncheckParent()[node.name]">
       <i class="me-1 al-icon al-ico-next toggle-icon sm"></i>
       <span class="ellipsis flex-grow-1 pe-1" [smTooltip]="node.displayName ?? node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{ node.displayName ?? node.name }}</span>
       <button

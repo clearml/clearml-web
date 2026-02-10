@@ -1,8 +1,7 @@
-@if (!loading() || !disabled) {
-@if (hasLog && showHeader) {
+@if (hasLog() && showHeader()) {
   <div class="header">
-    <div class="ellipsis" [smTooltip]="creator" matTooltipShowDelay="300" smShowTooltipIfEllipsis>
-      <b class="me-2">Hostname:</b>{{creator}}
+    <div class="ellipsis" [smTooltip]="creator()" matTooltipShowDelay="300" smShowTooltipIfEllipsis>
+      <b class="me-2">Hostname:</b>{{creator()}}
     </div>
     <button mat-stroked-button (click)="downloadLog()">
       <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
@@ -18,22 +17,21 @@
     </mat-form-field>
   </div>
 }
-@if (hasLog === false) {
+@if (hasLog() === false) {
   <div class="no-output">
     <mat-icon fontSet="al" fontIcon="al-ico-log" class="xxl"></mat-icon>
     <h4>NO LOG DATA</h4>
   </div>
 }
 
-@if (hasLog) {
+@if (hasLog()) {
   <sm-experiment-log-info
-    [class.no-header]="!showHeader"
-    [logs]="log$ | ngrxPush"
+    [class.no-header]="!showHeader()"
+    [logs]="log()"
     [beginningOfLog]="logBeginning$ | ngrxPush"
     [filterString]="filter$ | ngrxPush"
     [fetching]="fetching$ | ngrxPush"
     (fetchMore)="getLogs($event)"
     (scrolledToBottom)="this.scrolledToBottom.emit();"
   ></sm-experiment-log-info>
-}
 }

@@ -1,41 +1,18 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  Renderer2,
-  inject,
-  viewChild,
-  viewChildren,
-  input,
-  output,
-  signal,
-  effect,
-  computed,
-  untracked,
-  model,
-  DestroyRef
-} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, model, NgZone, output, Renderer2, signal, untracked, viewChild, viewChildren} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {checkIfLegendToTitle, sortMetricsList} from '../../tasks/tasks.utils';
 import {SingleGraphComponent} from '../single-graph/single-graph.component';
-import {
-  ChartHoverModeEnum,
-  EXPERIMENT_GRAPH_ID_PREFIX,
-  SINGLE_GRAPH_ID_PREFIX, singleValueChartTitle
-} from '../../experiments/shared/common-experiments.const';
+import {ChartHoverModeEnum, EXPERIMENT_GRAPH_ID_PREFIX, SINGLE_GRAPH_ID_PREFIX, singleValueChartTitle} from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {GroupByCharts, groupByCharts} from '../../experiments/actions/common-experiment-output.actions';
 import {Store} from '@ngrx/store';
-import {ResizeEvent} from 'angular-resizable-element';
+import {ResizableDirective, ResizeEvent, ResizeHandleDirective} from 'angular-resizable-element';
 import {distinctUntilChanged, skip, tap} from 'rxjs/operators';
-import {Observable, of, combineLatest} from 'rxjs';
+import {combineLatest, Observable, of} from 'rxjs';
 import {ChartPreferences, ExtFrame, ExtLegend, VisibleExtFrame} from '../single-graph/plotly-graph-base';
 import {signUrls} from '../../core/actions/common-auth.actions';
 import {getSignedUrlOrOrigin$} from '../../core/reducers/common-auth-reducer';
-import {
-  EventsGetTaskSingleValueMetricsResponseValues
-} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {v4} from 'uuid';
 import {selectChartSettings, selectExperimentOrModelId, selectGraphsPerRow} from '@common/experiments/reducers';
 import {setGraphsPerRow} from '@common/experiments/actions/common-experiment-output.actions';
@@ -46,6 +23,17 @@ import {GroupedList} from '@common/tasks/tasks.model';
 import {computedPrevious} from 'ngxtension/computed-previous';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
 import {injectResize} from 'ngxtension/resize';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {isEqual} from 'lodash-es';
+import {MatIconModule} from '@angular/material/icon';
+import {SingleValueSummaryTableComponent} from '@common/shared/single-value-summary-table/single-value-summary-table.component';
+import {GetCounterStringPipe} from '@common/shared/experiment-graphs/filter-hidden.pipe';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {GraphViewerComponent} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
+import {MatDialog} from '@angular/material/dialog';
+import {GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.consts';
 
 export const inHiddenList = (isCompare: boolean, hiddenList: string[], metric: string, variant: string) => {
   const metVar = `${metric}${variant}`;
@@ -57,34 +45,35 @@ export const inHiddenList = (isCompare: boolean, hiddenList: string[], metric: s
   templateUrl: './experiment-graphs.component.html',
   styleUrls: ['./experiment-graphs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    MatIconModule,
+    SingleValueSummaryTableComponent,
+    GetCounterStringPipe,
+    PushPipe,
+    ResizableDirective,
+    ResizeHandleDirective,
+    TooltipDirective,
+    MatIconButton,
+    SingleGraphComponent
+  ]
 })
 
 export class ExperimentGraphsComponent {
+  private renderer = inject(Renderer2);
+  private destroy = inject(DestroyRef);
   private el = inject(ElementRef);
   private changeDetection = inject(ChangeDetectorRef);
   private store = inject(Store);
-  private renderer = inject(Renderer2);
-  private destroy = inject(DestroyRef);
   private resize = injectResize();
+  private readonly zone = inject(NgZone);
+  private readonly dialog = inject(MatDialog);
 
   readonly experimentGraphidPrefix = EXPERIMENT_GRAPH_ID_PREFIX;
   readonly singleGraphidPrefix = SINGLE_GRAPH_ID_PREFIX;
   allMetrics = viewChild<ElementRef>('allMetrics');
-  private timer: number;
   public height = 450;
   public width: number;
-  private minWidth = 350;
-  private resizeTextElement: HTMLDivElement;
-  private graphsNumberLimit: number;
   public activeResizeElement: HTMLDivElement;
-  protected readonly singleValueChartTitle = singleValueChartTitle;
-  protected graphsData = signal<Record<string, VisibleExtFrame[]>>(null);
-  protected signedImagePlots: Record<string, Observable<string[]>> = {};
-  private previousWindowWidth: number;
-  protected plotlyReady = this.store.selectSignal(selectPlotlyReady);
-  protected chartSettings: Record<string, Observable<ChartPreferences>> = {};
-
   hiddenList = input<string[]>();
   isGroupGraphs = input<boolean>();
   legendStringLength = input(19);
@@ -94,13 +83,13 @@ export class ExperimentGraphsComponent {
   legendConfiguration = input<Partial<ExtLegend>>({});
   breakPoint = input(700);
   isCompare = input(false);
+  hideLegend = input(false);
   defaultHoverMode = input<ChartHoverModeEnum>();
   disableResize = input(false);
   singleValueData = model<EventsGetTaskSingleValueMetricsResponseValues[]>();
   multipleSingleValueData = model<ExtFrame>();
   experimentName = input<string>();
   splitSize = input<number>();
-
   smoothWeight = input<number>();
   smoothSigma = input<number>();
   smoothType = input<SmoothTypeEnum>();
@@ -108,10 +97,8 @@ export class ExperimentGraphsComponent {
   showOriginals = input<boolean>();
   xAxisType = input<ScalarKeyEnum>();
   exportForReport = input(true);
-
   metrics = input<Record<string, ExtFrame[]>>();
   list = input<GroupedList>();
-
   resetGraphs = output();
   // hoverModeChanged = output<ChartHoverModeEnum>();
   createEmbedCode = output<{
@@ -125,20 +112,54 @@ export class ExperimentGraphsComponent {
     domRect: DOMRect;
     singleValues?: boolean;
   }>();
-
-  chartSettingsChanged = output<{id: string, changes:ChartPreferences}>()
-
+  chartSettingsChanged = output<{ id: string, changes: ChartPreferences }>();
   allMetricGroups = viewChildren<ElementRef>('metricGroup');
   singleGraphs = viewChildren<ElementRef>('singleGraphContainer');
   singleValueGraph = viewChildren<SingleGraphComponent>('singleValueGraph');
   allGraphs = viewChildren(SingleGraphComponent);
-
-  graphsPerRow = this.store.selectSignal(selectGraphsPerRow);
-
   allGraphsPrevious = computedPrevious(this.allGraphs);
-  loading = computed(() => this.graphsData() === null || this.hiddenList() === null );
+  visibility = computed(() => {
+    return Object.entries(this.list() || {}).reduce((acc, [metric, plots]) => {
+      const variants = Object.keys(plots);
+      acc[metric] = variants.length > 0 ? variants.map(variant =>
+        (this.isCompare() && this.hiddenList()?.includes(metric) && metric.endsWith(` - ${variant}`)) ? null : this.hiddenList()?.includes(`${metric}${variant}`)) : null;
+      return acc;
+    }, {});
+  });
+  protected readonly singleValueChartTitle = singleValueChartTitle;
+  protected graphsData = signal<Record<string, VisibleExtFrame[]>>(null);
+  loading = computed(() => {
+    this.graphsData();
+    return this.graphsData() === null || this.hiddenList() === null;
+  });
+  graphsState = computed(() => ({
+    graphsPerRow: signal(this.graphsPerRow() ?? 2),
+    graphList: signal(this.metrics() ? sortMetricsList(Object.keys(this.metrics())) : []),
+    noGraphs: signal(this.graphsData() && Object.keys(this.graphsData()).length === 0),
+    numIterations: signal(Array.from(new Set(Object.values(this.graphsData() ?? {}).reduce((acc, frames) =>
+      [...acc, ...frames.map(frame => frame.iter)], []).flat())).filter(a => Number.isInteger(a)).length),
+    maxUserWidth: signal(maxInArray(Object.values(this.graphsData() ?? {}).flat().map((chart: ExtFrame) => chart.layout?.width || 0))),
+    maxUserHeight: signal(maxInArray(Object.values(this.graphsData() ?? {}).flat().map((chart: ExtFrame) => chart.layout?.height || 0)))
+  }));
+  protected signedImagePlots: Record<string, Observable<string[]>> = {};
+  protected chartSettings: Record<string, Observable<ChartPreferences>> = {};
+  protected routeParams = toSignal(this.store.select(selectRouterParams).pipe(distinctUntilChanged((a, b) => isEqual(a, b))));
+  protected plotlyReady = this.store.selectSignal(selectPlotlyReady);
+  graphsPerRow = this.store.selectSignal(selectGraphsPerRow);
+  private timer: number;
+  private minWidth = 350;
+  private resizeTextElement: HTMLDivElement;
+  private graphsNumberLimit: number;
+  private previousWindowWidth: number;
 
   constructor() {
+
+    // reset loader when ids change for compare
+    effect(() => {
+      if (this.routeParams()) {
+        this.graphsData.set(null);
+      }
+    });
 
     effect(() => {
       if (this.allGraphsPrevious()?.length === 0 && this.allGraphs()?.length > 0) {
@@ -168,34 +189,34 @@ export class ExperimentGraphsComponent {
       [this.metrics],
       ([metrics]) => {
         if (metrics === undefined) {
-        return;
-      }
-      const graphsData = this.addId(this.sortGraphsData(metrics || {}));
-      const toBeSigned = [];
-      this.chartSettings['singleValues'] = this.store.select(selectChartSettings('singleValues', null));
-      Object.values(graphsData).forEach((graphs: ExtFrame[]) => {
-        graphs.forEach((graph: ExtFrame) => {
-          if ((graph?.layout?.images?.length ?? 0) > 0) {
-            const observables = [] as Observable<string>[];
-            graph.layout.images.forEach(((image: Plotly.Image, i) => {
-                toBeSigned.push({
-                  url: image.source,
-                  config: {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}
-                });
-                observables.push(getSignedUrlOrOrigin$(image.source, this.store).pipe(tap(signed => graph.layout.images[i].source = signed)));
-              }
-            ));
-            this.signedImagePlots[graph.id] = combineLatest(observables);
-          } else {
-            this.signedImagePlots[graph.id] = of(['true']);
-          }
-          this.chartSettings[graph.id] = this.store.select(selectChartSettings(graph.metric, graph.variant));
+          return;
+        }
+        const graphsData = this.addId(this.sortGraphsData(metrics || {}));
+        const toBeSigned = [];
+        this.chartSettings['singleValues'] = this.store.select(selectChartSettings('singleValues', null));
+        Object.values(graphsData).forEach((graphs: ExtFrame[]) => {
+          graphs.forEach((graph: ExtFrame) => {
+            if ((graph?.layout?.images?.length ?? 0) > 0) {
+              const observables = [] as Observable<string>[];
+              graph.layout.images.forEach(((image: Plotly.Image, i) => {
+                  toBeSigned.push({
+                    url: image.source,
+                    config: {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}
+                  });
+                  observables.push(getSignedUrlOrOrigin$(image.source, this.store).pipe(tap(signed => graph.layout.images[i].source = signed)));
+                }
+              ));
+              this.signedImagePlots[graph.id] = combineLatest(observables);
+            } else {
+              this.signedImagePlots[graph.id] = of(['true']);
+            }
+            this.chartSettings[graph.id] = this.store.select(selectChartSettings(graph.metric, graph.variant));
+          });
         });
+        this.store.dispatch(signUrls({sign: toBeSigned}));
+        this.graphsData.set(graphsData);
+        // this.calculateGraphsLayout(0, (this.disableResize() || this.allGroupsSingleGraphs()) ? 1 : this.graphsState().graphsPerRow());
       });
-      this.store.dispatch(signUrls({sign: toBeSigned}));
-      this.graphsData.set(graphsData);
-      // this.calculateGraphsLayout(0, (this.disableResize() || this.allGroupsSingleGraphs()) ? 1 : this.graphsState().graphsPerRow());
-    });
 
 
     this.store.select(selectExperimentOrModelId)
@@ -223,26 +244,6 @@ export class ExperimentGraphsComponent {
     });
   }
 
-  graphsState = computed(() => ({
-    graphsPerRow: signal(this.graphsPerRow() ?? 2),
-    graphList: signal(this.metrics() ? sortMetricsList(Object.keys(this.metrics())) : []),
-    noGraphs: signal(this.graphsData() && Object.keys(this.graphsData()).length === 0),
-    numIterations: signal(Array.from(new Set(Object.values(this.graphsData() ?? {}).reduce((acc, frames) =>
-      [...acc, ...frames.map(frame => frame.iter)], []).flat())).filter(a => Number.isInteger(a)).length),
-    maxUserWidth: signal(maxInArray(Object.values(this.graphsData() ?? {}).flat().map((chart: ExtFrame) => chart.layout?.width || 0))),
-    maxUserHeight: signal(maxInArray(Object.values(this.graphsData() ?? {}).flat().map((chart: ExtFrame) => chart.layout?.height || 0)))
-  }));
-
-  visibility = computed(() => {
-    return Object.entries(this.list() || {}).reduce((acc, [metric, plots]) => {
-      const variants = Object.keys(plots);
-      acc[metric] = variants.filter(v => v !== '__displayName').length > 0 ? variants.map(variant =>
-        (this.isCompare() && this.hiddenList()?.includes(metric) && metric.endsWith(` - ${variant}`)) ? null : this.hiddenList()?.includes(`${metric}${variant}`)) : null;
-      return acc;
-    }, {});
-  });
-
-
   onResize() {
     clearTimeout(this.timer);
     if (window.innerWidth !== this.previousWindowWidth) {
@@ -257,8 +258,8 @@ export class ExperimentGraphsComponent {
       ({
         ...acc,
         [label]: graphs.sort((a, b) => {
-          const aTitle = (a.layout.title as {text: string})?.text ?? a.layout.title as string;
-          const bTitle = (b.layout.title as {text: string})?.text ?? b.layout.title as string;
+          const aTitle = (a.layout.title as { text: string })?.text ?? a.layout.title as string;
+          const bTitle = (b.layout.title as { text: string })?.text ?? b.layout.title as string;
           a.layout.title = {text: aTitle || ''};
           b.layout.title = {text: bTitle || ''};
           return aTitle === bTitle ?
@@ -276,11 +277,6 @@ export class ExperimentGraphsComponent {
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint();
-  }
-
-  private allGroupsSingleGraphs() {
-    const groups = Object.values(this.graphsData() || {});
-    return (this.isGroupGraphs() || this.disableResize() || groups.length === 1) && groups.every(group => group.length === 1);
   }
 
   public calculateGraphsLayout(delay = 200, graphsPerRow?: number) {
@@ -352,18 +348,6 @@ export class ExperimentGraphsComponent {
     this.changeDetection.detectChanges();
   }
 
-  private calcGraphPerRow(userWidth: number, containerWidth: number) {
-    let graphsPerRow: number;
-    if (userWidth > 0.75 * containerWidth) {
-      graphsPerRow = 1;
-    } else if (userWidth > 0.33 * containerWidth) {
-      graphsPerRow = 2;
-    } else {
-      graphsPerRow = Math.floor(containerWidth / userWidth);
-    }
-    return Math.min(graphsPerRow, this.graphsNumberLimit);
-  }
-
   resizeStarted(metricGroup: HTMLDivElement, singleGraph?: HTMLDivElement) {
     this.activeResizeElement = singleGraph;
     this.changeDetection.detectChanges();
@@ -396,21 +380,8 @@ export class ExperimentGraphsComponent {
     }
   }
 
-
-  private addId(sortGraphsData1: Record<string, ExtFrame[]>): Record<string, VisibleExtFrame[]> {
-    return Object.entries(sortGraphsData1).reduce((acc, [label, graphs]) =>
-      ({
-        ...acc,
-        [label]: graphs.map((graph) => ({
-          ...graph,
-          id: v4()
-        }))
-      }), {} as Record<string, VisibleExtFrame[]>);
-  }
-
   public generateIdentifier = (chartItem: ExtFrame) =>
     `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
-
 
   creatingEmbedCodeGroup(metric: VisibleExtFrame[], domRect) {
     const metricName = metric[0].metric;
@@ -478,6 +449,47 @@ export class ExperimentGraphsComponent {
   }
 
   chartPreferencesChanged(chartItem: Partial<ExtFrame>, $event: ChartPreferences) {
-    this.chartSettingsChanged.emit({id: !chartItem.variant ? chartItem.metric : `${chartItem.metric}_-_${chartItem.variant}`, changes: $event});
+    this.chartSettingsChanged.emit({
+      id: !chartItem.variant ? chartItem.metric : `${chartItem.metric}_-_${chartItem.variant}`,
+      changes: $event
+    });
+  }
+
+  private allGroupsSingleGraphs() {
+    const groups = Object.values(this.graphsData() || {});
+    return (this.isGroupGraphs() || this.disableResize() || groups.length === 1) && groups.every(group => group.length === 1);
+  }
+
+  private calcGraphPerRow(userWidth: number, containerWidth: number) {
+    let graphsPerRow: number;
+    if (userWidth > 0.75 * containerWidth) {
+      graphsPerRow = 1;
+    } else if (userWidth > 0.33 * containerWidth) {
+      graphsPerRow = 2;
+    } else {
+      graphsPerRow = Math.floor(containerWidth / userWidth);
+    }
+    return Math.min(graphsPerRow, this.graphsNumberLimit);
+  }
+
+  private addId(sortGraphsData1: Record<string, ExtFrame[]>): Record<string, VisibleExtFrame[]> {
+    return Object.entries(sortGraphsData1).reduce((acc, [label, graphs]) =>
+      ({
+        ...acc,
+        [label]: graphs.map((graph) => ({
+          ...graph,
+          id: v4()
+        }))
+      }), {} as Record<string, VisibleExtFrame[]>);
+  }
+
+  protected maximize(data: GraphViewerData) {
+    this.zone.run(() => {
+      this.dialog.open<GraphViewerComponent, GraphViewerData>(GraphViewerComponent, {
+        data,
+        panelClass: ['image-viewer-dialog', 'full-screen'],
+        maxWidth: 'auto'
+      });
+    });
   }
 }

@@ -5,8 +5,7 @@ import {selectThemeMode} from '@common/core/reducers/view.reducer';
 @Component({
   selector: 'sm-page-base',
   template: '',
-  standalone: true
-})
+  })
 export abstract class PageBaseComponent {
   private readonly store= inject(Store);
   protected theme = this.store.selectSignal(selectThemeMode);

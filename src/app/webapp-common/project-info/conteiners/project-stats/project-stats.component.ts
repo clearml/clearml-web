@@ -29,13 +29,21 @@ import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamE
 import {concatLatestFrom} from '@ngrx/operators';
 import {presetColors} from '@common/shared/ui-components/inputs/color-picker/color-picker-wrapper.component';
 import {selectMetricVariants} from '@common/experiments/reducers';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton} from '@angular/material/button';
 
 @Component({
-    selector: 'sm-project-stats',
-    templateUrl: './project-stats.component.html',
-    styleUrls: ['./project-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-project-stats',
+  templateUrl: './project-stats.component.html',
+  styleUrls: ['./project-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ScatterPlotComponent,
+    TooltipDirective,
+    MatIcon,
+    MatButton
+  ]
 })
 export class ProjectStatsComponent implements OnDestroy {
   private store = inject(Store);

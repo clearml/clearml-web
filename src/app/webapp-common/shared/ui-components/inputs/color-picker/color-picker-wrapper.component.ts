@@ -3,7 +3,7 @@ import {
   Component, computed,
   effect,
   inject,
-  signal,
+  signal, untracked,
   viewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
@@ -12,6 +12,7 @@ import {ColorHashService} from '@common/shared/services/color-hash/color-hash.se
 import {TinyColor} from '@ctrl/tinycolor';
 import {ColorPickerDirective} from 'ngx-color-picker';
 import {closeColorPicker} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
+import {MatButton} from '@angular/material/button';
 
 export const presetColors = [
   '#1f77b4',  // muted blue
@@ -44,11 +45,14 @@ export const presetColorsDark = [
 ];
 
 @Component({
-    selector: 'sm-color-picker-wrapper',
-    templateUrl: './color-picker-wrapper.component.html',
-    styleUrls: ['./color-picker-wrapper.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-color-picker-wrapper',
+  templateUrl: './color-picker-wrapper.component.html',
+  styleUrls: ['./color-picker-wrapper.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ColorPickerDirective,
+    MatButton
+  ]
 })
 export class ColorPickerWrapperComponent {
   private store = inject(Store);
@@ -77,6 +81,17 @@ export class ColorPickerWrapperComponent {
         this.picker().openDialog();
       }
     });
+
+    effect(() => {
+      const color = this.state().color();
+      untracked(() => {
+        if (this.props()) {
+          const {r, g, b, a} = new TinyColor(color).toRgb();
+          const rgb = [r, g, b, (this.state().props.alpha && a === 1) ? 0.99999 : a];
+          this.colorHashService.setTempColorForString(this.props().cacheKey, rgb, this.state().props.alpha);
+        }
+      });
+    });
   }
 
   closeColorPicker() {
@@ -85,9 +100,7 @@ export class ColorPickerWrapperComponent {
   }
 
   selectColor() {
-    const {r, g, b, a} = new TinyColor(this.state().color()).toRgb();
-    const color = [r, g, b, (this.state().props.alpha && a === 1) ? 0.99999 : a];
-    this.colorHashService.setColorForString(this.props().cacheKey, color, true, this.state().props.alpha);
+    this.colorHashService.saveTempColor()
     this.closeColorPicker();
   }
 }

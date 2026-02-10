@@ -4,12 +4,15 @@ import {selectIsModelSaving, selectModelId, selectSelectedModel} from '../../red
 import {activateModelEdit, cancelModelEdit, editModel, setSavingModel } from '../../actions/models-info.actions';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {ModelViewNetworkComponent} from '@common/models/dumbs/model-view-network/model-view-network.component';
 
 @Component({
-    selector: 'sm-model-info-network',
-    templateUrl: './model-info-network.component.html',
-    styleUrls: ['./model-info-network.component.scss'],
-    standalone: false
+  selector: 'sm-model-info-network',
+  templateUrl: './model-info-network.component.html',
+  styleUrls: ['./model-info-network.component.scss'],
+  imports: [
+    ModelViewNetworkComponent
+  ]
 })
 export class ModelInfoNetworkComponent {
   private store = inject(Store);

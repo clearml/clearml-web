@@ -12,10 +12,9 @@
           <mat-spinner [diameter]="16" [strokeWidth]="2" color="accent"></mat-spinner>
         } @else {
           @if (artifact?.uri) {
-            <i
-              class="pointer al-icon al-ico-download sm ms-1"
-              (click)="artifactFilePathClicked(artifact.uri, inMemorySize)"
-            ></i>
+            <button mat-icon-button class="sm ms-1" (click)="artifactFilePathClicked(artifact.uri, inMemorySize)">
+              <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+            </button>
           }
         }
         @if (artifact?.uri && isLocalFile) {

@@ -8,18 +8,34 @@ import {BaseImageViewerComponent} from '@common/shared/debug-sample/image-viewer
 import {getDebugImageSample, getNextDebugImageSample, setDebugImageViewerScrollId, setViewerEndOfTime} from '@common/shared/debug-sample/debug-sample.actions';
 import {selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {FormsModule} from '@angular/forms';
+import {MatSlider, MatSliderThumb} from '@angular/material/slider';
+import {PushPipe} from '@ngrx/component';
+import {ToPercentagePipe} from '@common/shared/pipes/to-precentage.pipe';
 
 const VIEWER_AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 @Component({
-    selector: 'sm-image-viewer',
-    templateUrl: './image-viewer.component.html',
-    styleUrls: ['./image-viewer.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-image-viewer',
+  templateUrl: './image-viewer.component.html',
+  styleUrls: ['./image-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    FormsModule,
+    MatSliderThumb,
+    MatSlider,
+    PushPipe,
+    ToPercentagePipe
+  ]
 })
 export class ImageViewerComponent extends BaseImageViewerComponent implements OnDestroy {
 
+  change$: BehaviorSubject<number>;
+  public embedFunction: (DOMRect, metric: string, variant: string) => null;
   protected minMaxIterations$ = this.store.select(selectMinMaxIterations);
   protected beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
   protected endOfTime$ = this.store.select(selectViewerEndOfTime);
@@ -27,29 +43,6 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
   private isAppVisible$ = this.store.select(selectAppVisible);
   private beginningOfTime = false;
   private endOfTime = false;
-  change$: BehaviorSubject<number>;
-  public embedFunction: (DOMRect, metric: string, variant: string) => null;
-
-
-  @HostListener('document:keydown', ['$event'])
-  onKeyDown(e: KeyboardEvent) {
-    switch (e.key) {
-      case 'ArrowRight':
-        this.next();
-        break;
-      case 'ArrowLeft':
-        this.previous();
-        break;
-      case 'ArrowUp':
-        this.nextIteration();
-        break;
-      case 'ArrowDown':
-        this.previousIteration();
-        break;
-      default:
-        this.baseOnKeyDown(e);
-    }
-  }
 
   constructor() {
     super();
@@ -118,6 +111,26 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
       });
   }
 
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'ArrowRight':
+        this.next();
+        break;
+      case 'ArrowLeft':
+        this.previous();
+        break;
+      case 'ArrowUp':
+        this.nextIteration();
+        break;
+      case 'ArrowDown':
+        this.previousIteration();
+        break;
+      default:
+        this.baseOnKeyDown(e);
+    }
+  }
+
   canGoNext() {
     return !this.endOfTime;
   }
@@ -137,13 +150,6 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     if (this.canGoBack() && this.currentDebugImage) {
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true}));
-    }
-  }
-
-  private nextIteration() {
-    if (this.canGoNext() && this.currentDebugImage) {
-      this.imageLoaded = false;
-      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false, iteration: true}));
     }
   }
 
@@ -183,6 +189,13 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
         this.currentDebugImage?.metric,
         this.currentDebugImage?.variant
       );
+    }
+  }
+
+  private nextIteration() {
+    if (this.canGoNext() && this.currentDebugImage) {
+      this.imageLoaded = false;
+      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false, iteration: true}));
     }
   }
 }

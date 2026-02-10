@@ -2,13 +2,11 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {OpenDatasetsComponent} from '@common/datasets/open-datasets/open-datasets.component';
-import {NestedOpenDatasetsPageComponent} from '@common/datasets/nested-open-datasets-page/nested-open-datasets-page.component';
 
 const routes: Routes = [
   {
     path     : '',
-    component: OpenDatasetsComponent,
+    loadComponent: () => import('@common/datasets/open-datasets/open-datasets.component').then(c => c.OpenDatasetsComponent),
     data: {search: true, staticBreadcrumb:[[{
         name: 'DATASETS',
         type: CrumbTypeEnum.Feature
@@ -20,12 +18,12 @@ const routes: Routes = [
     children: [
       {
         path: 'datasets',
-        component: OpenDatasetsComponent,
+        loadComponent: () => import('@common/datasets/open-datasets/open-datasets.component').then(c => c.OpenDatasetsComponent),
         data: {search: true}
       },
       {
         path: 'projects',
-        component: NestedOpenDatasetsPageComponent,
+        loadComponent: () => import('@common/datasets/nested-open-datasets-page/nested-open-datasets-page.component').then(c => c.NestedOpenDatasetsPageComponent),
         data: {search: true}
       },
       {path: 'experiments', redirectTo: 'tasks'},

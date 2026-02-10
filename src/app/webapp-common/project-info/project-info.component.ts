@@ -19,22 +19,33 @@ import {HeaderMenuService} from '~/shared/services/header-menu.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
 import {injectQueryParams} from 'ngxtension/inject-query-params';
+import {MarkdownEditorComponent} from '@common/shared/components/markdown-editor/markdown-editor.component';
+import {MatExpansionPanel, MatExpansionPanelContent, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
+import {MatButton} from '@angular/material/button';
+import {ProjectStatsComponent} from '@common/project-info/conteiners/project-stats/project-stats.component';
 
 
 @Component({
-    selector: 'sm-project-info',
-    templateUrl: './project-info.component.html',
-    styleUrls: ['./project-info.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-project-info',
+  templateUrl: './project-info.component.html',
+  styleUrls: ['./project-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MarkdownEditorComponent,
+    MatExpansionPanelTitle,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelContent,
+    MatButton,
+    ProjectStatsComponent
+  ]
 })
 export class ProjectInfoComponent {
   private store = inject(Store);
   private contextMenuService = inject(HeaderMenuService);
   private archive = injectQueryParams('archive');
 
-  protected blockUserScripts$ = this.store.select(selectBlockUserScript);
-  private selectedProject$ = this.store.select(selectSelectedProject);
+  protected blockUserScripts = this.store.selectSignal(selectBlockUserScript);
   public panelOpen = signal(false);
   protected project = this.store.selectSignal(selectSelectedProject);
   protected example = computed(() => isExample(this.project()));
@@ -77,7 +88,7 @@ export class ProjectInfoComponent {
 
   setupBreadcrumbsOptions() {
     combineLatest([
-      this.selectedProject$,
+      this.store.select(selectSelectedProject),
       this.store.select(selectIsDeepMode)
     ])
       .pipe(

@@ -3,6 +3,8 @@ import {Store} from '@ngrx/store';
 import {selectSelectedModel} from '../../reducers';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {updateModelDetails} from '../../actions/models-info.actions';
+import {ModelsModule} from '@common/models/models.module';
+import {ModelGeneralInfoComponent} from '@common/models/dumbs/model-general-info/model-general-info.component';
 
 
 @Component({
@@ -10,7 +12,10 @@ import {updateModelDetails} from '../../actions/models-info.actions';
   templateUrl: './model-info-general.component.html',
   styleUrls: ['./model-info-general.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    ModelsModule,
+    ModelGeneralInfoComponent
+  ]
 })
 export class ModelInfoGeneralComponent {
   private store = inject(Store);

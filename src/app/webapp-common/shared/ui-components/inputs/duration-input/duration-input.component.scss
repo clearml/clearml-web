@@ -1,12 +1,25 @@
 :host {
-  width: 190px;
+  margin: 0 24px;
   text-align: center;
+
+  form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0 6px;
+    background: var(--color-surface-container-high);
+    border-radius: 36px;
+    &.in-edit-mode {
+      border-radius: 36px 0 0 36px;
+    }
+  }
 
   input {
     text-align: center;
     width: 22px;
     border: none;
     font-size: 14px;
+    color: var(--color-on-surface);
     background: transparent;
     color: var(--mat-form-field-outlined-input-text-color);
 
@@ -15,41 +28,36 @@
     }
   }
 
-  form {
-    position: relative;
-
-  }
-
   .inputs-container {
-    background: var(--color-surface-container-high);
+    height: 36px;
     padding: 0 12px;
-    border-radius: 4px;
-    position: relative;
     display: flex;
+    align-items: center;
     gap: 1px;
-    z-index: 2;
+  }
 
-    .separator {
-      line-height: 32px;
+  .submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    border-radius: 0 36px 36px 0;
+    width: 36px;
+    height: 36px;
+    background: var(--color-surface-container-high);
+    transition: right 0.3s, opacity 0.3s, visibility 0.3s;
 
-      &:last-child {
-        padding-right: 0;
-      }
+    pointer-events: none;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+
+    &.in-edit-mode {
+      pointer-events: all;
+      right: -20px;
+      opacity: 1;
+      visibility: visible;
     }
   }
-    .submit {
-      position: absolute;
-      top: 50%;
-      right: -8px;
-      transform: translate(0, -50%);
-      opacity: 0;
-      transition: right ease-in-out 0.3s, opacity ease-out 0.5s;
-      pointer-events: none;
 
-      &.in-edit-mode {
-        pointer-events: all;
-        right: -40px;
-        opacity: 1;
-      }
-    }
 }

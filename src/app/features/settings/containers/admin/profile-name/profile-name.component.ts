@@ -7,6 +7,7 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {setAllProjectUsers} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-profile-name',
@@ -29,6 +30,7 @@ export class ProfileNameComponent {
   nameChange(updatedUserName: string, currentUser: GetCurrentUserResponseUserObject) {
     const user = {name: updatedUserName, user: currentUser.id};
     this.store.dispatch(updateCurrentUser({user}));
+    this.store.dispatch(setAllProjectUsers({users: []}));
   }
   copyToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));

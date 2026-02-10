@@ -1,4 +1,4 @@
-import packageJson from '../../../../../../../package.json';
+import {version} from '../../../../../../version.json';
 
 export interface CommercialContext {
   title?: string;
@@ -79,7 +79,7 @@ export const BASE_ENV: Environment = {
   autoLogin: false,
   apiBaseUrl: null,
   fileBaseUrl: null,
-  version: packageJson.version,
+  version,
   baseUrl: 'https://app.allegro.ai',
   headerPrefix: 'X-Allegro',
   loginBanner: '',

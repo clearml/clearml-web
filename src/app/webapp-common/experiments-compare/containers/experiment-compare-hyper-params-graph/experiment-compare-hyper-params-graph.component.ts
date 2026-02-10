@@ -43,6 +43,19 @@ import {
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 import {encodeMetric} from '@common/shared/utils/tableParamEncode';
 import {mapArray} from 'ngxtension/map-array';
+import {
+  MetricVariantSelectorComponent
+} from '@common/experiments-compare/dumbs/metric-param-selector/metric-variant-selector.component';
+import {ParamSelectorComponent} from '@common/experiments-compare/dumbs/param-selector/param-selector.component';
+import {
+  ParallelCoordinatesGraphComponent
+} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
+import {
+  CompareScatterPlotComponent
+} from '@common/experiments-compare/containers/compare-scatter-plot/compare-scatter-plot.component';
+import {PushPipe} from '@ngrx/component';
+import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @Component({
@@ -53,7 +66,16 @@ import {mapArray} from 'ngxtension/map-array';
     '(document:click)': 'clickOut()',
     '(window:beforeunload)': 'unloadHandler()'
   },
-  standalone: false
+  imports: [
+    MetricVariantSelectorComponent,
+    ParallelCoordinatesGraphComponent,
+    CompareScatterPlotComponent,
+    ParamSelectorComponent,
+    MatIconModule,
+    MetricVariantToPathPipe,
+    PushPipe,
+    MetricVariantToNamePipe
+  ]
 })
 export class ExperimentCompareHyperParamsGraphComponent implements OnDestroy {
   private store = inject(Store);
@@ -72,7 +94,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnDestroy {
   private routeWasLoaded: boolean;
   private settingsLoaded: boolean;
   protected graphs: Record<string, ExtFrame>;
-  protected selectedHyperParams: {section: string; name: string}[] = [];
+  protected selectedHyperParams: {section: string; name: string}[] = null;
   protected encodedHyperParams: string[];
   protected selectedMetric: SelectedMetricVariant;
   protected hyperParams: Record<string, Record<string, string>>;
@@ -262,13 +284,13 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnDestroy {
 
   selectedParamsChanged({param}) {
     const selected = this.paramDecoder(param);
-    const included = this.selectedHyperParams.some(p => p.name === selected.name && p.section === selected.section);
+    const included = this.selectedHyperParams?.some(p => p.name === selected.name && p.section === selected.section);
     if (this.scatter) {
       this.updateServer(this.selectedMetric, included ? [] : [selected]);
     } else {
       const newSelectedParamsList = included ?
-        this.selectedHyperParams.filter(p => !(p.name === selected.name && p.section === selected.section)) :
-        [...this.selectedHyperParams, selected];
+        this.selectedHyperParams?.filter(p => !(p.name === selected.name && p.section === selected.section)) :
+        [...this.selectedHyperParams ?? [], selected];
       this.updateServer(this.selectedMetric, newSelectedParamsList);
     }
   }
@@ -326,7 +348,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnDestroy {
       changes: {
         selectedMetric: this.selectedMetric,
         selectedMetrics: this.selectedMetrics,
-        selectedHyperParams: this.selectedHyperParams.map(this.paramEncoder),
+        selectedHyperParams: this.selectedHyperParams?.map(this.paramEncoder),
         selectedParamsHoverInfo: this.selectedParamsHoverInfo.map(this.paramEncoder),
         selectedMetricsHoverInfo: this.selectedMetricsHoverInfo
       }

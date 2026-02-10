@@ -6,8 +6,7 @@ interface IOption {
 }
 @Pipe({
   name: 'selectOptionValueToLabel',
-  standalone: true
-})
+  })
 export class SelectOptionValueToLabelPipe implements PipeTransform {
   transform(value: string, options: Array<IOption>): string {
     if (!options) {

@@ -1,7 +1,7 @@
 <div class="chart-container overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{queue()?.caption ?? 'Overall'}} Task Wait Time</div>
+      <div class="ellipsis">{{caption() ?? 'Overall'}} Task Wait Time</div>
       @if (statsError()) {
         <mat-icon fontSet="al" fontIcon="al-ico-alert-outline" class="warning" smTooltip="Data temporarily not available"></mat-icon>
       }
@@ -10,6 +10,7 @@
   <div #waitchart class="line-chart-container">
     <sm-line-chart
       class="h-100"
+      [unit]="'sec'"
       [data]="queueStats().wait"
       [showLoadingOverlay]="refreshChart()"
       [yTickFormatter]="timeFormatter"
@@ -19,7 +20,7 @@
 <div class="chart-container right overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{queue()?.caption ?? 'Overall'}} Queued Tasks</div>
+      <div class="ellipsis">{{caption() ?? 'Overall'}} Queued Tasks</div>
       @if (statsError()) {
         <mat-icon fontSet="al" fontIcon="al-ico-alert-outline" class="warning" smTooltip="Data temporarily not available"></mat-icon>
       }

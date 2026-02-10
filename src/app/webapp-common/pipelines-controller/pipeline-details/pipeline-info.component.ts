@@ -5,16 +5,42 @@ import {
 } from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
+import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {RouterLink} from '@angular/router';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
+import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
+import {KeyValuePipe, TitleCasePipe} from '@angular/common';
+import {FilterMonitorMetricPipe} from '@common/shared/pipes/filter-monitor-metric.pipe';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-pipeline-info',
-    templateUrl: './pipeline-info.component.html',
-    styleUrls: ['./pipeline-info.component.scss'],
-    standalone: false
+  selector: 'sm-pipeline-info',
+  templateUrl: './pipeline-info.component.html',
+  styleUrls: ['./pipeline-info.component.scss'],
+  imports: [
+    IdBadgeComponent,
+    MatIconModule,
+    MatExpansionPanelHeader,
+    MatExpansionPanel,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    RouterLink,
+    FileSizePipe,
+    DurationPipe,
+    RegexPipe,
+    TitleCasePipe,
+    FilterMonitorMetricPipe,
+    KeyValuePipe
+  ]
 })
 export class PipelineInfoComponent {
       private store = inject(Store);

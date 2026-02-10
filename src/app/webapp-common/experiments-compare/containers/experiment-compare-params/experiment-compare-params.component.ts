@@ -8,13 +8,42 @@ import {ExperimentCompareBase} from '../experiment-compare-base';
 import {paramsActions} from '../../actions/experiments-compare-params.actions';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {PortalComponent} from '@common/shared/portal/portal.component';
+import {
+  CompareCardListComponent
+} from '@common/experiments-compare/dumbs/compare-card-list/compare-card-list.component';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {PushPipe} from '@ngrx/component';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CompareCardHeaderDirective} from '@common/experiments-compare/dumbs/compare-card-header.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {CompareCardBodyDirective} from '@common/experiments-compare/dumbs/compare-card-body.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-experiment-compare-params',
   templateUrl: './experiment-compare-params.component.html',
   styleUrls: ['../experiment-compare-base.component.scss', './experiment-compare-params.component.scss', '../../cdk-drag.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    PortalComponent,
+    CompareCardListComponent,
+    ExperimentCompareGeneralDataComponent,
+    SearchComponent,
+    MatIconModule,
+    PushPipe,
+    CdkFixedSizeVirtualScroll,
+    CompareCardHeaderDirective,
+    TooltipDirective,
+    CompareCardBodyDirective,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    MatIconButton
+  ]
 })
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
   public showEllipsis = true;

@@ -1,14 +1,34 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
-import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
+import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {UpperCasePipe} from '@angular/common';
+import {MatIconButton} from '@angular/material/button';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-experiment-artifact-item-view',
-    templateUrl: './experiment-artifact-item-view.component.html',
-    styleUrls: ['./experiment-artifact-item-view.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiment-artifact-item-view',
+  templateUrl: './experiment-artifact-item-view.component.html',
+  styleUrls: ['./experiment-artifact-item-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SectionHeaderComponent,
+    ScrollTextareaComponent,
+    CopyClipboardComponent,
+    EditableSectionComponent,
+    LabeledRowComponent,
+    MatProgressSpinner,
+    FileSizePipe,
+    UpperCasePipe,
+    MatIconModule,
+    MatIconButton
+  ]
 })
 export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactComponent{
   public isLocalFile: boolean;

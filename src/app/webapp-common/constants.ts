@@ -47,7 +47,8 @@ export const ICONS = {
   RUN: 'al-ico-run',
   METADATA: 'al-ico-metadata',
   ID: 'al-ico-id',
-  CHECK: 'al-ico-success'
+  CHECK: 'al-ico-success',
+  PALETTE: 'al-ico-palette'
 };
 
 export type IconNames = keyof typeof ICONS;

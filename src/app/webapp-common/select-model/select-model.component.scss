@@ -6,13 +6,11 @@
   sm-models-table {
     display: block;
     height: 100%;
+    padding: 16px 0;
   }
 
   .model-table-container {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    height: calc(100% - 164px);
+    height: calc(100% - 134px);
     width: 100%;
   }
 
@@ -20,9 +18,22 @@
     display: flex;
     justify-content: center;
     gap: 16px;
+
+    button {
+      width: 130px;
+    }
+  }
+
+  ::ng-deep p-table table {
+    width: 100% !important;
+
+    .p-datatable-selectable-row  {
+      cursor: default !important;
+    }
+  }
+
+  ::ng-deep .generic-container {
+    max-height: unset !important;
   }
 }
 
-::ng-deep p-table table {
-  width: 100% !important;
-}

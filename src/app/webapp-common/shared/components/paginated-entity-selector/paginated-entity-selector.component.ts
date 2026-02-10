@@ -58,7 +58,7 @@ export interface baseEntity {
 })
 export class PaginatedEntitySelectorComponent implements ControlValueAccessor, Validator {
   protected control = new FormControl<string>(null);
-  protected noMoreOptions: boolean;
+  protected noMoreOptions = signal(false);
   protected error: string = null;
   private previousLength: number;
   data = input<baseEntity[]>([]);
@@ -77,7 +77,7 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   createNewSelected = output<string>();
   protected onTouched: () => void;
   private onChange: (value) => void;
-  private onValidation: (value) => void;
+  protected onValidation: (value) => void;
   protected state = computed(() => ({
     data: this.data(),
     loading: signal(false),
@@ -94,7 +94,7 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
     effect(() => {
       if (this.data()) {
         const length = this.data().length;
-        this.noMoreOptions = length === this.previousLength || length < rootProjectsPageSize;
+        this.noMoreOptions.set(length === this.previousLength || length < rootProjectsPageSize);
         this.previousLength = length;
       }
     });
@@ -157,10 +157,31 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   }
 
   validate(/*control: AbstractControl*/): ValidationErrors | null {
-    return this.isRequired() && !this.control.value ? {required: true} :
-      (this.minLength() && this.control.value.length< this.minLength() ? { minlength: true} :
-      (this.emptyNameValidator() && this.control.value?.length > 0 && this.control.value.trim().length === 0 ? { emptyName: true}
-        : null));
+    const value = this.control.value;
+
+    // 1. Check Required
+    if (this.isRequired() && !value) {
+      return { required: true };
+    }
+
+    // Guard: If value is empty (and wasn't caught by required),
+    // stop here to prevent errors accessing .length below.
+    if (!value) {
+      return null;
+    }
+
+    // 2. Check Min Length
+    if (this.minLength() && value.length < this.minLength()) {
+      return { minlength: true };
+    }
+
+    // 3. Check Empty Name (Whitespace only)
+    // We already know value exists, so we just check if trimmed length is 0
+    if (this.emptyNameValidator() && value.trim().length === 0) {
+      return { emptyName: true };
+    }
+
+    return null;
   }
 
   registerOnValidatorChange(fn) {

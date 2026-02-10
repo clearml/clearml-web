@@ -38,7 +38,7 @@ export interface TreeStep {
   job_id: string;
 }
 
-export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
+export const EXPERIMENTS_INFO_PREFIX = '[Experiments Info ]';
 
 export const getExperimentInfo = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO',

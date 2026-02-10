@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {combineLatest, Subscription} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router';
 import {selectGlobalLegendData, selectShowGlobalLegend} from './reducers';
 import {combineLatestWith, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {resetSelectCompareHeader, setShowGlobalLegend} from './actions/compare-header.actions';
@@ -28,6 +28,18 @@ import {
 import {headerActions} from '@common/core/actions/router.actions';
 import {isEqual} from 'lodash-es';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
+import {
+  ExperimentCompareHeaderComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-header/experiment-compare-header.component';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {PushPipe} from '@ngrx/component';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 const toCompareEntityType = {
   [EntityTypeEnum.controller]: EntityTypeEnum.experiment,
@@ -35,11 +47,22 @@ const toCompareEntityType = {
 };
 
 @Component({
-    selector: 'sm-experiments-compare',
-    templateUrl: './experiments-compare.component.html',
-    styleUrls: ['./experiments-compare.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiments-compare',
+  templateUrl: './experiments-compare.component.html',
+  styleUrls: ['./experiments-compare.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterOutlet,
+    ExperimentCompareHeaderComponent,
+    TagListComponent,
+    MatIconModule,
+    PushPipe,
+    RouterLink,
+    ChooseColorDirective,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    MatIconButton
+  ]
 })
 export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   private store = inject(Store);

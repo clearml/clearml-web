@@ -104,7 +104,7 @@
         align-self: center;
       }
       &.mat-expanded {
-        background-color: var(--color-surface-container-highest);
+        background-color: var(--color-tint-8);
       }
     }
   }
@@ -149,7 +149,7 @@
     }
 
     &:hover {
-      background-color: color-mix(in srgb, var(--color-surface-container), transparent 40%);
+      background-color: var(--color-tint-5);
     }
   }
 

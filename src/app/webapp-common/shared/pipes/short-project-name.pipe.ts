@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'shortProjectName',
-  standalone: true
-})
+  })
 export class ShortProjectNamePipe implements PipeTransform {
 
   transform(value: string): string {

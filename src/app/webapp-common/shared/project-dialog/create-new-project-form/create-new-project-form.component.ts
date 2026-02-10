@@ -17,8 +17,8 @@ import {
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.component';
 import {MatButton} from '@angular/material/button';
-import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 import {MatError} from '@angular/material/form-field';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 export interface NewProjectResults {
   name?: string;
@@ -50,11 +50,11 @@ export class CreateNewProjectFormComponent {
   public readonly projectsRoot = 'Projects root';
 
   projectForm = this.formBuilder.group({
-    name: ['', [Validators.required, minLengthTrimmed(3)]],
+    name: ['', [Validators.required, minLengthTrimmed(1)]],
     description: [''],
     default_output_destination: [null, [Validators.pattern(OutputDestPattern)]],
     system_tags: [[]],
-    parent: [null as string, [Validators.required, minLengthTrimmed(3)]]
+    parent: [null as string, [Validators.required]]
   }, {asyncValidators: [uniqueProjectValidator(this.projectsApi)], updateOn: 'change'});
 
   public loading: boolean;
@@ -102,8 +102,8 @@ export class CreateNewProjectFormComponent {
         takeUntilDestroyed()
       )
       .subscribe(() => {
-        if (this.projectForm.controls.name.value.length > 2) {
-          this.projectForm.controls.name.setErrors(null);
+        if (this.projectForm.controls.name.value.length > 0) {
+          this.projectForm.controls.name.updateValueAndValidity()
         }
       });
   }

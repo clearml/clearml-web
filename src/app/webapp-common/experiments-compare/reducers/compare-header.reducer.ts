@@ -35,7 +35,7 @@ export interface CompareHeaderState {
 
 
 export const initialState: CompareHeaderState = {
-  searchResultsExperiments: [],
+  searchResultsExperiments: null,
   searchTerm: null,
   showSearch: false,
   hideIdenticalRows: false,

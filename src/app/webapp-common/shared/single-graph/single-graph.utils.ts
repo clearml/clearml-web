@@ -47,6 +47,17 @@ export const smoothTypeEnum = {
   any: 'No Smoothing' as SmoothTypeEnum
 };
 
+export const generateColorKey = (name: string, task: string, colorKey: string, isCompare)=> {
+  const variant = colorKey || name;
+  if (!isCompare) {
+    // "?" to adjust desired colors (legend title is removing this ?)
+    // trim() because in hiDpi we add spaces to name
+    return `${variant?.trim()}?`;
+  } else {
+    return variant?.endsWith(task) ? variant : `${variant}-${task}`;
+  }
+}
+
 export const averageDebiased = (arr, weight) => {
   let last = arr?.length ? 0 : NaN;
   let validPoints = 0;

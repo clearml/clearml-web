@@ -192,10 +192,14 @@ export class GlobalSearchFilterComponent {
 
   protected pageNumber = signal(1);
   usersSearchTerm = signal('');
-  currentUserId = input<string>();
-  protected sortByUsersList = computed(() => [this.currentUserId(), ...(this.userFilter.value ?? [])]);
+  protected usersMenuOpen = signal(false);
 
-  protected loading = signal(false);
+  protected sortByUsersList = computed(() => {
+    this.usersMenuOpen();
+    return [this.currentUserId(), ...(this.userFilter.value ?? [])]});
+  currentUserId = input<string>();
+
+ protected loading = signal(false);
   statusOptions = input(['created', 'in_progress', 'completed']);
   isFiltered = input<boolean>()
   typeOptions = input([]);
@@ -212,6 +216,9 @@ export class GlobalSearchFilterComponent {
       tooltip: ''
     })) ?? [],this.sortByUsersList() );
   });
+  usersMenuChangedState= (open: boolean)=> {
+    this.usersMenuOpen.set(open)
+  }
 
   tags = input<string[]>([]);
   filters = input<Record<string, FilterMetadata>>({});
@@ -223,6 +230,7 @@ export class GlobalSearchFilterComponent {
   }>();
 
   resetFilters = output();
+  tagsMenuOpened = output();
 
   tagsMenuClosed() {
 
@@ -246,6 +254,7 @@ export class GlobalSearchFilterComponent {
       return;
     }
     window.setTimeout(() => {
+      this.tagsMenuOpened.emit();
       this.tagMenuTrigger().openMenu();
       this.tagMenu().focus();
     });

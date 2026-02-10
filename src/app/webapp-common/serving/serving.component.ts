@@ -7,7 +7,7 @@ import {FilterMetadata} from 'primeng/api';
 import {selectCompanyTags, selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
 import {debounceTime, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
-import {Params} from '@angular/router';
+import {Params, RouterOutlet} from '@angular/router';
 import {createMetricColumn, decodeColumns, decodeFilter, decodeOrder} from '@common/shared/utils/tableParamEncode';
 import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
 import {SelectionEvent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
@@ -20,14 +20,24 @@ import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {headerActions} from '@common/core/actions/router.actions';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {ServingHeaderComponent} from '@common/serving/serving-header/serving-header.component';
+import {PushPipe} from '@ngrx/component';
 
 type EndpointsTableViewMode = 'active' | 'loading';
 
 @Component({
-    selector: 'sm-serving',
-    templateUrl: './serving.component.html',
-    styleUrl: './serving.component.scss',
-    standalone: false
+  selector: 'sm-serving',
+  templateUrl: './serving.component.html',
+  styleUrl: './serving.component.scss',
+  imports: [
+    ServingTableComponent,
+    RouterOutlet,
+    SplitAreaComponent,
+    SplitComponent,
+    ServingHeaderComponent,
+    PushPipe,
+  ]
 })
 export class ServingComponent extends BaseEntityPageComponent implements OnDestroy {
   public readonly originalTableColumns = servingTableCols;
@@ -169,6 +179,7 @@ export class ServingComponent extends BaseEntityPageComponent implements OnDestr
     ])
       .pipe(
         takeUntilDestroyed(),
+        debounceTime(0),
         withLatestFrom(this.store.select(servingFeature.selectTableMode)),
         map(([[id, endpoints], mode]) => {
           this.firstEndpoint = endpoints?.[0];

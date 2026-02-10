@@ -5,3 +5,15 @@
 .al-ico-alert-outline {
   color: var(--color-warning);
 }
+
+.repo-icon {
+  margin-right: 8px;
+  flex: 0 0 20px;
+}
+
+:host-context(.dark-mode) {
+  .repo-icon.i-github {
+    filter: brightness(0) invert(1);
+  }
+}
+ 

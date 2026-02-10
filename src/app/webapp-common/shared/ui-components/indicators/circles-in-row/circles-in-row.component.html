@@ -21,7 +21,9 @@
     }
     @if (limit() && data().length > limit()) {
       <div class="circle rest"
+           customClass="break-line scrollable"
            [smTooltip]="restTooltip()"
+           matTooltipPosition="right"
            [style.left.px]="-6 * (limit())">
         <div>+{{ data().length - limit() }}</div>
       </div>

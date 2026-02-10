@@ -53,13 +53,13 @@ import {
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {PushPipe} from '@ngrx/component';
 import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
 import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 
 @Component({
@@ -68,13 +68,14 @@ import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
   styleUrls: ['./experiment-compare-scalar-charts.component.scss'],
   imports: [
     MatSidenavModule,
-    ExperimentGraphsModule,
+    SingleGraphStateModule,
     SelectableGroupedFilterListComponent,
     PushPipe,
     GraphSettingsBarComponent,
     MatMenu,
     MatMenuTrigger,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    ExperimentGraphsComponent
   ]
 })
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
@@ -163,8 +164,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
     this.subs.add(combineLatest([this.metrics$, this.singleValues$])
       .subscribe(([metricsWrapped, singleValues]) => {
+        this.graphs = {}; // Do we want to reset graphs between changes
         const metrics = metricsWrapped?.metrics || {};
-
         if (singleValues) {
           const visibles = this.graphsComponent?.singleValueGraph().at(0)?.chart.data.reduce((curr, data) => {
             curr[data.task] = data.visible;
@@ -247,7 +248,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       .subscribe(metrics => {
         this.previousTaskIds = this.taskIds;
         this.originMetrics = metrics;
-        this.graphList = this.settings.groupBy === 'none' ? buildMetricsList(metrics) : this.buildNestedListWithoutChildren(metrics);
+        this.graphList = buildMetricsList(metrics);
 
         if (!this.minimized) {
           let selectedMetricsCols: MetricVariantResult[];
@@ -283,7 +284,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         }
         if (this.selectedVariants?.length === 0) {
           this.store.dispatch(setExperimentHistogram({axisType: this.settings.xAxisType, payload: {}}));
-          this.store.dispatch(setExperimentMultiScalarSingleValue({name: {}}));
+          this.store.dispatch(setExperimentMultiScalarSingleValue({name: null}));
           this.singleValuesChart = null;
           this.singleValuesSplit = [];
           this.graphs = {};
@@ -427,7 +428,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     } else {
       this.prepareGraphsAndUpdate(this.metrics, this.singleValuesSplit);
     }
-    this.graphList = this.settings.groupBy === 'none' ? buildMetricsList(this.originMetrics) : this.buildNestedListWithoutChildren(this.originMetrics);
+    this.graphList = buildMetricsList(this.originMetrics);
     const selectedMetricsWithoutVariants = this.selectedVariants.map(metric => ({metric: metric.metric, variants: []}));
     if (groupBy === 'none') {
       this.settings = this.selectAllChildren();

@@ -1,15 +1,19 @@
 import {inject, Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {filter, take} from 'rxjs/operators';
-import {selectColorPreferences} from '../../ui-components/directives/choose-color/choose-color.reducer';
+import {BehaviorSubject, combineLatest, filter, take, map, distinctUntilChanged} from 'rxjs';
+import {
+  selectColorPickerProps,
+  selectColorPreferences
+} from '../../ui-components/directives/choose-color/choose-color.reducer';
 import {
   addUpdateColorPreferences,
   ColorPreference
 } from '../../ui-components/directives/choose-color/choose-color.actions';
 import stc from 'string-to-color';
 import {TinyColor} from '@ctrl/tinycolor';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {isEqual} from 'lodash-es';
+import {debounceTime, startWith} from 'rxjs/operators';
 
 export type ColorCache = Record<string, number[]>;
 
@@ -21,10 +25,19 @@ export class ColorHashService {
   private store = inject(Store);
 
   private _colorCache = new BehaviorSubject<ColorCache>({});
-  __signal = toSignal(this._colorCache);
+  private _tempColor = new BehaviorSubject<ColorCache>(null);
+  __signal = toSignal(this.getColorCache());
 
   getColorCache() {
-    return this._colorCache.asObservable();
+    return combineLatest([
+      this._colorCache.asObservable(),
+      this._tempColor.asObservable().pipe( distinctUntilChanged(isEqual))
+    ])
+      .pipe(
+        debounceTime(50),
+        startWith([]),
+        map(([cache, tmp]) => ({...cache, ...tmp} as ColorCache)),
+      );
   }
 
   setColorCache(obj: ColorCache) {
@@ -54,13 +67,20 @@ export class ColorHashService {
           this.batchUpdateColorCache(preferenceColors);
         }
       });
+
+    this.store.select(selectColorPickerProps)
+      .pipe(
+        takeUntilDestroyed(),
+        filter(props => props === null),
+      )
+      .subscribe(() => this._tempColor.next(null));
   }
 
   public initColor(label: string, initColor?: number[], lighten = false): number[] {
     if (label === undefined) {
       return [255, 255, 255];
     }
-    const colorCache = this._colorCache.getValue()?.[label];
+    const colorCache = this.colorsSignal()?.[label];
     if (colorCache) {
       return colorCache;
     }
@@ -101,6 +121,13 @@ export class ColorHashService {
     this.setColorCache(filteredCache);
   }
 
+  setTempColorForString(key: string, color: number[], saveAlpha = false) {
+    color = saveAlpha ?
+      color :
+      [color[0], color[1], color[2], this._colorCache.getValue()[key] ? this._colorCache.getValue()[key][3] : 0.35];
+    this._tempColor.next({[key]: color});
+  }
+
   setColorForString(key: string, color: number[], savePreference = true, saveAlpha = false) {
     if (savePreference) {
       color = saveAlpha ? color : [color[0], color[1], color[2], this._colorCache.getValue()[key] ? this._colorCache.getValue()[key][3] : 0.35];
@@ -137,6 +164,14 @@ export class ColorHashService {
       tc = tc.mix({r: color[0], g: color[1], b: color[2]}, 100 / colors.length);
     });
     return [Math.floor(tc.r), Math.floor(tc.g), Math.floor(tc.b), forcedOpacity ?? tc.a];
+  }
+
+  saveTempColor() {
+    this.setColorCache({
+      ...this._colorCache.getValue(),
+      ...this._tempColor.getValue()
+    });
+    this.store.dispatch(addUpdateColorPreferences(this._tempColor.getValue()));
   }
 }
 

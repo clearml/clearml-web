@@ -11,13 +11,30 @@ import {combineLatestWith, debounceTime, distinctUntilChanged, filter, map} from
 import {ServingActions} from '@common/serving/serving.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {PrimeTemplate} from 'primeng/api';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
-    selector: 'sm-serving-general-info',
-    templateUrl: './serving-general-info.component.html',
-    styleUrls: ['./serving-general-info.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-serving-general-info',
+  templateUrl: './serving-general-info.component.html',
+  styleUrls: ['./serving-general-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TableComponent,
+    CopyClipboardComponent,
+    LabeledRowComponent,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    PrimeTemplate,
+    DurationPipe,
+    DecimalPipe,
+  ]
 })
 export class ServingGeneralInfoComponent {
   private store = inject(Store);

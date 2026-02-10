@@ -1,4 +1,4 @@
-<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$ | ngrxPush"></sm-overlay>
 <sm-experiment-header
   [tableCols]="tableMode() === 'compare' ? (tableCompareView() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
   [isArchived]="inArchivedMode()"
@@ -7,7 +7,7 @@
   [minimizedView]="minimizedView()"
   [isMetricsLoading]="metricLoading$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
-  [tableMode]="firstExperiment ? tableMode() : 'table'"
+  [tableMode]="firstExperiment ? getTableModeFromURL() : 'table'"
   [showCompareScalarSettings]="showCompareScalarSettings$ | ngrxPush"
   [compareView]="tableCompareView()"
   [rippleEffect]="tableModeAwareness$ | ngrxPush"
@@ -67,6 +67,7 @@
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [tableCols]="tableCols$| ngrxPush"
         [experiments]="experiments$ | ngrxPush"
+        [currentUserId]="currentUser()?.id"
         [users]="users()"
         [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
         [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
@@ -88,6 +89,7 @@
         [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | ngrxPush"
         [cardsCollapsed]="cardsCollapsed()"
         [cardHeight]="112"
+        [showColors]="showColorsInCards()"
         (experimentSelectionChanged)="getTableModeFromURL() !== 'compare' && experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
@@ -140,6 +142,7 @@
     [useCurrentEntity]="singleRowContext"
     [minimizedView]="true"
     [tableMode]="!minimizedView()"
+    [isCompare]="getTableModeFromURL() === 'compare'"
     [backdrop]="menuBackdrop"
     (tagSelected)="onAddTag($event, contextExperiment)"
     (menuOpened)="setContextMenuStatus(true)"

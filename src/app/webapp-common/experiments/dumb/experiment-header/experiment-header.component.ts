@@ -22,8 +22,8 @@ import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/s
 import {NgTemplateOutlet} from '@angular/common';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 @Component({
     selector: 'sm-experiment-header',
@@ -49,7 +49,7 @@ import {CommonSearchComponent} from '@common/common-search/containers/common-sea
     NgTemplateOutlet,
     MatIconButton,
     MatIcon,
-    ExperimentGraphsModule,
+    SingleGraphStateModule,
     CommonSearchComponent,
   ]
 })

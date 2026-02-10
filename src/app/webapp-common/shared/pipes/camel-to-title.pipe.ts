@@ -3,8 +3,7 @@ import {capitalize} from 'lodash-es';
 
 @Pipe({
   name: 'camelToTitle',
-  standalone: true
-})
+  })
 export class CamelToTitlePipe implements PipeTransform {
 
   transform(value: string): string {

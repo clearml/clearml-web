@@ -1,4 +1,4 @@
-<mat-drawer-container autosize class="light-theme h-100">
+<mat-drawer-container [hasBackdrop]="false" autosize class="light-theme h-100">
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized" [autoFocus]="true">
     <div class="list-container">
       @if (plotsList !== undefined) {
@@ -8,7 +8,7 @@
           [checkedList]="selectedMetrics"
           [searchTerm]="searchTerm"
           (itemSelect)="metricSelected($event)"
-          (hiddenChanged)="hiddenListChanged($event)"
+          (selectedChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
       }

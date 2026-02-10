@@ -1,33 +1,57 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  input,
+  output,
+  viewChild
+} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {DialogModule} from 'primeng/dialog';
+import {ButtonModule} from 'primeng/button';
+import {CommonModule} from '@angular/common';
 import {ModelsViewModesEnum} from '../../models.consts';
 import {FilterMetadata} from 'primeng/api';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {
+  ClearFiltersButtonComponent
+} from '@common/shared/components/clear-filters-button/clear-filters-button.component';
 
 @Component({
-    selector: 'sm-select-model-header',
-    templateUrl: './select-model-header.component.html',
-    styleUrls: ['./select-model-header.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-select-model-header',
+  templateUrl: './select-model-header.component.html',
+  styleUrls: ['./select-model-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    DialogModule,
+    ButtonModule,
+    CommonModule,
+    SearchComponent,
+    MatSlideToggleModule,
+    ClearFiltersButtonComponent,
+  ],
 })
 export class SelectModelHeaderComponent {
 
-  @Input() searchValue: string;
-  @Input() isArchived: boolean;
-  @Input() hideArchiveToggle: boolean;
-  @Input() hideCreateNewButton: boolean;
-  @Input() viewMode: ModelsViewModesEnum;
-  @Input() searchActive: boolean;
-  @Input() tableFilters: Record<string, FilterMetadata>;
-  @Input() isShowArchived: boolean;
+  searchValue = input<string>();
+  isArchived = input<boolean>();
+  hideArchiveToggle = input<boolean>();
+  hideCreateNewButton = input<boolean>();
+  viewMode = input<ModelsViewModesEnum>();
+  searchActive = input<boolean>();
+  tableFilters = input<Record<string, FilterMetadata>>();
+  isShowArchived = input<boolean>();
 
-  @Output() searchValueChanged   = new EventEmitter<string>();
-  @Output() isArchivedChanged    = new EventEmitter<boolean>();
-  @Output() isAllProjectsChanged = new EventEmitter<boolean>();
-  @Output() viewModeChanged      = new EventEmitter<ModelsViewModesEnum>();
-  @Output() addModelClicked      = new EventEmitter();
-  @Output() clearFilters      = new EventEmitter();
+  searchValueChanged   = output<string>();
+  isArchivedChanged    = output<boolean>();
+  isAllProjectsChanged = output<boolean>();
+  viewModeChanged      = output<ModelsViewModesEnum>();
+  addModelClicked      = output<void>();
+  clearFilters         = output<void>();
 
-  @ViewChild('search') searchElem;
+  searchElem = viewChild<ElementRef>('search');
 
   onSearchValueChanged(value: string) {
     this.searchValueChanged.emit(value);
@@ -45,11 +69,7 @@ export class SelectModelHeaderComponent {
     this.addModelClicked.emit();
   }
 
-  // searchClicked() {
-  //   this.searchElem.searchBarInput.nativeElement.focus();
-  // }
-
   onSearchFocusOut() {
-    if (!this.searchElem.searchBarInput().nativeElement.value) {}
+    if (!this.searchElem().nativeElement.value) {}
   }
 }

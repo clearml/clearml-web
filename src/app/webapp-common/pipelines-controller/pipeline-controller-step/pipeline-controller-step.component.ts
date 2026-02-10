@@ -10,26 +10,32 @@ import {interval, of, switchMap} from 'rxjs';
 import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs/operators';
-import {animate, state, style, transition, trigger} from '@angular/animations';
+import {
+  ExperimentTypeIconLabelComponent
+} from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatIconButton} from '@angular/material/button';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-pipeline-controller-step',
-    templateUrl: './pipeline-controller-step.component.html',
-    styleUrls: ['./pipeline-controller-step.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger('openClose', [
-            state('open', style({
-                transform: 'scale(3)',
-                opacity: 0
-            })),
-            state('closed', style({
-                opacity: 1,
-            })),
-            transition('closed => open', [animate('0.35s')]),
-        ]),
-    ],
-    standalone: false
+  selector: 'sm-pipeline-controller-step',
+  templateUrl: './pipeline-controller-step.component.html',
+  styleUrls: ['./pipeline-controller-step.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExperimentTypeIconLabelComponent,
+    MatIconModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    DurationPipe,
+    PushPipe
+  ]
 })
 export class PipelineControllerStepComponent {
   step = input<PipelineItem>();
@@ -54,19 +60,16 @@ export class PipelineControllerStepComponent {
         }
       })
     );
-  enlarged = false;
-
-
-  expandG($event: any) {
-    if ($event.toState === 'open') {
-      this.expandStage.emit($event);
-
-    }
-  }
+  protected enlarged = signal(false);
 
   toggleEnlarge() {
-    // Real work is done after animation by expandG function
     this.expandStageAnimationStarted.emit()
-    this.enlarged = !this.enlarged;
+    this.enlarged.update(value => !value);
+  }
+
+  enlargeEnd(event: TransitionEvent) {
+    if (event.propertyName === 'transform' && (event.target as HTMLDivElement).classList.contains('open')) {
+      this.expandStage.emit();
+    }
   }
 }

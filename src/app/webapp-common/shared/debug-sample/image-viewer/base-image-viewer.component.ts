@@ -36,7 +36,6 @@ export interface ImageViewerData {
 @Component({
   selector: 'sm-image-viewer',
   template: '',
-  standalone: false
 })
 export abstract class BaseImageViewerComponent implements OnDestroy {
   public data = inject<ImageViewerData>(MAT_DIALOG_DATA);

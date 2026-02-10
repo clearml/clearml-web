@@ -1,4 +1,3 @@
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Component, input, output, inject, signal} from '@angular/core';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {Store} from '@ngrx/store';
@@ -19,14 +18,6 @@ import {MatButton, MatIconButton} from '@angular/material/button';
     MatIconButton,
     MatButton,
   ],
-  animations: [
-    trigger('fadeInOut', [
-      state('void', style({ opacity: 0 })), // state when element is not present
-      state('*', style({ opacity: 1 })),    // state when element is present
-      transition('void => *', animate('0.3s ease-in')),
-      transition('* => void', animate('0.3s ease-out'))
-    ])
-  ]
 })
 export class RefreshButtonComponent {
   protected refreshService = inject(RefreshService);

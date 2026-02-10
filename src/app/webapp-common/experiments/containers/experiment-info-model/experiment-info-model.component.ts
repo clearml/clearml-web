@@ -4,7 +4,6 @@ import {selectExperimentModelInfoData, selectIsExperimentSaving} from '../../red
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable} from 'rxjs';
-import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
 import {activateEdit, cancelExperimentEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
@@ -16,13 +15,25 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
 import {addMessage} from '@common/core/actions/layout.actions';
 import {cloneDeep} from 'lodash-es';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
+import {NgTemplateOutlet} from '@angular/common';
+import {PushPipe} from '@ngrx/component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
 
 
 @Component({
-    selector: 'sm-experiment-info-model',
-    templateUrl: './experiment-info-model.component.html',
-    styleUrls: ['./experiment-info-model.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-info-model',
+  templateUrl: './experiment-info-model.component.html',
+  styleUrls: ['./experiment-info-model.component.scss'],
+  imports: [
+    EditableSectionComponent,
+    ScrollTextareaComponent,
+    NgTemplateOutlet,
+    PushPipe,
+    ExperimentModelsFormViewComponent,
+    SectionHeaderComponent
+  ]
 })
 export class ExperimentInfoModelComponent {
   public modelInfo$: Observable<IExperimentModelInfo>;

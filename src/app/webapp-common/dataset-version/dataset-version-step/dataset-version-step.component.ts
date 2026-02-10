@@ -1,7 +1,14 @@
-import {Component, computed, Input, input, output} from '@angular/core';
+import {Component, computed, input, output} from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
-import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
+import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatIconButton} from '@angular/material/button';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {MatIconModule} from '@angular/material/icon';
 
 export interface TreeVersion {
   name: string;
@@ -20,10 +27,17 @@ export interface VersionItem extends DagModelItem {
 }
 
 @Component({
-    selector: 'sm-dataset-version-step',
-    templateUrl: './dataset-version-step.component.html',
-    styleUrls: ['../../pipelines-controller/pipeline-controller-step/pipeline-controller-step.component.scss', './dataset-version-step.component.scss'],
-    standalone: false
+  selector: 'sm-dataset-version-step',
+  templateUrl: './dataset-version-step.component.html',
+  styleUrls: ['../../pipelines-controller/pipeline-controller-step/pipeline-controller-step.component.scss', './dataset-version-step.component.scss'],
+  imports: [
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconModule,
+    MatIconButton,
+    FileSizePipe,
+    TimeAgoPipe
+  ]
 })
 export class DatasetVersionStepComponent {
   protected readonly fileSizeConfigStorage = fileSizeConfigStorage;

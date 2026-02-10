@@ -26,9 +26,15 @@ import {ProjectsUpdateResponse} from '~/business-logic/model/projects/projectsUp
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {isPipelines, isReports} from './common-projects.utils';
-import {getFeatureProjectRequest, getSelfFeatureProjectRequest, isDatasets} from '~/features/projects/projects-page.utils';
+import {
+  getFeatureProjectRequest,
+  getSelfFeatureProjectRequest,
+  isDatasets, rootCardQuery,
+  showRootFolder
+} from '~/features/projects/projects-page.utils';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getTagsFilters} from '@common/shared/utils/tableParamEncode';
+
 
 @Injectable()
 export class CommonProjectsEffects {
@@ -97,7 +103,7 @@ export class CommonProjectsEffects {
               const selectedProjectBasename = selectedProjectName?.split('/').at(-1);
               // current project id
               const projectsView = this.route.snapshot.firstChild.firstChild.routeConfig.path === 'projects';
-              const nested = this.route.snapshot.firstChild?.firstChild?.firstChild.firstChild?.routeConfig?.path === 'projects';
+              const nested = !projectsView && this.route.snapshot.firstChild?.firstChild?.firstChild.firstChild?.routeConfig?.path === 'projects';
               const datasets = isDatasets(this.route.snapshot);
               const pipelines = isPipelines(this.route.snapshot);
               const reports = isReports(this.route.snapshot);
@@ -126,7 +132,7 @@ export class CommonProjectsEffects {
                   }),
                   stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
                   include_stats: true,
-                  shallow_search: !searchQuery?.query,
+                  shallow_search: !searchQuery?.query && mainPageTagsFilter?.length === 0,
                   ...(((projectsView || nested) && !searchQuery?.query) && {permission_roots_only: true}),
                   ...((projectsView && projectId && projectId !== '*') && {parent: [projectId]}),
                   scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
@@ -180,50 +186,38 @@ export class CommonProjectsEffects {
                     ...(showOnlyUserWork && {active_users: [user.id]}),
                     only_fields: ['name', 'company', 'user', 'created', 'default_output_destination'],
                     ...(!projectsView && getSelfFeatureProjectRequest(this.route.snapshot)),
-                  }) : nested && reports && projectId === '*' && !scrollId && !searchQuery?.query ?
-                    // nested reports virtual card
-                    this.projectsApi.projectsGetAllEx({
-                      name: '^\\.reports$',
-                      search_hidden: true,
-                      children_type: 'report',
-                      stats_with_children: false,
-                      stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
-                      include_stats: true,
-                      check_own_contents: true, // in order to check if project is empty
-                      ...(showOnlyUserWork && {active_users: [user.id]}),
-                      only_fields: ['id', 'company'],
-                      ...(mainPageTagsFilter?.length > 0 && {
-                        children_tags_filter: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter)
-                      }),
-
-
-                    }) :
+                  }) : nested && showRootFolder(this.route.snapshot) && projectId === '*' && !scrollId && !searchQuery?.query ?
+                    // nested reports virtual root card
+                    rootCardQuery(this.route.snapshot, this.projectsApi, user.id, showOnlyUserWork, mainPageUsersFilter,
+                      mainPageTagsFilter, mainPageTagsFilterMatchMode)
+                    :
                     of(null),
               ]).pipe(
                 debounceTime(0),
                 map(([projectsRes, currentProjectRes]: [ProjectsGetAllExResponse, ProjectsGetAllExResponse]) => ({
                     newScrollId: projectsRes.scroll_id,
-                    projects: currentProjectRes !== null && currentProjectRes.projects.length !== 0 &&
-                    this.isNotEmptyExampleProject(currentProjectRes.projects[0]) ?
-
-                      [(currentProjectRes?.projects?.length === 0 ?
-                        {
-                          isRoot: true,
-                          sub_projects: null,
-                          name: `[${selectedProjectName}]`,
-                          basename: `[${selectedProjectBasename}]`
-                        } :
-                        {
-                          ...currentProjectRes.projects[0],
-                          id: projectId,
-                          isRoot: true,
-
-                          sub_projects: null,
-                          name: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectName}]`,
-                          basename: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectBasename}]`
-                        }),
+                    projects: (
+                      currentProjectRes !== null &&
+                      currentProjectRes.projects.length !== 0 &&
+                      this.isNotEmptyExampleProject(currentProjectRes.projects[0])
+                    ) ?
+                      [
+                        currentProjectRes?.projects?.length === 0 ?
+                          {
+                            isRoot: true,
+                            sub_projects: null,
+                            name: `[${selectedProjectName}]`,
+                            basename: `[${selectedProjectBasename}]`
+                          } :
+                          {
+                            ...currentProjectRes.projects[0],
+                            id: projectId,
+                            isRoot: true,
+                            sub_projects: null,
+                            name: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectName}]`,
+                            basename: !selectedProjectName && currentProjectRes.projects[0].stats ? '[Root]' : `[${selectedProjectBasename}]`
+                          },
                         ...projectsRes.projects
-
                       ] :
                       projectsRes.projects
                   }

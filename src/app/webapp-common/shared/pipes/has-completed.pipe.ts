@@ -3,8 +3,7 @@ import { TaskStatusEnum } from '~/business-logic/model/tasks/taskStatusEnum';
 
 @Pipe({
   name: 'hasCompleted',
-  standalone: true
-})
+  })
 export class HasCompletedPipe implements PipeTransform {
 
   transform(tasks: any[]): boolean {

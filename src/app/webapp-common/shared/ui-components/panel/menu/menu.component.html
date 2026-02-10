@@ -9,7 +9,7 @@
   [class.icon-only]="!header()"
   [disabled]="disabled()"
   [smTooltip]="buttonTooltip()"
-  (menuOpened)="menuOpened.emit()"
+  (menuOpened)="menuOpened.emit(); focusInputIfNeeded();"
   >
   @if (prefixIconClass()) {
     <mat-icon fontSet="al" [fontIcon]="prefixIconClass()">
@@ -32,7 +32,11 @@
   >
   @if (enableSearch()) {
     <mat-form-field appearance="fill" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
-      <input matInput [placeholder]="searchPlaceholder()" (input)="searchValueChanged.emit($any($event.target).value)" [(ngModel)]="searchValue" autocomplete="off">
+      <input matInput
+             #searchInput
+             [placeholder]="searchPlaceholder()"
+             (input)="searchValueChanged.emit($any($event.target).value)"
+             [(ngModel)]="searchValue" autocomplete="off">
       @if (searchValue()) {
       <button mat-icon-button matSuffix class="me-1" (click)="clearSearch()">
         <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>

@@ -1,7 +1,7 @@
 import {createActionGroup, emptyProps, props} from '@ngrx/store';
 import {Queue as BLQueue} from '~/business-logic/model/queues/queue';
-import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 export interface Queue extends Omit<BLQueue, 'id'> {
   id: string;
@@ -17,15 +17,14 @@ export const queueActions = createActionGroup({
     'queues table sort changed': props<{ colId: string; isShift: boolean }>(),
     'queues table set sort': props<{ orders: SortMeta[] }>(),
     'clear queue': props<{ queue?: Queue }>(),
-    'refresh selected queue': props<{autoRefresh?: boolean}>(),
-    'set selected queue from server': props<{ queue?: Queue }>(),
+    'fetch queue': props<{id: string, autoRefresh?: boolean}>(),
+    'fetch queue success': props<{ queue?: Queue }>(),
     'delete queue': props<{ queue?: Queue }>(),
     'move experiment to bottom of queue': props<{ task: string }>(),
     'move experiment to top of queue': props<{ task: string }>(),
     'move experiment in queue': props<{ queueId: string; task: string; current: number; previous: number }>(),
     'remove experiment from queue': props<{ task: string }>(),
     'move experiment to other queue': props<{ task: string; queueId: string; queueName: string }>(),
-    'add experiment to queue': props<{ task: string; queueId: string; queueName: string }>(),
     'get stats': props<{ maxPoints?: number }>(),
     'set stats': props<{ data: { wait: Topic[]; length: Topic[] } }>(),
     'reset queues': emptyProps(),

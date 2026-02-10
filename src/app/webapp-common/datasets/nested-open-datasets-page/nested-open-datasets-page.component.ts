@@ -1,7 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {
+  NestedProjectViewPageComponent,
+  ProjectTypeEnum
+} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
-import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {
@@ -29,15 +31,16 @@ import {MatButton} from '@angular/material/button';
     selector: 'sm-nested-open-datasets-page',
     templateUrl: './nested-open-datasets-page.component.html',
     styleUrls: ['../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
-    imports: [
-        ProjectsSharedModule,
-        CircleCounterComponent,
-        ClickStopPropagationDirective,
-        TagListComponent,
-        PushPipe,
-        MatIcon,
-        MatButton
-    ]
+  imports: [
+    CircleCounterComponent,
+    ClickStopPropagationDirective,
+    TagListComponent,
+    PushPipe,
+    MatIcon,
+    MatButton,
+    DatasetEmptyComponent,
+    NestedProjectViewPageComponent
+  ]
 })
 export class NestedOpenDatasetsPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
   entityTypeEnum = ProjectTypeEnum;
@@ -73,9 +76,7 @@ export class NestedOpenDatasetsPageComponent extends ProjectsPageComponent imple
     return [];
   }
 
-  override ngOnInit() {
-    super.ngOnInit();
-    this.store.dispatch(getProjectsTags({entity: 'dataset'}));
+  ngOnInit() {
     // Todo: 1 subscription at base, get function to supply relevant selectors
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
@@ -123,5 +124,9 @@ export class NestedOpenDatasetsPageComponent extends ProjectsPageComponent imple
         }
       }));
     }));
+  }
+
+  override  getProjectsTags(){
+    this.store.dispatch(getProjectsTags({entity: 'dataset', projectId: this.projectId}));
   }
 }

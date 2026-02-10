@@ -28,10 +28,9 @@ import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExR
 import {ITask} from '~/business-logic/model/al-task';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiveManyResponse';
-import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {cloneExtraActions, EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {TasksEnqueueManyResponse} from '~/business-logic/model/tasks/tasksEnqueueManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
-import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
 import {PIPELINE_INFO_ONLY_FIELDS} from '../../pipelines-controller/controllers.consts';
@@ -210,30 +209,51 @@ export class CommonExperimentsMenuEffects {
 
   cloneExperimentRequested$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.cloneExperiment),
-    switchMap(action => this.apiTasks.tasksClone({
-        task: action.originExperiment.id,
-
-        ...(action.cloneData?.project?.value && {new_task_project: action.cloneData.project.value}),
-        new_task_comment: action.cloneData.comment,
-        new_task_name: action.cloneData.name,
-        new_project_name: action.cloneData.newProjectName,
-        ...(action.cloneData.forceParent && {new_task_parent: action.originExperiment.id})
-
-      } as TasksCloneRequest)
-        .pipe(
-          mergeMap((res: TasksCloneResponse) => {
-            return [
-              menuActions.cloneExperimentSuccess({project: action.cloneData.project?.value || res.new_project?.id || '*', task: res.id}),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
+    switchMap(([action, selectedExperiment]) => {
+      if (action.cloneData['forceOriginalPackages'] && action.originExperiment.id !== selectedExperiment?.id) {
+        return this.apiTasks.tasksGetAllEx({
+          id: [action.originExperiment.id],
+          only_fields: ['script.requirements.*']
+        }).pipe(map((res: TasksGetAllExResponse) => [action, res.tasks[0]]))
+      }
+      return of([action, selectedExperiment ?? action.originExperiment]);
+    }),
+    switchMap(([action, experiment]: [ReturnType<typeof menuActions.cloneExperiment>, Task]) => {
+      return this.apiTasks.tasksClone({
+          task: action.originExperiment.id,
+          ...(action.cloneData?.project?.value && {new_task_project: action.cloneData.project.value}),
+          new_task_comment: action.cloneData.comment,
+          new_task_name: action.cloneData.name,
+          new_project_name: action.cloneData.newProjectName,
+          ...(action.cloneData.forceParent && {new_task_parent: action.originExperiment.id}),
+          ...(action.cloneData['forceOriginalPackages'] && {script_overrides: {
+              requirements: {
+                ...((experiment.script.requirements?.pip && experiment.script.requirements.org_pip) &&
+                  {pip: experiment.script.requirements.org_pip}
+                ),
+                ...((experiment.script.requirements?.conda && experiment.script.requirements.org_conda) &&
+                  {conda: experiment.script.requirements.org_conda}
+                ),
+              }
+            }}),
+          ...cloneExtraActions(action.cloneData as unknown)
+        } as TasksCloneRequest)
+          .pipe(
+            mergeMap((res: TasksCloneResponse) => {
+              return [
+                menuActions.cloneExperimentSuccess({project: action.cloneData.project?.value || res.new_project?.id || '*', task: res.id}),
+                deactivateLoader(action.type),
+                ...action.cloneData.newProjectName ? [projectsActions.setDeep({deep: false})] : [],
+              ];
+            }),
+            catchError(error => [
               deactivateLoader(action.type),
-              ...action.cloneData.newProjectName ? [projectsActions.setDeep({deep: false}), getAllSystemProjects()] : [],
-            ];
-          }),
-          catchError(error => [
-            deactivateLoader(action.type),
-            setServerError(error, null, 'Clone Task failed'),
-            requestFailed(error)
-          ])
-        )
+              setServerError(error, null, 'Clone Task failed'),
+              requestFailed(error)
+            ])
+          )
+      }
     )
   ));
 

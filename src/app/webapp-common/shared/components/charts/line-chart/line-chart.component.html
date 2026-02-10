@@ -19,3 +19,26 @@
   [type]="lineChartType"
   [plugins]="lineChartPlugins"
 ></canvas>
+
+@if (tooltipData()) {
+  <div
+    #chartjsTooltip class="tooltip" animate.leave="leaving" animate.enter="enter"
+    [style.left.px]="tooltipData()?.position.x"
+    [style.top.px]="tooltipData()?.position.y"
+  >
+  @if (!hideTooltipTitle()) {
+    <div class="tooltip__title">{{tooltipData()?.title}}</div>
+  }
+    <div class="tooltip__body" [style.--columns]="tooltipData().columns">
+      @for (item of tooltipData()?.dataPoints; track item.datasetIndex) {
+        <div class="tooltip__body__item">
+           <span
+             class="tooltip__body__item__dot" [class.striped]="item.striped"
+             [style.--dot-color]="item.color.backgroundColor"
+           ></span>
+          <span class="tooltip__body__item__key">{{item['overrideTooltipLabel'] ?? item.dataset.label}}:</span> {{item.formattedValue}}
+        </div>
+      }
+    </div>
+  </div>
+}

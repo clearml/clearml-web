@@ -4,8 +4,7 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 @Directive({
   selector : '[smUniqueInListSyncValidator2]',
   providers: [{provide: NG_VALIDATORS, useExisting: UniqueInListSync2ValidatorDirective, multi: true}],
-  standalone: true
-})
+  })
 export class UniqueInListSync2ValidatorDirective implements Validator {
   @Input() prefix2: string;
 

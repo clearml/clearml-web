@@ -4,7 +4,6 @@ import {isEqual} from 'lodash-es';
 
 @Directive({
     selector: '[smTemplateFormSectionBase]',
-    standalone: false
 })
 export abstract class TemplateFormSectionBaseDirective implements ControlValueAccessor {
   @Input() public disabled: boolean;

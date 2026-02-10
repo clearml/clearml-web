@@ -3,8 +3,7 @@ import {last} from 'lodash-es';
 
 @Pipe({
   name: 'isVideo',
-  standalone: true
-})
+  })
 export class IsVideoPipe implements PipeTransform {
   static videoExtensions = ['ogv', 'mp4', 'webm', 'ogg', 'm4v', 'avi', 'mov', 'wmv'];
 

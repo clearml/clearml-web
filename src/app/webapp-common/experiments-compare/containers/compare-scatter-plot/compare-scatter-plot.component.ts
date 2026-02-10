@@ -9,13 +9,22 @@ import domtoimage from 'dom-to-image';
 import {take} from 'rxjs/operators';
 import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
+import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @Component({
-    selector: 'sm-compare-scatter-plot',
-    templateUrl: './compare-scatter-plot.component.html',
-    styleUrls: ['./compare-scatter-plot.component.scss'],
-    standalone: false
+  selector: 'sm-compare-scatter-plot',
+  templateUrl: './compare-scatter-plot.component.html',
+  styleUrls: ['./compare-scatter-plot.component.scss'],
+  imports: [
+    ScatterPlotComponent,
+    MatIconModule,
+    TooltipDirective,
+    MatIconButton
+  ]
 })
 export class CompareScatterPlotComponent {
   private ref = inject(ElementRef);

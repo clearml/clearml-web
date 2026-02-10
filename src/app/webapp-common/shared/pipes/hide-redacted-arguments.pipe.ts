@@ -4,8 +4,7 @@ const SECRET = '****************';
 
 @Pipe({
   name: 'hideRedactedArguments',
-  standalone: true
-})
+  })
 export class HideRedactedArgumentsPipe implements PipeTransform {
 
   transform(value: string, redactedArguments: { key: string }[]): string {

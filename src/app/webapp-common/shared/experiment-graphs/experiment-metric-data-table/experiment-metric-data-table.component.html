@@ -1,14 +1,17 @@
 <mat-drawer-container autosize class="h-100">
   <mat-drawer #drawer [opened]="filterOpen" mode="over" (closedStart)="filterOpen = false" class="mat-elevation-z0">
     <div class="head">
-      <i class="close al-icon al-ico-dialog-x" (click)="drawer.close()" data-id="closeToggleGraph"></i>
+      <button mat-icon-button class="close" (click)="drawer.close()" data-id="closeToggleGraph">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
     </div>
     <div class="list-container">
       <sm-selectable-grouped-filter-list
-        [list]="metricVariantList$() | ngrxPush"
+        [list]="metricVariantList$()"
+        [nested]="true"
         [checkedList]="computedSelectedMetricsScalar()"
         [searchTerm]="listSearchTerm()"
-        (hiddenChanged)="selectedMetricsChanged.emit($event)"
+        (selectedChanged)="selectedMetricsChanged.emit($event)"
         (searchTermChanged)="searchTermChanged($event)"
         >
       </sm-selectable-grouped-filter-list>
@@ -56,16 +59,24 @@
                   <span class="path1"></span><span class="path2"></span>
                 </mat-icon>
               </button>
-              <mat-form-field appearance="outline" class="light-theme mat-light no-bottom">
-                <input #filterRef
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input
+                  #filterRef
                   name="filter"
                   [formControl]="variantFilter"
                   placeholder="Search metric"
                   matInput
                   autocomplete="off">
-                <i matSuffix class="al-icon sm-md search-icon me-2" [class]="variantFilter.value? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-                  (click)="variantFilter.value && clearSearch(); filterRef.focus()"
-                smClickStopPropagation></i>
+                @if (variantFilter.value) {
+                  <button mat-icon-button matSuffix class="search-icon sm-md me-2"
+                          (click)="variantFilter.value && clearSearch(); filterRef.focus()"
+                          smClickStopPropagation
+                  >
+                    <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+                  </button>
+                } @else {
+                  <mat-icon matSuffix fontSet="al" fontIcon="al-ico-search"></mat-icon>
+                }
               </mat-form-field>
             </div>
           </th>

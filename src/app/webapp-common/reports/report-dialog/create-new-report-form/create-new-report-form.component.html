@@ -36,6 +36,9 @@
       @if (errors?.required) {
         <mat-error>Please select project.</mat-error>
       }
+      @else if (errors?.minlength < 0) {
+        <mat-error>Project name can't contain only spaces</mat-error>
+      }
     </div>
   }
 

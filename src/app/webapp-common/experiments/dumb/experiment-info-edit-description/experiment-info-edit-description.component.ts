@@ -5,11 +5,8 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
     selector: 'sm-experiment-info-edit-description',
     templateUrl: './experiment-info-edit-description.component.html',
     styleUrls: ['./experiment-info-edit-description.component.scss'],
-    standalone: false
 })
 export class ExperimentInfoEditDescriptionComponent {
   selectedExperiment = input<IExperimentInfo>();
   editDescription = output();
-
-  public isOpen = false;
 }

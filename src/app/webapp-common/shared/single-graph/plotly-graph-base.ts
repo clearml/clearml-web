@@ -14,7 +14,9 @@ export const Colors = {
     tick: '#9ea1a8',
     legend: '#bfc7d5',
     icon: '#a1c9ff',
-    iconActive: '#fff'
+    iconActive: '#fff',
+    polarbgcolor: 'transparent'
+
   },
   light: {
     font: '#1a1c1e',
@@ -22,7 +24,8 @@ export const Colors = {
     tick: '#666',
     legend: '#666',
     icon: '#0060a8',
-    iconActive: '#00152c'
+    iconActive: '#00152c',
+    polarbgcolor: 'transparent'
   }
 };
 
@@ -86,7 +89,6 @@ export interface ChartPreferences {
 @Component({
   selector: 'sm-base-plotly-graph',
   template: '',
-  standalone: false
 })
 export abstract class PlotlyGraphBaseComponent implements OnDestroy {
 

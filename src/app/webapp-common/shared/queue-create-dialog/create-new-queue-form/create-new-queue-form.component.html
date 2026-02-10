@@ -7,7 +7,11 @@
       @if (errors?.required) {
         Required
       } @else if (errors?.minlength) {
-        Name should contain at least 3 characters
+        @if (errors.minlength > 0) {
+          Name should contain at least 3 characters
+        } @else {
+          Queue name can't contain only spaces
+        }
       } @else if (errors?.uniqueName) {
         Name should be unique
       }

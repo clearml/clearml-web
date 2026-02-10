@@ -56,7 +56,10 @@ export class CommonDashboardEffects {
         ...(hideExamples && {allow_public: false}),
         only_fields: ['name', 'basename', 'company', 'user', 'created', 'default_output_destination']
       }).pipe(
-          mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),
+          mergeMap(({projects}) => [
+            setRecentProjects({projects}),
+            deactivateLoader(action.type)
+          ]),
           catchError(error => [deactivateLoader(action.type), requestFailed(error)])
         )
     )

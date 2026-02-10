@@ -17,7 +17,7 @@
       [class.editor]="editor.editMode"
       [data]="info()"
       [readOnly]="example()"
-      [blockUserScripts]="blockUserScripts$ | ngrxPush"
+      [blockUserScripts]="blockUserScripts()"
       (saveInfo)="saveInfo($event)"
       >
       @if (!example()) {

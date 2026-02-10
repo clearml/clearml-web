@@ -9,13 +9,50 @@ import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem'
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ModelDetail} from '@common/experiments-compare/shared/experiments-compare-details.model';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {PortalComponent} from '@common/shared/portal/portal.component';
+import {
+  CompareCardListComponent
+} from '@common/experiments-compare/dumbs/compare-card-list/compare-card-list.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {PushPipe} from '@ngrx/component';
+import {HideHashPipe} from '@common/shared/pipes/hide-hash.pipe';
+import {HideHashTitlePipe} from '@common/shared/pipes/hide-hash-title.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {CompareCardHeaderDirective} from '@common/experiments-compare/dumbs/compare-card-header.directive';
+import {CompareCardBodyDirective} from '@common/experiments-compare/dumbs/compare-card-body.directive';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-model-compare-details',
   templateUrl: './model-compare-details.component.html',
   styleUrls: ['../experiment-compare-base.component.scss', './model-compare-details.component.scss', '../../cdk-drag.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    ExperimentCompareGeneralDataComponent,
+    PortalComponent,
+    CompareCardListComponent,
+    SearchComponent,
+    MatIconModule,
+    PushPipe,
+    HideHashPipe,
+    HideHashTitlePipe,
+    ShowTooltipIfEllipsisDirective,
+    CompareCardHeaderDirective,
+    CompareCardBodyDirective,
+    TooltipDirective,
+    CdkVirtualScrollViewport,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    MatIconButton
+  ]
 })
 export class ModelCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   override entityType = EntityTypeEnum.model;

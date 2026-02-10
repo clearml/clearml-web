@@ -1,4 +1,4 @@
-<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$ | ngrxPush"></sm-overlay>
 <sm-info-header-status-icon-label
   [status]=" (selectedExperiment())?.status || selectedExperiment()?.status"
 ></sm-info-header-status-icon-label>

@@ -26,7 +26,8 @@ export interface TagColor {
 }
 
 export const getAllSystemProjects = createAction(
-  PROJECTS_PREFIX + 'GET_PROJECTS'
+  PROJECTS_PREFIX + 'GET_PROJECTS',
+  props<{force?: boolean}>()
 );
 
 export const updateProject = createAction(
@@ -103,7 +104,7 @@ export const getCompanyTags = createAction(
 
 export const getProjectsTags = createAction(
   PROJECTS_PREFIX + 'get projects tags',
-  props<{ entity: string }>()
+  props<{ entity: string; projectId?: string }>()
 );
 
 export const setTagsFilterByProject = createAction(

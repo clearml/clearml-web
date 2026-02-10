@@ -9,7 +9,6 @@ import {downloadArtifacts} from '@common/experiments/actions/common-experiments-
 @Component({
     selector: 'sm-base-clickable-artifact',
     template: '<div></div>',
-    standalone: false
 })
 export class BaseClickableArtifactComponent {
   protected timestamp: number;

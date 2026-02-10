@@ -3,8 +3,7 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Pipe({
   name: 'hasExampleItem',
-  standalone: true
-})
+  })
 export class HasExampleItemPipe implements PipeTransform {
 
   transform(value: Array<any>, args?: any): any {

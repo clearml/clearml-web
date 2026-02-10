@@ -14,11 +14,13 @@ import {
 import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
-    selector: 'sm-experiment-info-general',
-    templateUrl: './experiment-info-general.component.html',
-    styleUrls: ['./experiment-info-general.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiment-info-general',
+  templateUrl: './experiment-info-general.component.html',
+  styleUrls: ['./experiment-info-general.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExperimentDetailsComponent
+  ]
 })
 export class ExperimentInfoGeneralComponent {
   protected store = inject(Store);

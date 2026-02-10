@@ -1,4 +1,4 @@
-import {Component, effect, ElementRef, EventEmitter, inject, Output, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, ElementRef, EventEmitter, inject, Output, viewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {fromEvent} from 'rxjs';
@@ -12,12 +12,22 @@ import {throttleTime} from 'rxjs/operators';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {CARDS_IN_ROW} from '../../common-dashboard.const';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
+import {PlusCardComponent} from '@common/shared/ui-components/panel/plus-card/plus-card.component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-dashboard-projects',
-    templateUrl: './dashboard-projects.component.html',
-    styleUrls: ['./dashboard-projects.component.scss'],
-    standalone: false
+  selector: 'sm-dashboard-projects',
+  templateUrl: './dashboard-projects.component.html',
+  styleUrls: ['./dashboard-projects.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ProjectCardComponent,
+    PlusCardComponent,
+    MatIcon,
+    MatButton
+  ]
 })
 export class DashboardProjectsComponent {
   private store = inject(Store);
@@ -49,7 +59,11 @@ export class DashboardProjectsComponent {
 
 
   public projectCardClicked(project: Project) {
-    (project.own_tasks===0 && project.sub_projects.length>0) ? this.router.navigateByUrl(`projects/${project.id}/projects`): this.router.navigateByUrl(`projects/${project.id}`);
+    if (project.own_tasks === 0 && project.sub_projects.length > 0) {
+      this.router.navigateByUrl(`projects/${project.id}/projects`)
+    } else {
+      this.router.navigateByUrl(`projects/${project.id}`);
+    }
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 

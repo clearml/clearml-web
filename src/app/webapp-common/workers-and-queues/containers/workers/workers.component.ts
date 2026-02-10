@@ -11,6 +11,7 @@ import {SplitAreaComponent, SplitComponent} from 'angular-split';
 import {WorkersStatsComponent} from '@common/workers-and-queues/containers/workers-stats/workers-stats.component';
 import {WorkersTableComponent} from '@common/workers-and-queues/dumb/workers-table/workers-table.component';
 import {WorkerInfoComponent} from '@common/workers-and-queues/dumb/worker-info/worker-info.component';
+import {distinctUntilChanged} from "rxjs/operators";
 
 const REFRESH_INTERVAL = 30000;
 
@@ -45,7 +46,7 @@ export class WorkersComponent {
     this.store.dispatch(getWorkers())
     combineLatest([
       interval(REFRESH_INTERVAL),
-      toObservable(this.activeWorker)
+      toObservable(this.activeWorker).pipe(distinctUntilChanged((OW, NW )=> OW?.id=== NW?.id)),
     ])
       .pipe(
         takeUntilDestroyed()

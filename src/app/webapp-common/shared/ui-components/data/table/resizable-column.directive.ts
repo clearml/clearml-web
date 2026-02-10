@@ -15,9 +15,9 @@ export class ResizableColumnDirective extends ResizableColumn implements AfterVi
       this.sub = fromEvent(this.resizer, 'dblclick').subscribe((event: MouseEvent) => {
         const width = this.calcWidth(this.el.nativeElement);
         const delta = width - this.el.nativeElement.offsetWidth;
-        this.dt.onColumnResizeBegin(event);
-        this.dt.onColumnResize({pageX: event.pageX + delta});
-        this.dt.onColumnResizeEnd();
+        this.dataTable.onColumnResizeBegin(event);
+        this.dataTable.onColumnResize({pageX: event.pageX + delta});
+        this.dataTable.onColumnResizeEnd();
       });
     }
   }
@@ -29,7 +29,7 @@ export class ResizableColumnDirective extends ResizableColumn implements AfterVi
 
   private calcWidth(column: HTMLTableHeaderCellElement) {
     const index = column.cellIndex;
-    const table = this.dt;
+    const table = this.dataTable;
     const rows = [...table.el.nativeElement.getElementsByTagName('tr')] as HTMLTableRowElement[];
 
     const dummyContainer = document.createElement('span');

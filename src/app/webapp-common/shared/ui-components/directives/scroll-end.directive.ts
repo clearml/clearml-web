@@ -1,61 +1,76 @@
-import {Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Optional, Output} from '@angular/core';
-
-export enum ScrollEndDirection {
-  down = 'down',
-  up = 'up',
-}
+import {Directive, ElementRef, inject, NgZone, OnDestroy, OnInit, output} from '@angular/core';
 
 @Directive({
-  selector: '[smScrollEnd]',
+  selector: '[smScrollEnd]'
 })
 export class ScrollEndDirective implements OnInit, OnDestroy {
-  @Output() smScrollEnd = new EventEmitter<any>();
+  /**
+   * Emits when the element becomes visible at the bottom of its scrollable container.
+   * This is ideal for triggering "load more" or "infinite scroll" logic.
+   */
+  smScrollEnd = output<number>();
+  private el = inject(ElementRef<HTMLElement>);
+  private ngZone = inject(NgZone);
+  private observer: IntersectionObserver | null = null;
+  private counter = 1;
 
-  @Input() rootMargin = '0px 0px 0px 0px';
-  @Input() desiredDirection: ScrollEndDirection = ScrollEndDirection.down;
+  ngOnInit() {
+    // We run this outside of Angular's zone to avoid triggering
+    // unnecessary change detection on intersection events.
+    this.ngZone.runOutsideAngular(() => {
+      const options: IntersectionObserverInit = {
+        // Use the nearest scrollable ancestor as the root.
+        // If null, the browser's viewport is used.
+        root: this.getScrollableParent(this.el.nativeElement),
+        rootMargin: '0px',
+        // Fire when even 1px of the element becomes visible
+        threshold: 0.01,
+      };
 
-  observer: IntersectionObserver;
-  previousEntry: IntersectionObserverEntry;
-  scrollDirection: ScrollEndDirection;
-
-  constructor(
-    private el: ElementRef,
-    @Optional() private scrollEndRoot: ScrollEndRootDirective,
-  ) {
-  }
-
-  ngOnInit(): void {
-    this.observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        this.scrollDirection = (this.previousEntry?.boundingClientRect.bottom === undefined || this.previousEntry?.boundingClientRect.bottom === 0 || this.previousEntry?.boundingClientRect.bottom > entry.boundingClientRect.bottom)
-          ? ScrollEndDirection.down : ScrollEndDirection.up;
-
-        if (!this.previousEntry?.isIntersecting && entry.isIntersecting && this.scrollDirection === this.desiredDirection) {
-          // TODO: The 'emit' function requires a mandatory any argument
-          this.smScrollEnd.emit();
+      this.observer = new IntersectionObserver(([entry]) => {
+        // entry.isIntersecting is true when the element enters the viewport
+        if (entry.isIntersecting) {
+          this.ngZone.run(() => {
+            this.smScrollEnd.emit(++this.counter);
+          });
         }
+      }, options);
 
-        this.previousEntry = entry;
-      });
-    }, {
-      root: this.scrollEndRoot?.el.nativeElement,
-      rootMargin: this.rootMargin,
+      // Start observing the element this directive is attached to
+      this.observer.observe(this.el.nativeElement);
     });
-
-    this.observer.observe(this.el.nativeElement);
   }
 
-  ngOnDestroy(): void {
-    this.observer.disconnect();
+  ngOnDestroy() {
+    // Clean up the observer when the directive is destroyed
+    this.observer?.disconnect();
   }
-}
 
-@Directive({
-  selector: '[smScrollEndRoot]',
-})
-export class ScrollEndRootDirective {
-  constructor(
-    public el: ElementRef,
-  ) {
+  /**
+   * Traverses up the DOM tree to find the first scrollable parent.
+   * If no scrollable parent is found (or we reach the body/document),
+   * it returns null, which defaults the IntersectionObserver's
+   * root to the browser's viewport.
+   */
+  private getScrollableParent(element: HTMLElement | null): HTMLElement | null {
+    if (!element || element === document.body) {
+      return null;
+    }
+
+    const parent = element.parentElement;
+
+    if (!parent) {
+      return null;
+    }
+
+    const overflowY = window.getComputedStyle(parent).overflowY;
+    const isScrollable = overflowY === 'auto' || overflowY === 'scroll';
+
+    if (isScrollable) {
+      return parent;
+    } else {
+      // Recurse up the tree
+      return this.getScrollableParent(parent);
+    }
   }
 }

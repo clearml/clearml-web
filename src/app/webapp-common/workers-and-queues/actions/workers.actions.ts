@@ -1,7 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {Worker} from '~/business-logic/model/workers/worker';
-import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 const workersPrefix = '[WORKERS] ';
 

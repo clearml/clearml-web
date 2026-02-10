@@ -3,8 +3,8 @@ import {WorkerExt, setWorkers, workersTableSetSort, setSelectedWorker, setStats,
   from '../actions/workers.actions';
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {TIME_INTERVALS} from '../workers-and-queues.consts';
-import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 export interface WorkersState {
   data: WorkerExt[];

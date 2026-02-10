@@ -16,7 +16,7 @@ export const uniqueProjectValidator = (
     const parentControl = control.get<string>('parent');
     const pattern = (parentControl.value && parentControl.value !== 'Projects root' ? `${parentControl.value}/${nameControl.value}` : nameControl.value).trim();
 
-    if (!(nameControl.value?.length > 2) || pattern === allowedPath || nameControl.value === initialValue) {
+    if (!(nameControl.value?.length > 0) || pattern === allowedPath || nameControl.value === initialValue) {
       nameControl.setErrors(null);
       return of(null);
     }

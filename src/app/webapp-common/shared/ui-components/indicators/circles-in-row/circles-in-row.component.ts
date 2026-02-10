@@ -35,7 +35,7 @@ export class CirclesInRowComponent {
 
   limit = input<number>();
   restTooltip= computed(() => {
-    return this.data().slice(this.limit()).map((x) => x.name).join(', ');
+    return this.data().slice(this.limit()).map((x) => x.name).join('\n');
   });
 
   get staggerArray() {

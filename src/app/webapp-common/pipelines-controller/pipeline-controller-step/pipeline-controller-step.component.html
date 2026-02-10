@@ -1,9 +1,9 @@
 <div [id]="stepWithStatus().stepId"
      class="step-container pointer"
      [class.selected]="selected()"
-     [@openClose]="enlarged? 'open': 'closed'"
-     (@openClose.done)="expandG($event)"
+     [class.open]="enlarged()"
      [style.--status-color]="'var(--color-' + stepWithStatus().data.status + '-container)'"
+     (transitionend)="enlargeEnd($event)"
      data-id="stepContainer"
 >
   <div class="step-part step-title" [class.stage-step]="stepWithStatus().data?.isStage">
@@ -20,7 +20,7 @@
         <mat-icon fontSet="al" fontIcon="al-ico-zoom-to-fit"></mat-icon>
       </button>
     } @else {
-      <button class="console-button" mat-icon-button (click)="openConsole.emit()" data-id="stepResultButton">
+      <button class="console-button" mat-icon-button (click)="$event.stopPropagation(); openConsole.emit()" data-id="stepResultButton">
         <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
       </button>
     }

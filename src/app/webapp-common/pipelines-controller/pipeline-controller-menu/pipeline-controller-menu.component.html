@@ -55,6 +55,12 @@
       [companyTags]="companyTags()"
       (tagSelected)="tagSelected.emit($event)">
     </sm-tags-menu>
+    @if (isCompare()) {
+      <button mat-menu-item (click)="openColorPicker($event)" data-id="Palette Option">
+        <mat-icon fontSet="al" [fontIcon]="icons.PALETTE"></mat-icon>
+        <span>Edit Color</span>
+      </button>
+    }
     <button mat-menu-item (click)="restoreArchive(entityTypeEnum.controller)"
             [disabled]="selectedDisableAvailable()[menuItems.archive].disable">
       <mat-icon fontSet="al" [fontIcon]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>

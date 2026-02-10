@@ -5,8 +5,9 @@ import {activeLoader, addMessage, deactivateLoader} from '../core/actions/layout
 import {
   currentPageLoadMoreResults,
   getCurrentPageResults,
-  getEndpoints,
+  getEndpoints, getProjectsTagsOptionsForSearch,
   getResultsCount,
+  getTagsOptionsForSearch,
   loadMoreExperiments,
   loadMoreModels,
   loadMoreOpenDatasets,
@@ -15,7 +16,6 @@ import {
   loadMorePipelines,
   loadMoreProjects,
   loadMoreReports,
-  searchActivate,
   searchExperiments,
   searchLoadMoreDeactivate,
   searchModels,
@@ -27,33 +27,35 @@ import {
   searchStart,
   searchTableFilterChanged,
   setEndpointsResults,
-  setExperimentsResults, setLoadingEndpointsResults,
+  setExperimentsResults,
+  setLoadingEndpointsResults,
   setModelsResults,
   setOpenDatasetsResults,
   setPipelinesResults,
   setProjectsResults,
-  setReportsResults
+  setReportsResults,
+  setSearchProjectsTags
 } from './dashboard-search.actions';
 import {EXPERIMENT_SEARCH_ONLY_FIELDS, SEARCH_PAGE_SIZE} from './dashboard-search.consts';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {Store} from '@ngrx/store';
 import {
-  selectActiveSearch,
-  selectSearchIsAdvance,
+  selectAdvancedSearch,
   selectSearchPages,
-  selectSearchTableFilters,
+  selectSearchProjectsTags,
+  selectTabFilters,
   selectSearchTerm
 } from './dashboard-search.reducer';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {catchError, filter, map, mergeMap, switchMap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap} from 'rxjs';
 import {activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {emptyAction} from '~/app.constants';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {selectCompanyTags, selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {Report} from '~/business-logic/model/reports/report';
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
@@ -65,6 +67,9 @@ import {ApiServingService} from '~/business-logic/api-services/serving.service';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {ErrorService} from '@common/shared/services/error.service';
 import {ServingGetLoadingInstancesResponse} from '~/business-logic/model/serving/servingGetLoadingInstancesResponse';
+import {getCompanyTags} from '@common/core/actions/projects.actions';
+import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
+import {ProjectsGetProjectTagsResponse} from '~/business-logic/model/projects/projectsGetProjectTagsResponse';
 
 
 export const getEntityStatQuery = (action, searchHidden, filters, advanced) => ({
@@ -198,7 +203,7 @@ export class DashboardSearchEffects {
 
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(searchProjects, searchModels, searchExperiments, searchPipelines),
+    ofType(searchProjects, searchModels, searchExperiments, searchPipelines, getCompanyTags, getProjectsTagsOptionsForSearch),
     map(action => activeLoader(action.type))
   ));
 
@@ -210,15 +215,15 @@ export class DashboardSearchEffects {
 
   tableFilterChange = createEffect(() => this.actions.pipe(
     ofType(searchTableFilterChanged),
-    concatLatestFrom(() => this.store.select(selectSearchTableFilters)),
-    switchMap(([action, oldFilters]) => {
-        return [setURLParams({
+    concatLatestFrom(() => this.store.select(selectTabFilters)),
+    map(([action, oldFilters]) => {
+        return setURLParams({
           gsFilters: {
             ...oldFilters,
             ...(action.filter.col === 'myWork' ? {['users']: {value: []}} : {}),
             [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
           }, update: true
-        })];
+        });
       }
     )
   ));
@@ -226,19 +231,10 @@ export class DashboardSearchEffects {
   startSearch = createEffect(() => this.actions.pipe(
     ofType(searchStart, searchSetTableFilters),
     concatLatestFrom(() => [
-      this.store.select(selectActiveSearch),
       this.store.select(selectSearchTerm)
     ]),
     // filter(([, , term]) => term?.query && term.query.length > 0),
-    switchMap(([, active, term]) => {
-      const actionsToFire = [];
-      if (!active) {
-        // actionsToFire.push(searchClear());
-        actionsToFire.push(searchActivate());
-      }
-      actionsToFire.push(getResultsCount(term));
-      return actionsToFire;
-    })
+    map(([, term]) => getResultsCount(term))
   ));
 
   getCurrentPageResults = createEffect(() => this.actions.pipe(
@@ -304,8 +300,8 @@ export class DashboardSearchEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
       this.store.select(selectShowHidden),
-      this.store.select(selectSearchTableFilters),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectTabFilters),
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, user, hideExamples, showHidden, filters, advanced]) =>
       this.projectsApi.projectsGetAllEx({
@@ -334,10 +330,13 @@ export class DashboardSearchEffects {
             }
         ),
       }).pipe(
-        switchMap(res => [setProjectsResults({
-          projects: res.projects,
-          page: [loadMoreProjects.type].includes(action.type) ? (pages[activeSearchLink.projects] || 0) + 1 : 0
-        }), deactivateLoader(action.type)]),
+        switchMap(res => [
+          setProjectsResults({
+            projects: res.projects,
+            page: [loadMoreProjects.type].includes(action.type) ? (pages[activeSearchLink.projects] || 0) + 1 : 0
+          }),
+          deactivateLoader(action.type)
+        ]),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
   ));
 
@@ -347,8 +346,8 @@ export class DashboardSearchEffects {
       this.store.select(selectSearchPages),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchTableFilters),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectTabFilters),
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, user, hideExamples, filters, advanced]) => this.projectsApi.projectsGetAllEx({
       search_hidden: true,
@@ -376,10 +375,13 @@ export class DashboardSearchEffects {
           }
       ),
     }).pipe(
-      mergeMap(res => [setPipelinesResults({
-        pipelines: res.projects,
-        page: [loadMorePipelines.type].includes(action.type) ? (pages[activeSearchLink.pipelines] || 0) + 1 : 0
-      }), deactivateLoader(action.type)]),
+      mergeMap(res => [
+        setPipelinesResults({
+          pipelines: res.projects,
+          page: [loadMorePipelines.type].includes(action.type) ? (pages[activeSearchLink.pipelines] || 0) + 1 : 0
+        }),
+        deactivateLoader(action.type)
+      ]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
   ));
 
@@ -387,10 +389,10 @@ export class DashboardSearchEffects {
     ofType(searchOpenDatasets, loadMoreOpenDatasets),
     concatLatestFrom(() => [
       this.store.select(selectSearchPages),
-      this.store.select(selectSearchTableFilters),
+      this.store.select(selectTabFilters),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, filters, user, hideExamples, advanced]) => this.projectsApi.projectsGetAllEx({
       search_hidden: true,
@@ -421,10 +423,13 @@ export class DashboardSearchEffects {
           }
       ),
     }).pipe(
-      mergeMap(res => [setOpenDatasetsResults({
-        datasets: res.projects,
-        page: [loadMoreOpenDatasets.type].includes(action.type) ? (pages[activeSearchLink.datasets] || 0) + 1 : 0
-      }), deactivateLoader(action.type)]),
+      mergeMap(res => [
+        setOpenDatasetsResults({
+          datasets: res.projects,
+          page: [loadMoreOpenDatasets.type].includes(action.type) ? (pages[activeSearchLink.datasets] || 0) + 1 : 0
+        }),
+        deactivateLoader(action.type)
+      ]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
   ));
 
@@ -433,10 +438,10 @@ export class DashboardSearchEffects {
     ofType(searchModels, loadMoreModels),
     concatLatestFrom(() => [
       this.store.select(selectSearchPages),
-      this.store.select(selectSearchTableFilters),
+      this.store.select(selectTabFilters),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, filters, user, hideExamples, advanced]) => this.modelsApi.modelsGetAllEx({
       system_tags: ['-archived'],
@@ -462,10 +467,13 @@ export class DashboardSearchEffects {
           }
       ),
     }).pipe(
-      mergeMap(res => [setModelsResults({
-        models: res.models,
-        page: [loadMoreModels.type].includes(action.type) ? (pages[activeSearchLink.models] || 0) + 1 : 0
-      }), deactivateLoader(action.type)]),
+      mergeMap(res => [
+        setModelsResults({
+          models: res.models,
+          page: [loadMoreModels.type].includes(action.type) ? (pages[activeSearchLink.models] || 0) + 1 : 0
+        }),
+        deactivateLoader(action.type)
+      ]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
   ));
 
@@ -476,8 +484,8 @@ export class DashboardSearchEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
       this.store.select(selectShowHidden),
-      this.store.select(selectSearchTableFilters),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectTabFilters),
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, user, hideExamples, showHidden, filters, advanced]) => this.experimentsApi.tasksGetAllEx({
       page_size: SEARCH_PAGE_SIZE,
@@ -506,10 +514,13 @@ export class DashboardSearchEffects {
       ),
     })
       .pipe(
-        mergeMap(res => [setExperimentsResults({
-          tasks: res.tasks,
-          page: [loadMoreOpenDatasetsVersions.type, loadMorePipelineRuns.type, loadMoreExperiments.type].includes(action.type) ? (pages[activeSearchLink.experiments] || 0) + 1 : 0
-        }), deactivateLoader(action.type)]),
+        mergeMap(res => [
+          setExperimentsResults({
+            tasks: res.tasks,
+            page: [loadMoreOpenDatasetsVersions.type, loadMorePipelineRuns.type, loadMoreExperiments.type].includes(action.type) ? (pages[activeSearchLink.experiments] || 0) + 1 : 0
+          }),
+          deactivateLoader(action.type)
+        ]),
         catchError(error => [
           deactivateLoader(action.type),
           requestFailed(error),
@@ -520,10 +531,10 @@ export class DashboardSearchEffects {
     ofType(searchReports, loadMoreReports),
     concatLatestFrom(() => [
       this.store.select(selectSearchPages),
-      this.store.select(selectSearchTableFilters),
+      this.store.select(selectTabFilters),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action, pages, filters, user, hideExamples, advanced]) => this.reportsApi.reportsGetAllEx({
       page_size: SEARCH_PAGE_SIZE,
@@ -548,21 +559,24 @@ export class DashboardSearchEffects {
           }
       ),
     }).pipe(
-      mergeMap(res => [setReportsResults({
-        reports: res.tasks,
-        page: [loadMoreReports.type].includes(action.type) ? (pages[activeSearchLink.reports] || 0) + 1 : 0
+      mergeMap(res => [
+        setReportsResults({
+          reports: res.tasks,
+          page: [loadMoreReports.type].includes(action.type) ? (pages[activeSearchLink.reports] || 0) + 1 : 0
 
-      }), deactivateLoader(action.type)]),
+        }),
+        deactivateLoader(action.type)
+      ]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
   ));
 
   getEndpoints = createEffect(() => this.actions.pipe(
     ofType(getEndpoints),
     concatLatestFrom(() => [
-      this.store.select(selectSearchTableFilters),
+      this.store.select(selectTabFilters),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action]) => this.servingApi.servingGetEndpoints({})
       .pipe(
@@ -570,7 +584,7 @@ export class DashboardSearchEffects {
           endpoints: res.endpoints.map(endpoint => ({
             ...endpoint,
             id: uuidv5(endpoint.url, uuidv5.URL)
-          })).sort((a, b)=> (new Date(b.last_update).getTime() - new Date(a.last_update).getTime()))
+          })).sort((a, b) => (new Date(b.last_update).getTime() - new Date(a.last_update).getTime()))
         }), deactivateLoader(action.type)]),
         catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   ));
@@ -578,19 +592,54 @@ export class DashboardSearchEffects {
   getLoadingEndpoints = createEffect(() => this.actions.pipe(
     ofType(getEndpoints),
     concatLatestFrom(() => [
-      this.store.select(selectSearchTableFilters),
+      this.store.select(selectTabFilters),
       this.store.select(selectCurrentUser),
       this.store.select(selectHideExamples),
-      this.store.select(selectSearchIsAdvance)
+      this.store.select(selectAdvancedSearch)
     ]),
     switchMap(([action]) => this.servingApi.servingGetLoadingInstances({})
       .pipe(
-        mergeMap((res: ServingGetLoadingInstancesResponse) => [setLoadingEndpointsResults({
-          instances: res.instances.sort((a, b)=> (new Date(b.last_update).getTime() - new Date(a.last_update).getTime()))
-        }), deactivateLoader(action.type)]),
+        mergeMap((res: ServingGetLoadingInstancesResponse) => [
+          setLoadingEndpointsResults({
+            instances: res.instances.sort((a, b) => (new Date(b.last_update).getTime() - new Date(a.last_update).getTime()))
+          }),
+          deactivateLoader(action.type)
+        ]),
         catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   ));
 
+  getAllCompanyTags = createEffect(() => this.actions.pipe(
+    ofType(getTagsOptionsForSearch),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterQueryParams),
+      this.store.select(selectCompanyTags)
+    ]),
+    filter(([, params, companyTags]) => !['projects'].includes(params?.tab) && companyTags?.length === 0),
+    map(() => getCompanyTags())
+  ));
+
+  getProjectsTags = createEffect(() => this.actions.pipe(
+    ofType(getTagsOptionsForSearch),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterQueryParams),
+      this.store.select(selectSearchProjectsTags)
+    ]),
+    filter(([, params, projectsTags]) => ['projects'].includes(params?.tab) && projectsTags?.length === 0),
+    map(() => getProjectsTagsOptionsForSearch())
+  ));
+
+
+  getProjectsTagsFromAPI = createEffect(() => this.actions.pipe(
+    ofType(getProjectsTagsOptionsForSearch),
+    switchMap((action) =>
+      this.projectsApi.projectsGetProjectTags({filter: {system_tags: ['-pipeline', '-dataset', '-Annotation']}})
+        .pipe(
+          mergeMap((res: ProjectsGetProjectTagsResponse) => [
+            setSearchProjectsTags({tags: res.tags}),
+            deactivateLoader(action.type)
+          ]),
+          catchError((error) => [requestFailed(error),  deactivateLoader(action.type)])))
+  ));
 }
 
 

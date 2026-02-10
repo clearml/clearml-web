@@ -44,17 +44,17 @@
   >
     @if (showMenu()) {
       <mat-slide-toggle
-        @fadeInOut
+        animate.enter="enter" animate.leave="leaving"
         [ngModel]="autoRefreshState()"
         (ngModelChange)="setAutoRefresh.emit($event)"
       >
         <span class="toggle-label" [class.enabled]="autoRefreshState()">AUTO REFRESH</span>
       </mat-slide-toggle>
-      <div @fadeInOut class="dot">•</div>
-      <button @fadeInOut mat-button (click)="refresh()">REFRESH</button>
+      <div class="dot" animate.enter="enter" animate.leave="leaving">•</div>
+      <button mat-button (click)="refresh()" animate.enter="enter" animate.leave="leaving">REFRESH</button>
     }
   </div>
   @if (showMenu()) {
-    <div @fadeInOut class="tip"></div>
+    <div animate.enter="enter" animate.leave="leaving" class="tip"></div>
   }
 </div>

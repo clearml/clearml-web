@@ -31,12 +31,30 @@ import {
 } from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
 import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {ProjectsHeaderComponent} from '@common/projects/dumb/projects-header/projects-header.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-card.component';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButton} from '@angular/material/button';
+import {FormsModule} from '@angular/forms';
 
 @Component({
-    selector: 'sm-pipelines-page',
-    templateUrl: './pipelines-page.component.html',
-    styleUrls: ['./pipelines-page.component.scss'],
-    standalone: false
+  selector: 'sm-pipelines-page',
+  templateUrl: './pipelines-page.component.html',
+  styleUrls: ['./pipelines-page.component.scss'],
+  imports: [
+    ProjectsHeaderComponent,
+    ButtonToggleComponent,
+    PipelineCardComponent,
+    DotsLoadMoreComponent,
+    MatIconModule,
+    PushPipe,
+    MatButton,
+    FormsModule,
+    PipelinesEmptyStateComponent
+  ]
 })
 export class PipelinesPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
   initPipelineCode = `from clearml import PipelineDecorator
@@ -72,8 +90,7 @@ if __name__ == '__main__':
   private mainPageFilterSub: Subscription;
   public isNested$: Observable<boolean>;
 
-  override ngOnInit() {
-    super.ngOnInit();
+  ngOnInit() {
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),

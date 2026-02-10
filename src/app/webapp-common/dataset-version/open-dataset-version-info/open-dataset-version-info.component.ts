@@ -9,16 +9,50 @@ import {CommonExperimentsInfoEffects} from '@common/experiments/effects/common-e
 import {tap} from 'rxjs/operators';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {
+  OpenDatasetVersionContentComponent
+} from '@common/dataset-version/open-dataset-version-content/open-dataset-version-content.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {
+  OpenDatasetVersionDetailsComponent
+} from '@common/dataset-version/open-dataset-version-details/open-dataset-version-details.component';
+import {DatasetVersionStepComponent} from '@common/dataset-version/dataset-version-step/dataset-version-step.component';
+import {
+  ExperimentOutputLogComponent
+} from '@common/experiments/containers/experiment-output-log/experiment-output-log.component';
+import {
+  OpenDatasetVersionPreviewComponent
+} from '@common/dataset-version/open-dataset-version-preview/open-dataset-version-preview.component';
+import {FormsModule} from '@angular/forms';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {ReversePipe} from '@common/shared/pipes/reverse.pipe';
+import {UniqueByPipe} from '@common/shared/pipes/unique-by.pipe';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-open-dataset-version-info',
-    templateUrl: './open-dataset-version-info.component.html',
-    styleUrls: [
-        './open-dataset-version-info.component.scss',
-        '../../pipelines-controller/pipeline-controller-info/pipeline-controller-info.component.scss'
-    ],
-    providers: [DagManagerUnsortedService],
-    standalone: false
+  selector: 'sm-open-dataset-version-info',
+  templateUrl: './open-dataset-version-info.component.html',
+  styleUrls: [
+    './open-dataset-version-info.component.scss',
+    '../../pipelines-controller/pipeline-controller-info/pipeline-controller-info.component.scss'
+  ],
+  providers: [DagManagerUnsortedService],
+  imports: [
+    OpenDatasetVersionContentComponent,
+    ButtonToggleComponent,
+    OpenDatasetVersionDetailsComponent,
+    DatasetVersionStepComponent,
+    ExperimentOutputLogComponent,
+    OpenDatasetVersionPreviewComponent,
+    MatIconModule,
+    FormsModule,
+    MatButton,
+    MatIconButton,
+    ReversePipe,
+    UniqueByPipe,
+    PushPipe
+  ]
 })
 export class OpenDatasetVersionInfoComponent extends PipelineControllerInfoComponent {
       private dialog = inject(MatDialog);

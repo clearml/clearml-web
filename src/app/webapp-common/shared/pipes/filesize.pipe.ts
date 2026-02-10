@@ -15,8 +15,7 @@ export const fileSizeConfigCount = {
 
 @Pipe({
   name: 'filesize',
-  standalone: true
-})
+  })
 export class FileSizePipe implements PipeTransform {
   private static transformOne(value: number, options?: FilesizeOptions): string {
     return filesize(value, options) as string;

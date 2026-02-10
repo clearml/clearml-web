@@ -5,7 +5,7 @@
     modelInfo: modelInfo$ | ngrxPush,
     editable: editable$ | ngrxPush
   }" [ngTemplateOutlet]="selfie" #selfie>
-  <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
+  <sm-overlay [backdropActive]="backdropActive$ | ngrxPush"></sm-overlay>
   @if ((modelInfo?.output?.length) || (modelInfo?.input?.length) || (modelInfo?.artifacts?.length) || editable) {
     <as-split
       class="light-theme"

@@ -48,3 +48,6 @@ export const EXPERIMENTS_TYPE_LABELS = {
 };
 
 export const hideDeleteArtifactsEntities = [EntityTypeEnum.model];
+
+export const cloneExtraToggles = () => ['force original packages'];
+export const cloneExtraActions = (data: unknown) => ({});

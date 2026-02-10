@@ -25,6 +25,7 @@
       [tableCols]="tableCols$ | ngrxPush"
       [noMoreModels]="noMoreModels$ | ngrxPush"
       [users]="users$ |ngrxPush"
+      [currentUserId]="currentUser()?.id"
       [frameworks]="frameworks$ |ngrxPush"
       [tags]="tags$ | ngrxPush"
       [projects]="(projectsOptions$ | ngrxPush)"

@@ -1,6 +1,6 @@
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {setCreationStatus, setQueues, resetState} from './queue-create-dialog.actions';
-import {Queue} from '@common/workers-and-queues/actions/queues.actions';
+import {SelectQueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
 
 export type CreationStatusEnum = 'success' | 'failed' | 'inProgress';
 export const CREATION_STATUS = {
@@ -9,23 +9,23 @@ export const CREATION_STATUS = {
   IN_PROGRESS: 'inProgress' as CreationStatusEnum,
 };
 
-export interface ICreateQueueDialog {
-  queues: Queue[];
+export interface CreateQueueState {
+  queues: SelectQueue[];
   creationStatus: CreationStatusEnum;
 }
 
-const createQueueInitState: ICreateQueueDialog = {
+const createQueueInitState: CreateQueueState = {
   queues        : [],
   creationStatus: null
 };
 
-export const selectCreateQueueDialog = createFeatureSelector<ICreateQueueDialog>('queueCreateDialog');
-export const selectQueues            = createSelector(selectCreateQueueDialog, (state) => state.queues);
-export const selectCreationStatus    = createSelector(selectCreateQueueDialog, (state): CreationStatusEnum => state.creationStatus);
+export const selectCreateQueue = createFeatureSelector<CreateQueueState>('queueCreateDialog');
+export const selectQueues            = createSelector(selectCreateQueue, (state) => state.queues);
+export const selectCreationStatus    = createSelector(selectCreateQueue, (state): CreationStatusEnum => state.creationStatus);
 
 export const queueCreateDialogReducer = createReducer(
   createQueueInitState,
-  on(setQueues, (state, action): ICreateQueueDialog => ({...state, queues: action.queues})),
-  on(setCreationStatus, (state, action): ICreateQueueDialog => ({...state, creationStatus: action.status})),
-  on(resetState, (): ICreateQueueDialog => ({...createQueueInitState})),
+  on(setQueues, (state, action): CreateQueueState => ({...state, queues: action.queues})),
+  on(setCreationStatus, (state, action): CreateQueueState => ({...state, creationStatus: action.status})),
+  on(resetState, (): CreateQueueState => ({...createQueueInitState})),
 );

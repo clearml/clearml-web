@@ -1,4 +1,6 @@
 <div class="table-card" data-id="cardPanel"
+     [style.border-left-color]="color()"
+     [class.item-color]="color()"
      [class.two-columns]="!hasTypeIcon() && !noSelection()"
      [class.no-selection]="noSelection()"
      [class]="{'selected':selected(), 'checked':checked(), 'context-menu-open': activeContextRow()?.id ===rowData()?.id && contextMenuOpen()}">

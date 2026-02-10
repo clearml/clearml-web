@@ -1,7 +1,11 @@
 @if (metricValuesView()) {
-  <sm-experiment-metric-data-table [selectedMetricsScalar]="tableSelectedMetrics()" [lastMetrics]="lastMetricsValues()" (selectedMetricsChanged)="selectedMetricsChanged($event)"></sm-experiment-metric-data-table>
+  <sm-experiment-metric-data-table
+    [selectedMetricsScalar]="tableSelectedMetrics()"
+    [lastMetrics]="lastMetricsValues()"
+    (selectedMetricsChanged)="selectedMetricsChanged($event)"
+  ></sm-experiment-metric-data-table>
 } @else {
-  <mat-drawer-container autosize class="light-theme">
+  <mat-drawer-container [hasBackdrop]="false" autosize class="light-theme">
     <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
       <div class="list-container">
         @if (!minimized) {
@@ -29,10 +33,11 @@
 
         <sm-selectable-grouped-filter-list
           [list]="scalarList()"
+          [nested]="groupBy() === 'none'"
           [checkedList]="selectedMetrics()"
           [searchTerm]="searchTerm()"
           (itemSelect)="metricSelected($event)"
-          (hiddenChanged)="hiddenListChanged($event)"
+          (selectedChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
         @if (minimized) {

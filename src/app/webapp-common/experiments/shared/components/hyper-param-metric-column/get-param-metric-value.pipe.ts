@@ -7,8 +7,7 @@ import {decodeHyperParam} from '@common/shared/utils/tableParamEncode';
 
 @Pipe({
   name: 'getParamMetricValue',
-  standalone: true
-})
+  })
 export class GetParamMetricValuePipe implements PipeTransform {
 
   transform(col: ISmCol, experiment: ITask, roundedMetricValue: any) {

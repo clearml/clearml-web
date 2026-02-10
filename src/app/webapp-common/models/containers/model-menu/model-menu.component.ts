@@ -38,13 +38,26 @@ import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {Project} from '~/business-logic/model/projects/project';
+import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
+import {MatIconButton} from '@angular/material/button';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @Component({
-    selector: 'sm-model-menu',
-    templateUrl: './model-menu.component.html',
-    styleUrls: ['./model-menu.component.scss'],
-    standalone: false
+  selector: 'sm-model-menu',
+  templateUrl: './model-menu.component.html',
+  styleUrls: ['./model-menu.component.scss'],
+  imports: [
+    TagsMenuComponent,
+    MatIconModule,
+    MatIconButton,
+    MatMenuTrigger,
+    MatMenuItem,
+    MatMenu,
+    MenuItemTextPipe
+  ]
 })
 export class ModelMenuComponent extends BaseContextMenuComponent {
   protected dialog = inject(MatDialog);

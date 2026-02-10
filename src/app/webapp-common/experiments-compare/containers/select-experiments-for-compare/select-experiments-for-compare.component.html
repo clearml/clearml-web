@@ -1,17 +1,13 @@
 <sm-dialog-template [header]="'Select compared '+ data.entityType + 's'">
   <div class="select-experiments-container light-theme" (click)="closeSearch()">
     <div class="search-experiment-for-compare d-flex justify-content-between mb-3">
-      <mat-form-field appearance="outline" class="no-bottom thin" style="width: 450px" smClickStopPropagation>
-        <input
-          #searchExperiments
-          matInput
-          name="search-experiments"
-          autocomplete="off"
-          smClickStopPropagation
-          placeholder="Start typing {{data.entityType}} name or ID to add to your comparison"
-          (input)="searchTermChanged(searchExperiments.value)"
-        >
-      </mat-form-field>
+      <sm-search
+        #search
+        class="search outline"
+        placeholder="Start typing task name or ID to add to your comparison"
+        [value]="searchTerm()"
+        (valueChanged)="searchTermChanged($event)">
+      </sm-search>
       <div class="d-flex-center">
         <mat-slide-toggle
           class="me-2"
@@ -27,6 +23,7 @@
     <div class="hide-table show-table">
       <sm-experiments-table
         class="align-self-stretch"
+        [currentUserId]="currentUser()?.id"
         [selectionReachedLimit]="reachedCompareLimit"
         [selectionMode]="null"
         [reorderableColumns]="false"

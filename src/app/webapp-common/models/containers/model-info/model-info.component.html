@@ -29,13 +29,13 @@
          @if (routerConfig().includes('scalars')) {
            <div class="table-graph-toggle" [class.maximized]="!minimized">
              <button mat-icon-button (click)="toggleTableView()"
-                     [smTooltip]="(metricValuesView$ | async) === false ? 'Metric values': 'Graphs'"
+                     [smTooltip]="(metricValuesView$ | ngrxPush) === false ? 'Metric values': 'Graphs'"
              >
-               <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon>
+               <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | ngrxPush)===false? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon>
              </button>
           </div>
          }
-         @if ((metricValuesView$ | async) === false && routerConfig().includes('scalars') && minimized) {
+         @if ((metricValuesView$ | ngrxPush) === false && routerConfig().includes('scalars') && minimized) {
           <button mat-icon-button data-id="scalar settings" [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
             <mat-icon fontSet="al" fontIcon="al-ico-tune"></mat-icon>
           </button>

@@ -13,13 +13,13 @@ import {
   servingTableCols,
   sortAndFilterEndpoints
 } from '@common/serving/serving.consts';
-import {Topic} from '@common/shared/utils/statistics';
 import {ServingGetEndpointDetailsResponse} from '~/business-logic/model/serving/servingGetEndpointDetailsResponse';
 import {TIME_INTERVALS} from '@common/workers-and-queues/workers-and-queues.consts';
 import {ServingGetEndpointMetricsHistoryRequest} from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryRequest';
 import MetricTypeEnum = ServingGetEndpointMetricsHistoryRequest.MetricTypeEnum;
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 export const servingFeatureKey = 'serving';
 
