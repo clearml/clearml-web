@@ -30,12 +30,60 @@ import {
 import {
   ClearInstalledPackagesDialogComponent
 } from '@common/experiments/dumb/clear-installed-packges-dialog/clear-installed-packages-dialog.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
+import {ExperimentsModule} from '~/features/experiments/experiments.module';
+import {MatFormField} from '@angular/material/form-field';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
+import {PushPipe} from '@ngrx/component';
+import {HideRedactedArgumentsPipe} from '@common/shared/pipes/hide-redacted-arguments.pipe';
+import {NgTemplateOutlet, UpperCasePipe} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MatListModule} from '@angular/material/list';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatButton} from '@angular/material/button';
+import {MatInput} from '@angular/material/input';
 
 @Component({
-    selector: 'sm-experiment-info-execution',
-    templateUrl: './experiment-info-execution.component.html',
-    styleUrls: ['./experiment-info-execution.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-info-execution',
+  templateUrl: './experiment-info-execution.component.html',
+  styleUrls: ['./experiment-info-execution.component.scss'],
+  imports: [
+    EditableSectionComponent,
+    OverlayComponent,
+    ScrollTextareaComponent,
+    LabeledRowComponent,
+    SectionHeaderComponent,
+    ExperimentsModule,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatSidenavContainer,
+    MatSidenav,
+    MatSidenavContent,
+    PushPipe,
+    HideRedactedArgumentsPipe,
+    UpperCasePipe,
+    FormsModule,
+    MatListModule,
+    ExperimentExecutionSourceCodeComponent,
+    NgTemplateOutlet,
+    NgTemplateOutlet,
+    TooltipDirective,
+    MatButton,
+    MatButton,
+    MatButton,
+    MatButton,
+    MatButton,
+    MatButton,
+    MatInput,
+    MatInput,
+    MatInput,
+    MatInput
+  ]
 })
 export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 

@@ -20,13 +20,38 @@ import {
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {selectModelsTags} from '@common/models/reducers';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
+import {ModelMenuExtendedComponent} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
 
 @Component({
-    selector: 'sm-model-info-header',
-    templateUrl: './model-info-header.component.html',
-    styleUrls: ['./model-info-header.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-model-info-header',
+  templateUrl: './model-info-header.component.html',
+  styleUrls: ['./model-info-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TagsMenuComponent,
+    ModelMenuExtendedComponent,
+    TagListComponent,
+    InlineEditComponent,
+    IdBadgeComponent,
+    OverlayComponent,
+    MatIconModule,
+    MatMenuTrigger,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    MatIconButton,
+    PushPipe
+  ]
 })
 export class ModelInfoHeaderComponent {
   private store = inject(Store);

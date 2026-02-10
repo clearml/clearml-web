@@ -32,8 +32,8 @@ import {
   PaginatedEntitySelectorComponent
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
 import {Store} from '@ngrx/store';
-import {selectQueuesList} from '@common/experiments/shared/components/select-queue/select-queue.reducer';
-import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {selectQueueFeature} from '@common/experiments/shared/components/select-queue/select-queue.reducer';
+import {NgTemplateOutlet} from '@angular/common';
 import {MatDialogRef} from '@angular/material/dialog';
 import {getQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -51,6 +51,7 @@ import {containedInList} from '@common/shared/validators/containedInList.validat
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {TaskTypeOptions} from '~/features/dashboard-search/dashboard-search.consts';
+import {EXPERIMENTS_TYPE_LABELS} from '~/shared/constants/non-common-consts';
 
 const venvOptions = [
   {label: 'Discover', value: 'discover'},
@@ -95,10 +96,10 @@ type ScriptType = typeof scriptTypes[number];
 
 
 @Component({
-    selector: 'sm-create-experiment-dialog',
-    templateUrl: './create-experiment-dialog.component.html',
-    styleUrl: './create-experiment-dialog.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'sm-create-experiment-dialog',
+  templateUrl: './create-experiment-dialog.component.html',
+  styleUrl: './create-experiment-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatStepper,
     MatStep,
@@ -128,13 +129,13 @@ type ScriptType = typeof scriptTypes[number];
     ButtonToggleComponent,
     MatSelectTrigger,
   ],
-    providers: [
-        {
-            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-            useValue: { subscriptSizing: 'dynamic', appearance: 'outline', floatLabel: 'always' } as MatFormFieldDefaultOptions
-        },
-        { provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: { disabled: true } as RippleGlobalOptions }
-    ]
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { subscriptSizing: 'dynamic', appearance: 'outline', floatLabel: 'always' } as MatFormFieldDefaultOptions
+    },
+    { provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: { disabled: true } as RippleGlobalOptions }
+  ]
 })
 export class CreateExperimentDialogComponent {
   private readonly formBuilder = inject(FormBuilder);
@@ -142,12 +143,10 @@ export class CreateExperimentDialogComponent {
   private readonly dialog = inject(MatDialogRef);
   protected readonly venvOptions = venvOptions;
 
-  private readonly titleCase = new TitleCasePipe;
-
   private codeForm = viewChild<ElementRef<HTMLFormElement>>('codeForm');
   private codeEditor = viewChild(CodeEditorComponent);
 
-  protected queues = this.store.selectSignal(selectQueuesList);
+  protected queues = this.store.selectSignal(selectQueueFeature.selectQueues);
   private queueNames = computed(() => this.queues()?.map(q => q.name));
   protected filteredQueues = computed(() => this.queueVal() ?
       this.queues()
@@ -157,7 +156,7 @@ export class CreateExperimentDialogComponent {
 
   protected taskTypes = TaskTypeOptions.map(value => ({
     value,
-    label:  this.titleCase.transform(value.replace('_', ' ')),
+    label: EXPERIMENTS_TYPE_LABELS[value],
     icon: `al-ico-type-${value ? (value.toString()).replace('_', '-') : 'training'}`
   }));
 
@@ -173,7 +172,7 @@ export class CreateExperimentDialogComponent {
     taskType: ['training' as TaskTypeEnum],
     repo: [null as string],
     type: ['branch'],
-    branch: ['master'],
+    branch: ['main'],
     commit: [null],
     tag: [null],
     directory: ['.', Validators.required],

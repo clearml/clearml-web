@@ -28,6 +28,7 @@ import {
 } from './items.utils';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {
+  getAllSystemProjects,
   getTablesFilterProjectsOptions,
   resetProjectSelection, resetTablesFilterProjectsOptions,
   setTablesFilterProjectsOptions
@@ -46,11 +47,11 @@ import {HeaderMenuService} from '~/shared/services/header-menu.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {concatLatestFrom} from '@ngrx/operators';
 import {resetTablesFilterParentsOptions} from '@common/experiments/actions/common-experiments-view.actions';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 
 @Component({
   selector: 'sm-base-entity-page',
   template: '',
-  standalone: false
 })
 export abstract class BaseEntityPageComponent implements OnDestroy {
   protected store = inject(Store);
@@ -75,6 +76,7 @@ export abstract class BaseEntityPageComponent implements OnDestroy {
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
   protected users = this.store.selectSignal(selectSelectedProjectUsers);
+  protected currentUser = this.store.selectSignal(selectCurrentUser);
   protected projectsOptions = this.store.selectSignal(selectTablesFilterProjectsOptions);
   protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
   protected projectDeepMode = this.store.selectSignal(selectIsDeepMode);
@@ -114,6 +116,8 @@ export abstract class BaseEntityPageComponent implements OnDestroy {
   };
 
   protected constructor() {
+    this.store.dispatch(getAllSystemProjects({}));
+
     effect(() => {
       if (this.tableMode) {
         this.shouldOpenDetails = this.tableMode() !== 'table';

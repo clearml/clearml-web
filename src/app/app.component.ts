@@ -82,7 +82,7 @@ export class AppComponent {
         distinctUntilChanged((prev, next) => prev?.id === next?.id)
       )
       .subscribe(() => {
-        this.store.dispatch(getAllSystemProjects());
+        this.store.dispatch(getAllSystemProjects({}));
         this.store.dispatch(getTutorialBucketCredentials());
         this.store.dispatch(termsOfUseAccepted());
         this.uiUpdatesService.checkForUiUpdate();

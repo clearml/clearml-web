@@ -8,8 +8,7 @@ import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[appendComponentOnTopElement]',
-  standalone: true
-})
+  })
 export class AppendComponentOnTopElementDirective implements OnDestroy, AfterViewInit {
   private timer: number;
   @Input() set componentToAppend(componentToAppend: any) {

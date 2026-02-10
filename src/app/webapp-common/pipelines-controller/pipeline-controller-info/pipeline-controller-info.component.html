@@ -9,7 +9,7 @@
 <sm-pipeline-info [entity]="selected$ | ngrxPush" [project]="projectId$ | ngrxPush" [step]="selectedEntity()" data-id="pipelineInfo"></sm-pipeline-info>
 
 <div class="console-button">
-    <button mat-flat-button (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
+    <button mat-flat-button (click)="openLog()" data-id="consoleDetailsButton">
       <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
       DETAILS
     </button>
@@ -27,8 +27,7 @@
 <div
   #diagramContainer
   class="pipeline-container"
-  [@shrinkRegular]="shrink? 'shrink': 'regular'"
-  (@shrinkRegular.done)="shrinkDone($event)"
+  [class.enter]="shrink()"
   tabindex="1"
   [class.extend]="showLog()"
   (click)="selectStep()"
@@ -44,10 +43,9 @@
             [step]="step"
             [selected]="selectedEntity()?.id === step?.id"
             (click)="$event.stopPropagation(); !taskEl.selected() && selectStep(step)"
-            (openConsole)="openLog()"
+            (openConsole)="openLog(step)"
             (expandStage)="expandStage(step)"
             (expandStageAnimationStarted)="expandStageAnimationStarted()"
-
           ></sm-pipeline-controller-step>
         }
       </div>
@@ -96,7 +94,7 @@
         <button mat-icon-button (click)="toggleResultSize()" data-id="maxResultPanel">
           <mat-icon fontSet="al" [fontIcon]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'"></mat-icon>
         </button>
-        <button mat-icon-button (click)="openLog(false)" data-id="closeResultPanel">
+        <button mat-icon-button (click)="showLog.set(false)" data-id="closeResultPanel">
           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
         </button>
       </div>
@@ -111,6 +109,7 @@
         @case (statusOption.log) {
           <sm-experiment-output-log
             [experiment]="selected$ | ngrxPush"
+            [step]="selectedEntity()"
             [showHeader]="false"
           ></sm-experiment-output-log>
         }

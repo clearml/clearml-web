@@ -7,13 +7,13 @@ import {
 } from '@angular/core';
 import {MatMenu, MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {MatInputModule} from '@angular/material/input';
+import {MatInput, MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
 
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {MatIcon} from '@angular/material/icon';
+import {MatIconModule} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
@@ -21,18 +21,18 @@ import {MatButton, MatIconButton} from '@angular/material/button';
     templateUrl: './menu.component.html',
     styleUrls: ['./menu.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        MatMenuModule,
-        TooltipDirective,
-        MatInputModule,
-        FormsModule,
-        MatListModule,
-        ClickStopPropagationDirective,
-        ShowTooltipIfEllipsisDirective,
-        MatIcon,
-        MatIconButton,
-        MatButton
-    ]
+  imports: [
+    MatMenuModule,
+    TooltipDirective,
+    MatInputModule,
+    FormsModule,
+    MatListModule,
+    ClickStopPropagationDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconModule,
+    MatIconButton,
+    MatButton,
+  ]
 })
 export class MenuComponent {
   private renderer = inject(Renderer2);
@@ -60,6 +60,7 @@ export class MenuComponent {
   searchValueChanged = output<string>();
   trigger = viewChild(MatMenuTrigger);
   menu = viewChild(MatMenu);
+  searchInput = viewChild(MatInput);
 
   @HostListener('document:click', ['$event'])
   clickOut(event: MouseEvent) {
@@ -98,5 +99,10 @@ export class MenuComponent {
   clearSearch() {
     this.searchValue.set('');
     this.searchValueChanged.emit('');
+  }
+  focusInputIfNeeded(){
+    if(this.enableSearch()){
+      this.searchInput().focus();
+    }
   }
 }

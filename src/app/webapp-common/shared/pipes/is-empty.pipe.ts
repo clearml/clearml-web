@@ -3,8 +3,7 @@ import {isEmpty} from 'lodash-es';
 
 @Pipe({
   name: 'isEmpty',
-  standalone: true
-})
+  })
 export class IsEmptyPipe implements PipeTransform {
 
   transform(value: unknown): unknown {

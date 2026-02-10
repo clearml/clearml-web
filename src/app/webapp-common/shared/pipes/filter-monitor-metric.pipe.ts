@@ -3,8 +3,7 @@ import {MetricVariantResult} from '~/business-logic/model/projects/metricVariant
 
 @Pipe({
   name: 'filterMonitorMetric',
-  standalone: true
-})
+  })
 export class FilterMonitorMetricPipe implements PipeTransform {
 
   transform(value: {key: string; value: MetricVariantResult}[]) {

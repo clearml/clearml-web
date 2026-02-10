@@ -11,6 +11,7 @@ import {SafeHtmlPipe} from 'primeng/menu';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 import {FormsModule} from '@angular/forms';
 import {explicitEffect} from 'ngxtension/explicit-effect';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -76,19 +77,21 @@ export class HeaderNavbarTabsComponent {
     });
 
 
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.lastKnownGoodIndex = this.getCurrentTabIndexFromRoute();
-        this.lastKnownGoodContextTabs = this.contextNavbar();
-      } else if (event instanceof NavigationCancel && event.code === NavigationCancellationCode.GuardRejected) {
-        if (this.lastKnownGoodContextTabs && (this.tabGroup()?.selectedIndex !== this.lastKnownGoodIndex || this.lastKnownGoodContextTabs?.length !== this.contextNavbar()?.length)) {
-          this.store.dispatch(headerActions.setTabs({
-            contextMenu: this.lastKnownGoodContextTabs,
-            active: this.lastKnownGoodContextTabs?.[this.lastKnownGoodIndex]?.header
-          }));
+    this.router.events
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.lastKnownGoodIndex = this.getCurrentTabIndexFromRoute();
+          this.lastKnownGoodContextTabs = this.contextNavbar();
+        } else if (event instanceof NavigationCancel && event.code === NavigationCancellationCode.GuardRejected) {
+          if (this.lastKnownGoodContextTabs && (this.tabGroup()?.selectedIndex !== this.lastKnownGoodIndex || this.lastKnownGoodContextTabs?.length !== this.contextNavbar()?.length)) {
+            this.store.dispatch(headerActions.setTabs({
+              contextMenu: this.lastKnownGoodContextTabs,
+              active: this.lastKnownGoodContextTabs?.[this.lastKnownGoodIndex]?.header
+            }));
+          }
         }
-      }
-    });
+      });
   }
 
   getCurrentTabIndexFromRoute(): number {

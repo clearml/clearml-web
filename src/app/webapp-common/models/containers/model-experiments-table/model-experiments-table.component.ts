@@ -1,7 +1,6 @@
-import {Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, effect, EventEmitter, inject, OnDestroy, viewChild, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {
   selectExperimentsList,
@@ -17,7 +16,6 @@ import * as experimentsActions from '../../../experiments/actions/common-experim
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
-import {FilterMetadata} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {
@@ -25,7 +23,14 @@ import {
   modelsExperimentsTableClearAllFilters
 } from '@common/models/actions/models-info.actions';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {MatInput} from '@angular/material/input';
+import {MatFormField, MatInput} from '@angular/material/input';
+import {
+  ClearFiltersButtonComponent
+} from '@common/shared/components/clear-filters-button/clear-filters-button.component';
+import {FormsModule} from '@angular/forms';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {PushPipe} from '@ngrx/component';
+import {selectModelId} from '@common/models/reducers';
 
 export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
   {
@@ -64,55 +69,60 @@ export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
 ];
 
 @Component({
-    selector: 'sm-model-experiments-table',
-    templateUrl: './model-experiments-table.component.html',
-    styleUrls: ['./model-experiments-table.component.scss'],
-    standalone: false
+  selector: 'sm-model-experiments-table',
+  templateUrl: './model-experiments-table.component.html',
+  styleUrls: ['./model-experiments-table.component.scss'],
+  imports: [
+    ExperimentsTableComponent,
+    ClearFiltersButtonComponent,
+    MatFormField,
+    MatInput,
+    FormsModule,
+    ClickStopPropagationDirective,
+    ClickStopPropagationDirective,
+    PushPipe
+  ]
 })
-export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
+export class ModelExperimentsTableComponent implements OnDestroy {
+  private store = inject(Store);
   public tableCols = INITIAL_MODEL_EXPERIMENTS_TABLE_COLS;
   public entityTypes = EntityTypeEnum;
   private paramsSubscription: Subscription;
-  public experiments$: Observable<IExperimentInfo[]>;
-  public tableFilters$: Observable<Record<string, FilterMetadata>>;
   public tags$: Observable<string[]>;
-  public systemTags$: Observable<string[]>;
-  public noMoreExperiments$: Observable<boolean>;
   public tableSortFields$: Observable<SortMeta[]>;
   selectedExperiment: IExperimentInfo;
   private _resizedCols = {} as Record<string, string>;
   private resizedCols$ = new BehaviorSubject<Record<string, string>>(this._resizedCols);
   @ViewChild('searchExperiments', {static: true}) searchExperiments: MatInput;
-  @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
+  private table = viewChild(ExperimentsTableComponent);
   private modelId: string;
   public tags: string[];
   private initTags: boolean;
-  public searchTerm$: Observable<{ query: string; regExp?: boolean; original?: string }>;
   protected splitSize = this.store.selectSignal(selectSplitSize);
+  protected experiments$ = this.store.select(selectExperimentsList);
+  protected searchTerm$ = this.store.select(selectGlobalFilter);
 
-  constructor(
-    private store: Store,
-  ) {
+  protected tableFilters$ = this.store.select(selectTableFilters)
+    .pipe(
+      map(filtersObj =>
+        Object.fromEntries(Object.entries(filtersObj).filter(([key]) => key !== 'models.input.model'))
+      )
+    );
+  protected systemTags$ = this.store.select(selectProjectSystemTags);
+  protected noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
+
+  constructor() {
     this.resizedCols$.next(this._resizedCols);
-    this.experiments$ = this.store.select(selectExperimentsList);
-    this.searchTerm$ = this.store.select(selectGlobalFilter);
 
-    this.tableFilters$ = this.store.select(selectTableFilters)
-      .pipe(map(filtersObj => Object.fromEntries(Object.entries(filtersObj).filter(([key]) => key !== 'models.input.model'))));
-    this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
-  }
+    effect(() => {
+      if (this.table()?.table()) {
+        this.table().table().rowRightClick = new EventEmitter();
+      }
+    });
 
-  public searchTermChanged(term: string) {
-    this.store.dispatch(experimentsActions.globalFilterChanged({query: term}));
-  }
-
-  ngOnInit() {
-    window.setTimeout(() => this.table.table().rowRightClick = new EventEmitter());
-    this.paramsSubscription = this.store.select(selectRouterParams)
+    this.paramsSubscription = this.store.select(selectModelId)
       .pipe(
         debounceTime(150),
-        map(params => params?.modelId),
         filter(modelId => !!modelId),
         distinctUntilChanged()
       )
@@ -123,10 +133,17 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
         this.searchTermChanged('');
         this.filterChanged({col: {id: 'models.input.model'}, value: modelId, andFilter: false});
       });
-    this.experiments$.pipe(filter(() => this.initTags)).subscribe(experiments => {
-      this.tags = uniq(experiments?.map(exp => exp.tags).flat());
-      this.initTags = false;
-    });
+
+    this.experiments$
+      .pipe(filter(() => this.initTags))
+      .subscribe(experiments => {
+        this.tags = uniq(experiments?.map(exp => exp.tags).flat());
+        this.initTags = false;
+      });
+  }
+
+  public searchTermChanged(term: string) {
+    this.store.dispatch(experimentsActions.globalFilterChanged({query: term}));
   }
 
   ngOnDestroy(): void {

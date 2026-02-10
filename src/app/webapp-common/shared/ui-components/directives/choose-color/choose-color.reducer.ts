@@ -26,9 +26,11 @@ export const selectColorPickerProps = createSelector(colors, state => state.pick
 
 const reducer = createReducer(
   initialState,
-  on(addUpdateColorPreferences, (state, action) => ({...state, colorPreferences: {...state.colorPreferences, ...action}})),
-  on(showColorPicker, (state , action) => ({...state, pickerProps: action})),
-  on(closeColorPicker, (state , action) => ({...state, pickerProps: null}))
+  on(addUpdateColorPreferences, (state, action): ColorPreferenceState =>
+    ({...state, colorPreferences: {...state.colorPreferences, ...action}})),
+  on(showColorPicker, (state , action): ColorPreferenceState =>
+    ({...state, pickerProps: action})),
+  on(closeColorPicker, (state): ColorPreferenceState => ({...state, pickerProps: null}))
 );
 
 export const colorPreferenceReducer = (state: ColorPreferenceState | undefined, action: Action) => reducer(state, action);

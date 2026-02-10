@@ -1,14 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed, effect,
+  computed,
+  effect,
   OnDestroy,
   signal,
   viewChild
 } from '@angular/core';
 import {
   selectActiveParentsFilter,
-  selectCompareSelectedMetrics, selectCustomColumns,
+  selectCompareSelectedMetrics,
+  selectCustomColumns,
   selectExperimentsList,
   selectExperimentsParents,
   selectExperimentsTableColsOrder,
@@ -35,14 +37,15 @@ import {
 } from './reducers';
 import {
   selectCompanyTags,
-  selectProjectSystemTags, selectRouterProjectId,
+  selectProjectSystemTags,
+  selectRouterProjectId,
   selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {isEqual} from 'lodash-es';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {distinctUntilChanged, filter, map, skip, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, tap} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
 import {selectBackdropActive} from '../core/reducers/view.reducer';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
@@ -50,7 +53,12 @@ import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import * as experimentsActions from './actions/common-experiments-view.actions';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
-import {getProjectUsers, setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
+import {
+  getProjectUsers,
+  setArchive as setProjectArchive,
+  setBreadcrumbsOptions,
+  setDeep
+} from '../core/actions/projects.actions';
 import {
   createCompareMetricColumn,
   createMetricColumn,
@@ -64,7 +72,7 @@ import {groupHyperParams} from '../shared/utils/shared-utils';
 import {
   ProjectsGetTaskParentsResponseParents
 } from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
-import {SortMeta} from 'primeng/api';
+import {FilterMetadata, SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ShowItemsFooterSelected} from '../shared/entity-page/footer-items/show-items-footer-selected';
 import {CompareFooterItem} from '../shared/entity-page/footer-items/compare-footer-item';
@@ -98,7 +106,6 @@ import {
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
-import {FilterMetadata} from 'primeng/api';
 import {encodeHyperParameter, filterArchivedExperiments} from './shared/common-experiments.utils';
 import {AbortAllChildrenFooterItem} from '../shared/entity-page/footer-items/abort-all-footer-item';
 import {
@@ -121,14 +128,37 @@ import {setExperiment} from '@common/experiments/actions/common-experiments-info
 import {selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 import {distinctParamsUntilChanged$} from '@common/projects/common-projects.utils';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {RouterOutlet} from '@angular/router';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {concatLatestFrom} from '@ngrx/operators';
 
 
 @Component({
-    selector: 'sm-common-experiments',
-    templateUrl: './experiments.component.html',
-    styleUrls: ['./experiments.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-common-experiments',
+  templateUrl: './experiments.component.html',
+  styleUrls: ['./experiments.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SplitComponent,
+    SplitAreaComponent,
+    RouterOutlet,
+    ExperimentsTableComponent,
+    ExperimentMenuExtendedComponent,
+    OverlayComponent,
+    ExperimentHeaderComponent,
+    EntityFooterComponent,
+    MatIconModule,
+    PushPipe,
+    TooltipDirective,
+    MatButton
+  ]
 })
 export class ExperimentsComponent extends BaseEntityPageComponent implements OnDestroy {
   protected get tableCols() {
@@ -176,11 +206,15 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   protected hyperParams$ = this.store.select(selectHyperParamsVariants).pipe(
     map(hyperParams => groupHyperParams(hyperParams.filter(hp => hp.section !== 'properties' || hp.name !== 'version')))
   );
-  protected experiments$ = this.store.select(selectExperimentsList)
+
+  protected experiments$ = combineLatest([
+    this.store.select(selectExperimentsList)
+  ])
     .pipe(
-      filter(experiments => experiments !== null),
+      filter(([experiments, ]) => experiments !== null),
       // lil hack for hiding archived task after they have been archived from task info or footer...
-      map((experiments) => filterArchivedExperiments(experiments, this.inArchivedMode())));
+      map(([experiments, ]) => filterArchivedExperiments(experiments, this.inArchivedMode()))
+    );
 
   protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
 
@@ -190,7 +224,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     map(cols => cols.filter(col => !col.hidden))
   );
   override tableMode = this.store.selectSignal(selectTableMode);
-    // .pipe(tap(tableMode => this.tableMode = tableMode));
+  // .pipe(tap(tableMode => this.tableMode = tableMode));
   protected showCompareScalarSettings$ = this.store.select(selectShowCompareScalarSettings);
   protected compareSelectedMetricsScalars$ = this.store.select(selectCompareSelectedMetrics('scalars'));
   protected compareSelectedMetricsPlots$ = this.store.select(selectCompareSelectedMetrics('plots'));
@@ -200,7 +234,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   private previousTableExperiment = computedPrevious(this.selectedTableExperiment);
   protected selectionState = computed(() => ({
     prevExperiment: this.previousTableExperiment(),
-    highlited: signal( this.selectedTableExperiment() ?? this.previousTableExperiment())
+    highlited: signal(this.selectedTableExperiment() ?? this.previousTableExperiment())
   }));
   protected highlited = computed(() => this.tableMode() === 'compare' ? null : this.selectionState().highlited());
 
@@ -213,6 +247,10 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   private previousSelectedIds: string;
   public metricsVariants$ = this.store.selectSignal(selectMetricVariantForView);
   public tableCompareView = this.store.selectSignal(selectTableCompareView);
+
+  protected showColorsInCards = computed(() => {
+    return this.tableMode() === 'compare';
+  });
 
 
   override get selectEditMode() {
@@ -229,7 +267,10 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     this.addTag = addTag;
     this.syncAppSearch();
 
-    this.store.dispatch(getProjectUsers({projectId: this.selectedProjectId, entity: ProjectsGetUserNamesRequest.EntityEnum.Task}))
+    this.store.dispatch(getProjectUsers({
+      projectId: this.selectedProjectId,
+      entity: ProjectsGetUserNamesRequest.EntityEnum.Task
+    }));
     this.store.dispatch(experimentsActions.setTableCols({cols: this.tableCols}));
 
     // effect(() => {
@@ -445,7 +486,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     ])
       .pipe(
         takeUntilDestroyed(),
-        withLatestFrom(this.store.select(selectTableMode)),
+        debounceTime(0),
+        concatLatestFrom(() => this.store.select(selectTableMode)),
         map(([[experimentId, experiments], mode]) => {
           this.firstExperiment = experiments?.[0];
           this.entities = experiments;
@@ -465,7 +507,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
           } else if (this.shouldOpenDetails) {
             this.modeChanged(mode);
             this.shouldOpenDetails = false;
-          } else if (this.getTableModeFromURL() !== mode){
+          } else if (this.getTableModeFromURL() !== mode) {
             this.modeChanged(this.getTableModeFromURL());
           }
           this.shouldOpenDetails = false;
@@ -475,7 +517,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
       )
       .subscribe((selectedExperiment) => {
           // this.tableMode = this.getTableModeFromURL();
-          this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
+          this.store.dispatch(experimentsActions.setTableMode({mode: this.tableMode()}));
           this.store.dispatch(experimentsActions.setSelectedExperiment({experiment: selectedExperiment}));
         }
       );
@@ -500,7 +542,11 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     }
   }
 
-  experimentSelectionChanged({experiment, openInfo, origin}: { experiment: ITableExperiment; openInfo?: boolean; origin: 'table' | 'row' }) {
+  experimentSelectionChanged({experiment, openInfo, origin}: {
+    experiment: ITableExperiment;
+    openInfo?: boolean;
+    origin: 'table' | 'row'
+  }) {
     if (experiment) {
       if (this.minimizedView() || openInfo) {
         this.store.dispatch(experimentsActions.experimentSelectionChanged({
@@ -549,7 +595,10 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   }
 
   toggleSelectedMetricHidden(col: ISmCol) {
-    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({columnId: col.id, projectId: this.projectId() }));
+    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({
+      columnId: col.id,
+      projectId: this.projectId()
+    }));
   }
 
   getMetricsToDisplay() {
@@ -651,7 +700,10 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   }
 
   columnsReordered(cols: string[], updateUrl = true) {
-    this.store.dispatch(experimentsActions.setColsOrderForProject({cols: Array.from(new Set([...cols, 'project.name'])), projectId: this.projectId()}));
+    this.store.dispatch(experimentsActions.setColsOrderForProject({
+      cols: Array.from(new Set([...cols, 'project.name'])),
+      projectId: this.projectId()
+    }));
     if (updateUrl) {
       this.store.dispatch(experimentsActions.updateUrlParams());
     }
@@ -710,6 +762,10 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
       }));
       return Promise.resolve();
     } else if (mode === 'compare') {
+      setTimeout(() => {
+        const experimentsIds = (this.route.snapshot.firstChild?.firstChild ?? this.route.snapshot.firstChild)?.params?.ids?.split(',').filter(id => !!id);
+        this.store.dispatch(experimentsActions.getSelectedExperiments({ids: experimentsIds}));
+      })
       return this.compareView();
     } else {
       return this.closePanel();
@@ -776,7 +832,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     return this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 
-  override filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean }}) {
+  override filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     super.filterSearchChanged({colId, value});
     if (colId === 'parent.name') {
       // No pagination in BE - setting same list will set noMoreOptions to true
@@ -788,7 +844,11 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
       }
     } else if (colId.startsWith('hyperparams.')) {
       if (!value.loadMore) {
-        this.store.dispatch(experimentsActions.hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
+        this.store.dispatch(experimentsActions.hyperParamSelectedInfoExperiments({
+          col: {id: colId},
+          loadMore: false,
+          values: null
+        }));
         this.store.dispatch(experimentsActions.setHyperParamsFiltersPage({page: 0}));
       }
       this.store.dispatch(experimentsActions.hyperParamSelectedExperiments({
@@ -797,4 +857,5 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
       }));
     }
   }
+
 }

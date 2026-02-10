@@ -1,16 +1,32 @@
 import {Component, ContentChild, EventEmitter, Input, Output, TemplateRef, ViewChild} from '@angular/core';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Task} from '../../../../business-logic/model/tasks/task';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
+import {Task} from '~/business-logic/model/tasks/task';
 import {CompareCardBodyDirective} from '../compare-card-body.directive';
 import {CompareCardExtraHeaderDirective} from '../compare-card-extra-header.directive';
 import {CompareCardHeaderDirective} from '../compare-card-header.directive';
-import {IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
+import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {DrawerComponent} from '@common/shared/ui-components/panel/drawer/drawer.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {NgTemplateOutlet} from '@angular/common';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {CardComponent2} from '@common/shared/ui-components/panel/card2/card-component2.component';
 
 @Component({
-    selector: 'sm-compare-card-list',
-    templateUrl: './compare-card-list.component.html',
-    styleUrls: ['./compare-card-list.component.scss'],
-    standalone: false
+  selector: 'sm-compare-card-list',
+  templateUrl: './compare-card-list.component.html',
+  styleUrls: ['./compare-card-list.component.scss'],
+  imports: [
+    DrawerComponent,
+    MatIconModule,
+    TooltipDirective,
+    CdkDrag,
+    CdkDropList,
+    CdkDragHandle,
+    NgTemplateOutlet,
+    MatIconButton,
+    CardComponent2
+  ]
 })
 export class CompareCardListComponent {
 
@@ -46,7 +62,7 @@ export class CompareCardListComponent {
     this.experimentListChanged.emit(newExperiments);
   }
 
-  drop(e: CdkDragDrop<Array<Task>>) {
+  drop(e: CdkDragDrop<Task[]>) {
     if (e.previousIndex === e.currentIndex) { return; }
     this.reorderExperiments(e.previousIndex, e.currentIndex);
   }

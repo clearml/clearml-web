@@ -22,7 +22,6 @@ import {
   setReportChanges,
   updateReport
 } from '@common/reports/reports.actions';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {
   catchError, debounceTime,
   distinctUntilChanged,
@@ -31,7 +30,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import {fromEvent, lastValueFrom, Observable, take, combineLatest, merge} from 'rxjs';
-import {selectEditingReport, selectReport, selectReportsTags} from '@common/reports/reports.reducer';
+import {selectEditingReport, selectReport, selectReportId, selectReportsTags} from '@common/reports/reports.reducer';
 import {ReportStatusEnum} from '~/business-logic/model/reports/reportStatusEnum';
 import {getBaseName, isExample} from '@common/shared/utils/shared-utils';
 import {MatDialog} from '@angular/material/dialog';
@@ -55,6 +54,15 @@ import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
 import {NgxPrintDirective} from 'ngx-print';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 const replaceSlash = (part) => part
   .replace('\\', '/')
@@ -67,11 +75,26 @@ const replaceSlash = (part) => part
   );
 
 @Component({
-    selector: 'sm-report',
-    templateUrl: './report.component.html',
-    styleUrls: ['./report.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-report',
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MarkdownEditorComponent,
+    TagsMenuComponent,
+    TagListComponent,
+    MatIconModule,
+    MatDrawer,
+    MatDrawerContainer,
+    PushPipe,
+    NgxPrintDirective,
+    MatMenuTrigger,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    MatButton,
+    MatIconButton,
+    MatDrawerContent
+  ]
 })
 export class ReportComponent implements OnDestroy {
   private store = inject(Store);
@@ -142,10 +165,9 @@ export class ReportComponent implements OnDestroy {
     });
 
 
-    this.store.select(selectRouterParams)
+    this.store.select(selectReportId)
       .pipe(
         takeUntilDestroyed(),
-        map(params => params?.reportId),
         filter(id => !!id),
         distinctUntilChanged()
       )
@@ -237,7 +259,8 @@ export class ReportComponent implements OnDestroy {
           showProjects: !!this.report(),
           featureBreadcrumb: {
             name: 'REPORTS',
-            url: this.nested()['reports'] ? 'reports/*/projects' : 'reports'
+            url: this.nested()['reports'] ? 'reports/*/projects' : 'reports',
+            linkLast: true
           },
           projectsOptions: {
             basePath: 'reports',

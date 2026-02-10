@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  HostListener,
+  HostListener, inject,
   OnDestroy,
   OnInit,
   viewChild
@@ -19,17 +19,32 @@ import {ActivatedRoute} from '@angular/router';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Task} from '~/business-logic/model/tasks/task';
-import {FormControl} from '@angular/forms';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {setExperimentSettings, setSelectedExperiments} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
 import {mkConfig, download, generateCsv} from 'export-to-csv';
 import {setExportTable} from '@common/experiments-compare/actions/compare-header.actions';
-import {Table} from 'primeng/table';
+import {Table, TableModule} from 'primeng/table';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {sortMetricsList} from '@common/tasks/tasks.utils';
 import {PlotData} from 'plotly.js';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {MatFormField} from '@angular/material/form-field';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatInput} from '@angular/material/input';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 interface ValueMode {
   key: string;
@@ -77,13 +92,35 @@ interface ExtTask extends Task {
 }
 
 @Component({
-    selector: 'sm-experiment-compare-metric-values',
-    templateUrl: './experiment-compare-metric-values.component.html',
-    styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiment-compare-metric-values',
+  templateUrl: './experiment-compare-metric-values.component.html',
+  styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SelectableGroupedFilterListComponent,
+    TableModule,
+    MatIconModule,
+    MatFormField,
+    MatDrawer,
+    MatDrawerContainer,
+    MatDrawerContent,
+    ReactiveFormsModule,
+    EllipsisMiddleDirective,
+    ChooseColorDirective,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    MatInput,
+    PushPipe
+  ]
 })
 export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  public store = inject(Store);
+  private changeDetection = inject(ChangeDetectorRef);
+  private refresh = inject(RefreshService);
+  private colorHash = inject(ColorHashService);
+
   public experiments: ExtTask[] = [];
   public taskIds: string[];
   public valuesMode: ValueMode;
@@ -117,13 +154,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.saveSettingsState();
   }
 
-  constructor(
-    private route: ActivatedRoute,
-    public store: Store,
-    private changeDetection: ChangeDetectorRef,
-    private refresh: RefreshService,
-    private colorHash: ColorHashService
-  ) {
+  constructor() {
     this.comparedTasks$ = this.store.select(selectCompareMetricsValuesExperiments);
     this.selectShowRowExtremes$ = this.store.select(selectShowRowExtremes);
     this.selectExportTable$ = this.store.select(selectExportTable).pipe(filter(e => !!e));
@@ -307,9 +338,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       row.firstMetricRow = row.metric !== this.dataTableFiltered[i - 1]?.metric;
       row.lastInGroup = row.metric !== this.dataTableFiltered[i + 1]?.metric;
     });
-    if (this.table()) {
-      window.setTimeout(() => this.table().scroller?.setSize(), 50);
-    }
   };
 
   private getExperimentIdsParams(experiments: { id?: string }[]): string {

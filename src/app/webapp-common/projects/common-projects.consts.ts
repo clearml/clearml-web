@@ -1,7 +1,7 @@
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 
-export const PROJECTS_PREFIX         = 'PROJECTS_';
+export const PROJECTS_PREFIX         = '[PROJECTS] ';
 
 export const pageSize = 16;
 

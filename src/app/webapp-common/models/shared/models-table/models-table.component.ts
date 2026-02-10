@@ -7,7 +7,7 @@ import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table
 import {get} from 'lodash-es';
 import {SelectedModel, TableModel} from '../models.model';
 import {MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
-import {FilterMetadata} from 'primeng/api';
+import {FilterMetadata, PrimeTemplate} from 'primeng/api';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {User} from '~/business-logic/model/users/user';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
@@ -27,34 +27,72 @@ import {
   selectionDisabledPublishModels
 } from '@common/shared/entity-page/items.utils';
 import {getCustomMetrics, getModelsMetadataValuesForKey, selectAllModels} from '../../actions/models-view.actions';
-import {
-  ModelMenuExtendedComponent
-} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
+import {ModelMenuExtendedComponent} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
 import {createFiltersFromStore, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '@common/experiments/shared/common-experiments.utils';
-import {animate, style, transition, trigger} from '@angular/animations';
 import {Project} from '~/business-logic/model/projects/project';
 import {computedPrevious} from 'ngxtension/computed-previous';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-label/status-icon-label.component';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {
+  TableFilterSortComponent
+} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
+import {
+  TableCardFilterComponent
+} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter.component';
+import {TableCardComponent} from '@common/shared/ui-components/data/table-card/table-card.component';
+import {
+  MiniTagsListComponent
+} from '@common/shared/ui-components/tags/user-tag/mini-tags-list/mini-tags-list.component';
+import {
+  HyperParamMetricColumnComponent
+} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {ReactiveFormsModule} from '@angular/forms';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {DatePipe} from '@angular/common';
+import {ColGetterPipe} from '@common/shared/pipes/col-getter.pipe';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-    selector: 'sm-models-table',
-    templateUrl: './models-table.component.html',
-    styleUrls: ['./models-table.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger('inOutAnimation', [
-            transition(':enter', [
-                style({ opacity: 0 }),
-                animate('0.25s ease-in', style({ opacity: 1 }))
-            ]),
-            transition(':leave', [
-                style({ opacity: 1 }),
-                animate('0.2s ease-in', style({ opacity: 0 }))
-            ])
-        ])
-    ],
-    standalone: false
+  selector: 'sm-models-table',
+  templateUrl: './models-table.component.html',
+  styleUrls: ['./models-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TableFilterSortComponent,
+    TableCardFilterComponent,
+    TableCardComponent,
+    StatusIconLabelComponent,
+    MiniTagsListComponent,
+    HyperParamMetricColumnComponent,
+    TableComponent,
+    TagListComponent,
+    MatCheckbox,
+    MatMenu,
+    ReactiveFormsModule,
+    FilterPipe,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    DatePipe,
+    ColGetterPipe,
+    IsRowSelectedPipe,
+    TimeAgoPipe,
+    PrimeTemplate,
+    ClickStopPropagationDirective,
+    MatMenuItem,
+    MatMenuTrigger,
+    ModelMenuExtendedComponent
+  ]
 })
 export class ModelsTableComponent extends BaseTableView implements OnChanges {
   override entitiesKey = 'models';
@@ -155,10 +193,12 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     const storeValues = createFiltersFromStore(filters || {}, false);
     return {...filtersValues, ...storeValues};
   });
+  protected sortByFilterValues = signal<Record<string, string[]>>(this.filtersValues());
+
 
   protected filtersOptions = computed(() => ({
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: this.sortOptionsList(
-      Array.from(new Set(this.frameworks().concat(this.filtersValues()[MODELS_TABLE_COL_FIELDS.FRAMEWORK]))).map(framework =>
+      Array.from(new Set(this.frameworks().concat(this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.FRAMEWORK]))).map(framework =>
         ({
           label: framework ? framework :
             (framework === null ? '(No framework)' : 'Unknown'), value: framework
@@ -171,7 +211,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
       label: user.name ? user.name : 'Unknown User',
       value: user.id,
       tooltip: ''
-    })) ?? [], this.filtersValues()[MODELS_TABLE_COL_FIELDS.USER]),
+    })) ?? [], [this.currentUserId(), ...this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.USER]]),
     [MODELS_TABLE_COL_FIELDS.TAGS]: this.calcOptionalTagsList(),
     [MODELS_TABLE_COL_FIELDS.PROJECT]: !this.projects() ? null :
       this.sortOptionsList(
@@ -179,7 +219,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
           label: project.name,
           value: project.id,
         })),
-        this.filtersValues()[MODELS_TABLE_COL_FIELDS.PROJECT]
+        this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.PROJECT]
       ),
     ...Object.entries(this.metadataValuesOptions() || {}).reduce((acc, [id, values]) => {
       acc![id] = values === null ? null : [{
@@ -223,12 +263,12 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   }
 
   calcOptionalTagsList() {
-    const tagsAndActiveFilter = uniqueFilterValueAndExcluded(this.tags(), this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS]);
+    const tagsAndActiveFilter = uniqueFilterValueAndExcluded(this.tags(), this.filtersValues()[MODELS_TABLE_COL_FIELDS.TAGS]);
     return this.sortOptionsList(tagsAndActiveFilter.map(tag => ({
         label: tag === null ? '(No tags)' : tag,
         value: tag
       }) as IOption),
-      this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS]
+      this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.TAGS]
     );
   }
 
@@ -313,7 +353,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   }
 
   columnFilterOpened(col: ISmCol) {
-    // this.sortOptionsList(col.id);
+    this.sortByFilterValues.set(this.filtersValues());
     if (col.id === MODELS_TABLE_COL_FIELDS.TAGS && !this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS]?.length) {
       this.tagsMenuOpened.emit();
     } else if (col.type === 'metadata') {

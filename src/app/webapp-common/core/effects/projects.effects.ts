@@ -35,7 +35,7 @@ import {
   ScatterPlotPoint,
   selectAllProjectsUsers, selectIsDeepMode,
   selectMainPageTagsFilter,
-  selectProjectsOptionsScrollId,
+  selectProjectsOptionsScrollId, selectRouterProjectId,
   selectSelectedMetricVariantForCurrProject,
   selectSelectedProjectId,
   selectShowHidden
@@ -50,7 +50,7 @@ import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRe
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
 import {setActiveWorkspace} from '@common/core/actions/users.actions';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import {escapeRegExp, get} from 'lodash-es';
+import {escapeRegExp, get, uniqBy} from 'lodash-es';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
@@ -66,6 +66,8 @@ import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
+import {ProjectsGetUserNamesResponse} from '~/business-logic/model/projects/projectsGetUserNamesResponse';
+import {fetchUsersForTypes} from '~/features/projects/projects.consts';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Tasks'};
 
@@ -91,11 +93,13 @@ export class ProjectsEffects {
     ofType(actions.setDeep),
     debounceTime(300),
     concatLatestFrom(() => [
-      this.store.select(selectSelectedProjectId),
+      this.store.select(selectRouterProjectId),
       this.store.select(selectIsDeepMode)
     ]),
     distinctUntilChanged(([, , preIsDeep], [, , currIsDeep]) => preIsDeep === currIsDeep),
-    map(([, projectId]) => actions.getProjectUsers({projectId}))));
+    map(([, projectId]) => {
+      return actions.getProjectUsers({projectId});
+    })));
 
 
   getTablesFilterProjectsOptions$ = createEffect(() => this.actions$.pipe(
@@ -118,7 +122,7 @@ export class ProjectsEffects {
           _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
           scroll_id: !!action.loadMore && scrollId ? scrollId : null
         } as ProjectsGetAllExRequest),
-        !action.loadMore && action.searchString?.length > 2 ?
+        !action.loadMore && action.searchString?.length > 0 ?
           this.projectsApi.projectsGetAllEx({
             only_fields: ['name', 'company'],
             search_hidden: showHidden,
@@ -228,20 +232,25 @@ export class ProjectsEffects {
   //getAll but not projects'
   getAllTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getCompanyTags),
-    switchMap(() => this.orgApi.organizationGetTags({include_system: true})
+    switchMap((action) => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
-        map((res: OrganizationGetTagsResponse) => actions.setCompanyTags({
+        mergeMap((res: OrganizationGetTagsResponse) => [actions.setCompanyTags({
           tags: res.tags,
           systemTags: res.system_tags
-        })),
-        catchError(error => [requestFailed(error)])
+        }), deactivateLoader(action.type)]),
+        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
       )
     )
   ));
 
   getProjectsTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectsTags),
-    switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: action.entity === 'project' ? ['-pipeline', '-dataset', '-Annotation'] : [action.entity]}})
+    switchMap(action => this.projectsApi.projectsGetProjectTags({
+      filter: {
+        system_tags: action.entity === 'project' ? ['-pipeline', '-dataset', '-Annotation'] : [action.entity]
+      },
+      ...(action.projectId && {projects: action.projectId === '*' ? [] : [action.projectId]})
+    })
       .pipe(
         withLatestFrom(this.store.select(selectMainPageTagsFilter), this.store.select(selectProjectType)),
         mergeMap(([res, fTags, projectType]) => [
@@ -350,24 +359,34 @@ export class ProjectsEffects {
     ofType(setActiveWorkspace, actions.refetchProjects, setShowHidden),
     mergeMap(() => [
       actions.resetProjects(),
-      actions.getAllSystemProjects()
+      actions.getAllSystemProjects({force: true})
     ])
   ));
 
   getAllProjectsUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
-    switchMap(() => this.projectsApi.projectsGetUserNames({
-
-      include_subprojects: true
-
-    }, {adminQuery: true}).pipe(
-      map(res => actions.setAllProjectUsers(res)),
+    concatLatestFrom(() => [this.store.select(selectAllProjectsUsers)]),
+    switchMap(([action, allUsers]) => ((action.force || !allUsers || allUsers.length === 0) ?
+        this.getAllEntitiesUserNames() : of(allUsers)
+    ).pipe(
+      map(res => actions.setAllProjectUsers({users: res})),
       catchError(error => [
         requestFailed(error),
         setServerError(error, null, 'Fetch all projects users failed')]
       )
     ))
   ));
+
+
+  getAllEntitiesUserNames = () => forkJoin(
+    fetchUsersForTypes.map(type => this.projectsApi.projectsGetUserNames({
+      include_subprojects: true,
+      entity: type
+    }, {adminQuery: true}))
+  ).pipe(
+    map((results: ProjectsGetUserNamesResponse[]) => {
+      return uniqBy([...results.map(res => res.users)], 'id').flat();
+    }));
 
   getUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectUsers),

@@ -3,9 +3,10 @@
   <ng-content select="[header-buttons]"></ng-content>
 </div>
 <div class="table-container">
-  @if (recentTasks) {
-    <sm-recent-tasks-table [tasks]="recentTasks"
-                           (taskSelected)="taskSelected($event)">
-    </sm-recent-tasks-table>
+  @if (recentTasks()) {
+    <sm-recent-tasks-table
+      [tasks]="recentTasks()"
+      (taskSelected)="taskSelected($event)"
+    ></sm-recent-tasks-table>
   }
 </div>

@@ -105,7 +105,7 @@
         border-radius: 0;
         border-bottom: none;
         font-weight: 500;
-        background-color: var(--color-surface-container-highest);
+        background-color: var(--color-tint-8);
 
         .panel-title {
           color: var(--color-on-surface);
@@ -130,7 +130,8 @@
     border-radius: 4px;
     margin: 1px 0;
     &:hover {
-      background-color: color-mix(in srgb, var(--color-surface-container), transparent 40%);
+      background-color: color-mix(in srgb, var(--color-surface-container-highest), transparent 40%);
+      background-color: var(--color-tint-5);
     }
   }
 

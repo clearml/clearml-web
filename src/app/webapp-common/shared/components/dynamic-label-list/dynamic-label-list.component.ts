@@ -58,8 +58,11 @@ export class DynamicLabelListComponent {
           let totalWidth = 32;
           let len = 0
           const offsetWidth = this.ref.nativeElement.offsetWidth;
-          while (totalWidth < offsetWidth) {
+          while (len < itemsLengths.length && totalWidth < offsetWidth) {
             totalWidth += itemsLengths[len];
+            len++;
+          }
+          if (len === itemsLengths.length && totalWidth < offsetWidth) {
             len++;
           }
           this.visibleLabelsLen = Math.max(len - 2, 0);

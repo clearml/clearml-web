@@ -43,16 +43,13 @@
           @if (errors?.required) {
             <mat-error>Please provide a Project</mat-error>
           }
-          @else if (errors?.minlength) {
-            <mat-error>Name should be at least 3 characters long</mat-error>
+          @else if (errors?.minlength < 0) {
+            <mat-error>Project name can't contain only spaces</mat-error>
           }
           @else if (errors?.uniqueName) {
             <mat-error>Please provide a different name as this project name is
               taken as an Example project
             </mat-error>
-          }
-          @else if (errors?.emptyName && !errors?.minlength) {
-            <mat-error>*Project name can't contain only spaces.</mat-error>
           }
         </div>
       }
@@ -71,12 +68,14 @@
         }
       </mat-form-field>
       @if (type === 'task') {
-        <mat-checkbox
+        <mat-checkbox class="w-100"
           formControlName="forceParent"
-          name="forceParent"
         >Set@if (reference) {
           <b [smTooltip]="reference.length > 80 ? reference : undefined"> {{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }} </b>
         }<span style="white-space: nowrap">as parent</span> </mat-checkbox>
+      }
+      @for (key of toggleKeys; track key) {
+        <mat-checkbox class="me-3" [formControlName]="key">{{extraToggles[key]}}</mat-checkbox>
       }
       <mat-form-field class="w-100" appearance="outline">
         <mat-label>Description</mat-label>

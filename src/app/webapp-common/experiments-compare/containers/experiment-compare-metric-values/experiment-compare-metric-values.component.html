@@ -8,10 +8,11 @@
     <div class="list-container">
       @if (settings) {
         <sm-selectable-grouped-filter-list
+          [list]="metricVariantList"
+          [nested]="true"
           [checkedList]="settings.selectedMetricsScalar"
           [searchTerm]="listSearchTerm"
-          [list]="metricVariantList"
-          (hiddenChanged)="selectedMetricsChanged($event)"
+          (selectedChanged)="selectedMetricsChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
       }

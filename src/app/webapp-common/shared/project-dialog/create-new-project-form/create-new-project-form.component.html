@@ -1,11 +1,11 @@
 <form [formGroup]="projectForm" class="d-flex flex-column">
   <mat-form-field appearance="outline">
     <mat-label>Project name</mat-label>
-    <input name="projectName"
-           formControlName="name"
-           matInput
-           autocomplete="off"
-           pattern="^[^\/]*$"
+    <input
+      formControlName="name"
+      matInput
+      autocomplete="off"
+      pattern="^[^\/]*$"
     >
     @if (projectForm.controls.name.invalid && projectForm.controls.name.errors; as errors) {
       <mat-error>
@@ -15,14 +15,11 @@
         @else if (errors?.uniqueProject) {
           Project name in this path already exists.
         }
-        @else if (errors?.minlength) {
-          Project name should contain more than 3 characters.
-        }
-        @else if (errors?.emptyName && !errors?.minlength) {
-          Project name can't contain only spaces.
-        }
-        @else if (errors?.pattern && !errors?.minlength) {
+        @else if (errors?.pattern) {
           Project name can't contain slash (/)
+        }
+        @else if (errors?.minlength) {
+          Name can't contain only spaces.
         }
       </mat-error>
     }
@@ -35,6 +32,7 @@
       label="Create in"
       placeHolder="Search for project path"
       [isRequired]="true"
+      [emptyNameValidator]="true"
       [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
       (getEntities)="loadMore($event, false)"
       (loadMore)="loadMore($event, true)"
@@ -43,9 +41,8 @@
       <div class="extra-errors">
         @if (errors?.required) {
           <mat-error>Please add name.</mat-error>
-        }
-        @else if (errors?.minlength) {
-          <mat-error>Project name should contain more than 3 characters.</mat-error>
+        } @else if (errors?.emptyName) {
+          <mat-error>Project name can't contain only spaces.</mat-error>
         }
       </div>
     }

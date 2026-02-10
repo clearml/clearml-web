@@ -15,8 +15,7 @@ import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 @Component({
   selector: 'sm-base-context-menu',
   template: '',
-  standalone: true
-})
+  })
 export class BaseContextMenuComponent {
   protected store = inject(Store);
   protected eRef = inject(ElementRef);

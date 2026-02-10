@@ -1,9 +1,15 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
 import {trackById} from '@common/shared/utils/forms-track-by';
+import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatIcon} from '@angular/material/icon';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatButton, MatIconButton} from '@angular/material/button';
 
 export interface MetricForStatsData {
   variants: MetricVariantResult[];
@@ -13,25 +19,24 @@ export interface MetricForStatsData {
 
 
 @Component({
-    selector: 'sm-metric-for-stats-dialog',
-    templateUrl: './metric-for-stats-dialog.component.html',
-    styleUrls: ['./metric-for-stats-dialog.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-metric-for-stats-dialog',
+  templateUrl: './metric-for-stats-dialog.component.html',
+  styleUrls: ['./metric-for-stats-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SelectMetricForCustomColComponent,
+    DialogTemplateComponent,
+    MatIcon,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    MatButton,
+    MatIconButton
+  ]
 })
 export class MetricForStatsDialogComponent {
-  public variants: MetricVariantResult[];
-  public metricVariantSelection: ISmCol[];
-  private readonly projectId: string;
-
-  constructor(
-    private matDialogRef: MatDialogRef<MetricForStatsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) {variants, metricVariantSelection, projectId}: MetricForStatsData
-  ) {
-    this.variants = variants;
-    this.metricVariantSelection = [...metricVariantSelection];
-    this.projectId = projectId;
-  }
+  private matDialogRef = inject(MatDialogRef<MetricForStatsDialogComponent>);
+  protected data = inject<MetricForStatsData>(MAT_DIALOG_DATA);
+  protected metricVariantSelection = signal(this.data.metricVariantSelection ?? []);
 
   selectionChange(event) {
     if(event && !event.valueType) {
@@ -43,16 +48,17 @@ export class MetricForStatsDialogComponent {
       valueType: event.valueType,
       metric: event.variant.metric,
       variant: event.variant.variant
-    }, this.projectId);
+    }, this.data.projectId);
+
     if (event.addCol) {
-      this.metricVariantSelection = [...this.metricVariantSelection, variantCol];
+      this.metricVariantSelection.update(selection => [...selection, variantCol]);
     } else {
-      this.metricVariantSelection = this.metricVariantSelection.filter(col => col.id !== variantCol.id)
+      this.metricVariantSelection.update(selection => selection.filter(col => col.id !== variantCol.id));
     }
   }
 
   clear(){
-    this.metricVariantSelection = [];
+    this.metricVariantSelection.set([]);
   }
 
   close(selection?) {
@@ -62,6 +68,6 @@ export class MetricForStatsDialogComponent {
   protected readonly trackById = trackById;
 
   removeExperiment(column: ISmCol) {
-    this.metricVariantSelection = this.metricVariantSelection.filter(col => col.id !== column.id)
+    this.metricVariantSelection.update(selection => selection.filter(col => col.id !== column.id));
   }
 }

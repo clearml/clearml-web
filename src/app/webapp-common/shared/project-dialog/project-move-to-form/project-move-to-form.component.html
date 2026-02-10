@@ -27,15 +27,12 @@
     smUniquePathValidator [currentName]="projectName | shortProjectName" [existingPaths]="projectsNames"
     smUniqueNameValidator [existingNames]="[projectName | projectLocation]"
     smInvalidPrefixValidator [invalidPrefix]="projectName"
-    required minlength="3"
+    required
   ></sm-paginated-entity-selector>
   @if (projectInput.touched && projectInput?.errors; as errors) {
     <div class="extra-errors">
       @if (errors?.required) {
         <mat-error>Please provide a Project</mat-error>
-      }
-      @if (errors?.minlength) {
-        <mat-error>Project name should be at least 3 characters long</mat-error>
       }
       @if (errors?.uniqueName && !projectInput?.errors?.required) {
         <mat-error>Can't move a project to its current location</mat-error>

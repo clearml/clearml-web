@@ -16,9 +16,6 @@
           Project name in this path already exists.
         }
         @else if (errors?.minlength) {
-          Project name should contain more than 3 characters.
-        }
-        @else if (errors?.emptyName && !errors?.minlength) {
           Project name can't contain only spaces.
         }
         @else if (errors?.pattern &&  !errors?.minlength) {

@@ -4,11 +4,17 @@ import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {pageSize} from '../../common-projects.consts';
 
+import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+
 @Component({
-    selector: 'sm-projects-list',
-    templateUrl: './projects-list.component.html',
-    styleUrls: ['./projects-list.component.scss'],
-    standalone: false
+  selector: 'sm-projects-list',
+  templateUrl: './projects-list.component.html',
+  styleUrls: ['./projects-list.component.scss'],
+    imports: [
+    ProjectCardComponent,
+    DotsLoadMoreComponent
+  ]
 })
 export class ProjectsListComponent {
   isExample = isExample;

@@ -18,12 +18,12 @@
     </cdk-virtual-scroll-viewport>
   </div>
   <div header-content class="d-flex align-items-center card-name">
-    <div class="title">
-      <span class="project-name me-2"
-        [smTooltip]="project.name"
-        smShowTooltipIfEllipsis
-        [showAlwaysTooltip]="(project.name?.includes('/'))"
-      >{{ project.basename }}</span>
+    <div class="title"
+         [smTooltip]="project.name"
+         smShowTooltipIfEllipsis
+         [showAlwaysTooltip]="(project.name?.includes('/'))"
+    >
+      <span class="project-name me-2">{{ project.basename }}</span>
     </div>
     @if (!hideMenu() && project.default_output_destination) {
       <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info-icon" [smTooltip]="'Default output destination: ' + project.default_output_destination"></mat-icon>

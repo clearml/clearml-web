@@ -3,13 +3,14 @@
     <section>
       <div class="filter-head">
         <h4>Users</h4>
-        <button mat-icon-button class="sm" [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()">
+        <button mat-icon-button class="sm" [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" (menuOpened)="usersMenuChangedState(true)">
           <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
         </button>
       </div>
       <sm-table-filter-sort #usersSubMenu
                             (filterChanged)="usersFilterChanged($event)"
                             (searchValueChanged)="usersSearchValueChanged($event)"
+                            (menuClosed)="usersMenuChangedState(false)"
                             [column]="usersColumn"
                             [options]="usersOptionsLabels() | filter: usersSearchTerm():'label'"
                             [value]="userFilter.value ?? []"

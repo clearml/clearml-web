@@ -1,7 +1,9 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {
+  NestedProjectViewPageComponent,
+  ProjectTypeEnum
+} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
-import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {ReportsPageComponent} from '@common/reports/reports-page/reports-page.component';
 import {getAllProjectsPageProjects, resetProjects, setProjectsOrderBy} from '@common/projects/common-projects.actions';
 import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
@@ -17,20 +19,24 @@ import {MatIcon} from '@angular/material/icon';
     selector: 'sm-nested-reports-page',
     templateUrl: './nested-reports-page.component.html',
     styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
-    imports: [
-        ProjectsSharedModule,
-        CircleCounterComponent,
-        PushPipe,
-        MatButton,
-        MatIcon
-    ]
+  imports: [
+    CircleCounterComponent,
+    PushPipe,
+    MatButton,
+    MatIcon,
+    NestedProjectViewPageComponent
+  ]
 })
 export class NestedReportsPageComponent extends ReportsPageComponent implements OnInit, OnDestroy {
-  entityTypeEnum = ProjectTypeEnum;
-  circleTypeEnum = CircleTypeEnum;
-  hideMenu = false;
-  entityType = ProjectTypeEnum.reports;
+  protected circleTypeEnum = CircleTypeEnum;
+  protected hideMenu = false;
+  protected entityType = ProjectTypeEnum.reports;
   private mainPageFilterSub: Subscription;
+
+  protected override get nested() {
+    return true;
+  }
+
   override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
     if (data.hasSubProjects) {
       this.router.navigate([data.id, 'projects'], {relativeTo: this.route.parent?.parent});

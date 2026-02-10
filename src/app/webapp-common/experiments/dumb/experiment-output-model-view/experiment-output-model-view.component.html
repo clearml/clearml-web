@@ -5,10 +5,9 @@
         {{model?.name}}
       </a>
       @if (model?.uri && !isLocalFile) {
-        <i
-          class="pointer al-icon al-ico-download sm-md ms-2"
-          (click)="artifactFilePathClicked(model.uri)"
-        ></i>
+        <button mat-icon-button class="sm-md- ms-2" (click)="artifactFilePathClicked(model.uri)">
+          <mat-icon fontSet="al" fontIcon="al-ico-download "></mat-icon>
+        </button>
       }
       @if (model?.uri && isLocalFile) {
         <sm-copy-clipboard

@@ -1,11 +1,11 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {Subscription, combineLatest} from 'rxjs';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {combineLatest} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {debounceTime, filter, take} from 'rxjs/operators';
 import {setDeep} from '@common/core/actions/projects.actions';
-import {getRecentProjects, getRecentExperiments, getRecentReports} from '@common/dashboard/common-dashboard.actions';
+import {getRecentExperiments, getRecentProjects, getRecentReports} from '@common/dashboard/common-dashboard.actions';
 import {selectFirstLogin} from '@common/core/reducers/view.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
@@ -14,24 +14,38 @@ import {selectRecentTasks} from '@common/dashboard/common-dashboard.reducer';
 import {initSearch} from '@common/common-search/common-search.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {selectActiveSearch} from '@common/common-search/common-search.reducer';
+import {CommonDashboardModule} from '@common/dashboard/common-dashboard.module';
+import {DashboardReportsComponent} from '@common/dashboard/containers/dashboard-reports/dashboard-reports.component';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {DashboardProjectsComponent} from '@common/dashboard/containers/dashboard-projects/dashboard-projects.component';
+import {DashboardExperimentsComponent} from '@common/dashboard/containers/dashboard-experiments/dashboard-experiments.component';
 
 
 @Component({
-    selector: 'sm-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-    standalone: false
+  selector: 'sm-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonDashboardModule,
+    DashboardReportsComponent,
+    MatButton,
+    MatIconModule,
+    DashboardProjectsComponent,
+    DashboardExperimentsComponent
+  ]
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardComponent {
   private store = inject(Store);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
-  public recentTasks$ = this.store.select(selectRecentTasks);
-  public width: number;
-  private welcomeSub: Subscription;
+  protected recentTasks = this.store.selectSignal(selectRecentTasks);
+  protected width = signal(0);
 
   constructor() {
+    this.store.dispatch(setDeep({deep: false}));
     this.store.dispatch(initSearch({payload: 'Search for all'}));
 
     this.store.select(selectActiveSearch)
@@ -46,8 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
      this.store.select(selectCurrentUser)
    ])
      .pipe(
-       debounceTime(100),
        takeUntilDestroyed(),
+       debounceTime(100),
        filter(([, user]) => !!user),
      )
      .subscribe(() => {
@@ -56,8 +70,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
        this.store.dispatch(getRecentReports());
      });
 
-    this.welcomeSub = this.store.select(selectFirstLogin)
+    this.store.select(selectFirstLogin)
       .pipe(
+        takeUntilDestroyed(),
         filter(first => !!first),
         take(1)
       )
@@ -70,20 +85,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/workers-and-queues');
   }
 
-  public ngOnInit(): void {
-    this.store.dispatch(setDeep({deep: false}));
-  }
-
-  ngOnDestroy(): void {
-    this.welcomeSub?.unsubscribe();
-  }
-
   private showWelcome() {
     this.dialog.open(WelcomeMessageComponent).afterClosed()
       .subscribe(() => this.store.dispatch(firstLogin({first: false})));
-  }
-
-  setWidth(width: number) {
-    this.width = width;
   }
 }

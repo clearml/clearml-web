@@ -1,19 +1,39 @@
 import {Component, ElementRef, inject, input, Input, viewChild, output } from '@angular/core';
-import {UntypedFormControl} from '@angular/forms';
+import {FormsModule, UntypedFormControl} from '@angular/forms';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {RouterLink} from '@angular/router';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
+import {NAPipe} from '@common/shared/pipes/na.pipe';
+import {FilterInternalPipe} from '@common/shared/pipes/filter-internal.pipe';
+import {DatePipe, KeyValuePipe} from '@angular/common';
 
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
 
 @Component({
-    selector: 'sm-experiment-details',
-    templateUrl: './experiment-details.component.html',
-    styleUrls: ['./experiment-details.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-details',
+  templateUrl: './experiment-details.component.html',
+  styleUrls: ['./experiment-details.component.scss'],
+  imports: [
+    LabeledRowComponent,
+    CopyClipboardComponent,
+    SectionHeaderComponent,
+    EditableSectionComponent,
+    FormsModule,
+    RouterLink,
+    DurationPipe,
+    NAPipe,
+    FilterInternalPipe,
+    DatePipe,
+    KeyValuePipe
+  ]
 })
 export class ExperimentDetailsComponent {
   private store = inject(Store);

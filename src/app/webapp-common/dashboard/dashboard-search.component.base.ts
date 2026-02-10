@@ -15,15 +15,18 @@ import {
   selectDatasetsResults,
   selectExperimentsResults,
   selectFilteredEndpointsResults,
-  selectFilteredLoadingEndpointsResults, selectLoadMoreActive,
+  selectFilteredLoadingEndpointsResults,
+  selectLoadMoreActive,
   selectModelsResults,
   selectPipelinesResults,
   selectProjectsResults,
   selectReportsResults,
-  selectResultsCount, selectSearchIsAdvance, selectSearchPages,
+  selectResultsCount,
+  selectAdvancedSearch,
+  selectSearchPages,
   selectSearchScrollIds,
-  selectSearchTableFilters,
-  selectSearchTerm
+  selectTabFilters,
+  selectSearchTerm, selectFilters
 } from '../dashboard-search/dashboard-search.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
@@ -33,17 +36,17 @@ import {Component, computed, inject, OnDestroy, OnInit, output, signal} from '@a
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from '@angular/router';
 import {IReport} from '@common/reports/reports.consts';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {isEqual, isEmpty} from 'lodash-es';
+import {isEqual} from 'lodash-es';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {SelectedModel} from '@common/models/shared/models.model';
 import {convertToViewAllFilter} from '@common/dashboard-search/dashboard-search.consts';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {explicitEffect} from 'ngxtension/explicit-effect';
+import {encodeFilters} from '@common/shared/utils/tableParamEncode';
 
 @Component({
   selector: 'sm-dashboard-search-base',
   template: '',
-  standalone: false
 })
 export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy {
   protected store = inject(Store);
@@ -72,11 +75,9 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
   protected loadingEndpointsResults$ = this.store.select(selectFilteredLoadingEndpointsResults);
   protected loadMoreActive = this.store.selectSignal(selectLoadMoreActive);
   protected pages = this.store.selectSignal(selectSearchPages);
-  protected isAdvancedSearch = this.store.selectSignal(selectSearchIsAdvance);
-  protected filters = this.store.selectSignal(selectSearchTableFilters);
-  protected isEmpty = computed(() => {
-    return !this.searchTerm()?.query && isEmpty(this.filters())
-  });
+  protected isAdvancedSearch = this.store.selectSignal(selectAdvancedSearch);
+  protected filters = this.store.selectSignal(selectTabFilters);
+  protected allFilters = this.store.selectSignal(selectFilters);
   protected pipelinesResults$ = this.store.select(selectPipelinesResults);
   protected openDatasetsResults$ = this.store.select(selectDatasetsResults);
   protected projectsResults$ = this.store.select(selectProjectsResults);
@@ -226,30 +227,10 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
 
   public activeLinkChanged(activeLink: ActiveSearchLink) {
     if (!this.searchStarted && !this.scrollIds()?.[activeLink]) {
-      this.store.dispatch(clearSearchFilters());
       this.store.dispatch(clearSearchResults());
       this.store.dispatch(getCurrentPageResults({activeLink}));
     }
   }
-
-  // setFirstActiveLink(resultsCount) {
-  //   this.router.navigate([], {queryParams: {tab: this.activeLink()}, queryParamsHandling: 'merge', replaceUrl: true});
-  //   if (resultsCount[this.activeLink()] > 0) {
-  //     this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink()}));
-  //   } else {
-  //     const firstTabIndex = activeLinksList.findIndex(activeLink => resultsCount[activeLink.name] > 0);
-  //     if (firstTabIndex > -1 && this.firstSearch) {
-  //       this.router.navigate([], {
-  //         queryParams: {tab: activeLinksList[firstTabIndex].name},
-  //         queryParamsHandling: 'merge'
-  //       });
-  //     } else if (firstTabIndex === -1) {
-  //       this.store.dispatch(clearSearchResults());
-  //     }
-  //   }
-  //   this.searchStarted = false;
-  //   this.firstSearch = false;
-  // }
 
   loadMore(name: ActiveSearchLink) {
     this.store.dispatch(currentPageLoadMoreResults({activeLink: name}));
@@ -257,7 +238,10 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
 
   changeActiveLink(tab: string) {
     this.router.navigate([], {
-      queryParams: {tab, gsfilter: undefined},
+      queryParams: {
+        tab,
+      ...(!this.isAdvancedSearch() && {gsfilter: encodeFilters(this.allFilters()[tab])})
+      },
       queryParamsHandling: 'merge'
     });
   }

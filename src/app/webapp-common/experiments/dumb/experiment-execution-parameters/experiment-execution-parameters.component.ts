@@ -5,12 +5,12 @@ import {
 } from '@angular/core';
 import {cloneDeep} from 'lodash-es';
 import {v4 as uuidV4} from 'uuid';
-import {NgForm} from '@angular/forms';
+import {FormsModule, NgForm} from '@angular/forms';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash-es';
-import {MatInput} from '@angular/material/input';
+import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 import {Store} from '@ngrx/store';
 import {navigateToDataset} from '@common/experiments/actions/common-experiments-info.actions';
 import {injectResize} from 'ngxtension/resize';
@@ -18,6 +18,21 @@ import {map, take} from 'rxjs/operators';
 import {startWith} from 'rxjs';
 import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {MatDialog} from '@angular/material/dialog';
+import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDivider} from '@angular/material/divider';
+import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  UniqueNameValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {PrimeTemplate} from 'primeng/api';
+import {PushPipe} from '@ngrx/component';
+import {JsonIndentPipe} from '@common/experiments/dumb/experiment-execution-parameters/json-indent.pipe';
 
 export interface ExecutionParameter {
   name?: string;
@@ -34,7 +49,27 @@ export interface ExecutionParameter {
   selector: 'sm-experiment-execution-parameters',
   templateUrl: './experiment-execution-parameters.component.html',
   styleUrls: ['./experiment-execution-parameters.component.scss'],
-  standalone: false
+  imports: [
+    FormsModule,
+    MatInput,
+    TableComponent,
+    MultiLineTooltipComponent,
+    MatFormField,
+    MatError,
+    MatIconModule,
+    MatDivider,
+    CdkFixedSizeVirtualScroll,
+    SearchTextDirective,
+    TooltipDirective,
+    UniqueNameValidatorDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    MatButton,
+    PrimeTemplate,
+    PushPipe,
+    JsonIndentPipe,
+    MatSuffix
+  ]
 })
 export class ExperimentExecutionParametersComponent implements OnChanges {
   private store = inject(Store);
@@ -210,7 +245,7 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
       try {
         const a = JSON.parse(value);
         return true;
-      } catch (e) {
+      } catch {
         return false;
       }
   }
@@ -222,7 +257,7 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
       text = JSON.parse(parameter.value);
       isJson = true;
     }
-    catch (e) {
+    catch {
       text = parameter.value;
     }
     this.dialog.open<EditJsonComponent, EditJsonData, string>(EditJsonComponent, {

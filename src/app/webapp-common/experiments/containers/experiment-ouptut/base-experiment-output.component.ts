@@ -50,7 +50,6 @@ import {concatLatestFrom} from '@ngrx/operators';
 @Component({
   selector: 'sm-base-experiment-output',
   template: '',
-  standalone: false
 })
 export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy {
   private store = inject(Store);

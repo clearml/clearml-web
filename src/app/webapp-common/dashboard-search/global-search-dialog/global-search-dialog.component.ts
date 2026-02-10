@@ -12,7 +12,7 @@ import {DashboardSearchModule} from '~/features/dashboard-search/dashboard-searc
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {Store} from '@ngrx/store';
 import {
-  searchActivate,
+  searchActivated,
   searchDeactivate,
   searchSetTableFilters,
   searchSetTerm
@@ -24,12 +24,17 @@ import {MatIconButton} from '@angular/material/button';
 import {PushPipe} from '@ngrx/component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
-import {selectResultErrors, selectSearchTerm} from '@common/dashboard-search/dashboard-search.reducer';
+import {
+  selectFilters,
+  selectResultErrors,
+  selectSearchTerm,
+} from '@common/dashboard-search/dashboard-search.reducer';
 import {MatDialogRef} from '@angular/material/dialog';
-import {decodeFilter} from '@common/shared/utils/tableParamEncode';
+import {decodeFilter, encodeFilters} from '@common/shared/utils/tableParamEncode';
 import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
 import {ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {DashboardSearchComponent} from '~/features/dashboard-search/containers/dashboard-search/dashboard-search.component';
 
 @Component({
   selector: 'sm-global-search-dialog',
@@ -45,7 +50,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     MatIconButton,
     PushPipe,
     TooltipDirective,
-    MultiLineTooltipComponent
+    MultiLineTooltipComponent,
+    DashboardSearchComponent
   ],
 })
 export class GlobalSearchDialogComponent {
@@ -66,13 +72,14 @@ export class GlobalSearchDialogComponent {
   protected regexError = signal(false);
   private errors = this.store.selectSignal(selectResultErrors);
   protected resultErrors = linkedSignal(() => this.errors());
+  protected filters = this.store.selectSignal(selectFilters);
   protected searchQuery$ = this.store.select(selectSearchTerm);
   private itemSelected = false;
   advancedTooltip = `Explicit DB query specification <br>
 (JSON format. see e.g. <a target="_blank" title="https://clear.ml/docs/latest/docs/references/sdk/task/#taskquery_tasks" data-renderer-mark="true" href="https://clear.ml/docs/latest/docs/references/sdk/task/#taskquery_tasks">Task.query_tasks()</a>)`;
 
   constructor() {
-    this.store.dispatch(searchActivate());
+    this.store.dispatch(searchActivated());
     this.route.queryParams.pipe(
       takeUntilDestroyed(),
       distinctUntilChanged((pre, current) => pre.gsfilter === current.gsfilter),
@@ -106,7 +113,7 @@ export class GlobalSearchDialogComponent {
           this.enableAdvancedSearch();
         }
         this.store.dispatch(searchSetTerm({
-          query: qregex ? query : query.trim(),
+          query: query,
           regExp: qregex,
           advanced: advanced
         }));
@@ -184,10 +191,17 @@ export class GlobalSearchDialogComponent {
       replaceUrl: true,
       queryParamsHandling: 'merge',
       queryParams: {
-        advanced: advanced ?? undefined,
-        gsfilter: undefined,
-        gq: undefined,
-        gqreg: undefined,
+        ...(advanced ?
+          {
+            advanced: advanced,
+            gsfilter: undefined,
+            gq: undefined,
+            gqreg: undefined,
+          } :
+          {
+            advanced:  undefined,
+            gsfilter: encodeFilters(this.filters()[this.activeLink()])
+          })
       }
     });
   }

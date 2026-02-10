@@ -72,7 +72,7 @@ export const experimentsCompareChartsReducer = createReducer(
     metricsHistogramCharts: action.payload,
     cachedAxisType: action.axisType
   })),
-  on(actions.setExperimentMultiScalarSingleValue, (state, action): IExperimentCompareChartsState => ({...state, multiSingleValues: action.name.tasks})),
+  on(actions.setExperimentMultiScalarSingleValue, (state, action): IExperimentCompareChartsState => ({...state, multiSingleValues: action.name ? action.name.tasks : []})),
   on(actions.setAxisCache, (state, action): IExperimentCompareChartsState => ({
     ...state,
     cachedAxisType: (action as ReturnType<typeof actions.setAxisCache>).axis

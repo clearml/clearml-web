@@ -28,6 +28,12 @@
       <mat-icon fontSet="al" [fontIcon]="icons.CHART"></mat-icon>
       {{minimizedView() ? 'View Full Screen' : 'View in Task Table'}}
     </button>
+    @if (isCompare()) {
+      <button mat-menu-item (click)="openColorPicker($event)" data-id="Palette Option">
+        <mat-icon fontSet="al" [fontIcon]="icons.PALETTE"></mat-icon>
+        <span>Edit Color</span>
+      </button>
+    }
     <hr>
     <button mat-menu-item (click)="manageQueueClicked()"
             [disabled]="selectedDisableAvailable()[menuItems.queue].disable" data-id="Manage Queue Option">

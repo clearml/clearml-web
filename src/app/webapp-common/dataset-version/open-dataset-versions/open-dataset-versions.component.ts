@@ -13,12 +13,31 @@ import {
   OpenDatasetVersionMenuComponent
 } from '@common/dataset-version/open-dataset-version-menu/open-dataset-version-menu.component';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
+import {
+  OpenDatasetVersionInfoComponent
+} from '@common/dataset-version/open-dataset-version-info/open-dataset-version-info.component';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
-    selector: 'sm-open-dataset-versions',
-    templateUrl: './open-dataset-versions.component.html',
-    styleUrls: ['./open-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss'],
-    standalone: false
+  selector: 'sm-open-dataset-versions',
+  templateUrl: './open-dataset-versions.component.html',
+  styleUrls: ['./open-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss'],
+  imports: [
+    ExperimentsTableComponent,
+    OpenDatasetVersionMenuComponent,
+    OpenDatasetVersionInfoComponent,
+    EntityFooterComponent,
+    OverlayComponent,
+    ExperimentHeaderComponent,
+    SplitComponent,
+    SplitAreaComponent,
+    PushPipe
+  ]
 })
 export class OpenDatasetVersionsComponent extends ControllersComponent {
   override contextMenu = viewChild.required(OpenDatasetVersionMenuComponent);

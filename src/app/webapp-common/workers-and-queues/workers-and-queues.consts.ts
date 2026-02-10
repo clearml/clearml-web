@@ -5,7 +5,7 @@ export const QUEUES_TABLE_COL_FIELDS = {
   USER        : 'user.name',
   QUEUED      : 'status_changed',
   TASK        : 'entries[0].task.name',
-  IN_QUEUE    : 'entries.length',
+  IN_QUEUE    : 'entries_count',
   LAST_UPDATED: 'last_update',
   WORKERS     : 'workers.length'
 };

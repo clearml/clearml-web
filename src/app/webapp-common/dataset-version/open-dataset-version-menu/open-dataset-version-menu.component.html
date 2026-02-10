@@ -3,11 +3,11 @@
     class="p-0 cell menu-button al-icon sm-md al-ico-bars-menu"
   ></div>
 } @else {
-  <div #contextTrigger
-       style="visibility: hidden; position: fixed"
-       [style.left.px]="position.x"
-       [style.top.px]="position.y"
-       [matMenuTriggerFor]="experimentMenu">
+  <div
+    style="visibility: hidden; position: fixed"
+    [style.left.px]="position.x"
+    [style.top.px]="position.y"
+    [matMenuTriggerFor]="experimentMenu">
   </div>
 }
 <mat-menu #experimentMenu="matMenu" [hasBackdrop]="false" class="light-theme entity-context-menu">
@@ -42,11 +42,11 @@
   }
 </mat-menu>
 
-    <sm-tags-menu
-      #tagMenu
-      [tags]="experiment()?.tags"
-      [tagsFilterByProject]="tagsFilterByProject()"
-      [projectTags]="projectTags()"
-      [companyTags]="companyTags()"
-      (tagSelected)="tagSelected.emit($event)">
-    </sm-tags-menu>
+<sm-tags-menu
+  #tagMenu
+  [tags]="experiment()?.tags"
+  [tagsFilterByProject]="tagsFilterByProject()"
+  [projectTags]="projectTags()"
+  [companyTags]="companyTags()"
+  (tagSelected)="tagSelected.emit($event)">
+</sm-tags-menu>

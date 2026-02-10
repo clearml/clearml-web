@@ -31,11 +31,9 @@ export interface SeriesData {
   y: number[];
 }
 
-export interface HistogramCharts {
-  [metric: string]: { [variant: string]: SeriesData };
-}
+export type HistogramCharts = Record<string, Record<string, SeriesData>>;
 
-export const EXPERIMENTS_OUTPUT_PREFIX = 'EXPERIMENTS_OUTPUT_';
+export const EXPERIMENTS_OUTPUT_PREFIX = '[Experiments Output] ';
 
 export const resetOutput = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_OUTPUT');
 

@@ -38,8 +38,8 @@ export const initialState: SingleGraphState = {
 
 export const singleGraphReducer = createReducer(
   initialState,
-  on(setGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenDetailedChart: action.data})),
-  on(setGraphDisplayFullDetailsScalarsIsOpen, (state, action) => ({
+  on(setGraphDisplayFullDetailsScalars, (state, action): SingleGraphState => ({...state, fullScreenDetailedChart: action.data})),
+  on(setGraphDisplayFullDetailsScalarsIsOpen, (state, action): SingleGraphState => ({
     ...state,
     isFullScreenOpen: action.isOpen,
     fullScreenDetailedChart: null,
@@ -47,18 +47,18 @@ export const singleGraphReducer = createReducer(
     plotViewerScrollId: null,
     minMaxIterations: null
   })),
-  on(getGraphDisplayFullDetailsScalars, state => ({...state, fetchingFullScreenData: true})),
-  on(setXtypeGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenXtype: action.xAxisType})),
-  on(mergeGraphDisplayFullDetailsScalars, (state, action) => ({
+  on(getGraphDisplayFullDetailsScalars, (state): SingleGraphState => ({...state, fetchingFullScreenData: true})),
+  on(setXtypeGraphDisplayFullDetailsScalars, (state, action): SingleGraphState => ({...state, fullScreenXtype: action.xAxisType})),
+  on(mergeGraphDisplayFullDetailsScalars, (state, action): SingleGraphState => ({
     ...state,
     fullScreenDetailedChart: {...state.fullScreenDetailedChart, data: action.data},
     fetchingFullScreenData: false
   })),
-  on(setPlotViewerScrollId, (state, action) => ({...state, plotViewerScrollId: action.scrollId})),
-  on(setViewerEndOfTime, (state, action) => ({...state, plotViewerEndOfTime: action.endOfTime})),
-  on(setViewerBeginningOfTime, (state, action) => ({...state, plotViewerBeginningOfTime: action.beginningOfTime})),
-  on(setCurrentPlot, (state, action) => ({...state, currentPlotViewer: action.event})),
-  on(setPlotIterations, (state, action) => ({...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}})),
+  on(setPlotViewerScrollId, (state, action): SingleGraphState => ({...state, plotViewerScrollId: action.scrollId})),
+  on(setViewerEndOfTime, (state, action): SingleGraphState => ({...state, plotViewerEndOfTime: action.endOfTime})),
+  on(setViewerBeginningOfTime, (state, action): SingleGraphState => ({...state, plotViewerBeginningOfTime: action.beginningOfTime})),
+  on(setCurrentPlot, (state, action): SingleGraphState => ({...state, currentPlotViewer: action.event})),
+  on(setPlotIterations, (state, action): SingleGraphState => ({...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}})),
 );
 
 const selectSingleGraph = createFeatureSelector<SingleGraphState>('singleGraph');

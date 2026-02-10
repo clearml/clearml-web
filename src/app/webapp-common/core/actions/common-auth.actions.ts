@@ -64,14 +64,14 @@ export const showLocalFilePopUp = createAction(
 );
 export const getAllCredentials = createAction(
   AUTH_PREFIX + 'GET_ALL_CREDENTIALS',
-  props<{userId?: string}>());
+  props<{userId?: string; autorefresh?: boolean}>());
 export const credentialRevoked = createAction(
   AUTH_PREFIX + 'REVOKE_CREDENTIAL (API)',
   props<{ accessKey: string; workspaceId: string }>()
 );
 export const updateAllCredentials = createAction(
   AUTH_PREFIX + 'UPDATE_ALL_CREDENTIALS',
-  props<{ credentials: CredentialKeyExt[]; extra: Record<string, CredentialKeyExt[]>; workspace: string }>()
+  props<{ credentials: CredentialKeyExt[]; extra: Record<string, CredentialKeyExt[]>; workspace: string; maxCredentials: number }>()
 );
 export const getSignedUrl = createAction(
   AUTH_PREFIX + '[get signed url]',

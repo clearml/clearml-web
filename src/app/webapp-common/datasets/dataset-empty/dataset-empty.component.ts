@@ -1,12 +1,22 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {NgTemplateOutlet} from '@angular/common';
 
 @Component({
-    selector: 'sm-dataset-empty',
-    templateUrl: './dataset-empty.component.html',
-    styleUrls: ['./dataset-empty.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-dataset-empty',
+  templateUrl: './dataset-empty.component.html',
+  styleUrls: ['./dataset-empty.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    CodeEditorComponent,
+    MatTab,
+    MatTabGroup,
+    NgTemplateOutlet
+  ]
 })
 export class DatasetEmptyComponent {
   protected readonly confService = inject(ConfigurationService);

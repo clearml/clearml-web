@@ -3,8 +3,7 @@ import {last} from 'lodash-es';
 
 @Pipe({
   name: 'isAudio',
-  standalone: true
-})
+  })
 export class IsAudioPipe implements PipeTransform {
   static audioExtensions = ['wav', 'mp3', 'flac', 'mid', 'au', 'ra', 'snd'];
 

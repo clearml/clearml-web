@@ -6,7 +6,7 @@
 
     .mat-expansion-panel {
       box-shadow: none;
-      margin: 0 12px 2px;
+      margin: 0 12px;
       border-radius: 4px;
     }
 
@@ -14,8 +14,9 @@
       height: 40px;
       font-weight: 400;
       padding: 0 16px 0 12px;
+      margin-bottom: 2px;
       &:hover {
-        background-color: var(--color-surface-container);
+        background-color: var(--color-tint-8);
       }
     }
 
@@ -53,17 +54,13 @@
       --mat-list-list-item-label-text-color: var(--color-on-surface-variant);
       --mat-theme-text-primary-on-background: var(--color-on-surface-variant);
 
-      &:hover {
-        background-color: var(--color-surface-container-high);
+      &:hover:not(.active) {
+        background-color: var(--color-tint-8);
       }
 
       &.active {
         --mat-list-list-item-label-text-color: var(--color-on-surface);
-        --mat-list-list-item-container-color: var(--color-surface-container-high);
-
-        &:hover {
-          background-color: var(--color-surface-container-highest);
-        }
+        --mat-list-list-item-container-color: var(--color-tint-14);
       }
 
       &::before,

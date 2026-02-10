@@ -17,6 +17,9 @@
   max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  &:empty {
+    display: none;
+  }
 }
 
 .s3-row {

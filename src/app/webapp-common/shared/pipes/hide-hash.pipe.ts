@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'hideHash',
-  standalone: true
-})
+  })
 export class HideHashPipe implements PipeTransform {
 
   transform(value: string, args?: any): any {

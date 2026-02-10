@@ -14,8 +14,8 @@ import {
   uniqueNameValidator,
 } from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {MatInput} from '@angular/material/input';
-import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
+import {SelectQueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
 
 export interface QueueFormData {
   name: string;
@@ -45,8 +45,8 @@ export class CreateNewQueueFormComponent {
     display_name: [null as string, [minLengthTrimmed(3),]]
   });
 
-  queues = input<Queue[]>();
-  queue = input<Queue>({name: null, id  : null} as Queue);
+  queues = input<SelectQueue[]>();
+  queue = input<SelectQueue>({name: null, id: null} as SelectQueue);
   queueCreated = output<QueueFormData>();
 
   protected queuesNames = computed(() => {

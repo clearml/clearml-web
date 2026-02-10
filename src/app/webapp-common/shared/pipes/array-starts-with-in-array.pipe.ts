@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'arrayIncludedInArray',
-  standalone: true
-})
+  })
 export class ArrayIncludedInArrayPipe implements PipeTransform {
 
   transform(values: string[], stingsArr: string[] = []): boolean {

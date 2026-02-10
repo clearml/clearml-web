@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, computed, input, output} from '@angular/core';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {IReport} from '../reports.consts';
 import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
@@ -35,29 +35,21 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 })
 export class ReportCardComponent {
 
-  public isExample: boolean;
-  private _report: IReport;
-  @Input() projectsNames: string[];
+  report = input.required<IReport>();
+  isExample = computed(() => !['All Tasks'].includes(this.report().name) && (!this.report().company || !this.report().company['id']));
 
-  @Input() set report(data: IReport) {
-    this._report = data;
-    this.isExample = !['All Tasks'].includes(data.name) && (!data.company || ! data.company['id']);
-  }
-  get report() {
-    return this._report;
-  }
+  projectsNames = input<string[]>();
+  allTags = input<string[]>();
+  hideMenu = input(false);
+  isArchive = input(false);
 
-  @Input() allTags: string[];
-
-  @Input() hideMenu = false;
-  @Input() isArchive = false;
-  @Output() cardClicked = new EventEmitter<IReport>();
-  @Output() nameChanged = new EventEmitter();
-  @Output() delete = new EventEmitter ();
-  @Output() removeTag = new EventEmitter<string>();
-  @Output() addTag = new EventEmitter<string>();
-  @Output() archive = new EventEmitter<boolean>();
-  @Output() moveTo = new EventEmitter<string>();
-  @Output() share = new EventEmitter();
+  cardClicked = output<IReport>();
+  nameChanged = output<string>();
+  delete = output<void>();
+  removeTag = output<string>();
+  addTag = output<string>();
+  archive = output<boolean>();
+  moveTo = output<string | void>();
+  share = output<void>();
   timeFormatString = TIME_FORMAT_STRING;
 }

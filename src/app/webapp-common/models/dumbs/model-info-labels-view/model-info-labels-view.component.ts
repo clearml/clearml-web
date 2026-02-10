@@ -1,16 +1,42 @@
 import {Component, input, output, effect, viewChild} from '@angular/core';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {Model} from '~/business-logic/model/models/model';
-import {NgForm} from '@angular/forms';
+import {FormsModule, NgForm} from '@angular/forms';
 import {SelectedModel} from '../../shared/models.model';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import { toObservable } from '@angular/core/rxjs-interop';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {MatError, MatFormField} from '@angular/material/form-field';
+import {UuidPipe} from '@common/shared/pipes/uuid.pipe';
+import {
+  UniqueInListSync2ValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-in-list-sync-validator-2.directive';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatInput} from '@angular/material/input';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-model-info-labels-view',
-    templateUrl: './model-info-labels-view.component.html',
-    styleUrls: ['./model-info-labels-view.component.scss'],
-    standalone: false
+  selector: 'sm-model-info-labels-view',
+  templateUrl: './model-info-labels-view.component.html',
+  styleUrls: ['./model-info-labels-view.component.scss'],
+  imports: [
+    EditableSectionComponent,
+    SectionHeaderComponent,
+    MatError,
+    MatIconModule,
+    MatFormField,
+    FormsModule,
+    UuidPipe,
+    UniqueInListSync2ValidatorDirective,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    CdkFixedSizeVirtualScroll,
+    MatButton,
+    MatIconButton,
+    MatInput
+  ]
 })
 export class ModelInfoLabelsViewComponent {
   public formData: { label: string; id: number }[] = [];

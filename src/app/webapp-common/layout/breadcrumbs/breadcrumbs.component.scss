@@ -44,7 +44,7 @@ span {
       white-space: nowrap;
       overflow: hidden;
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: minmax(40px, 1fr) auto auto;
       align-items: center;
       grid-gap: 8px;
       .name {

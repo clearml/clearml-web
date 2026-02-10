@@ -33,15 +33,15 @@
         (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
         >
         <button
-        mat-icon-button
-        data-id="descriptionIcon"
-        #trigger="matMenuTrigger"
-        [class.menu-opened]="trigger.menuOpen"
-        [matMenuTriggerFor]="menu"
-        (smHesitate)="menuHesitate.hesitateStatus = true; trigger.openMenu()"
-        [delay]="500"
-        [action]="'enter'"
-        (click)="false">
+          mat-icon-button
+          data-id="descriptionIcon"
+          #trigger="matMenuTrigger"
+          [class.menu-opened]="trigger.menuOpen"
+          [matMenuTriggerFor]="menu"
+          (smHesitate)="menuHesitate.hesitateStatus = true; trigger.openMenu()"
+          [delay]="500"
+          [action]="'enter'"
+        >
         <mat-icon fontSet="al" [fontIcon]="infoData()?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"></mat-icon>
       </button>
       </span>

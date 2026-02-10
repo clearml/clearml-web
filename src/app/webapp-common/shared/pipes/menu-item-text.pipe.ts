@@ -2,8 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'menuItemText',
-  standalone: true
-})
+  })
 export class MenuItemTextPipe implements PipeTransform {
 
   transform(numberOfItems: number, itemName: string, isMultiple = true): string {

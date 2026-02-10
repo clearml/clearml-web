@@ -12,7 +12,6 @@ import {
   output,
   signal,
   untracked,
-  viewChildren
 } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -46,18 +45,37 @@ import {
   selectTimeIsNow
 } from './debug-images-reducer';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {DebugImagesViewComponent} from '@common/debug-images/debug-images-view/debug-images-view.component';
 import {DebugImagesResponseIterations} from '~/business-logic/model/events/debugImagesResponseIterations';
 import {MetricsImageEvent} from '~/business-logic/model/events/metricsImageEvent';
 import {injectRouteData} from 'ngxtension/inject-route-data';
 import {selectSelectedExperimentFromRouter} from '@common/experiments/reducers';
+import {ItemByIdPipe} from '@common/shared/pipes/item-by-id.pipe';
+import {SlicePipe} from '@angular/common';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {MatFormField} from '@angular/material/form-field';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconModule} from '@angular/material/icon';
+import {DebugImagesViewComponent} from '@common/debug-images/debug-images-view/debug-images-view.component';
 
 @Component({
-    selector: 'sm-debug-images',
-    templateUrl: './debug-images.component.html',
-    styleUrls: ['./debug-images.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-debug-images',
+  templateUrl: './debug-images.component.html',
+  styleUrls: ['./debug-images.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ItemByIdPipe,
+    SlicePipe,
+    ExperimentCompareGeneralDataComponent,
+    MatFormField,
+    MatIconModule,
+    MatSelect,
+    TooltipDirective,
+    DebugImagesViewComponent,
+    MatOption
+  ]
 })
 export class DebugImagesComponent {
   private store = inject(Store);

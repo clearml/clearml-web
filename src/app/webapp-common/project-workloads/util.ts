@@ -1,14 +1,14 @@
-import {Usages} from '~/business-logic/model/organization/usages';
-import {Topic} from '@common/shared/utils/statistics';
 import {zip} from 'lodash-es';
 import {DonutChartData} from '@common/shared/components/charts/donut/donut.component';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {Workloads} from '~/business-logic/model/organization/workloads';
 
-export const getStatsData = (usages: Usages, weighted: boolean, localRuns = false) => {
-  return usages?.series.map((series, index) => ({
+export const getStatsData = (usages: Workloads, weighted: boolean, localRuns = false) => {
+  return usages?.series?.map((series, index) => ({
     topic: index,
     topicName: series.name === null ?
       localRuns === true ? 'Local Runs' : 'Unknown' :
-      `${series.name}${weighted && series.gpu_artificial_weights ? '*' : ''}`,
+      `${series.name}${weighted && series.gpu_usage_artifical_weights ? '*' : ''}`,
     topicID: series.id,
     dates: zip(series.dates, weighted ? series.gpu_usage : series.duration)
       .map(([date, value]) => ({
@@ -19,9 +19,9 @@ export const getStatsData = (usages: Usages, weighted: boolean, localRuns = fals
   } as Topic)) ?? [];
 }
 
-export const getTotalsData = (usages: Usages, weighted: boolean, localRuns = false) => {
-  const sum = usages?.total.reduce((sum, queue) => sum + queue.gpu_usage, 0) ?? 0;
-  return  usages?.total.map((series, index) => ({
+export const getTotalsData = (usages: Workloads, weighted: boolean, localRuns = false) => {
+  const sum = usages?.total?.reduce((sum, queue) => sum + queue.gpu_usage, 0) ?? 0;
+  return  usages?.total?.map((series, index) => ({
     name: series.name === null ?
       localRuns === true ? 'Local Runs' : 'Unknown' :
       `${series.name}${weighted && series.gpu_artificial_weights ? '*' : ''}`,

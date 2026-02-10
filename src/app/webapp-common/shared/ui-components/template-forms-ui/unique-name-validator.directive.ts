@@ -18,8 +18,7 @@ export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): Vali
 @Directive({
   selector: '[smUniqueNameValidator]',
   providers: [{provide: NG_VALIDATORS, useExisting: UniqueNameValidatorDirective, multi: true}],
-  standalone: true
-})
+  })
 export class UniqueNameValidatorDirective implements Validator {
   existingNames = input<string[]>();
   forbiddenPrefix = input<string>();

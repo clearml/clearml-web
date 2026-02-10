@@ -26,7 +26,7 @@ import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {ActivatedRoute, Router} from '@angular/router';
 import {servingLoadingTableCols, servingTableCols} from '@common/serving/serving.consts';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
-import {activitySeriesToTopic, Topic} from '@common/shared/utils/statistics';
+import {activitySeriesToTopic} from '@common/shared/utils/statistics';
 import {ApiServingService} from '~/business-logic/api-services/serving.service';
 import {ServingGetEndpointDetailsResponse} from '~/business-logic/model/serving/servingGetEndpointDetailsResponse';
 import {ServingGetEndpointsResponse} from '~/business-logic/model/serving/servingGetEndpointsResponse';
@@ -40,6 +40,7 @@ import {v5 as uuidv5} from 'uuid';
 import {ContainerInstanceStatsReference} from '~/business-logic/model/serving/containerInstanceStatsReference';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 @Injectable()
 export class ServingEffects {

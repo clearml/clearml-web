@@ -20,7 +20,7 @@
             >
             {{breadcrumb.name}}</a>
             @if (breadcrumb.badge) {
-              <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
+              <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" customClass="break-line" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
             }
           } @else {
             <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
@@ -40,7 +40,7 @@
                 <sm-tag-list [tags]="breadcrumb.tags"></sm-tag-list>
               }
               @if (breadcrumb.badge) {
-                <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300"
+                <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" customClass="break-line" [matTooltipShowDelay]="300"
                       [matBadge]="breadcrumb.badgeWarn ? 1 : null" matBadgeSize="small" matBadgePosition="below after"
                 >{{breadcrumb.badge}}</span>
               }

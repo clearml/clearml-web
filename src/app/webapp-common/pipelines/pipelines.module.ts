@@ -1,20 +1,12 @@
 import {InjectionToken, NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {PipelinesPageComponent} from './pipelines-page/pipelines-page.component';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
 import {StoreConfig, StoreModule} from '@ngrx/store';
 import {projectsReducer, ProjectsState} from '~/features/projects/projects.reducer';
-import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {merge} from 'lodash-es';
-import {PipelinesRouterModule} from '@common/pipelines/pipelines.route';
-import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-card.component';
-import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
-import {PushPipe} from '@ngrx/component';
-import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
-import {MatButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
-import {FormsModule} from '@angular/forms';
-
+import {PipelinesPageComponent} from '@common/pipelines/pipelines-page/pipelines-page.component';
+import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
+import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {RouterModule, Routes} from '@angular/router';
 
 
 export const pipelinesSyncedKeys = [
@@ -22,7 +14,7 @@ export const pipelinesSyncedKeys = [
 ];
 
 export const PIPELINES_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<ProjectsState , any>>('PipelineConfigToken');
+  new InjectionToken<StoreConfig<ProjectsState, any>>('PipelineConfigToken');
 
 
 const localStorageKey = '_saved_pipeline_state_';
@@ -42,29 +34,25 @@ const getPipelineConfig = () => ({
   }]
 });
 
+const routes = [{
+  path: '',
+  component: PipelinesPageComponent,
+  data: {search: true, features: FeaturesEnum.Pipelines, staticBreadcrumb:[[{
+      name: 'PIPELINES',
+      type: CrumbTypeEnum.Feature
+    }]]},
+}] as Routes;
 
 
 @NgModule({
-  declarations: [
-    PipelinesPageComponent,
-  ],
   imports: [
-    CommonModule,
     CommonProjectsModule,
-    ProjectsSharedModule,
-    PipelinesRouterModule,
+    RouterModule.forChild(routes),
     StoreModule.forFeature('projects', projectsReducer, PIPELINES_CONFIG_TOKEN),
-    PipelineCardComponent,
-    ButtonToggleComponent,
-    PushPipe,
-    DotsLoadMoreComponent,
-    MatButton,
-    MatIcon,
-    FormsModule,
   ],
-  exports: [PipelinesPageComponent],
   providers: [
     {provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig},
   ]
 })
-export class PipelinesModule { }
+export class PipelinesModule {
+}

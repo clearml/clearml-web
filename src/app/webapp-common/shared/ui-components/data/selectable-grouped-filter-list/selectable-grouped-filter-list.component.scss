@@ -10,10 +10,16 @@
   margin-top: 12px;
   padding: 0 24px;
   > span  {
-    margin-left: auto;
     font-size: 11px;
     color: var(--color-outline);
     cursor: pointer;
+    &:hover {
+      color: var(--color-hover);
+    }
+  }
+
+  > span:first-child {
+  margin-left: auto;
   }
 }
 

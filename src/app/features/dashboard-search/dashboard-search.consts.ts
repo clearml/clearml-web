@@ -1,6 +1,7 @@
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
+import {EXPERIMENTS_TYPE_LABELS} from '~/shared/constants/non-common-consts';
+import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
 
 export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines' | 'datasets' | 'modelEndpoints';
 
@@ -23,7 +24,7 @@ export const TaskStatusOptions = Object.values(TaskStatusEnum).filter(key=> !['u
 export const TaskTypeOptions = Object.values(TaskTypeEnum).filter(key=> !['dataset_import', 'annotation','annotation_manual'].includes(key));
 
 export interface SearchPageConfig {
-  name: string;
+  name: ActiveSearchLink;
   title?: string;
   viewAllResults: boolean;
   loadMore?: boolean;
@@ -37,14 +38,14 @@ export const activeLinksList = [
     name: activeSearchLink.projects,
     statusOptions: [],
     relevantSearchItems:{
-      [activeSearchLink.projects]:{name: activeSearchLink.projects, viewAllResults: true, viewAllResultsLink: 'projects', title: 'Projects'}}
+      [activeSearchLink.projects]:{name: activeSearchLink.projects, viewAllResults: true, viewAllResultsLink: 'projects',  title: 'Projects'}}
   },
   {
     label: 'DATASETS',
     showUserFilter: true,
     name: activeSearchLink.datasets,
     statusOptions:  TaskStatusOptions,
-    statusOptionsLabels: {...EXPERIMENTS_STATUS_LABELS,...DATASETS_STATUS_LABEL},
+    statusOptionsLabels: {...EXPERIMENTS_TYPE_LABELS,...DATASETS_STATUS_LABEL},
     relevantSearchItems:{
       [activeSearchLink.datasets]:{name: activeSearchLink.datasets, viewAllResults: true, viewAllResultsLink: 'datasets', title: 'Datasets'},
       [activeSearchLink.openDatasetVersions]:{name: activeSearchLink.openDatasetVersions, viewAllResults: false, title: 'Dataset Versions'},
@@ -54,7 +55,7 @@ export const activeLinksList = [
     label: 'TASKS',
     showUserFilter: true,
     statusOptions:  TaskStatusOptions,
-    statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
+    statusOptionsLabels: EXPERIMENTS_TYPE_LABELS,
     typeOptions: TaskTypeOptions,
     name: activeSearchLink.experiments,
     relevantSearchItems:{
@@ -65,7 +66,7 @@ export const activeLinksList = [
     label: 'MODELS',
     showUserFilter: true,
     statusOptions: ['created', 'published'],
-    statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
+    statusOptionsLabels: EXPERIMENTS_TYPE_LABELS,
     name: activeSearchLink.models,
     relevantSearchItems:{
       [activeSearchLink.models]:{name: activeSearchLink.models, viewAllResults: true, viewAllResultsLink: 'projects/*/models/', title: 'Models'},
@@ -76,7 +77,7 @@ export const activeLinksList = [
     showUserFilter: true,
     name: activeSearchLink.pipelines,
     statusOptions: TaskStatusOptions,
-    statusOptionsLabels: EXPERIMENTS_STATUS_LABELS,
+    statusOptionsLabels: EXPERIMENTS_TYPE_LABELS,
     relevantSearchItems:{
       'pipelines':{name: 'pipelines', viewAllResults: true, title: 'Pipelines', viewAllResultsLink: 'pipelines/'},
       'pipelineRuns':{name: 'pipelineRuns', viewAllResults: false, loadMore: true, title: 'Pipeline runs'},
@@ -89,7 +90,7 @@ export const activeLinksList = [
     statusOptions: ['created', 'published'],
     statusOptionsLabels: {created: 'Draft',  published: 'Published'},
     relevantSearchItems:{
-      [activeSearchLink.reports]:{name: activeSearchLink.reports, viewAllResults: true, viewAllResultsLink: 'reports/', title: 'Reports' },
+      [activeSearchLink.reports]:{name: activeSearchLink.reports, viewAllResults: true, viewAllResultsLink: 'reports/', title: 'Reports'},
     }
   },
   {

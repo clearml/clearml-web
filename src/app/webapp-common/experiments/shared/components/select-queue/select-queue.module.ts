@@ -4,7 +4,7 @@ import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {SelectQueueComponent} from './select-queue.component';
 import {SelectQueueEffects} from './select-queue.effects';
-import {selectQueueReducer} from './select-queue.reducer';
+import {selectQueueFeature} from './select-queue.reducer';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {MatInputModule} from '@angular/material/input';
@@ -25,7 +25,7 @@ import {MatButton} from '@angular/material/button';
   imports: [
     CommonModule,
     EffectsModule.forFeature([SelectQueueEffects]),
-    StoreModule.forFeature('selectQueue', selectQueueReducer),
+    StoreModule.forFeature(selectQueueFeature),
     FormsModule,
     ReactiveFormsModule,
     StringIncludedInArrayPipe,

@@ -1,4 +1,4 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {ActiveSectionEnum} from '@common/experiments/experiment.consts';
 import {Store} from '@ngrx/store';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
@@ -17,21 +17,42 @@ import {
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map, startWith} from 'rxjs/operators';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
 import {
   getExperimentArtifacts,
   setExperimentArtifacts
 } from '@common/experiments/actions/common-experiments-info.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {
+  ExperimentArtifactsNavbarComponent
+} from '@common/experiments/dumb/experiment-artifacts-navbar/experiment-artifacts-navbar.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {SplitAreaComponent, SplitComponent} from 'angular-split';
+import {NgTemplateOutlet} from '@angular/common';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-experiment-info-artifacts-model',
-    templateUrl: './experiment-info-artifacts.component.html',
-    styleUrls: ['./experiment-info-artifacts.component.scss'],
-    standalone: false
+  selector: 'sm-experiment-info-artifacts-model',
+  templateUrl: './experiment-info-artifacts.component.html',
+  styleUrls: ['./experiment-info-artifacts.component.scss'],
+  imports: [
+    OverlayComponent,
+    ExperimentArtifactsNavbarComponent,
+    SplitAreaComponent,
+    SplitComponent,
+    NgTemplateOutlet,
+    MatIconModule,
+    PushPipe,
+    RouterOutlet
+  ]
 })
 export class ExperimentInfoArtifactsComponent implements OnDestroy {
+  private store = inject(Store);
+  public router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   public backdropActive$: Observable<boolean>;
   public modelInfo$: Observable<IExperimentModelInfo>;
   public experimentInfo$: Observable<IExperimentInfo>;
@@ -44,8 +65,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private previousTarget: string;
   private sub = new Subscription();
 
-  constructor(private store: Store, public router: Router, private route: ActivatedRoute
-  ) {
+  constructor() {
     this.minimized = !!this.route.snapshot?.routeConfig?.data?.minimized;
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.editable$ = this.store.select(selectIsExperimentEditable);

@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'advancedFilter',
-  standalone: true
-})
+  })
 export class AdvancedFilterPipe implements PipeTransform {
 
   transform(arr: any[], query: string): any[] {

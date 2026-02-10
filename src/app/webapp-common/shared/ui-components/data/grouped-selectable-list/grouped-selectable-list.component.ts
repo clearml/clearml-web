@@ -40,7 +40,8 @@ export class GroupedSelectableListComponent {
 
   checkIcon: string[] = ['al-ico-show', 'al-ico-hide'];
   searchTerm = input<string>();
-  list = input<GroupedList>();
+  filteredList = input<GroupedList>();
+  fullList = input<GroupedList>();
   checkedList = input<string[]>();
 
   itemSelect = output<string>();
@@ -53,9 +54,18 @@ export class GroupedSelectableListComponent {
         hide: boolean;
     }>();
 
+  shouldUncheckParent = computed(() => {
+    return Object.entries(this.fullList() || {}).reduce((acc, [parent, children]) => {
+      const childrenNames = Object.keys(children);
+      const names = [parent, ...childrenNames.map(child => parent + child)];
+      acc[parent] = !names.some(value => this.checkedList()?.includes(value));
+      return acc
+    }, {} as Record<string, boolean>)
+  });
+
   tree = viewChild<MatTree<GroupItem>>(MatTree);
 
-  dataSource = computed(() => this.buildingNestedList(this.list()));
+  dataSource = computed(() => this.buildingNestedList(this.filteredList()));
 
   childrenAccessor = (node: GroupItem) => node.children ?? [];
 
@@ -64,7 +74,7 @@ export class GroupedSelectableListComponent {
   constructor() {
     effect(() => {
       if (this.searchTerm()) {
-        this.tree().expandAll();
+        setTimeout(() => this.tree().expandAll());
       } else {
         this.tree().collapseAll();
       }
@@ -73,7 +83,8 @@ export class GroupedSelectableListComponent {
 
   private buildingNestedList(list) {
     return Object.entries(list || {}).map(([parent, children]) => {
-      const childrenNames = Object.keys(children).filter((variant) => variant !== '__displayName');
+      const fullListChildren = Object.keys(this.fullList()[parent]);
+      const childrenNames = Object.keys(children);
       return {
         data: childrenNames.reduce((acc, child, i) => {
           acc[child] = {
@@ -88,12 +99,12 @@ export class GroupedSelectableListComponent {
           return acc;
         }, {} as GroupItem),
         name: parent,
-        displayName: list[parent].__displayName ?? parent,
+        displayName: (fullListChildren.length > 1 || !childrenNames[0]) ? parent : `${parent} - ${childrenNames[0]}`,
         parent: '',
-        hasChildren: childrenNames.length > 0,
-        children: childrenNames.map(child => ({name: child, parent})),
+        hasChildren: childrenNames.length > 1,
+        children: fullListChildren.length > 1 ? childrenNames.map(child => ({name: child, parent})) : [],
         childrenNames: [parent, ...childrenNames.map(child => parent + child)],
-        expandable: childrenNames.length > 0
+        expandable: fullListChildren.length > 1
       } as GroupItem
     });
   }

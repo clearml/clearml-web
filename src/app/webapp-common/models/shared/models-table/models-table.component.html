@@ -96,7 +96,7 @@
         [column]="col"
         [value]="filtersValues()[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="filtersOptions()[col.id] | filter:searchValues[col.id]:'label'"
+        [options]="filtersOptions()[col.id] | filter: searchValues[col.id]: 'label'"
         [sortOrder]="tableSortFieldsObject()[col.id]"
         [fixedOptionsSubheader]="col.id === modelsTableColFields.TAGS ? 'System tags' : ''"
         [andFilter]="col.andFilter ? filtersMatch()[col.id] === 'AND' : null"
@@ -216,12 +216,12 @@
     </sm-table-card>
     <ng-template #tagList>
       @if (!cardsCollapsed()) {
-        <sm-tag-list [@inOutAnimation] [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
+        <sm-tag-list animate.enter="enter" animate.leave="leaving" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
       }
     </ng-template>
     <ng-template #compactCol>
       @if (!cardsCollapsed()) {
-        <div [@inOutAnimation] class="ellipsis compact-columns-data" [class.selected]="selected">
+        <div animate.enter="enter" animate.leave="leaving" class="ellipsis compact-columns-data" [class.selected]="selected">
           Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
           @if (model.task) {
             <span class="dot">●</span>{{model.task.name}}

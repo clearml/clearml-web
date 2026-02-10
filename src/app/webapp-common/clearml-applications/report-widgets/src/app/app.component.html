@@ -9,7 +9,7 @@
       </a>
       @switch (type) {
         @case (type === 'plot' || type === 'scalar' ? type : '') {
-          @if (plotData) {
+          @defer (when plotData) {
           <sm-single-graph
             [hideDownloadButtons]="externalTool"
             [class.less-padding]="false"
@@ -27,12 +27,12 @@
             [isCompare]="tasksData()?.sourceTasks.length > 1 && $any(plotData)?.plotParsed?.data?.[0]?.type !== 'parcoords'"
             [noMargins]="true"
             [hideMaximize]="hideMaximize"
-            (maximizeClicked)="maximize()">
+            (maximizeClicked)="maximize($event)">
           </sm-single-graph>
           }
         }
         @case ('sample') {
-          @if (frame?.url) {
+          @defer (when frame?.url) {
             <sm-debug-image-snippet
               class="d-flex-center h-100"
               [frame]="frame"
@@ -42,7 +42,7 @@
           }
         }
         @case ('parcoords') {
-          @if (parcoordsData) {
+          @defer (when parcoordsData) {
             <sm-parallel-coordinates-graph
               [experiments]="parcoordsData.experiments"
               [parameters]="parcoordsData.params"
@@ -54,7 +54,7 @@
         }
         @case ('single') {
           <div class="single-value-summary-section">
-            @if (singleValueData && singleValueData[0]) {
+            @defer (when singleValueData && singleValueData[0]) {
               <sm-single-value-summary-table
                 [data]="singleValueData"
                 [experimentName]="singleValueData[0]?.metric"

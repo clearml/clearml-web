@@ -5,8 +5,8 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {interval, combineLatest, switchMap, fromEvent, startWith} from 'rxjs';
-import {Queue, queueActions} from '../../actions/queues.actions';
-import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
+import {queueActions} from '../../actions/queues.actions';
+import {selectQueuesStatsTimeFrame, selectQueueStats, selectSelectedQueue, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {
   IOption
@@ -45,10 +45,12 @@ export class QueueStatsComponent {
     {label: '1 Week', value: (TIME_INTERVALS.WEEK).toString()},
     {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}];
 
-  queue = input<Queue>();
+  queue = input<string>();
+  caption = input<string>();
   protected waitChartRef = viewChild<ElementRef<HTMLDivElement>>('waitchart');
   protected timeFrame = this.store.selectSignal(selectQueuesStatsTimeFrame);
   protected queueStats = this.store.selectSignal(selectQueueStats);
+  protected selectedQueue = this.store.selectSignal(selectSelectedQueue);
   protected refreshChart = computed(() => !(this.queueStats().wait || this.queueStats().length));
   protected statsError = this.store.selectSignal(selectStatsErrorNotice);
 
@@ -56,20 +58,17 @@ export class QueueStatsComponent {
 
   constructor() {
     effect(() => {
-      const maxPoints = this.waitChartRef().nativeElement.clientWidth | 1000;
-      untracked(() =>
-        this.store.dispatch(queueActions.getStats({maxPoints}))
-      );
-    });
-
-    effect(() => {
-      if (this.queue()?.id !== this.selectedQueueId) {
-        const maxPoints = this.waitChartRef().nativeElement.clientWidth | 1000;
-        untracked(() => {
-          this.store.dispatch(queueActions.resetStats());
-          this.store.dispatch(queueActions.getStats({maxPoints}));
-        });
-        this.selectedQueueId = this.queue()?.id;
+      const queue = this.queue();
+      const selectedQueue = this.selectedQueue();
+      if (queue === (selectedQueue?.id ?? null)) {
+        if (queue !== this.selectedQueueId) {
+          const maxPoints = this.waitChartRef().nativeElement.clientWidth | 1000;
+          untracked(() => {
+            this.store.dispatch(queueActions.resetStats());
+            this.store.dispatch(queueActions.getStats({maxPoints}));
+          });
+          this.selectedQueueId = queue;
+        }
       }
     });
 

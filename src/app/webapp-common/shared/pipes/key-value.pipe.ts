@@ -2,8 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'keyValue',
-  standalone: true
-})
+  })
 export class KeyValuePipe implements PipeTransform {
 
   transform(value: object, args?: any): Array<{key: any, value: any}> {

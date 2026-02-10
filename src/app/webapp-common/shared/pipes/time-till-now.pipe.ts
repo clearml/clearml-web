@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'timeTillNow',
-  standalone: true
-})
+  })
 export class TimeTillNowPipe implements PipeTransform {
   transform(value: any, args?: any): any {
     if (!value) {

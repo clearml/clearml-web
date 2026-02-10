@@ -2,15 +2,16 @@ import {ChangeDetectionStrategy, Component, computed, inject, input, signal} fro
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
 import {
+  getAllSystemProjects,
   setMainPageTagsFilter,
   setMainPageTagsFilterMatchMode,
   setMainPageUsersFilter
 } from '@common/core/actions/projects.actions';
 import {
+  selectAllProjectsUsers,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode,
-  selectMainPageUsersFilter,
-  selectSelectedProjectUsers,
+  selectMainPageUsersFilter
 } from '@common/core/reducers/projects.reducer';
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
@@ -25,9 +26,8 @@ import {FormsModule} from '@angular/forms';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {MatButton, MatIconButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
+import {MatIconModule} from '@angular/material/icon';
 import {debounceTime, filter, map} from 'rxjs/operators';
-import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {decodeFilter} from '@common/shared/utils/tableParamEncode';
 import {concatLatestFrom} from '@ngrx/operators';
@@ -40,6 +40,7 @@ import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experi
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -54,15 +55,13 @@ import {
     FilterPipe,
     FormsModule,
     MatIconButton,
-    MatIcon,
-    MatButton,
-    TableFilterSortComponent
+    MatIconModule,
+    TableFilterSortComponent,
+    MatButton
   ]
 })
 export class MainPagesHeaderFilterComponent {
   private store = inject(Store);
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
   public searchTerm: string;
   systemTags: string[];
   protected qParams$ = this.store.select(selectRouterQueryParams);
@@ -70,6 +69,7 @@ export class MainPagesHeaderFilterComponent {
 
   constructor() {
     this.qParams$.pipe(
+      takeUntilDestroyed(),
       filter((params) => params?.filter !== undefined),
       debounceTime(100),
       concatLatestFrom(() => [this.store.select(selectActiveSearch)]),
@@ -102,17 +102,17 @@ export class MainPagesHeaderFilterComponent {
 
   allTags = input<string[]>();
   currentUser = this.store.selectSignal(selectCurrentUser);
-  users = this.store.selectSignal(selectSelectedProjectUsers);
+  users = this.store.selectSignal(selectAllProjectsUsers);
   usersOptions = computed(() => {
     return this.sortOptionsList(this.users()?.map(user => ({
       label: user.name ? user.name : 'Unknown User',
       value: user.id,
       tooltip: ''
-    })) ?? [], this.sortByUsersList());
+    })) ?? [], [this.currentUser().id, ...(this.sortByUsersFilter() ?? [])]);
   });
 
   protected tagsLabelValue = computed(() => {
-    const cleanTags = this.tagsFilters()?.map(tag => cleanTag(tag));
+    const cleanTags = this.sortByTagsFilter()?.map(tag => cleanTag(tag));
     return this.allTags()
       ?.map(tag => ({label: tag, value: tag}))
       .sort((a, b) =>
@@ -136,9 +136,13 @@ export class MainPagesHeaderFilterComponent {
   protected matchMode = this.store.selectSignal(selectMainPageTagsFilterMatchMode);
   protected tagsFilters = this.store.selectSignal(
     selectMainPageTagsFilter);
+  protected sortByTagsFilter = signal< string[]>(this.tagsFilters());
+
   protected usersFilters = this.store.selectSignal(
     selectMainPageUsersFilter);
-  protected sortByUsersList = computed(() => [this.currentUser().id, ...(this.usersFilters() ?? [])]);
+  protected sortByUsersFilter = signal< string[]>(this.usersFilters());
+
+  // protected sortByUsersList = computed(() => [this.currentUser().id, ...(this.usersFilters() ?? [])]);
   protected currentFeature = this.store.selectSignal(selectProjectType);
 
   switchUserFocus() {
@@ -178,5 +182,17 @@ export class MainPagesHeaderFilterComponent {
     this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature()}));
     this.store.dispatch(setMainPageUsersFilter({users: [], feature: this.currentFeature()}));
     this.store.dispatch(setFilterByUser({showOnlyUserWork: false, feature: this.currentFeature()}));
+  }
+
+  menuOpen() {
+    this.store.dispatch(getAllSystemProjects({}));
+  }
+
+  tagsFilterOpened(){
+    this.sortByTagsFilter.set(this.tagsFilters());
+  }
+
+  usersFilterOpened(){
+    this.sortByUsersFilter.set(this.usersFilters());
   }
 }

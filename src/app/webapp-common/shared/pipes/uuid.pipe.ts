@@ -3,8 +3,7 @@ import {v4} from 'uuid';
 
 @Pipe({
   name: 'uuid',
-  standalone: true
-})
+  })
 export class UuidPipe implements PipeTransform {
 
   transform(value: string): string {

@@ -2,7 +2,7 @@
 @let editable = editable$ | ngrxPush;
 @let configurationObjectName = selectedConfigObj$ | ngrxPush;
 <sm-editable-section [editable]="false">
-  <sm-section-header [label]="configurationObjectName | replaceViaMapPipe:sectionReplaceMap | uppercase"></sm-section-header>
+  <sm-section-header [label]="configurationObjectName | replaceViaMapPipe: sectionReplaceMap | uppercase"></sm-section-header>
   <sm-labeled-row label="TYPE">{{ formData?.type === 'legacy' ? '' : formData?.type }}</sm-labeled-row>
   <sm-labeled-row label="DESCRIPTION">{{ formData?.description }}</sm-labeled-row>
 </sm-editable-section>

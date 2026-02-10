@@ -3,12 +3,14 @@ import {Store} from '@ngrx/store';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 import {fromEvent} from 'rxjs';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {searchDeactivate} from '@common/dashboard-search/dashboard-search.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectFirstRouterConfig} from '@common/core/reducers/router-reducer';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {selectDarkTheme, selectHideEnterpriseFeatures} from '@common/core/reducers/view.reducer';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {NgOptimizedImage} from '@angular/common';
+import {RouterLink, RouterLinkActive} from '@angular/router';
 
 @Component({
   selector: 'sm-side-nav',
@@ -21,7 +23,12 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
       useValue: {showDelay: 0, position: 'right'} as MatTooltipDefaultOptions
     },
   ],
-  standalone: false
+  imports: [
+    TooltipDirective,
+    NgOptimizedImage,
+    RouterLink,
+    RouterLinkActive
+  ]
 })
 export class SideNavComponent {
   public store = inject(Store);
@@ -40,8 +47,4 @@ export class SideNavComponent {
     this.resize();
     return this.container()?.nativeElement.scrollHeight > this.container()?.nativeElement.clientHeight
   });
-
-  public resetSearch() {
-    this.store.dispatch(searchDeactivate());
-  }
 }

@@ -25,9 +25,6 @@ export class WebappInterceptor implements HttpInterceptor {
 
   protected errorHandler(request: HttpRequest<any>, err: HttpErrorResponse) {
     const redirectUrl: string = window.location.pathname + window.location.search;
-    if (request.url.endsWith('system.company_info')) {
-      return throwError(() => err);
-    }
     if (err.status === 401) {
       if (redirectUrl.indexOf('/signup') === -1 && redirectUrl.indexOf('/login') === -1) {
         this.login.logout();

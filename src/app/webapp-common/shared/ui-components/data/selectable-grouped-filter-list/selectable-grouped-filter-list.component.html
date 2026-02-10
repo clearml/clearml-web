@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between mb-2">
-  <span class="font-weight-bold">{{titleLabel()}}</span>
+  <span class="font-weight-bold">{{ titleLabel() }}</span>
 </div>
 <sm-search
   [value]="searchTerm()"
@@ -10,10 +10,17 @@
   (valueChanged)="onSearchTermChanged($event)"
 ></sm-search>
 <div class="toggle-all-text">
-  <span (click)="toggleHideAll()">{{checkedList()?.length !== 0 ? 'Hide all' : 'Show all'}}</span>
+  @if (searchTerm()) {
+    <span (click)="toggleHideMatching()">{{ allFilteredSelected() ? 'Hide matching' : 'Show matching' }}</span>
+  } @else {
+  <span (click)="toggleHideAll()">{{ allSelected() ? 'Hide all' : 'Show all' }}</span>
+  }
+</div>
+<div class="toggle-all-text">
 </div>
 <sm-grouped-selectable-list
-  [list]="filteredList()"
+  [filteredList]="filteredList()"
+  [fullList]="listNested()"
   [searchTerm]="searchTerm()"
   [checkedList]="checkedList()"
   (itemSelect)="itemSelect.emit($event)"

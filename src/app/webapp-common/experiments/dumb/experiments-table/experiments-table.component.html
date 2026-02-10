@@ -35,7 +35,8 @@
     >
     <!--HEADER TEMPLATE-->
     <ng-template pTemplate="cardFilter">
-      <sm-table-card-filter [options]="filtersOptions()"
+      <sm-table-card-filter
+        [options]="filtersOptions()"
         [filterMatch]="filtersMatch()"
         [value]="filtersValues()"
         [subValue]="filtersSubValues()[experimentsTableColFields.TAGS]"
@@ -209,6 +210,7 @@
 
     <ng-template let-experiment="rowData" let-selected="selected" pTemplate="card">
       <sm-table-card
+        [showColor]="showColors()"
         [selected]="selected"
         [cardName]="experiment.name"
         [columns]="tableCols()"
@@ -261,7 +263,7 @@
       </sm-table-card>
       <ng-template #tagList>
         @if (!cardsCollapsed()) {
-          <span tags-list-container [@inOutAnimation]>
+          <span tags-list-container animate.enter="enter" animate.leave="leaving">
             @if (!removeTag.observed) {
               <sm-tag-list [sysTags]="getSystemTags(experiment)"
               [tags]="experiment?.tags"></sm-tag-list>
@@ -274,7 +276,7 @@
       </ng-template>
       <ng-template #compactCol>
         @if (!cardsCollapsed()) {
-          <span [@inOutAnimation]>
+          <span animate.enter="enter" animate.leave="leaving">
             <div class="d-flex justify-content-between compact-columns-data" [class.selected]="selected">
               <span class="ellipsis">Updated {{ experiment.last_update | timeAgo }}<span
               class="dot">●</span>Created by {{ experiment.user?.name || 'Unknown User' }}

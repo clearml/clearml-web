@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'toExponential',
-  standalone: true
-})
+  })
 export class ToExponentialPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {

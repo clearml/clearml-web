@@ -234,6 +234,10 @@ export class BaseLoginService {
           pathname = pathname.replace(this.locationStrategy.getBaseHref(), '');
         }
 
+        if (pathname.startsWith('/login')) {
+          return of(null);
+        }
+
         let redirectUrl = '';
         let extraParam = '';
         if (pathname.match(/^\/_\w+$/gm)) {

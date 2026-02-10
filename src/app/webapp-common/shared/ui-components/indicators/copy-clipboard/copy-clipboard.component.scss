@@ -5,3 +5,10 @@ button {
     transition: color 0.3s;
   }
 }
+:host-context(.inverse-theme) {
+  button .mat-icon.al-icon.mat-icon-no-color {
+    &.al-ico-copy-to-clipboard, &.al-ico-success {
+      --mat-icon-color: var(--color-inverse-primary) !important;
+    }
+  }
+}

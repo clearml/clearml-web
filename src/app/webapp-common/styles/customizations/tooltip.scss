@@ -11,7 +11,12 @@
     &.break-line {
       .mdc-tooltip__surface {
         white-space: pre-line;
+        text-align: left;
       }
+    }
+    &.scrollable .mdc-tooltip__surface {
+      overflow: auto;
+      max-height: 400px;
     }
 
     &.validation {

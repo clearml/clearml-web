@@ -43,12 +43,13 @@ export class InlineEditComponent {
   public active = signal(false);
   protected inlineValue = signal<string>(null);
 
-  readonly pattern = input(undefined);
+  readonly pattern = input<string>();
   readonly required = input(false);
   readonly minLength = input(0);
   readonly originalText = input<string>(undefined);
+  forbiddenPrefix = input<string>();
   forbiddenString = input<string[]>();
-  forbiddenStringFiltered = computed(() => this.forbiddenString()?.filter(fs => fs !== this.originalText()));
+  forbiddenStringFiltered = computed(() => this.forbiddenString()?.filter(fs => fs !== (this.forbiddenPrefix() || '') + this.originalText()));
 
   // *DEFAULTS*
   readonly editable = input(true);

@@ -3,8 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'keyval',
-  standalone: true
-})
+  })
 export class KeyvalPipe implements PipeTransform {
 
   transform(arr: Array<object>, key, value): any {

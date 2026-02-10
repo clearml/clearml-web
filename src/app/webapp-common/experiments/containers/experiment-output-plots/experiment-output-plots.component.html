@@ -1,5 +1,5 @@
-<mat-drawer-container autosize [class]="dark ? 'dark-theme' : 'light-theme'">
-  <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized && !isDatasetVersionPreview">
+<mat-drawer-container autosize [class]="dark ? 'dark-theme' : 'light-theme'" [hasBackdrop]="false">
+  <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview"  [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized && !isDatasetVersionPreview">
 
     <div class="list-container">
       @if (plotsList !== undefined) {
@@ -9,7 +9,7 @@
           [checkedList]="selectedMetrics"
           [searchTerm]="searchTerm$ | ngrxPush"
           (itemSelect)="metricSelected($event)"
-          (hiddenChanged)="hiddenListChanged($event)"
+          (selectedChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
       }

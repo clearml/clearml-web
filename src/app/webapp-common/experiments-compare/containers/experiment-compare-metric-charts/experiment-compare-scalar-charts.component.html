@@ -1,4 +1,4 @@
-<mat-drawer-container autosize class="light-theme">
+<mat-drawer-container [hasBackdrop]="false" autosize class="light-theme">
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
     <div class="list-container">
       @if (!minimized) {
@@ -25,10 +25,11 @@
       @if (!minimized) {
         <sm-selectable-grouped-filter-list
           [list]="graphList"
+          [nested]="settings.groupBy === 'none'"
           [checkedList]="settings.selectedMetricsScalar"
           [searchTerm]="searchTerm$ | ngrxPush"
           (itemSelect)="metricSelected($event)"
-          (hiddenChanged)="selectedListChanged($event)"
+          (selectedChanged)="selectedListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         >
         </sm-selectable-grouped-filter-list>
@@ -43,6 +44,7 @@
       [hiddenList]="settings.selectedMetricsScalar"
       [isGroupGraphs]="settings.groupBy === 'none'"
       [isCompare]="true"
+      [hideLegend]="minimized"
       [smoothWeight]="settings.smoothWeight"
       [smoothSigma]="settings.smoothSigma"
       [smoothType]="settings.smoothType"

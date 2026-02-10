@@ -1,7 +1,7 @@
 <sm-dialog-template iconClass="al-ico-reports" header="CREATE NEW REPORT">
   <sm-create-new-report-form
-    [projects]="projects$| ngrxPush"
-    [readOnlyProjectsNames]="readOnlyProjectsNames$ | ngrxPush"
+    [projects]="projects()"
+    [readOnlyProjectsNames]="readOnlyProjectsNames()"
     [defaultProjectId]="data?.defaultProjectId"
     (reportCreated)="createReport($event)"
     (filterSearchChanged)="filterSearchChanged($event)"

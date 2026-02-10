@@ -13,7 +13,7 @@ import {
 } from './reports.actions';
 import {IReport} from './reports.consts';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
   if (currentOrderField === nextOrderField) {
@@ -122,3 +122,4 @@ export const selectReportsQueryString = createSelector(selectReportsState, state
 export const selectEditingReport = createSelector(selectReportsState, state => state.editing);
 export const selectDirtyReport = createSelector(selectReportsState, state => state.dirty);
 export const selectNestedReports = createSelector(selectRouterConfig, config => config?.length === 3 && config.at(-1) === 'reports');
+export const selectReportId = createSelector(selectRouterParams, params => params?.reportId);

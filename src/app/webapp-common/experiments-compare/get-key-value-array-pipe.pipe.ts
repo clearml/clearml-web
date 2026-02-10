@@ -2,7 +2,6 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
     name: 'getKeyValueArrayPipe',
-    standalone: false
 })
 export class GetKeyValueArrayPipePipe implements PipeTransform {
 

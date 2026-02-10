@@ -4,14 +4,37 @@ import {Project} from '~/business-logic/model/projects/project';
 import {ICONS} from '@common/constants';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {CleanProjectPathPipe} from '@common/shared/pipes/clean-project-path.pipe';
+import {BreadcrumbsEllipsisPipe} from '@common/shared/pipes/breadcrumbs-ellipsis.pipe';
 
 
 @Component({
-    selector: 'sm-nested-card',
-    templateUrl: './nested-card.component.html',
-    styleUrls: ['./nested-card.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-nested-card',
+  templateUrl: './nested-card.component.html',
+  styleUrls: ['./nested-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CardComponent,
+    InlineEditComponent,
+    TooltipDirective,
+    ShortProjectNamePipe,
+    ShowTooltipIfEllipsisDirective,
+    CdkVirtualForOf,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualScrollViewport,
+    ClickStopPropagationDirective,
+    CleanProjectPathPipe,
+    BreadcrumbsEllipsisPipe
+  ]
 })
 export class NestedCardComponent {
 

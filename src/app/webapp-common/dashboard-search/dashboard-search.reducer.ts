@@ -5,19 +5,26 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {Model} from '~/business-logic/model/models/model';
 import {
   clearSearchFilters,
-  clearSearchResults, currentPageLoadMoreResults, getResultsCount,
-  searchActivate,
+  clearSearchResults,
+  currentPageLoadMoreResults,
+  getResultsCount,
+  searchActivated,
   searchClear,
-  searchDeactivate, searchLoadMoreDeactivate,
+  searchDeactivate,
+  searchLoadMoreDeactivate,
   searchSetTableFilters,
-  searchSetTerm, searchStart, setEndpointsResults,
-  setExperimentsResults, setLoadingEndpointsResults,
+  searchSetTerm,
+  searchStart,
+  setEndpointsResults,
+  setExperimentsResults,
+  setLoadingEndpointsResults,
   setModelsResults,
   setOpenDatasetsResults,
   setPipelinesResults,
   setProjectsResults,
   setReportsResults,
-  setResultsCount
+  setResultsCount,
+  setSearchProjectsTags
 } from './dashboard-search.actions';
 import {SearchState} from '../common-search/common-search.reducer';
 import {ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
@@ -30,9 +37,11 @@ import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {filterEndpoints} from '@common/serving/serving.consts';
 import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
 import {SEARCH_PAGE_SIZE} from '@common/dashboard-search/dashboard-search.consts';
+import {selectCompanyTags} from '@common/core/reducers/projects.reducer';
 
 export interface DashboardSearchState {
   projects: Project[];
+  projectsTags: string[];
   tasks: Task[];
   models: Model[];
   pipelines: Project[];
@@ -58,15 +67,16 @@ export const searchInitialState: DashboardSearchState = {
   term: null,
   tabsColumnFilters: {},
   forceSearch: false,
-  projects: [],
-  pipelines: [],
-  openDatasets: [],
+  projects: null,
+  projectsTags: [],
+  pipelines: null,
+  openDatasets: null,
   users: [],
-  tasks: [],
-  models: [],
-  reports: [],
-  endpoints: [],
-  loadingInstances: [],
+  tasks: null,
+  models: null,
+  reports: null,
+  endpoints: null,
+  loadingInstances: null,
   resultsCount: null,
   scrollIds: null,
   active: false,
@@ -77,7 +87,7 @@ export const searchInitialState: DashboardSearchState = {
 };
 
 export const dashboardSearchReducers = [
-  on(searchActivate, (state): DashboardSearchState => ({...state, active: true})),
+  on(searchActivated, (state): DashboardSearchState => ({...state, active: true})),
   on(searchLoadMoreDeactivate, (state): DashboardSearchState => ({...state, loadMoreActive: false})),
   on(currentPageLoadMoreResults, (state): DashboardSearchState => ({...state, loadMoreActive: true})),
   on(searchDeactivate, (state): DashboardSearchState => ({
@@ -98,7 +108,7 @@ export const dashboardSearchReducers = [
   on(searchSetTableFilters, (state, action): DashboardSearchState => ({
     ...state,
     tabsColumnFilters: {
-      // ...state.tabsColumnFilters,
+      ...state.tabsColumnFilters,
       [action.activeLink]: {
         ...action.filters.reduce((obj, filter: TableFilter) => {
           obj[filter.col] = {value: filter.value, matchMode: filter.filterMatchMode};
@@ -111,7 +121,7 @@ export const dashboardSearchReducers = [
   on(setProjectsResults, (state, action): DashboardSearchState => ({
     ...state,
     projects: action.page && action.page !== state.pages?.[activeSearchLink.projects] ? state.projects.concat(action.projects) : action.projects,
-      ...(action.page !== undefined && {pages: {...state.pages, [activeSearchLink.projects]: action.page}})
+    ...(action.page !== undefined && {pages: {...state.pages, [activeSearchLink.projects]: action.page}})
   })),
   on(setPipelinesResults, (state, action): DashboardSearchState => ({
     ...state,
@@ -146,20 +156,24 @@ export const dashboardSearchReducers = [
     ...state,
     loadingInstances: action.instances,
   })),
-  on(getResultsCount, (state): DashboardSearchState => ({...state, errors: searchInitialState.errors})),
+  on(setSearchProjectsTags, (state, action): DashboardSearchState => ({
+    ...state,
+    projectsTags: action.tags,
+  })),
+  on(getResultsCount, (state): DashboardSearchState => ({...state, errors: searchInitialState.errors, active: true})),
   on(setResultsCount, (state, action): DashboardSearchState => ({
     ...state,
     resultsCount: action.counts,
     errors: action.errors
   })),
-  on(clearSearchResults, searchStart, (state, action): DashboardSearchState => ({
+  on(clearSearchResults, searchStart, (state): DashboardSearchState => ({
     ...state,
-    models: [],
-    tasks: [],
-    pipelines: [],
-    projects: [],
-    openDatasets: [],
-    reports: [],
+    models: searchInitialState.models,
+    tasks: searchInitialState.tasks,
+    pipelines: searchInitialState.pipelines,
+    projects: searchInitialState.projects,
+    openDatasets: searchInitialState.openDatasets,
+    reports: searchInitialState.reports,
   })),
   on(searchClear, (state): DashboardSearchState => ({...state, ...searchInitialState})),
   on(clearSearchFilters, (state): DashboardSearchState => ({
@@ -185,25 +199,28 @@ export const selectDatasetsResults = createSelector(selectSearch, (state: Dashbo
 export const selectActiveSearch = createSelector(selectSearch, (state: DashboardSearchState): boolean => state?.active);
 export const selectLoadMoreActive = createSelector(selectSearch, (state: DashboardSearchState): boolean => state?.loadMoreActive);
 export const selectSearchTerm = createSelector(selectSearch, (state: DashboardSearchState): SearchState['searchQuery'] => state.term);
-export const selectSearchIsAdvance = createSelector(selectSearchTerm, (term: SearchState['searchQuery']) => term?.advanced);
-export const selectSearchTableFilters =
-  createSelector(selectSearch, selectRouterQueryParams, (state, params) => state.tabsColumnFilters?.[params?.tab || 'projects'] ?? {} as Record<string, FilterMetadata>);
+export const selectAdvancedSearch = createSelector(selectSearchTerm, (term: SearchState['searchQuery']) => term?.advanced);
+export const selectFilters = createSelector(selectSearch, state => state.tabsColumnFilters);
+export const selectTabFilters = createSelector(selectFilters, selectAdvancedSearch, selectRouterQueryParams,
+  (filters, advanced, params) => (!advanced && filters?.[params?.tab || 'projects']) ?? {} as Record<string, FilterMetadata>);
 export const selectFilteredEndpointsResults =
   createSelector(selectEndpointsResults, selectSearchTerm, (endpoints, searchTerm): EndpointStats[] =>
-    filterEndpoints(endpoints, searchTerm).slice(0, SEARCH_PAGE_SIZE));
+    filterEndpoints(endpoints, searchTerm)?.slice(0, SEARCH_PAGE_SIZE) ?? null);
 export const selectFilteredLoadingEndpointsResults =
   createSelector(selectLoadingEndpointsResults, selectSearchTerm, (loadingEndpoints, searchTerm): EndpointStats[] =>
-    filterEndpoints(loadingEndpoints, searchTerm).slice(0, SEARCH_PAGE_SIZE));
+    filterEndpoints(loadingEndpoints, searchTerm)?.slice(0, SEARCH_PAGE_SIZE) ?? null);
 export const selectResultsCount = createSelector(selectSearch, (state: DashboardSearchState) => state.resultsCount);
 export const selectSearchScrollIds = createSelector(selectSearch, (state: DashboardSearchState) => state.scrollIds);
 export const selectSearchPages = createSelector(selectSearch, (state: DashboardSearchState) => state.pages);
+export const selectSearchProjectsTags = createSelector(selectSearch, (state: DashboardSearchState) => state.projectsTags);
+export const selectSearchTags = createSelector(selectCompanyTags, selectSearchProjectsTags, selectRouterQueryParams, (companyTags, projectsTags, params) => params?.tab === 'projects' ? projectsTags : companyTags);
 export const selectResultErrors = createSelector(selectSearch, (state: DashboardSearchState) => state.errors ?
   Object.entries(Object.groupBy(Object.keys(state.errors), entity => {
     const error = state.errors[entity];
     const matches = Array.from(error.matchAll(/field=(.*),|field=(.*)$/gm));
-    if(matches?.length > 0) {
+    if (matches?.length > 0) {
       const fields = Array.from(new Set(matches.map(match => match[1] || match[2])));
-      return `Invalid Fields ${fields.join(', ')}`
+      return `Invalid Fields ${fields.join(', ')}`;
     } else {
       return error;
     }

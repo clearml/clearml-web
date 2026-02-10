@@ -1,5 +1,5 @@
 import {Component, computed, inject, OnDestroy} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import * as infoActions from '../../actions/models-info.actions';
@@ -45,12 +45,39 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {concatLatestFrom} from '@ngrx/operators';
 import {infoModelsTabsLinks} from '@common/models/models.consts';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {
+  InfoHeaderStatusIconLabelComponent
+} from '@common/shared/experiment-info-header-status-icon-label/info-header-status-icon-label.component';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {
+  GraphSettingsBarComponent
+} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
+import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
+import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {ModelInfoHeaderComponent} from '@common/models/dumbs/model-info-header/model-info-header.component';
 
 @Component({
   selector: 'sm-model-info',
   templateUrl: './model-info.component.html',
   styleUrls: ['./model-info.component.scss'],
-  standalone: false
+  imports: [
+    RouterOutlet,
+    InfoHeaderStatusIconLabelComponent,
+    RefreshButtonComponent,
+    GraphSettingsBarComponent,
+    RouterTabNavBarComponent,
+    MatIconModule,
+    MatMenu,
+    PushPipe,
+    MatMenuTrigger,
+    TooltipDirective,
+    MatIconButton,
+    ModelInfoHeaderComponent
+  ]
 })
 export class ModelInfoComponent implements OnDestroy {
   private router = inject(Router);

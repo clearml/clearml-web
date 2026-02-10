@@ -1,6 +1,8 @@
-@use "variables";
-
 :host {
+
+  .search.outline {
+    width: 450px;
+  }
 
   .select-experiments-container {
     height: calc(100% - 100px);
@@ -10,7 +12,6 @@
   .hide-table {
     height: 0;
     overflow: hidden;
-    transition: variables.$transition-fast;
 
     &.show-table {
       height: calc(100% - 60px);
@@ -49,6 +50,10 @@
     .p-datatable-hoverable-rows .p-datatable-selectable-row  {
       cursor: default;
     }
+  }
+
+  ::ng-deep .generic-container {
+    max-height: unset !important;
   }
 }
 

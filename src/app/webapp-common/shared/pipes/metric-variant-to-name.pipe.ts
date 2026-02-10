@@ -4,8 +4,7 @@ import {MetricValueTypeStrings} from '@common/shared/utils/tableParamEncode';
 
 @Pipe({
   name: 'metricVariantToName',
-  standalone: true
-})
+  })
 export class MetricVariantToNamePipe implements PipeTransform {
 
   transform(metricVariant: SelectedMetricVariant, includeValueType?: boolean): string {

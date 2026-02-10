@@ -1,15 +1,15 @@
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {ProjectRouterModule} from './projects-routing.module';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
+import {ProjectDialogModule} from '@common/shared/project-dialog/project-dialog.module';
 
 export const projectSyncedKeys = ['showHidden', 'tableModeAwareness', 'orderBy', 'sortOrder'];
 
 @NgModule({
   imports        : [
-    CommonModule,
     ProjectRouterModule,
     CommonProjectsModule,
+    ProjectDialogModule
   ],
   declarations   : []
 })

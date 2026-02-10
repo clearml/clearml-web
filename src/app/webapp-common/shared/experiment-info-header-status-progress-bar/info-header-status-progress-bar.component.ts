@@ -11,8 +11,7 @@ import {
   imports: [
     InfoHeaderStatusIconLabelComponent
   ],
-  standalone: true
-})
+  })
 export class InfoHeaderStatusProgressBarComponent {
   @Input() status;
   @Input() editable          = true;

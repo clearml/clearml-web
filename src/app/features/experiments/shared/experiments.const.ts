@@ -70,3 +70,4 @@ export const DATASETS_STATUS_LABEL = {
   Completed: 'Final'
 };
 
+export const selectQueueFields = ['id', 'name', 'display_name'];

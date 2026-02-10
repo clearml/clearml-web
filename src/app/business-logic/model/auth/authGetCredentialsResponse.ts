@@ -18,4 +18,8 @@ export interface AuthGetCredentialsResponse {
      * List of credentials, each with an empty secret field.
      */
     credentials?: Array<CredentialKey>;
+
+    additional_credentials?: Record<string, CredentialKey[]>;
+
+    max_credentials?: number;
 }

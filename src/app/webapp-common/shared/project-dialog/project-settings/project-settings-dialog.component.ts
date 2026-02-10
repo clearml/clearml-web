@@ -3,8 +3,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButton} from '@angular/material/button';
-import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
-import {groupByCharts, GroupByCharts, removeExperimentSettings, setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {groupByCharts, GroupByCharts, setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {Store} from '@ngrx/store';
@@ -25,6 +24,7 @@ import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-
 import {updateProject as dialogUpdateProject} from '@common/shared/project-dialog/project-dialog.actions';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ProjectSettingsStore} from '@common/shared/project-dialog/project-settings/project-settings-dialog.store';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 export interface ProjectSettingsDialogConfig {
   project: Project;
@@ -41,7 +41,7 @@ export interface ProjectSettingsDialogConfig {
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatButton,
-    ExperimentGraphsModule,
+    SingleGraphStateModule,
     DialogTemplateComponent,
     MatTabGroup,
     MatTab,

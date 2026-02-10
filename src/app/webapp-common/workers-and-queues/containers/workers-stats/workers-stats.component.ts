@@ -8,9 +8,9 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import {humanizeUsage} from '@common/shared/utils/time-util';
 import {Store} from '@ngrx/store';
 import {Worker} from '~/business-logic/model/workers/worker';
-import {Topic} from '@common/shared/utils/statistics';
 import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 import {getWorkerStats, setStats, setStatsParams} from '../../actions/workers.actions';
 import {selectStats, selectStatsErrorNotice, selectStatsParams, selectStatsTimeFrame} from '../../reducers/index.reducer';
@@ -22,7 +22,7 @@ import {FormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import {LineChartComponent} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {LineChartComponent, Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
@@ -55,6 +55,16 @@ export class WorkersStatsComponent {
     refreshChart: signal(!this.chartData())
   }))
   public yAxisLabel = computed(() => this.activeWorker() ? this.yAxisLabels[this.currentParam()] : 'Count');
+
+  formatY = computed(() => {
+    // Capture the dependencies
+    const unitType = this.activeWorker() && this.units[this.currentParam()];
+    // Return the actual formatting function
+    return (tick) => {
+      const { humanizedValue, humanizedUnit } = humanizeUsage(unitType, tick);
+      return `${humanizedValue} ${humanizedUnit}`;
+    };
+  });
 
   constructor() {
     combineLatest([
@@ -108,5 +118,10 @@ export class WorkersStatsComponent {
   timeFrameChange(event: string) {
     const maxPoints = Math.min(0.8 * this.chartRef().nativeElement.clientWidth || 1000, 1000);
     this.store.dispatch(setStatsParams({timeFrame: event, param: this.currentParam(), maxPoints}));
+  }
+  units = {
+    memory_used: 'Byte',
+    gpu_memory_used: 'Byte',
+    'network_rx;network_tx': 'B/s'
   }
 }

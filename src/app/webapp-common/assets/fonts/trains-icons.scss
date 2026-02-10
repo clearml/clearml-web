@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: '#{variables.$icomoon-font-family}';
-  src: url('./#{variables.$icomoon-font-family}.ttf?2tj9q0') format('truetype');
+  src: url('./#{variables.$icomoon-font-family}.ttf?2sxgo1') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-downward {
+  &:before {
+    content: variables.$al-ico-downward; 
+  }
+}
+.al-ico-upward {
+  &:before {
+    content: variables.$al-ico-upward; 
+  }
+}
+.al-ico-package {
+  &:before {
+    content: variables.$al-ico-package; 
+  }
+}
 .al-ico-dataviews {
   &:before {
     content: variables.$al-ico-dataviews;

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {MatSelectChange} from '@angular/material/select';
+import {MatFormField, MatOption, MatSelect, MatSelectChange, MatSelectTrigger} from '@angular/material/select';
 import {Store} from '@ngrx/store';
 import {selectHideIdenticalFields, selectShowRowExtremes} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
@@ -15,7 +15,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {filter, map} from 'rxjs/operators';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {
   SelectExperimentsForCompareComponent,
@@ -27,13 +27,35 @@ import {paramsActions} from '@common/experiments-compare/actions/experiments-com
 import {SelectModelComponent} from '@common/select-model/select-model.component';
 import {MatDialog} from '@angular/material/dialog';
 import {setArchive} from '@common/core/actions/projects.actions';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
+import {TitleCasePipe, UpperCasePipe} from '@angular/common';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-experiment-compare-header',
   templateUrl: './experiment-compare-header.component.html',
   styleUrls: ['./experiment-compare-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    MatFormField,
+    MatOption,
+    MatSelect,
+    TooltipDirective,
+    RefreshButtonComponent,
+    MatSlideToggle,
+    MatIconModule,
+    MatButton,
+    MatIconButton,
+    NoUnderscorePipe,
+    UpperCasePipe,
+    PushPipe,
+    TitleCasePipe,
+    MatSelectTrigger
+  ]
 })
 export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 

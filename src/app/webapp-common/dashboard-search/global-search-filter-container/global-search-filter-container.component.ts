@@ -2,11 +2,15 @@ import {Component, inject, input} from '@angular/core';
 import {
   GlobalSearchFilterComponent
 } from '@common/dashboard-search/global-search-filter/global-search-filter.component';
-import {selectAllProjectsUsers, selectCompanyTags} from '@common/core/reducers/projects.reducer';
+import {selectAllProjectsUsers} from '@common/core/reducers/projects.reducer';
 import {Store} from '@ngrx/store';
-import {getCompanyTags, getProjectUsers} from '@common/core/actions/projects.actions';
-import {clearSearchResults, searchTableFilterChanged} from '@common/dashboard-search/dashboard-search.actions';
-import {selectSearchTableFilters} from '@common/dashboard-search/dashboard-search.reducer';
+import {getAllSystemProjects} from '@common/core/actions/projects.actions';
+import {
+  clearSearchResults,
+  getTagsOptionsForSearch,
+  searchTableFilterChanged
+} from '@common/dashboard-search/dashboard-search.actions';
+import {selectTabFilters, selectSearchTags} from '@common/dashboard-search/dashboard-search.reducer';
 import {Router} from '@angular/router';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 
@@ -21,10 +25,10 @@ import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 export class GlobalSearchFilterContainerComponent {
   private store = inject(Store);
   protected router = inject(Router);
-  protected tags = this.store.selectSignal(selectCompanyTags);
+  protected tags = this.store.selectSignal(selectSearchTags);
   protected userOptions = this.store.selectSignal(selectAllProjectsUsers);
   protected currentUser = this.store.selectSignal(selectCurrentUser);
-  protected filters = this.store.selectSignal(selectSearchTableFilters);
+  protected filters = this.store.selectSignal(selectTabFilters);
   statusOptions= input<string[]>()
   typeOptions= input<string[]>()
   showUserFilter= input<boolean>()
@@ -33,8 +37,7 @@ export class GlobalSearchFilterContainerComponent {
 
 
   constructor() {
-    this.store.dispatch(getCompanyTags());
-    this.store.dispatch(getProjectUsers({projectId: '*'}));
+    this.store.dispatch(getAllSystemProjects({}));
   }
   filterChanged({col, value, matchMode}: { col: string; value: any; matchMode?: string }) {
     this.store.dispatch(clearSearchResults());
@@ -51,6 +54,9 @@ export class GlobalSearchFilterContainerComponent {
       queryParams: { gsfilter: ''},
       queryParamsHandling: 'merge'
     });
+  }
+  tagsMenuOpened(){
+    this.store.dispatch(getTagsOptionsForSearch());
   }
 
 }

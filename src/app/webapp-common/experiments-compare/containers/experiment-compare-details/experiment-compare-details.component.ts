@@ -10,13 +10,50 @@ import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {PortalComponent} from '@common/shared/portal/portal.component';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {
+  CompareCardListComponent
+} from '@common/experiments-compare/dumbs/compare-card-list/compare-card-list.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {CompareCardBodyDirective} from '@common/experiments-compare/dumbs/compare-card-body.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CompareCardHeaderDirective} from '@common/experiments-compare/dumbs/compare-card-header.directive';
+import {MatIconButton} from '@angular/material/button';
+import {HideHashTitlePipe} from '@common/shared/pipes/hide-hash-title.pipe';
+import {HideHashPipe} from '@common/shared/pipes/hide-hash.pipe';
+import {PushPipe} from '@ngrx/component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-experiment-compare-details',
   templateUrl: './experiment-compare-details.component.html',
   styleUrls: ['../experiment-compare-base.component.scss', '../../cdk-drag.scss', './experiment-compare-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    ExperimentCompareGeneralDataComponent,
+    PortalComponent,
+    CompareCardListComponent,
+    SearchComponent,
+    MatIconModule,
+    CompareCardBodyDirective,
+    ShowTooltipIfEllipsisDirective,
+    TooltipDirective,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    CompareCardHeaderDirective,
+    CdkFixedSizeVirtualScroll,
+    MatIconButton,
+    HideHashTitlePipe,
+    HideHashPipe,
+    PushPipe
+  ]
 })
 export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   public showEllipsis= true;

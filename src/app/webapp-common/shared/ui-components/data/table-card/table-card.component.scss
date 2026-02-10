@@ -1,4 +1,7 @@
 .table-card {
+  &.item-color{
+    border-left: 8px solid;
+  }
   display: grid;
   grid-template-columns: 20px 32px 1fr;
   align-items: center;

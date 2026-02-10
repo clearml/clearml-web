@@ -12,7 +12,10 @@ export const setCurrentUserName = createAction(USERS_PREFIX + 'SET_CURRENT_USER_
 );
 export const termsOfUseAccepted = createAction(USERS_PREFIX + '[TOS accepted]');
 
-export const logout = createAction(USERS_PREFIX + 'LOGOUT', props<{provider?: string}>());
+export const logout = createAction(
+  USERS_PREFIX + 'LOGOUT',
+  props<{provider?: string; tenant?: string; redirectUrl?: string}>()
+);
 export const logoutSuccess = createAction(USERS_PREFIX + 'LOGOUT_SUCCESS');
 
 export const setPreferences = createAction(USERS_PREFIX +'SET_PREF', props<{payload: any}>());

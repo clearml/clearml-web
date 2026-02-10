@@ -44,7 +44,7 @@ export interface Script {
     /**
      * A JSON object containing requirements strings by key
      */
-    requirements?: object;
+    requirements?: any;
     /**
      * Uncommitted changes found in the repository when task was run
      */

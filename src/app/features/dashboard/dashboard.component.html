@@ -1,10 +1,10 @@
 <div class="dashboard-body">
   <div class="recent">
-    <sm-dashboard-projects (width)="setWidth($event)"></sm-dashboard-projects>
+    <sm-dashboard-projects (width)="width.set($event)"></sm-dashboard-projects>
     <sm-dashboard-reports></sm-dashboard-reports>
     <sm-dashboard-experiments
-      [style.width]="width && width > 900 ? width + 'px' : '100%'"
-      [recentTasks]="recentTasks$| async"
+      [style.width]="width() && width() > 900 ? width() + 'px' : '100%'"
+      [recentTasks]="recentTasks()"
     >
       <div header-buttons>
         <button mat-flat-button data-id="Manage Workers And Queues" (click)="redirectToWorkers()">

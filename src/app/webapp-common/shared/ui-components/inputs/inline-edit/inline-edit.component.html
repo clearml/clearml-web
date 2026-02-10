@@ -29,6 +29,7 @@
                  [required]="required()"
                  [minLength]="minLength()"
                  smUniqueNameValidator
+                 [forbiddenPrefix]="forbiddenPrefix()"
                  [existingNames]="forbiddenStringFiltered()"
                  (keydown.tab)="form.checkValidity() && inlineSaved()"
                  (keydown.escape)="inlineCanceled()"

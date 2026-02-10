@@ -80,7 +80,8 @@
               "base-64",
               "export-to-csv",
               "dompurify",
-              "hammerjs"
+              "hammerjs",
+              "semver/functions"
             ],
             "extractLicenses": false,
             "sourceMap": true,

@@ -28,7 +28,6 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {MetricValueType, SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
 import {
@@ -76,7 +75,6 @@ interface ParaPlotData {
   imports: [
     SlicePipe,
     TooltipDirective,
-    ChooseColorModule,
     ShowTooltipIfEllipsisDirective,
     MatIconButton,
     MatIcon,

@@ -3,8 +3,7 @@ import {escape} from 'lodash-es';
 
 @Pipe({
   name: 'breadcrumbsEllipsis',
-  standalone: true
-})
+  })
 export class BreadcrumbsEllipsisPipe implements PipeTransform {
 
   transform(value: string) {

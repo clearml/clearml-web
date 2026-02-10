@@ -1,22 +1,22 @@
-<button mat-icon-button class='cell' [matMenuTriggerFor]="menu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
+<button mat-icon-button class='cell' [matMenuTriggerFor]="menu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen" (menuOpened)="menuOpen()">
   <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0)? 'al-ico-filter-on' : 'al-ico-filter-off')">
     <span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span>
   </mat-icon>
 </button>
 
-<mat-menu #menu="matMenu" class="light-theme" (closed)="closeMenu()">
+<mat-menu #menu="matMenu" (closed)="closeMenu()">
   <button mat-menu-item smClickStopPropagation (click)="switchUserFocus()">
     <mat-icon matIconPrefix fontSet="al" [fontIcon]="showOnlyUserWork() ? 'al-ico-success' : ''" data-id="MyworkCheckbox"></mat-icon>
     <div data-id="MyWorkFilterOption">My Work</div>
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="subMenu">
+  <button mat-menu-item [matMenuTriggerFor]="subMenu" (menuOpened)="tagsFilterOpened()">
     <mat-icon matIconPrefix fontSet="al"
               [fontIcon]="!(tagsFilters()?.length > 0) ? '' : 'al-ico-success'"
               data-id="TagCheckbox"
     ></mat-icon>
     <span data-id="TagOption">Tags</span>
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" [disabled]="showOnlyUserWork()">
+  <button mat-menu-item [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" [disabled]="showOnlyUserWork()" (menuOpened)="usersFilterOpened()">
     <mat-icon matIconPrefix fontSet="al"
               [fontIcon]="!(usersFilters()?.length > 0) ? '' : 'al-ico-success'"
               data-id="TagCheckbox"
@@ -24,7 +24,7 @@
     <span data-id="TagOption">Users</span>
   </button>
 
-  <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu()">
+  <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme"  (close)="closeMenu()">
     <form class="filter-form">
       <mat-form-field appearance="fill"  smClickStopPropagation class="tags-menu-input w-100 no-bottom">
         <input matInput (input)="setSearchTerm($event)" name="filter" [(ngModel)]="searchTerm" autocomplete="off">

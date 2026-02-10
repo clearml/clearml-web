@@ -45,6 +45,7 @@ import {ErrorService} from '@common/shared/services/error.service';
 import {Router} from '@angular/router';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {selectionDisabledReset} from '@common/shared/entity-page/items.utils';
 
 @Injectable()
 export class DeleteDialogEffectsBase {
@@ -78,7 +79,8 @@ export class DeleteDialogEffectsBase {
     urlsToDelete: string[];
     succeeded?: TasksResetManyResponseSucceeded[]
   }> {
-    const ids = entities.map(entity => entity.id as string);
+    const filtered = resetMode ? selectionDisabledReset(entities).selectedFiltered : entities;
+    const ids = filtered.map(entity => entity.id as string);
     switch (entityType) {
       case EntityTypeEnum.controller:
         return this.pipelinesService.pipelinesDeleteRuns({

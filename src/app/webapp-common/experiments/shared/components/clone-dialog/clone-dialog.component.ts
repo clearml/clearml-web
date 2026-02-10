@@ -1,23 +1,35 @@
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogRef} from '@angular/material/dialog';
 import {
   ChangeDetectionStrategy,
   Component, computed, effect,
   inject
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {FormBuilder, Validators} from '@angular/forms';
-import {selectReadOnlyProjects, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {rootProjectsPageSize} from '@common/constants';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import {selectCloneForceParent} from '@common/experiments/reducers';
+import {selectCloneDefaultOptions} from '@common/experiments/reducers';
 import {CloneExperimentPayload} from '@common/experiments/shared/common-experiment-model.model';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
-import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 import {CloneNamingService} from '~/features/experiments/shared/services/clone-naming.service';
+import {camelCase, capitalize} from 'lodash-es';
+import {
+  PaginatedEntitySelectorComponent
+} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatError, MatFormField,MatLabel} from '@angular/material/form-field';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatButton} from '@angular/material/button';
+import {MatInput} from '@angular/material/input';
+import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
+import {SlicePipe} from '@angular/common';
+import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 
 export interface CloneDialogData {
   type: string;
@@ -25,14 +37,30 @@ export interface CloneDialogData {
   defaultName: string;
   defaultComment?: string;
   extend?: boolean;
+  extraToggles?: string[];
 }
 
 @Component({
-    selector: 'sm-clone-dialog',
-    templateUrl: './clone-dialog.component.html',
-    styleUrls: ['./clone-dialog.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-clone-dialog',
+  templateUrl: './clone-dialog.component.html',
+  styleUrls: ['./clone-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogActions,
+    PaginatedEntitySelectorComponent,
+    DialogTemplateComponent,
+    MatError,
+    MatFormField,
+    MatLabel,
+    MatCheckbox,
+    MatDialogClose,
+    ReactiveFormsModule,
+    TooltipDirective,
+    MatButton,
+    MatInput,
+    StringIncludedInArrayPipe,
+    SlicePipe
+  ]
 })
 export class CloneDialogComponent {
   private readonly store = inject(Store);
@@ -45,11 +73,22 @@ export class CloneDialogComponent {
   public header: string;
   public type: string;
 
+  protected extraToggles = this.data.extraToggles?.reduce((acc, toggle) => {
+    const key = camelCase(toggle);
+    acc[key] = capitalize(toggle);
+    return acc;
+  }, {});
+  protected toggleKeys = Object.keys(this.extraToggles ?? {});
+
   protected cloneForm = this.builder.group({
-    project: [null as string, [Validators.required, minLengthTrimmed(3)]],
+    project: [null as string, [Validators.required, minLengthTrimmed(1)]],
     name: [null as string, [Validators.required]],
     comment: [null as string],
-    forceParent: [false]
+    forceParent: [false],
+    ...this.toggleKeys?.reduce((acc, key) => {
+      acc[key] = [false];
+      return acc;
+    }, {}) ?? {},
   });
 
   private readonly defaultProjectId: string;
@@ -59,13 +98,12 @@ export class CloneDialogComponent {
   private defaultProject;
   private newProjectName: string;
 
-  public forceParent = this.store.selectSignal(selectCloneForceParent);
+  public defaultOptions = this.store.selectSignal(selectCloneDefaultOptions);
   protected projects = this.store.selectSignal(selectTablesFilterProjectsOptions);
   protected readonlyProject = computed(() => this.projects()?.length === 1 && isReadOnly(this.projects()[0]));
   protected noMoreOptions = computed(() => this.projects()?.length < rootProjectsPageSize);
   protected loading = computed(() => this.projects() === null);
   protected projectsNames = computed(() => this.projects()?.map(p => p.name) ?? []);
-  protected readOnlyProjects = this.store.selectSignal(selectReadOnlyProjects);
 
   constructor() {
     this.defaultProjectId = this.data.defaultProject;
@@ -89,11 +127,11 @@ export class CloneDialogComponent {
     });
 
     effect(() => {
-      this.cloneForm.controls.forceParent.setValue(this.forceParent());
+      this.cloneForm.patchValue(this.defaultOptions());
     });
 
     effect(() => {
-      const name = this.naming.getClonePrefix(this.data.defaultName);
+      const name = this.naming.getTaskCloneTemplate(this.data.defaultName);
       if (name) {
         this.cloneForm.patchValue({name})
       }

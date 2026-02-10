@@ -3,12 +3,12 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {SortMeta} from 'primeng/api';
 import {TableFilter} from '@common/shared/utils/tableParamEncode';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {Topic} from '@common/shared/utils/statistics';
 import {ServingGetEndpointDetailsResponse} from '~/business-logic/model/serving/servingGetEndpointDetailsResponse';
 import {ServingGetEndpointMetricsHistoryRequest} from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryRequest';
 import MetricTypeEnum = ServingGetEndpointMetricsHistoryRequest.MetricTypeEnum;
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import {ContainerInstanceStats} from '~/business-logic/model/serving/containerInstanceStats';
+import {Topic} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 
 export type servingTableColFields =

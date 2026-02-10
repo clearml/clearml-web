@@ -10,7 +10,6 @@
     (menuClosed)="menuOpen.set(false)"
   ></sm-queues-menu-extended>
   <sm-table
-    #table
     [tableData]="queues()"
     [columns]="cols()"
     [rowsNumber]="100"
@@ -23,7 +22,7 @@
     [selection]="selectedQueue()"
     [contextMenuOpen]="menuOpen()"
     [activeContextRow]="contextQueue"
-    (rowSelectionChanged)="onRowClicked($event)"
+    (rowSelectionChanged)="queueSelected.emit($event.data?.id)"
     (rowRightClick)="openContextMenu($event)"
   >
     <ng-template let-col pTemplate="sort-filter">
@@ -40,7 +39,7 @@
           <div class="d-flex align-items-center first id-cell">
             <div class="queue-name" [smTooltip]="queue?.caption" smShowTooltipIfEllipsis>{{queue?.caption}}</div>
             <div class="copy-btn">
-              <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.id">
+              <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.[0]?.id">
                 <button
                   mat-menu-item
                   smTooltip="Copy Queue ID"
@@ -80,9 +79,10 @@
           }
         }
         @case (QUEUES_TABLE_COL_FIELDS.IN_QUEUE) {
-          <span class="ellipsis">{{queue?.entries?.length === 0 ? '' : queue?.entries?.length}}</span>
-          @if (queue?.entries?.length === 0) {
+          @if (queue?.entries_count === 0) {
             <span>&mdash;</span>
+          } @else {
+            <span class="ellipsis">{{queue?.entries_count || ''}}</span>
           }
         }
         @default {

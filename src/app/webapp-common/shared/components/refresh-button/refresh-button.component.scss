@@ -7,6 +7,7 @@
 
   .refresh-wrapper {
     position: relative;
+
     &.show-menu {
       .tooltip-container {
         padding: 4px 6px 4px 12px;
@@ -86,11 +87,29 @@
 }
 
 @keyframes rotation {
-  from{
+  from {
     transform: rotate(0deg);
   }
 
-  to{
+  to {
     transform: rotate(180deg);
   }
+}
+
+.enter {
+  animation: fade-in ease-in 0.3s;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.leaving {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }

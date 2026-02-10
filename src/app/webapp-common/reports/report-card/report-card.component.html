@@ -1,6 +1,6 @@
 <sm-card class="report-card"
-  (click)="cardClicked.emit(report)"
-  [isExample]="isExample"
+  (click)="cardClicked.emit(report())"
+  [isExample]="isExample()"
   [showFolder]="false"
   [oneTabMode]="true"
   >
@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #editName
         class="title edit-name dark"
-        [originalText]="report.name"
+        [originalText]="report().name"
         [editable]="true"
         [minLength]="3"
         [required]="true"
@@ -17,18 +17,18 @@
         (textChanged)="nameChanged.emit($event)"
         >
         <span class="d-flex align-items-center">
-          <span class="report-name" [smTooltip]="report.name | cleanProjectPath" smShowTooltipIfEllipsis>{{report.name}}</span>
-          @if (report.name) {
-            <i [smTooltip]="report.name" class="al-icon al-ico-project-path sm ms-2"></i>
+          <span class="report-name" [smTooltip]="report().name | cleanProjectPath" smShowTooltipIfEllipsis>{{report().name}}</span>
+          @if (report()?.project?.name !== '.reports') {
+            <i [smTooltip]="report()?.project?.name | cleanProjectPath" class="al-icon al-ico-project-path sm ms-2"></i>
           }
         </span>
       </sm-inline-edit>
-      @if (!hideMenu && !isExample) {
+      @if (!hideMenu() && !isExample()) {
         <sm-report-card-menu
           class="menu-wrapper"
-          [report]="report"
-          [isArchived]="isArchive"
-          [allTags]="allTags"
+          [report]="report()"
+          [isArchived]="isArchive()"
+          [allTags]="allTags()"
           (rename)="editName.inlineActivated()"
           (addTag)="addTag.emit($event)"
           (archive)="archive.emit($event)"
@@ -39,34 +39,32 @@
       }
     </div>
     <div class="d-flex align-items-center justify-content-start sub-title">
-      <div class="ellipsis" [smTooltip]="report?.project?.name | cleanProjectPath" smShowTooltipIfEllipsis>{{report?.project?.name | cleanProjectPath}}</div>
-      <span class="dot">●</span>
-      <div class="flex-shrink-0">{{report?.user?.name}}</div>
+      <div class="flex-shrink-0">{{report()?.user?.name}}</div>
     </div>
     <div class="d-flex sub-title">
-      @if (report?.last_update) {
+      @if (report()?.last_update) {
         <div
           class="last-run"
-          [smTooltip]="report.last_update | date: timeFormatString"
+          [smTooltip]="report().last_update | date: timeFormatString"
           matTooltipPosition="after"
-        >Updated {{report.last_update | timeAgo}}</div>
+        >Updated {{report().last_update | timeAgo}}</div>
       } @else {
         <div class="last-run"></div>
       }
-      <sm-status-icon-label class="ms-auto" [status]="report?.status"></sm-status-icon-label>
+      <sm-status-icon-label class="ms-auto" [status]="report()?.status"></sm-status-icon-label>
     </div>
   </div>
-  <div class="comment">{{report?.comment}}</div>
+  <div class="comment">{{report()?.comment}}</div>
   <div footer class="footer-tags">
-    @if (removeTag.observed) {
+    @if (removeTag['listeners']?.length) {
       <sm-tag-list
         class="w-100"
-        [tags]="report.tags"
+        [tags]="report().tags"
         (remove)="removeTag.emit($event)"
         smClickStopPropagation
       ></sm-tag-list>
     } @else {
-      <sm-tag-list class="w-100" [tags]="report.tags"></sm-tag-list>
+      <sm-tag-list class="w-100" [tags]="report().tags"></sm-tag-list>
     }
   </div>
 </sm-card>

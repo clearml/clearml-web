@@ -1,48 +1,56 @@
 import {AfterViewInit, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ChartPreferences, ExtFrame, ExtLegend} from '../plotly-graph-base';
+import {ExtFrame} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {Observable, Subject, Subscription} from 'rxjs';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatSelectChange} from '@angular/material/select';
+import {MatFormField, MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
 import {debounceTime, filter, map, take} from 'rxjs/operators';
 import {checkIfLegendToTitle, convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {
-  getGraphDisplayFullDetailsScalars, getNextPlotSample, getPlotSample, setGraphDisplayFullDetailsScalars, setGraphDisplayFullDetailsScalarsIsOpen, setViewerBeginningOfTime, setViewerEndOfTime,
-  setXtypeGraphDisplayFullDetailsScalars
-} from '@common/shared/single-graph/single-graph.actions';
-import {
-  selectCurrentPlotViewer, selectFullScreenChart, selectFullScreenChartIsFetching, selectFullScreenChartXtype, selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime
-} from '@common/shared/single-graph/single-graph.reducer';
+import {getGraphDisplayFullDetailsScalars, getNextPlotSample, getPlotSample, setGraphDisplayFullDetailsScalars, setGraphDisplayFullDetailsScalarsIsOpen, setViewerBeginningOfTime, setViewerEndOfTime, setXtypeGraphDisplayFullDetailsScalars} from '@common/shared/single-graph/single-graph.actions';
+import {selectCurrentPlotViewer, selectFullScreenChart, selectFullScreenChartIsFetching, selectFullScreenChartXtype, selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime} from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {Color, LayoutAxis} from 'plotly.js';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
-
-export interface GraphViewerData {
-  chart: ExtFrame;
-  id: string;
-  xAxisType?: 'iter' | 'timestamp' | 'iso_time';
-  chartSettings?: ChartPreferences;
-  smoothWeight?: number;
-  smoothType?: SmoothTypeEnum;
-  hideNavigation: boolean;
-  isCompare: boolean;
-  moveLegendToTitle: boolean;
-  showOrigin: boolean;
-  embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
-  legendConfiguration: Partial<ExtLegend>;
-  darkTheme?: boolean;
-  dialogTitle?: string;
-}
+import {GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.consts';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {MatSlider, MatSliderThumb} from '@angular/material/slider';
+import {FormsModule} from '@angular/forms';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {MatIconModule} from '@angular/material/icon';
+import {KeyValuePipe} from '@angular/common';
+import {PushPipe} from '@ngrx/component';
+import {MatIconButton} from '@angular/material/button';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 @Component({
-    selector: 'sm-graph-viewer',
-    templateUrl: './graph-viewer.component.html',
-    styleUrls: ['./graph-viewer.component.scss'],
-    standalone: false
+  selector: 'sm-graph-viewer',
+  templateUrl: './graph-viewer.component.html',
+  styleUrls: ['./graph-viewer.component.scss'],
+  imports: [
+    SingleGraphComponent,
+    MatSlideToggle,
+    MatSlider,
+    FormsModule,
+    MatSliderThumb,
+    MatSelect,
+    MatFormField,
+    MatFormField,
+    TagListComponent,
+    MatOption,
+    MatIconModule,
+    KeyValuePipe,
+    PushPipe,
+    MatIconButton,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    ChooseColorDirective
+  ]
 })
 export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('singleGraph') singleGraph: SingleGraphComponent;

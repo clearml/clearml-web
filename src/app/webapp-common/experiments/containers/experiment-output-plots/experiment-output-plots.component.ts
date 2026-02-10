@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -12,28 +22,57 @@ import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'r
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {experimentPlotsRequested, resetExperimentMetrics, setChartSettings, setExperimentMetricsSearchTerm, setExperimentSettings} from '../../actions/common-experiment-output.actions';
-import {selectExperimentInfoPlots, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedSettingsHiddenPlot, selectSplitSize} from '../../reducers';
+import {
+  experimentPlotsRequested,
+  resetExperimentMetrics,
+  setChartSettings,
+  setExperimentMetricsSearchTerm,
+  setExperimentSettings
+} from '../../actions/common-experiment-output.actions';
+import {
+  selectExperimentInfoPlots,
+  selectExperimentMetricsSearchTerm,
+  selectIsExperimentInProgress,
+  selectSelectedSettingsHiddenPlot,
+  selectSplitSize
+} from '../../reducers';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconModule} from '@angular/material/icon';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 @Component({
-    selector: 'sm-experiment-output-plots',
-    templateUrl: './experiment-output-plots.component.html',
-    styleUrls: ['./experiment-output-plots.component.scss', '../experiment-output-scalars/shared-experiment-output.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiment-output-plots',
+  templateUrl: './experiment-output-plots.component.html',
+  styleUrls: ['./experiment-output-plots.component.scss', '../experiment-output-scalars/shared-experiment-output.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SelectableGroupedFilterListComponent,
+    SingleGraphStateModule,
+    MatIconModule,
+    MatDrawerContent,
+    MatDrawer,
+    MatIconButton,
+    PushPipe,
+    MatButton,
+    TooltipDirective,
+    MatDrawerContainer,
+    ExperimentGraphsComponent
+  ]
 })
 export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isDatasetVersionPreview = false;
   @Input() selected: { id: string };
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
-
-  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   public plotsList: GroupedList;
-  private experimentId: string;
-  private routerParams$: Observable<Record<string, string>>;
   public listOfHidden$: Observable<string[]>;
   public searchTerm$: Observable<string>;
   public minimized = false;
@@ -42,12 +81,14 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   public selectIsExperimentPendingRunning: Observable<boolean>;
   public splitSize$: Observable<number>;
   public dark: boolean;
+  public selectedMetrics: string[];
+  public plotsListLength: number;
+  protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
+  private experimentId: string;
+  private routerParams$: Observable<Record<string, string>>;
   private subs = new Subscription();
   private plots$: Observable<MetricsPlotEvent[]>;
-  public selectedMetrics: string[];
   private originalPlotList: { metric: string; variant: string }[];
-  public plotsListLength: number;
-
 
   constructor(
     private store: Store,
@@ -167,29 +208,25 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     return Object.keys(groupedPlots)
       .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}))
       .reduce((acc, metric) => {
-        if (groupedPlots[metric].length < 2) {
-          acc[metric + groupedPlots[metric][0].variant] = {__displayName: metric} as any;
-        } else {
-          acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
-            acc2[plot.variant] = {};
-            return acc2;
-          }, {});
-        }
+        acc[metric] = groupedPlots[metric].reduce((acc2, plot) => {
+          acc2[plot.variant] = {};
+          return acc2;
+        }, {});
         return acc;
       }, {} as GroupedList);
   }
 
   metricSelected(id: string) {
-    this.graphsComponent?.scrollToGraph(id);
+    this.graphsComponent?.scrollToGraph(id, true);
   }
 
   hiddenListChanged(hiddenList: string[]) {
     const metrics = this.originalPlotList.map(metric => metric.metric);
-    const variants = this.originalPlotList.map(metric => `${metric.metric}${metric.variant}`)
+    const variants = this.originalPlotList.map(metric => `${metric.metric}${metric.variant}`);
     this.store.dispatch(setExperimentSettings({
       id: this.experimentId,
       changes: {
-        hiddenMetricsPlot:  Array.from(new Set([...metrics, ...variants].filter(metric => !hiddenList.includes(metric))))
+        hiddenMetricsPlot: Array.from(new Set([...metrics, ...variants].filter(metric => !hiddenList.includes(metric))))
       }
     }));
   }

@@ -31,7 +31,7 @@
     (columnResized)="columnResized.emit($event)"
     (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
   >
-    <ng-template let-col pTemplate="cardFilter">
+    <ng-template pTemplate="cardFilter">
       <sm-table-card-filter
         [options]="filtersOptions()"
         [value]="filtersValues()"
@@ -53,7 +53,7 @@
         [column]="col"
         [value]="filtersValues()[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="filtersOptions()[col.id] | filter:searchValues[col.id]:'label'"
+        [options]="filtersOptions()[col.id] | filter: searchValues[col.id]:'label'"
         [sortOrder]="tableSortFieldsObject()[col.id]"
         [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
@@ -144,7 +144,7 @@
       }
     </ng-template>
 
-    <ng-template let-endpoint="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
+    <ng-template let-endpoint="rowData" let-selected="selected" pTemplate="card">
       <sm-table-card
         [selected]="selected"
         [cardName]="endpoint.endpoint"
@@ -164,7 +164,7 @@
       </sm-table-card>
       <ng-template #compactCol>
         @if (!cardsCollapsed()) {
-          <span class="model-name" [class.selected]="selected" [@inOutAnimation]>{{ endpoint.model }}</span>
+          <span class="model-name" [class.selected]="selected" animate.enter="enter" animate.leave="leaving">{{ endpoint.model }}</span>
         }
 
       </ng-template>

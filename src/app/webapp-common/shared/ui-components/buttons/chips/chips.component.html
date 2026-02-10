@@ -1,28 +1,30 @@
-@if (label) {
+@if (label()) {
   <div
     class="chips"
-    [style.max-width]="maxWidth"
+    [style.max-width]="maxWidth()"
     (click)="$event.stopPropagation()"
     (mousedown)="$event.stopPropagation()"
     >
     <span class="label"
       data-id="label"
-      [style.color]="color"
-      [style.background]="backgroundColor">
-      @if (!colorIsForced) {
+      [style.color]="color()"
+      [style.background]="backgroundColor()">
+      @if (!forcedColor()) {
         <span class="dot-container">
           <span #dot class="dot pallete-cursor"
             data-id="colorDotButton"
-            [style.background-color]="color"
+            [style.background-color]="color()"
             [colorButtonRef]="dot"
-            [smChooseColor]="color"
-            [stringToColor]="label">
+            [smChooseColor]="color()"
+            [stringToColor]="label()">
           </span>
         </span>
       }
-      <span [smTooltip]="label" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName" [style.color]="textColor">{{label}}</span>
-      @if (allowRemove) {
-        <button mat-icon-button class="xs" [style.color]="textColor" (click)="remove.emit($event); $event.stopPropagation()">
+      <span [smTooltip]="label()" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName" [style.color]="textColor()">{{label()}}</span>
+      @if (allowRemove()) {
+        <button mat-icon-button class="xs" [style.color]="textColor()"
+                (click)="remove.emit($event); $event.stopPropagation()"
+        >
           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" data-id="annotation cross button"></mat-icon>
         </button>
       }

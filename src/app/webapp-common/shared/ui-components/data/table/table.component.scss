@@ -28,6 +28,7 @@
       height: calc(100% - var(--table-row-height, 48px));
 
       .p-datatable-frozen-column-right {
+        background-color: transparent;
         right: 24px;
       }
     }

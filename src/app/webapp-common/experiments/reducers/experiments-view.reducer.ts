@@ -14,9 +14,9 @@ import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/share
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {cloneExperiment, removeTagSuccess} from '@common/experiments/actions/common-experiments-menu.actions';
 import {HIDDEN_PLOTS_BY_DEFAULT} from '@common/experiments-compare/experiments-compare.constants';
-import {isEqual} from 'lodash-es';
+import {camelCase, isEqual} from 'lodash-es';
 import {INITIAL_EXPERIMENT_COLS_ORDER, INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
-import {CommonExperimentInfoState} from '@common/experiments/reducers/common-experiment-info.reducer';
+import {cloneExtraToggles} from '~/shared/constants/non-common-consts';
 
 
 export interface ExperimentsViewState {
@@ -57,7 +57,7 @@ export interface ExperimentsViewState {
   tableMode: 'info' | 'table' | 'compare';
   tableCompareView: 'scalars' | 'plots';
   showCompareScalarSettings: boolean;
-  cloneForceParent: boolean;
+  cloneDefaultOptions: Record<string, boolean>;
 }
 
 export const experimentsViewInitialState: ExperimentsViewState = {
@@ -99,7 +99,7 @@ export const experimentsViewInitialState: ExperimentsViewState = {
   tableMode: 'table',
   tableCompareView: 'scalars',
   showCompareScalarSettings: false,
-  cloneForceParent: null,
+  cloneDefaultOptions: {},
 };
 
 const setExperimentsAndUpdateSelectedExperiments = (state: ExperimentsViewState, payload: {
@@ -427,7 +427,13 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
   on(actions.setTableMode, (state, action): ExperimentsViewState => ({...state, tableMode: action.mode})),
   on(actions.setCompareView, (state, action): ExperimentsViewState => ({...state, tableCompareView: action.mode})),
   on(actions.toggleCompareScalarSettings, (state): ExperimentsViewState => ({...state, showCompareScalarSettings: !state.showCompareScalarSettings})),
-  on(cloneExperiment, (state, action): ExperimentsViewState => ({...state, cloneForceParent: action.cloneData.forceParent})),
+  on(cloneExperiment, (state, action): ExperimentsViewState => ({...state,
+    cloneDefaultOptions: ['forceParent', ...cloneExtraToggles().map(key => camelCase(key))]
+      .reduce((acc, key) => {
+        acc[key] = action.cloneData[key];
+        return acc;
+      }, {})
+  })),
   on(removeTagSuccess, (state, action): ExperimentsViewState => ({
     ...state,
     experiments: state.experiments ? state.experiments.map(experiment => action.experiments.includes(experiment.id) ? {

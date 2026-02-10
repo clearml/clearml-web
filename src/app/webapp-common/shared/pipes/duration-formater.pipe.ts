@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'durationFormater',
-  standalone: true
-})
+  })
 export class DurationFormaterPipe implements PipeTransform {
 
   transform(value: any, inputFormat: 's' | 'ms', timeFormat: string): any {

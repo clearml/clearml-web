@@ -6,14 +6,23 @@ import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-ta
 import {get} from 'lodash-es';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {computedPrevious} from 'ngxtension/computed-previous';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {RouterLink} from '@angular/router';
+import {
+  ModelExperimentsTableComponent
+} from '@common/models/containers/model-experiments-table/model-experiments-table.component';
 
 
 @Component({
   selector: 'sm-model-info-experiments',
   templateUrl: './model-info-experiments.component.html',
   styleUrls: ['./model-info-experiments.component.scss'],
-  standalone: false,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    IdBadgeComponent,
+    RouterLink,
+    ModelExperimentsTableComponent
+  ]
 })
 export class ModelInfoExperimentsComponent {
   private store = inject(Store);

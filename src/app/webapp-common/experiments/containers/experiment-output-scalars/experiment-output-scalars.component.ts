@@ -44,12 +44,37 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {explicitEffect} from 'ngxtension/explicit-effect';
 import {computedPrevious} from 'ngxtension/computed-previous';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {
+  ExperimentMetricDataTableComponent
+} from '@common/shared/experiment-graphs/experiment-metric-data-table/experiment-metric-data-table.component';
+import {
+  GraphSettingsBarComponent
+} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-experiment-output-scalars',
   templateUrl: './experiment-output-scalars.component.html',
   styleUrls: ['./experiment-output-scalars.component.scss', './shared-experiment-output.scss'],
-  standalone: false
+  imports: [
+    ExperimentGraphsComponent,
+    SelectableGroupedFilterListComponent,
+    ExperimentMetricDataTableComponent,
+    GraphSettingsBarComponent,
+    MatIconModule,
+    MatDrawer,
+    MatDrawerContent,
+    MatDrawerContainer,
+    MatIconButton,
+    MatButton,
+    TooltipDirective
+  ]
 })
 export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   protected store = inject(Store);
@@ -132,7 +157,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       [this.groupBy, this.scalars, this.xAxisType], ([groupBy, scalars, xAxisType]) => {
         if (groupBy && scalars &&
           // prevent rendering chart with misfit x-axis type and data
-          ( Object.values(scalars || {}).length === 0 ||
+          (Object.values(scalars || {}).length === 0 ||
             !this.graphs() ||
             (xAxisType !== 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] > 1600000000000) ||
             (xAxisType === 'iter' && Object.values(Object.values(scalars || {})[0] || {})?.[0]?.x?.[0] < 1600000000000))
@@ -216,7 +241,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
       const taskId = this.experiment()?.id ?? this.experimentId();
-      this.scalarList.set({...(this.hasSingleValueData() && {[singleValueChartTitle]: {}}), ...this.prepareScalarList(scalars, this.groupBy() === 'none')});
+      this.scalarList.set({...(this.hasSingleValueData() && {[singleValueChartTitle]: {}}), ...this.prepareScalarList(scalars)});
       this.graphs.set(this.groupBy() === 'metric' ? convertScalars(scalars, taskId) : convertSplitScalars(scalars, taskId));
       // this.changeDetection.markForCheck();
     }
@@ -231,23 +256,28 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.experimentGraphs?.scrollToGraph(id);
   }
 
+  hiddenListChanged(selectedList: string[]) {
+    let variantsFromOtherEntity = [...selectedList];
+    const scalarsAndSummary = {...this.scalars(), ...(this.hasSingleValueData() && {[singleValueChartTitle]: null})};
 
-  hiddenListChanged(hiddenList: string[]) {
-    const metrics = this.originalScalarList.map(metric => metric.metric);
-    const variants = this.originalScalarList.map(metric => `${metric.metric}${metric.variant || ''}`);
-    const nonTaskMetrics = this.listOfHidden().filter(m => !metrics.some(metric => metric.startsWith(m)) && !variants.includes(m));
-    const newList = [
-      ...metrics.filter(metric => !hiddenList.some(a => a.startsWith(metric))),
-      ...variants.filter(metric => this.groupBy() === 'none' ? !hiddenList.includes(metric) : !hiddenList.some(a => metric.startsWith(a))),
-      ...nonTaskMetrics.filter(metric => !hiddenList.includes(metric))
-    ];
+    const hiddenList = Object.entries(scalarsAndSummary).reduce((acc, [metric, variantObjs]) => {
+      const metricVariants = Object.keys(variantObjs || {}).map(variant => metric + variant);
+      const hiddenMetricVariants = metricVariants.filter(metricVariant => !selectedList.includes(metricVariant));
+      if (!selectedList.includes(metric) && metricVariants.length === hiddenMetricVariants.length) {
+        acc.push(metric);
+      }
 
-    const metricsWithoutVariants = metrics.filter(metric => !variants.filter(v => v.startsWith(metric)).filter(v => !newList.includes(v)).length);
+      variantsFromOtherEntity = variantsFromOtherEntity.filter(metricVariant =>
+        metricVariant !== metric && metricVariants.includes(metricVariant) && !selectedList.includes(metricVariant));
+      acc.push(...hiddenMetricVariants, ...variantsFromOtherEntity);
+      return acc;
+    }, [] as string[]);
+
     this.store.dispatch(setExperimentSettings({
       id: this.experiment()?.id,
       changes: {
         ...this.getSettingsObject(),
-        hiddenMetricsScalar: Array.from(new Set(newList.concat(metricsWithoutVariants)))
+        hiddenMetricsScalar: Array.from(new Set(hiddenList))
       }
     }));
   }
@@ -259,21 +289,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     }
   }
 
-  prepareScalarList = (metricsScalar: GroupedList, splitted: boolean): GroupedList =>
+  //lala No need to prepare list
+  prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
     sortMetricsList(Object.keys(metricsScalar || [])).reduce((acc, curr) => {
-      const variants = Object.keys(metricsScalar[curr]);
-      if (splitted) {
-        if (variants.length > 1) {
-          acc[curr] = {};
-          Object.keys(metricsScalar[curr]).forEach((variant) => {
-            acc[curr][variant] = {};
-          });
-        } else {
-          acc[curr + variants[0]] = {__displayName: `${curr} - ${variants[0]}`};
-        }
-      } else {
-        acc[curr] = {};
-      }
+          acc[curr] = metricsScalar[curr];
       return acc;
     }, {});
 

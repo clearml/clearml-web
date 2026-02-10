@@ -1,9 +1,18 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, viewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  LOCALE_ID,
+  Output,
+  viewChild
+} from '@angular/core';
 import {get} from 'lodash-es';
 import {SelectedModel} from '../../shared/models.model';
 import {NA} from '~/app.constants';
 import {TAGS} from '@common/tasks/tasks.constants';
-import {DatePipe} from '@angular/common';
+import {formatDate} from '@angular/common';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {activateModelEdit, cancelModelEdit} from '../../actions/models-info.actions';
@@ -12,17 +21,34 @@ import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {filter, map, take} from 'rxjs/operators';
 import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {RouterLink} from '@angular/router';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {NAPipe} from '@common/shared/pipes/na.pipe';
 
 @Component({
   selector: 'sm-model-general-info',
   templateUrl: './model-general-info.component.html',
   styleUrls: ['./model-general-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    InlineEditComponent,
+    CopyClipboardComponent,
+    CopyClipboardComponent,
+    LabeledRowComponent,
+    LabeledRowComponent,
+    MatIconModule,
+    RouterLink,
+    MatIconButton,
+    NAPipe
+  ]
 })
 export class ModelGeneralInfoComponent {
-  constructor(private datePipe: DatePipe, private store: Store, private adminService: AdminService) {
-  }
+  private store = inject(Store);
+  private adminService = inject(AdminService);
+  private locale = inject(LOCALE_ID);
 
   public kpis: { label: string; value: string; downloadable?: boolean; href?: string; task?: string }[];
   private _model: SelectedModel;
@@ -40,8 +66,8 @@ export class ModelGeneralInfoComponent {
     if (model) {
       this.isLocalFile = this.adminService.isLocalFile(model.uri);
       this.kpis = [
-        {label: 'CREATED AT', value: model.created ? (this.datePipe.transform(model.created, TIME_FORMAT_STRING)) : 'NA'},
-        {label: 'UPDATED AT', value: model.last_update ? (this.datePipe.transform(model.last_update, TIME_FORMAT_STRING)) : 'NA'},
+        {label: 'CREATED AT', value: model.created ? (formatDate(model.created, TIME_FORMAT_STRING, this.locale)) : 'NA'},
+        {label: 'UPDATED AT', value: model.last_update ? (formatDate(model.last_update, TIME_FORMAT_STRING, this.locale)) : 'NA'},
         {label: 'FRAMEWORK', value: model.framework || NA},
         {label: 'STATUS', value: (model.ready !== undefined) ? (model.ready ? 'Published' : 'Draft') : NA},
         {label: 'MODEL URL', value: model.uri || NA, downloadable: true},

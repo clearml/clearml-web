@@ -1,17 +1,14 @@
 import {allItemsAreSelected} from '../../../utils/shared-utils';
 import {unionBy} from 'lodash-es';
-import {
-  Directive,
-  input,
-  output, viewChild, computed, effect, inject,
-  DestroyRef,
-} from '@angular/core';
+import {computed, DestroyRef, Directive, effect, inject, input, output, viewChild,} from '@angular/core';
 import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from './table.consts';
 import {TableComponent} from './table.component';
 import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {sortByArr} from '../../../pipes/show-selected-first.pipe';
-import {IOption} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {
+  IOption
+} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
 import {FormControl} from '@angular/forms';
 import {Store} from '@ngrx/store';
@@ -40,6 +37,7 @@ export abstract class BaseTableView {
   minimizedView = input<boolean>();
   hideSelectAll = input<boolean>();
   cardsCollapsed = input<boolean>();
+  currentUserId = input<string>();
 
 
   filterSearchChanged = output<{colId: string; value}>();
@@ -153,8 +151,6 @@ export abstract class BaseTableView {
     this.searchValues[colId] = $event.value;
     if (asyncFilter) {
       this.filterSearchChanged.emit({colId, value: $event});
-    } else {
-      // this.sortOptionsList(colId);
     }
   }
 

@@ -3,12 +3,17 @@ import {Store} from '@ngrx/store';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
 import {activateModelEdit, cancelModelEdit, editModel, setSavingModel} from '../../actions/models-info.actions';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
+import {
+  ModelInfoLabelsViewComponent
+} from '@common/models/dumbs/model-info-labels-view/model-info-labels-view.component';
 
 @Component({
-    selector: 'sm-model-info-labels',
-    templateUrl: './model-info-labels.component.html',
-    styleUrls: ['./model-info-labels.component.scss'],
-    standalone: false
+  selector: 'sm-model-info-labels',
+  templateUrl: './model-info-labels.component.html',
+  styleUrls: ['./model-info-labels.component.scss'],
+  imports: [
+    ModelInfoLabelsViewComponent
+  ]
 })
 export class ModelInfoLabelsComponent {
 

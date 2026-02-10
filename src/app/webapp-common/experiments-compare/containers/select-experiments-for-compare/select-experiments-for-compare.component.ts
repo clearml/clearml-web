@@ -1,27 +1,7 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Inject,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {
-  compareAddDialogTableSortChanged,
-  compareAddTableClearAllFilters,
-  compareAddTableFilterChanged,
-  compareAddTableFilterInit, setAddTableViewArchived,
-  getSelectedExperimentsForCompareAddDialog,
-  resetSelectCompareHeader,
-  setShowSearchExperimentsForCompare
-} from '../../actions/compare-header.actions';
-import {
-  selectExperimentsForCompareSearchTerm,
-  selectSelectedExperimentsForCompareAdd,
-  selectViewArchivedInAddTable
-} from '../../reducers';
+import {compareAddDialogTableSortChanged, compareAddTableClearAllFilters, compareAddTableFilterChanged, compareAddTableFilterInit, getSelectedExperimentsForCompareAddDialog, resetSelectCompareHeader, setAddTableViewArchived, setShowSearchExperimentsForCompare} from '../../actions/compare-header.actions';
+import {selectExperimentsForCompareSearchTerm, selectSelectedExperimentsForCompareAdd, selectViewArchivedInAddTable} from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
@@ -30,44 +10,34 @@ import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, take, tap} f
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
-import {
-  selectActiveParentsFilter,
-  selectExperimentsList,
-  selectExperimentsMetricsColsForProject,
-  selectExperimentsParents, selectExperimentsTableCols,
-  selectExperimentsTableColsOrder,
-  selectExperimentsTags,
-  selectExperimentsTypes,
-  selectHyperParamsOptions,
-  selectNoMoreExperiments,
-  selectTableFilters,
-  selectTableSortFields
-} from '@common/experiments/reducers';
+import {selectActiveParentsFilter, selectExperimentsList, selectExperimentsMetricsColsForProject, selectExperimentsParents, selectExperimentsTableCols, selectExperimentsTableColsOrder, selectExperimentsTags, selectExperimentsTypes, selectHyperParamsOptions, selectNoMoreExperiments, selectTableFilters, selectTableSortFields} from '@common/experiments/reducers';
 import {isEqual, unionBy} from 'lodash-es';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 import {initSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
-import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
+import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, resetExperiments, resetGlobalFilter, setHyperParamsFiltersPage, setParents, setTableCols} from '@common/experiments/actions/common-experiments-view.actions';
 import {User} from '~/business-logic/model/users/user';
 import {selectProjectSystemTags, selectProjectUsers, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
-import {SortMeta} from 'primeng/api';
+import {FilterMetadata, SortMeta} from 'primeng/api';
 import {Project} from '~/business-logic/model/projects/project';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {
-  ProjectsGetTaskParentsResponseParents
-} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
-import {FilterMetadata} from 'primeng/api';
+import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {getProjectUsers, getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {EXPERIMENTS_PAGE_SIZE} from '@common/experiments/shared/common-experiments.const';
-import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setTableCols} from '@common/experiments/actions/common-experiments-view.actions';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {ClearFiltersButtonComponent} from '@common/shared/components/clear-filters-button/clear-filters-button.component';
+import {MatButton} from '@angular/material/button';
+import {IdToObjectsArrayPipe} from '@common/shared/pipes/idToObjectsArray.pipe';
+import {PushPipe} from '@ngrx/component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -78,10 +48,19 @@ export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => 
 
 
 @Component({
-    selector: 'sm-select-experiments-for-compare',
-    templateUrl: './select-experiments-for-compare.component.html',
-    styleUrls: ['./select-experiments-for-compare.component.scss'],
-    standalone: false
+  selector: 'sm-select-experiments-for-compare',
+  templateUrl: './select-experiments-for-compare.component.html',
+  styleUrls: ['./select-experiments-for-compare.component.scss'],
+  imports: [
+    MatSlideToggle,
+    ExperimentsTableComponent,
+    DialogTemplateComponent,
+    ClearFiltersButtonComponent,
+    MatButton,
+    IdToObjectsArrayPipe,
+    PushPipe,
+    SearchComponent
+  ]
 })
 export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public entityTypes = EntityTypeEnum;
@@ -90,6 +69,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public selectedExperimentsIds: string[] = [];
   private paramsSubscription: Subscription;
   public searchTerm$: Observable<string>;
+  searchTerm = this.store.selectSignal(selectExperimentsForCompareSearchTerm);
   public allowAddExperiment$: Observable<boolean>;
   public tableColsOrder$: Observable<string[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
@@ -120,6 +100,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   private parents: ProjectsGetTaskParentsResponseParents[];
   private timer: number;
   private previousExperimentsLength: number;
+  protected currentUser = this.store.selectSignal(selectCurrentUser);
 
   constructor(
     private store: Store,
@@ -134,6 +115,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
       this.store.select(selectExperimentsList),
       this.store.select(selectSelectedExperimentsForCompareAdd),
     ]).pipe(
+      filter(([experiments, selectedExperiments]) => experiments !== null && selectedExperiments !== null),
       map(([experiments, selectedExperiments]) => {
         const union = unionBy(selectedExperiments, experiments, 'id');
         if (this.previousExperimentsLength !== experiments?.length && experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) < EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
@@ -152,6 +134,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.tableFilters$ = this.store.select(selectTableFilters);
     this.parent$ = this.store.select(selectExperimentsParents).pipe(tap(parents => this.parents = parents));
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
+
 
     this.tags$ = this.store.select(selectExperimentsTags);
     this.types$ = this.store.select(selectExperimentsTypes);

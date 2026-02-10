@@ -19,10 +19,9 @@
 .step-container {
   border-radius: 4px;
   padding: 2px;
-  transition: scale 0.3s ease;
-  &.enlarged {
-    transform: scale(1.3);
-  }
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.4s ease, opacity 0.6s ease;
 
   &:hover {
     box-shadow: 0 0 0 2px rgba(from var(--color-inverse-surface) r g b / 0.4);
@@ -33,6 +32,11 @@
   }
   &.selected {
     box-shadow: 0 0 0 2px rgba(from var(--color-inverse-surface) r g b / 1);
+  }
+
+  &.open {
+    transform: scale(3);
+    opacity: 0;
   }
 }
 

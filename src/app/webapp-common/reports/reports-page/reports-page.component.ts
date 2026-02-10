@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit,} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit,} from '@angular/core';
 import {Params} from '@angular/router';
 import {ReportDialogComponent} from '../report-dialog/report-dialog.component';
 import {
@@ -25,7 +25,7 @@ import {
   selectReportsSortOrder,
   selectReportsTags
 } from '../reports.reducer';
-import {combineLatest, Observable, Subscription, take} from 'rxjs';
+import {combineLatest, take} from 'rxjs';
 import {IReport} from '../reports.consts';
 import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../constants';
@@ -43,36 +43,38 @@ import {ProjectsPageComponent} from '@common/projects/containers/projects-page/p
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {ReportsListComponent} from '@common/reports/reports-list/reports-list.component';
+import {ReportsHeaderComponent} from '@common/reports/reports-filters/reports-header.component';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-reports-page',
   templateUrl: './reports-page.component.html',
   styleUrls: ['./reports-page.component.scss'],
-  standalone: false
+  imports: [
+    ReportsListComponent,
+    ReportsHeaderComponent,
+    PushPipe
+  ]
 })
 export class ReportsPageComponent extends ProjectsPageComponent implements OnInit, OnDestroy {
-  public reports$: Observable<IReport[]>;
-  public archive$: Observable<boolean>;
-  public reportsTags$: Observable<string[]>;
-  public noMoreReports$: Observable<boolean>;
-  public reportsOrderBy$: Observable<string>;
-  public reportsSortOrder$: Observable<1 | -1>;
-  public prevQueryParams: Params;
+  private _clipboardService = inject(ClipboardService);
 
+  protected reports$ = this.store.select(selectReports);
+  protected reportsTags$ = this.store.select(selectReportsTags);
+  protected archive$ = this.store.select(selectArchiveView);
+  protected noMoreReports$ = this.store.select(selectNoMoreReports);
+  protected reportsOrderBy$ = this.store.select(selectReportsOrderBy);
+  protected reportsSortOrder$ = this.store.select(selectReportsSortOrder);
+  protected prevQueryParams: Params;
 
-  constructor(
-    private _clipboardService: ClipboardService
-  ) {
+  protected get nested() {
+    return false;
+  }
+
+  constructor() {
     super();
-    this.reports$ = this.store.select(selectReports);
-    this.reportsTags$ = this.store.select(selectReportsTags);
-    this.archive$ = this.store.select(selectArchiveView);
-    this.noMoreReports$ = this.store.select(selectNoMoreReports);
-    this.reportsOrderBy$ = this.store.select(selectReportsOrderBy);
-    this.reportsSortOrder$ = this.store.select(selectReportsSortOrder);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
-
-
   }
 
   public openCreateReportDialog(projectId) {
@@ -98,8 +100,7 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
     this.store.dispatch(resetReports());
   }
 
-  override ngOnInit(): void {
-    super.ngOnInit();
+  ngOnInit(): void {
     this.subs.add(combineLatest([
         this.store.select(selectMainPageTagsFilter),
         this.store.select(selectMainPageTagsFilterMatchMode),
@@ -109,6 +110,7 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
         this.route.queryParams
           .pipe(
             map(params => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const {q, qreg, gq, gqreg, tab, gsfilter, ...filteredQueryParams} = params;
               return filteredQueryParams;
             }),
@@ -214,13 +216,14 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
           showProjects: !!selectedProject,
           featureBreadcrumb: {
             name: 'REPORTS',
-            url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
+            url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports',
+            linkLast: !this.nested && selectedProject?.id === '*'
           },
           projectsOptions: {
             basePath: 'reports',
             filterBaseNameWith: ['.reports'],
             compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
+            showSelectedProject: true,
             ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
           }
         }

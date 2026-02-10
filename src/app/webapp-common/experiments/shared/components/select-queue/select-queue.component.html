@@ -23,9 +23,7 @@
           <br>If enqueued to run, they might produce no results.</b>
       </p>
     }
-    <mat-form-field appearance="outline"
-                    class="thin short"
-                    floatLabel="always">
+    <mat-form-field appearance="outline" class="thin short" floatLabel="always">
       <mat-label class="field-label">Queue</mat-label>
       <input
         type="text"
@@ -37,11 +35,7 @@
         [formControl]="queueControl"
         [matAutocomplete]="auto"
       >
-      <mat-autocomplete
-        class="light-theme"
-        [displayWith]="displayFn"
-        #auto="matAutocomplete"
-      >
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (closed)="selectQueueFromSearch()">
         @if ((userAllowedToCreateQueue()) && queueControl.value &&
           !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesNames()) &&
           !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesDisplays())
@@ -78,7 +72,7 @@
     <button mat-stroked-button (click)="closeDialog(false)" data-id="CancelButton">
       CANCEL
     </button>
-    <button mat-flat-button (click)="closeDialog(true)" [disabled]="!queueControl.valid" data-id="EnqueueButton">
+    <button mat-flat-button (click)="closeDialog(true)" [disabled]="!queueControl.valid || !selectedQueue()" data-id="EnqueueButton">
       ENQUEUE
     </button>
   </div>

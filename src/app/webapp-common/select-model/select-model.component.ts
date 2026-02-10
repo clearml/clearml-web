@@ -1,12 +1,26 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, ViewChild, inject} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  inject,
+  viewChild, effect, DestroyRef
+} from '@angular/core';
 import {Store} from '@ngrx/store';
 import * as actions from './select-model.actions';
 import {clearTableFilter, setSelectedModels, showArchive} from './select-model.actions';
 import {
+  selectAllModels,
   selectFrameworks,
-  selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectShowArchive, selectTableSortFields, selectTags, selectViewMode
+  selectGlobalFilter,
+  selectNoMoreModels,
+  selectSelectedModels,
+  selectSelectModelTableFilters,
+  selectShowArchive,
+  selectTableSortFields,
+  selectTags,
+  selectViewMode
 } from './select-model.reducer';
-import {combineLatest, Observable, of} from 'rxjs';
+import {Observable, of, debounceTime, distinctUntilChanged, map, tap} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -14,14 +28,18 @@ import {SelectedModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS} from '../models/models.consts';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
-import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/models';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
-import {isEqual, unionBy} from 'lodash-es';
+import {getAllSystemProjects, getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {isEqual} from 'lodash-es';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {SelectModelHeaderComponent} from '@common/models/shared/select-model-header/select-model-header.component';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
 
 export interface SelectModelData {
   selectionMode?: 'multiple' | 'single' | null;
@@ -36,44 +54,70 @@ export interface SelectModelData {
   templateUrl: './select-model.component.html',
   styleUrls: ['./select-model.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  imports: [
+    ModelsTableComponent,
+    SelectModelHeaderComponent,
+    DialogTemplateComponent,
+    PushPipe,
+    MatButton,
+  ]
 })
-export class SelectModelComponent implements OnInit, OnDestroy {
-  private store = inject(Store);
+export class SelectModelComponent {
   public dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef<ConfirmDialogComponent>);
   public data = inject<SelectModelData>(MAT_DIALOG_DATA);
-
+  protected tableSortOrder$: Observable<TableSortOrderEnum>;
+  protected tableCols = MODELS_TABLE_COLS;
+  protected tableCols$ = of(this.tableCols)
+    .pipe(
+      distinctUntilChanged((a, b) => isEqual(a, b)),
+      map(cols => cols.filter(col => (!col.hidden || col.id === 'project.name')).map(col => ({
+          ...col,
+          hidden: false,
+          headerType: col.headerType === ColHeaderTypeEnum.checkBox ? ColHeaderTypeEnum.title : col.headerType,
+          ...(col.id === 'project.name' && {
+            getter: 'project',
+            filterable: true,
+            searchableFilter: true,
+            sortable: false,
+            headerType: ColHeaderTypeEnum.sortFilter
+          })
+        })
+      )));
+  protected selectedProject: Project;
+  private store = inject(Store);
   protected tableSortFields$ = this.store.select(selectTableSortFields);
   protected tableFilters$ = this.store.select(selectSelectModelTableFilters);
-  protected selectedModels$ = this.store.select(selectSelectedModels).pipe(tap(models => this.selectedModels = models));
   protected viewMode$ = this.store.select(selectViewMode);
   protected searchValue$ = this.store.select(selectGlobalFilter);
   protected noMoreModels$ = this.store.select(selectNoMoreModels);
   protected showArchive$ = this.store.select(selectShowArchive);
   protected users$ = this.store.select(selectAllProjectsUsers);
+  protected currentUser = this.store.selectSignal(selectCurrentUser);
   protected tags$ = this.store.select(selectTags);
   protected systemTags$ = this.store.select(selectProjectSystemTags);
-
-  public models$: Observable<SelectedModel[]>;
-  public tableSortOrder$: Observable<TableSortOrderEnum>;
-  public tableCols = MODELS_TABLE_COLS;
-  public selectedProject$: Observable<Project>;
-  public projectsOptions$: Observable<Project[]>;
-  public frameworks$: Observable<string[]>;
-
-  public selectedProject: Project;
+  protected models$ = this.store.select(selectAllModels);
+  protected projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
+  protected frameworks$ = this.store.select(selectFrameworks);
+  private readonly destroy = inject(DestroyRef);
+  private table = viewChild(ModelsTableComponent);
   private selectedModels: SelectedModel[];
-  public tableCols$: Observable<ISmCol[]>;
+  protected selectedModels$ = this.store.select(selectSelectedModels).pipe(tap(models => this.selectedModels = models));
 
   constructor() {
-    // this.models$ = this.store.select(selectModelsList);
-    this.models$ = combineLatest([
-      this.store.select(selectModels),
-      this.store.select(selectSelectedModelsList)
-    ]).pipe(
-      map(([models, selectedModels]) => unionBy(selectedModels, models, 'id')),
-      map(models => models?.map(model => ({...model, system_tags: model.system_tags?.map((t => t.replace('archive', ' archive')))})))
-    );
+    this.store.dispatch(actions.getFrameworks());
+    this.store.dispatch(actions.getTags());
+    this.store.dispatch(getAllSystemProjects({}));
+
+    if (this.data.selectedModels) {
+      this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
+    }
+
+    effect(() => {
+      if (this.table() && this.table().table()) {
+        this.table().table().rowRightClick = new EventEmitter();
+      }
+    });
+
     this.store.select(selectSelectedProject)
       .pipe(
         takeUntilDestroyed(),
@@ -84,41 +128,11 @@ export class SelectModelComponent implements OnInit, OnDestroy {
         this.store.dispatch(actions.tableFilterChanged({col: {id: 'project.name'}, value: selectedProject.id === '*' ? [] : [selectedProject.id]}));
       });
 
-    this.frameworks$ = this.store.select(selectFrameworks);
-    this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
-    this.tableCols$ = of(this.tableCols)
-      .pipe(
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        map(cols => cols.filter(col => (!col.hidden || col.id === 'project.name')).map(col => ({
-            ...col,
-            hidden: false,
-            headerType: col.headerType === ColHeaderTypeEnum.checkBox ? ColHeaderTypeEnum.title : col.headerType,
-            ...(col.id === 'project.name' && {
-              getter: 'project',
-              filterable: true,
-              searchableFilter: true,
-              sortable: false,
-              headerType: ColHeaderTypeEnum.sortFilter
-            })
-          })
-        )));
-  }
 
-  @ViewChild(ModelsTableComponent) table: ModelsTableComponent;
-
-  ngOnInit() {
-    // this.store.dispatch(actions.getNextModels());
-    this.store.dispatch(actions.getFrameworks());
-    this.store.dispatch(actions.getTags());
-    if (this.data.selectedModels) {
-      this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
-    }
-    window.setTimeout(() => this.table.table().rowRightClick = new EventEmitter());
-  }
-
-  ngOnDestroy(): void {
-    this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(actions.resetSelectModelState({fullReset: false}));
+    this.destroy.onDestroy(() => {
+      this.store.dispatch(resetTablesFilterProjectsOptions());
+      this.store.dispatch(actions.resetSelectModelState({fullReset: false}));
+    });
   }
 
   closeDialog(modelId: string) {

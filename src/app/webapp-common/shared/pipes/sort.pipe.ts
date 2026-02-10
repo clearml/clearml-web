@@ -3,8 +3,7 @@ import {sortByField} from '../../tasks/tasks.utils';
 
 @Pipe({
   name: 'sort',
-  standalone: true
-})
+  })
 export class SortPipe implements PipeTransform {
 
   transform(arr: any[], field: string): any[] {

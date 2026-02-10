@@ -9,7 +9,7 @@
         [checkedList]="selectedCharts()"
         [searchTerm]="searchTerm()"
         (itemSelect)="metricSelected($event)"
-        (hiddenChanged)="selectedMetricListChanged($event)"
+        (selectedChanged)="selectedMetricListChanged($event)"
         (searchTermChanged)="searchTermChanged($event)"
       ></sm-selectable-grouped-filter-list>
     </div>

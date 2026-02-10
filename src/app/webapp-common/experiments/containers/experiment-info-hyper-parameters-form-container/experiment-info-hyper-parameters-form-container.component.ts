@@ -8,8 +8,7 @@ import {
   selectSplitSize,
 } from '../../reducers';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
-import {selectIsExperimentEditable, selectSelectedExperiment,} from '~/features/experiments/reducers';
-import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {selectIsExperimentEditable} from '~/features/experiments/reducers';
 import {
   activateEdit,
   cancelExperimentEdit,
@@ -23,13 +22,31 @@ import {Router} from '@angular/router';
 import {
   ExperimentExecutionParametersComponent
 } from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {PushPipe} from '@ngrx/component';
+import {ReplaceViaMapPipe} from '@common/shared/pipes/replaceViaMap';
+import {SortPipe} from '@common/shared/pipes/sort.pipe';
+import {UpperCasePipe} from '@angular/common';
 
 @Component({
-    selector: 'sm-experiment-info-hyper-parameters-form-container',
-    templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
-    styleUrls: ['./experiment-info-hyper-parameters-form-container.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'sm-experiment-info-hyper-parameters-form-container',
+  templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
+  styleUrls: ['./experiment-info-hyper-parameters-form-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExperimentExecutionParametersComponent,
+    EditableSectionComponent,
+    SectionHeaderComponent,
+    SearchComponent,
+    OverlayComponent,
+    PushPipe,
+    ReplaceViaMapPipe,
+    SortPipe,
+    UpperCasePipe
+  ]
 })
 export class ExperimentInfoHyperParametersFormContainerComponent {
   private store = inject(Store);
@@ -45,12 +62,10 @@ export class ExperimentInfoHyperParametersFormContainerComponent {
     design: 'General'
   };
 
-  protected selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
+  protected selectedSectionHyperParams = this.store.selectSignal(selectExperimentHyperParamsSelectedSectionParams);
   protected editable$ = this.store.select(selectIsExperimentEditable);
   protected saving$ = this.store.select(selectIsExperimentSaving);
   protected backdropActive$ = this.store.select(selectBackdropActive);
-  protected routerConfig$ = this.store.select(selectRouterConfig);
-  protected selectedExperiment$ = this.store.select(selectSelectedExperiment);
   protected size$ = this.store.select(selectSplitSize);
   public isExample$ = this.store.select(selectSelectedExperimentReadOnly);
   protected selectedSection = this.store.selectSignal(selectExperimentHyperParamsSelectedSectionFromRoute);

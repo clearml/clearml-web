@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {MatDialog} from '@angular/material/dialog';
-import {Queue} from '~/business-logic/model/queues/queue';
+import {Queue} from '../../actions/queues.actions';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {SelectQueueComponent} from '@common/experiments/shared/components/select-queue/select-queue.component';
 import {Task} from '~/business-logic/model/tasks/task';
@@ -56,7 +56,7 @@ export class QueueInfoComponent {
   deselectQueue = output();
   moveExperimentToTopOfQueue = output<Task>();
   moveExperimentToBottomOfQueue = output<Task>();
-  moveExperimentToOtherQueue = output<{queue: Queue, task: Task}>();
+  moveExperimentToOtherQueue = output<{ queue: Queue, task: Task }>();
   removeExperimentFromQueue = output<Task>();
   moveExperimentInQueue = output<{
     task: string;
@@ -69,12 +69,12 @@ export class QueueInfoComponent {
   public menuPosition = signal<{ x: number; y: number }>(null);
   public readonly experimentsCols = [
     {header: '', class: ''},
-    {header: '', class: ''},
+    {header: '', class: ''}
   ];
-  public readonly workersCols     = [
+  public readonly workersCols = [
     {header: 'NAME', class: ''},
     {header: 'IP', class: ''},
-    {header: 'CURRENTLY EXECUTING', class: ''},
+    {header: 'CURRENTLY EXECUTING', class: ''}
   ];
 
   @HostListener('document:click', ['$event'])
@@ -134,7 +134,12 @@ export class QueueInfoComponent {
   }
 
   enqueuePopup() {
-    this.dialog.open<SelectQueueComponent, unknown, {confirmed?: boolean; queue: Queue}>(SelectQueueComponent, {data: {}}).afterClosed()
+    this.dialog.open<SelectQueueComponent, unknown, { confirmed?: boolean; queue: Queue }>(SelectQueueComponent, {
+      data: {
+        taskIds: [this.menuSelectedExperiment.id],
+        reference: this.menuSelectedExperiment.name
+      }
+    }).afterClosed()
       .subscribe((res) => {
         if (res?.confirmed) {
           this.moveExperimentToOtherQueue.emit({queue: res.queue, task: this.menuSelectedExperiment});

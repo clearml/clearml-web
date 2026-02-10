@@ -13,12 +13,6 @@
   border: 2px solid transparent;
   overflow: hidden;
 
-  &.error {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-
   video {
     cursor: pointer;
     width: 100%;

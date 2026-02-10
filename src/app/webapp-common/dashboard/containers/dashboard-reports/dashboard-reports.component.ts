@@ -8,7 +8,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {CARDS_IN_ROW} from '@common/dashboard/common-dashboard.const';
 import {IReport} from '@common/reports/reports.consts';
 import {selectRecentReports} from '@common/dashboard/common-dashboard.reducer';
-import {getRecentReports} from '@common/dashboard/common-dashboard.actions';
 import {MatAnchor, MatButton} from '@angular/material/button';
 import {IReportsCreateRequest, ReportDialogComponent} from '@common/reports/report-dialog/report-dialog.component';
 import {createReport} from '@common/reports/reports.actions';

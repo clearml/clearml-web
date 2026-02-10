@@ -4,13 +4,16 @@ import {EffectsModule} from '@ngrx/effects';
 import {appFeature} from '@common/clearml-applications/report-widgets/src/app/app.reducer';
 import {authReducer} from '~/core/reducers/auth.reducers';
 import {AppEffects} from '@common/clearml-applications/report-widgets/src/app/app.effects';
-import {extCoreConfig} from '@common/clearml-applications/report-widgets/src/build';
 import {provideHttpClient} from '@angular/common/http';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {SmApiRequestsService} from '~/business-logic/api-services/api-requests.service';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {provideAnimations} from '@angular/platform-browser/animations';
-import {BaseAdminService} from '@common/settings/admin/base-admin.service';
+import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
+import {AdminService} from '~/shared/services/admin.service';
+import {singleGraphReducer} from '@common/shared/single-graph/single-graph.reducer';
+import {SingleGraphEffects} from '@common/shared/single-graph/single-graph.effects';
+import {extCoreConfig, extCoreEffects} from '~/build-specifics/reports-index';
+import {colorPreferenceReducer} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,16 +21,18 @@ export const appConfig: ApplicationConfig = {
       StoreModule.forRoot({}),
       StoreModule.forFeature(appFeature),
       StoreModule.forFeature({name: 'auth', reducer: authReducer}),
+      StoreModule.forFeature('singleGraph', singleGraphReducer),
+      StoreModule.forFeature('colorsPreference', colorPreferenceReducer),
       // StoreModule.forFeature({name: 'users', reducer: usersReducer}),
-      EffectsModule.forRoot([AppEffects])
+      EffectsModule.forRoot([AppEffects, SingleGraphEffects, ...extCoreEffects]),
     ),
     ...extCoreConfig,
     provideZonelessChangeDetection(),
-    provideAnimations(),
     provideHttpClient(),
-    BaseAdminService,
+    AdminService,
     ApiEventsService,
     SmApiRequestsService,
-    ColorHashService
+    ColorHashService,
+    ApiOrganizationService
   ]
 };

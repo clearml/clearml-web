@@ -15,7 +15,7 @@ import {PushPipe} from '@ngrx/component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatIconButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
+import {MatIconModule} from '@angular/material/icon';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {concatLatestFrom} from '@ngrx/operators';
 
@@ -29,8 +29,8 @@ import {concatLatestFrom} from '@ngrx/operators';
     PushPipe,
     TooltipDirective,
     ClickStopPropagationDirective,
-    MatIconButton,
-    MatIcon
+    MatIconModule,
+    MatIconButton
   ]
 })
 export class CommonSearchComponent implements OnDestroy {

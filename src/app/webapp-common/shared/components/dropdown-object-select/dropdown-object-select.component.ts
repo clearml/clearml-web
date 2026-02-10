@@ -24,6 +24,8 @@ import {NgComponentOutlet} from '@angular/common';
 import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {explicitEffect} from 'ngxtension/explicit-effect';
+import {ClipboardModule} from 'ngx-clipboard';
+import {CopyClipboardComponent} from "@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component";
 
 export interface baseEntity {
   value?: string;
@@ -59,7 +61,9 @@ export interface baseEntity {
     MatLabel,
     NgComponentOutlet,
     MultiLineTooltipComponent,
-    SaferPipe
+    SaferPipe,
+    ClipboardModule,
+    CopyClipboardComponent
   ]
 })
 export class DropdownObjectSelectComponent implements ControlValueAccessor, Validator {
@@ -73,6 +77,7 @@ export class DropdownObjectSelectComponent implements ControlValueAccessor, Vali
   valueField = input<string>('name');
   label = input<string>();
   info = input<string>();
+  configurationInfo = input<string>();
   placeHolder = input('');
   createNewSuffix = input<boolean>(false);
   isRequired = input<boolean>(false);
@@ -88,6 +93,7 @@ export class DropdownObjectSelectComponent implements ControlValueAccessor, Vali
   createNewSelected = output<baseEntity>();
   autocompleteOpened = output();
   autocompleteClosed = output();
+  copied = output();
   protected onTouched: () => void;
   private onChange: (value) => void;
   private onValidation: (value) => void;

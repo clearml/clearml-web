@@ -15,7 +15,7 @@
       Properties
     </div>
   </mat-expansion-panel>
-  @if (((hyperParams() | keyvalue)|filterOut:'key':'properties')?.length > 0) {
+  @if (((hyperParams() | keyvalue) | filterOut: 'key': 'properties')?.length > 0) {
     <mat-expansion-panel [expanded]="true" class="secondary-panel grouped-selection">
       <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" data-id="HyperParameters">
         HYPERPARAMETERS

@@ -1,0 +1,169 @@
+<div class="header">
+  <mat-tab-group
+    [selectedIndex]="activeIndex()"
+    (selectedTabChange)="tabChanged($event.index)"
+    [mat-stretch-tabs]="false">
+    @for (searchTab of links(); track searchTab.name) {
+      <mat-tab
+        class="tab-link"
+      >
+        <ng-template mat-tab-label>
+          <span class="d-flex gap-1">{{ searchTab.label }}
+            @if ((query() || (!advanced() && (allFilters()[searchTab.name] | keyvalue)?.length)) && resultsCount()?.[searchTab.name] > 0) {
+              <i class="dot"></i>
+            }
+          </span>
+        </ng-template>
+      </mat-tab>
+    }
+  </mat-tab-group>
+  <button mat-icon-button
+          class="btn-toggle-filters"
+          [class.has-filter]="isFiltered()"
+          [disabled]="activeLink()==='modelEndpoints' || advanced()"
+          [smTooltip]="showFilter()? 'Hide filters': 'Show filters'"
+          [matTooltipShowDelay]="500"
+          (click)="toggleFilter()">
+    <mat-icon fontSet="al" [fontIcon]="isFiltered()? 'al-ico-filter-on' : 'al-ico-filter-off'">
+      <span class="path1"></span>
+      <span class="path2"></span>
+    </mat-icon>
+  </button>
+</div>
+<mat-drawer-container>
+  <mat-drawer [mode]="(smallScreen$ | ngrxPush).matches ? 'over' : 'side'" position="end" [(opened)]="showFilter">
+    <sm-global-search-filter-container
+      [isFiltered]="isFiltered()"
+      [showUserFilter]="links()[this.activeIndex()]?.showUserFilter"
+      [typeOptions]="links()[this.activeIndex()]?.typeOptions || []"
+      [statusOptions]="links()[this.activeIndex()]?.statusOptions"
+      [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"></sm-global-search-filter-container>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div #list class="list">
+      @if (noData()) {
+        <span class="no-data">No data to show</span>
+      } @else {
+        @for (itemsList of getAllResults(); let i = $index; track activeLinkConfiguration()[i]?.name) {
+          @if (itemsList?.length > 0) {
+            <div class="list__category">
+              <div class="list__category__title">{{isEmpty() ? 'RECENTLY UPDATED' : 'MATCHING'}} {{activeLinkConfiguration()[i].title}}</div>
+              @for (item of itemsList; track item.id) {
+                <ng-container *ngTemplateOutlet="
+                activeLinkConfiguration()[i].name === searchPages.projects ? ProjectTemplate :
+                activeLinkConfiguration()[i].name === searchPages.experiments ? ExperimentTemplate :
+                activeLinkConfiguration()[i].name === searchPages.models ? ModelsTemplate :
+                activeLinkConfiguration()[i].name === searchPages.modelEndpoints ? ModelEndpointTemplate :
+                activeLinkConfiguration()[i].name === searchPages.loadingEndpoints ? LoadingModelEndpointTemplate :
+                activeLinkConfiguration()[i].name === searchPages.pipelines ? PipelineTemplate :
+                activeLinkConfiguration()[i].name === searchPages.pipelineRuns ? PipelineRunTemplate :
+                activeLinkConfiguration()[i].name === searchPages.datasets ? openDatasetTemplate :
+                activeLinkConfiguration()[i].name === searchPages.openDatasetVersions ? openDatasetVersionTemplate :
+                activeLinkConfiguration()[i].name === searchPages.reports ? ReportsTemplate : ProjectTemplate; context: {$implicit: item}">
+                </ng-container>
+              }
+              @if (!advanced() && activeLinkConfiguration()[i].viewAllResults && itemsList.length === SEARCH_PAGE_SIZE) {
+                <div>
+                  <a [routerLink]="activeLinkConfiguration()[i].viewAllResultsLink" [queryParams]="viewAllQueryParams" (click)="closeDialog.emit()" class="list__view-all-link">View all results</a>
+                </div>
+              }
+              @if ((advanced() || !activeLinkConfiguration()[i].viewAllResults) &&
+                    itemsList.length >= (SEARCH_PAGE_SIZE * (1 + pages()[(activeLinkConfiguration()[i].name | replaceViaMapPipe : SEMI_TASKS_LISTS)]))) {
+                <div class="list__load-more">
+                  <button mat-button (click)="loadMoreClicked.emit(activeLinkConfiguration()[i].name)">
+                    <div class="d-flex-center gap-2">
+                      @if (loading()) {
+                        <mat-spinner [diameter]="16" [strokeWidth]="2" mode="indeterminate"></mat-spinner>
+                      }
+                      <span>LOAD MORE</span>
+                    </div>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+<ng-template #ProjectTemplate let-project>
+  <sm-search-result-project
+    [entity]="project"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (projectSelected)="projectSelected.emit($event)"
+  ></sm-search-result-project>
+</ng-template>
+
+<ng-template #ExperimentTemplate let-task>
+  <sm-search-result-task
+    [entity]="task"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (taskSelected)="experimentSelected.emit($event)"
+  ></sm-search-result-task>
+</ng-template>
+
+<ng-template #PipelineRunTemplate let-pipelineRun>
+  <sm-search-result-pipeline-run
+    [entity]="pipelineRun"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (pipelineRunSelected)="pipelineRunSelected.emit($event)"
+  ></sm-search-result-pipeline-run>
+</ng-template>
+
+<ng-template #ModelEndpointTemplate let-modelEndpoint>
+  <sm-search-result-model-endpoint
+    [entity]="modelEndpoint"
+    (modelEndpointSelected)="modelEndpointSelected.emit(modelEndpoint)"
+  >
+  </sm-search-result-model-endpoint>
+</ng-template>
+
+<ng-template #LoadingModelEndpointTemplate let-modelEndpoint>
+  <sm-search-result-model-endpoint
+    [entity]="modelEndpoint"
+    (modelEndpointSelected)="loadingEndpointSelected.emit(modelEndpoint)"
+  >
+  </sm-search-result-model-endpoint>
+</ng-template>
+
+<ng-template #ModelsTemplate let-model>
+  <sm-search-result-model
+    [entity]="model"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (modelSelected)="modelSelected.emit($event)"
+  ></sm-search-result-model>
+</ng-template>
+
+<ng-template #PipelineTemplate let-pipeline>
+  <sm-search-result-pipeline
+    [entity]="pipeline"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (pipelineSelected)="pipelineSelected.emit($event)"
+  ></sm-search-result-pipeline>
+</ng-template>
+
+<ng-template #openDatasetTemplate let-dataset>
+  <sm-search-result-open-dataset
+    [entity]="dataset"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (openDatasetSelected)="openDatasetSelected.emit($event)"
+  ></sm-search-result-open-dataset>
+</ng-template>
+
+<ng-template #openDatasetVersionTemplate let-version>
+  <sm-search-result-open-dataset-version
+    [entity]="version"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (openDatasetVersionSelected)="openDatasetVersionSelected.emit($event)"
+  ></sm-search-result-open-dataset-version>
+</ng-template>
+
+<ng-template #ReportsTemplate let-report>
+  <sm-search-result-report
+    [entity]="report"
+    [statusOptionsLabels]="links()[this.activeIndex()]?.statusOptionsLabels"
+    (reportSelected)="reportSelected.emit($event)"
+  ></sm-search-result-report>
+</ng-template>

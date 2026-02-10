@@ -183,7 +183,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   protected currRowsNumber = computed(() => this.tableData()?.length ?? this.rowsNumber() ?? 0);
   protected tableSate = computed(() => ({
     table: this.tableData(),
-    loading: signal(false)
+    loading: signal(!this.tableData())
   }))
 
   constructor() {
@@ -219,11 +219,6 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
       }
     });
 
-    effect(() => {
-      if (this.virtualScroll() && this.table() && this.tableData()) {
-        window.setTimeout(() => this.table().scroller?.setSize(), 50);
-      }
-    });
 
     effect(() => {
       if (this.table()) {

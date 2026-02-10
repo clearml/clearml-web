@@ -6,7 +6,7 @@ import {
   inject,
   OnInit, Renderer2,
   ViewChild,
-  DOCUMENT
+  DOCUMENT, NgZone
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
@@ -18,7 +18,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {_mergeVariants, allowedMergedTypes, checkIfLegendToTitle, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
+import {_mergeVariants, allowedMergedTypes, checkIfLegendToTitle, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
@@ -34,14 +34,15 @@ import {
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {ScalarKeyEnum} from '~/business-logic/model/reports/scalarKeyEnum';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
-import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
 import {
   SingleValueSummaryTableComponent
 } from '@common/shared/single-value-summary-table/single-value-summary-table.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
-
+import {getCompanyServices} from '~/core/actions/auth.actions';
+import {DebugImageSnippetComponent} from '@common/shared/debug-sample/debug-image-snippet/debug-image-snippet.component';
+import {GraphViewerComponent} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
+import {GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.consts';
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
@@ -51,17 +52,17 @@ export interface SelectedMetricVariant extends MetricVariantResult {
 }
 
 @Component({
-    selector: 'sm-widget-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        SingleGraphStateModule,
-        SingleGraphModule,
-        DebugSampleModule,
-        ParallelCoordinatesGraphComponent,
-        SingleValueSummaryTableComponent
-    ]
+  selector: 'sm-widget-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DebugSampleModule,
+    ParallelCoordinatesGraphComponent,
+    SingleValueSummaryTableComponent,
+    DebugImageSnippetComponent,
+    SingleGraphComponent
+  ]
 })
 export class AppComponent implements OnInit {
   private store = inject(Store);
@@ -70,6 +71,8 @@ export class AppComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private renderer = inject(Renderer2);
   private readonly document = inject(DOCUMENT);
+  private readonly zone = inject(NgZone);
+
   protected readonly checkIfLegendToTitle = checkIfLegendToTitle;
 
   protected title = 'report-widgets';
@@ -99,6 +102,7 @@ export class AppComponent implements OnInit {
   }
 
   constructor() {
+    this.store.dispatch(getCompanyServices());
     this.configService.globalEnvironmentObservable.subscribe(env => {
       this.environment = env;
     });
@@ -168,7 +172,7 @@ export class AppComponent implements OnInit {
         this.changeTheme();
       }
     });
-    this.changeTheme()
+    this.changeTheme();
   }
 
   changeTheme = () => {
@@ -182,7 +186,7 @@ export class AppComponent implements OnInit {
     }
     this.renderer.addClass(this.document.documentElement, `${this.isDarkTheme ? 'dark' : 'light'}-mode`);
     this.cdr.markForCheck();
-  }
+  };
 
   /// Merging all variants of same metric to same graph. (single experiment)
   mergeVariants = (plots: ReportsApiMultiplotsResponse): Record<string, any> => {
@@ -321,18 +325,10 @@ export class AppComponent implements OnInit {
           url.searchParams.append('tenant', this.searchParams.get('company'));
         }
         const urlDecoded = decodeURI(url.toString()); // decodeURI and not decodeURIComponent
+        this.frame = {...sample, url: urlDecoded};
+        this.activated = true;
+        this.cdr.markForCheck();
         this.store.dispatch(getSignedUrl({url: urlDecoded}));
-        this.store.select(selectSignedUrl(urlDecoded))
-          .pipe(
-            filter(signed => !!signed?.signed),
-            map(({signed: signedUrl}) => signedUrl),
-            take(1)
-          ).subscribe((signedUrl) => {
-          this.frame = {...sample, url: signedUrl};
-          this.activated = true;
-          this.cdr.markForCheck();
-        });
-
       });
   }
 
@@ -348,7 +344,7 @@ export class AppComponent implements OnInit {
         const variants = this.searchParams.getAll('variants');
         let filteredSingleValueData = singleValueData;
         if (variants.length > 0) {
-          filteredSingleValueData = singleValueData.map(single => ({...single, values: single.values.filter(val => variants.includes(val.variant))}))
+          filteredSingleValueData = singleValueData.map(single => ({...single, values: single.values.filter(val => variants.includes(val.variant))}));
         }
         this.plotData = createMultiSingleValuesChart(filteredSingleValueData);
       } else {
@@ -415,7 +411,20 @@ export class AppComponent implements OnInit {
     }
   }
 
-  maximize() {
+  maximize(data?: GraphViewerData) {
+    if (data) {
+      this.zone.run(() => {
+        this.dialog.open<GraphViewerComponent, GraphViewerData>(GraphViewerComponent, {
+          data,
+          panelClass: ['image-viewer-dialog', 'full-screen'],
+          maxWidth: '100%'
+        }).beforeClosed().subscribe(() => window.top.postMessage({
+          maximizing: true,
+          name: window.name,
+          src: window.location.href
+        }, '*'));
+      });
+    }
     this.loadStyle('trains-icons.css');
     window.top.postMessage({
       maximizing: true,
@@ -432,7 +441,7 @@ export class AppComponent implements OnInit {
         url: src,
         withoutNavigation: true
       },
-      panelClass: ['image-viewer-dialog', 'full-screen'],
+      panelClass: ['image-viewer-dialog', 'full-screen']
     }).beforeClosed().subscribe(() => this.maximize());
   }
 
@@ -456,7 +465,7 @@ export class AppComponent implements OnInit {
     const metricsPath = searchParams.getAll('metrics');
     let entityIds = objects.length > 0 ? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
     if (entityIds.length === 0 && this.tasksData().sourceTasks.length > 0) {
-      entityIds = this.tasksData().sourceTasks.slice(0,100);
+      entityIds = this.tasksData().sourceTasks.slice(0, 100);
     }
     const isCompare = this.tasksData().sourceTasks.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;

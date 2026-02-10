@@ -3,8 +3,7 @@ import {getBaseName} from '@common/shared/utils/shared-utils';
 
 @Pipe({
   name: 'baseName',
-  standalone: true
-})
+  })
 export class BaseNamePipe implements PipeTransform {
 
   transform(value: string): string {

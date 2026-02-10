@@ -1,17 +1,8 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
-import {
-  getParcoords,
-  getPlot,
-  getSample,
-  getScalar, getSingleValues,
-  setNoPermissions, setParallelCoordinateExperiments,
-  setPlotData,
-  setSampleData,
-  setSignIsNeeded, setSingleValues, setTaskData
-} from './app.actions';
+import {getParcoords, getPlot, getSample, getScalar, getSingleValues, setNoPermissions, setParallelCoordinateExperiments, setPlotData, setSampleData, setSignIsNeeded, setSingleValues, setTaskData} from './app.actions';
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {catchError, filter} from 'rxjs/operators';
@@ -25,20 +16,16 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
-import {BaseAdminService} from '@common/settings/admin/base-admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 
 
 @Injectable()
 export class AppEffects {
-
+  private httpClient = inject(HttpClient);
+  private store = inject(Store);
+  private actions$ = inject(Actions);
+  private adminService = inject(AdminService);
   protected basePath = HTTP.API_BASE_URL;
-
-  constructor(
-    private httpClient: HttpClient,
-    private store: Store,
-    private actions$: Actions,
-    private adminService: BaseAdminService) {
-  }
 
   getHeaders(company: string): HttpHeaders {
     let headers = new HttpHeaders();

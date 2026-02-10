@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
@@ -16,14 +16,10 @@ import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 
 @Injectable()
 export class ProjectsEffects {
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private projectsApi = inject(ApiProjectsService);
   private fetchingExampleExperiment: string = null;
-
-  constructor(
-    private actions$: Actions,
-    private store: Store,
-    private projectsApi: ApiProjectsService
-  ) {
-  }
 
   getSelectedProject = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
@@ -52,6 +48,7 @@ export class ProjectsEffects {
           deactivateLoader(action.type)];
       } else {
         const customProjectType = conf?.[0] !== 'projects';
+        const deepProjectPage = conf?.[0] === 'projects' && conf?.[2] === 'projects';
         this.fetchingExampleExperiment = action.example && action.projectId;
         return this.projectsApi.projectsGetAllEx({
           /* eslint-disable @typescript-eslint/naming-convention */
@@ -70,7 +67,7 @@ export class ProjectsEffects {
                   return [
                     actions.setSelectedProject({project: projects[0]}),
                     actions.getProjectUsers(action),
-                    ...(!customProjectType ? [actions.getTags()] : []),
+                    ...(!customProjectType && !deepProjectPage ? [actions.getTags()] : []),
                     actions.getCompanyTags(),
                     deactivateLoader(action.type),
                   ];

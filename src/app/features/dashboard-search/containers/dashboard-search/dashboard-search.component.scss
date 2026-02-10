@@ -1,1 +1,50 @@
+::ng-deep {
+  .list {
+    flex-grow: 1;
+    overflow: auto;
+    height: calc(100vh - 400px);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 12px 0 0;
+    &__category {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--color-surface-container-high);
+      &:last-child {
+        border: none;
+      }
+      &__title {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 6px 0;
+        font-weight: 500;
+        font-size: 12px;
+        color: var(--color-primary);
+        background: var(--mat-dialog-container-color);
+        text-transform: uppercase;
+      }
+    }
+    &__view-all-link {
+      margin: 6px 0 12px;
+      display: inline-block;
+    }
+    &__load-more {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: 15px;
+    }
 
+    .no-data {
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-empty-state);
+    }
+  }
+}

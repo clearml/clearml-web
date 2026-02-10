@@ -13,7 +13,6 @@ import {projectsReducer} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
 import {PROJECTS_PREFIX} from '@common/projects/common-projects.consts';
 import {CHOOSE_COLOR_PREFIX} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
-import {colorSyncedKeys} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {UserPreferences} from '@common/user-preferences';
 import {EffectsModule} from '@ngrx/effects';
 import {ActionReducer, MetaReducer, StoreModule, USER_PROVIDED_META_REDUCERS} from '@ngrx/store';
@@ -34,6 +33,8 @@ import {ReportCodeEmbedService} from '../shared/services/report-code-embed.servi
 import {recentTasksReducer} from '@common/core/reducers/recent-tasks-reducer';
 import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 import {MatDialogModule} from '@angular/material/dialog';
+import {searchReducer} from '@common/common-search/common-search.reducer';
+import {colorPreferenceReducer} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 
 export const reducers = {
   auth: authReducer,
@@ -44,7 +45,9 @@ export const reducers = {
   users: usersReducer,
   login: loginReducer,
   rootProjects: projectsReducer,
-  [userStatsFeatureKey]: usageStatsReducer
+  [userStatsFeatureKey]: usageStatsReducer,
+  commonSearch: searchReducer,
+  colorsPreference: colorPreferenceReducer,
 };
 
 const syncedKeys = [
@@ -64,6 +67,9 @@ const syncedKeys = [
   'views.contextMenuActiveFeature',
 ];
 const key = '_saved_state_';
+export const colorSyncedKeys = [
+  'colorPreferences',
+];
 
 const actionsPrefix = [AUTH_PREFIX, USERS_PREFIX, ROOT_PROJECTS_PREFIX, VIEW_PREFIX];
 

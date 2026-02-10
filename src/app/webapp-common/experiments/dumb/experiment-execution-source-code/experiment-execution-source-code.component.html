@@ -2,7 +2,15 @@
   <div [class.source-code-container]="editable()">
     <sm-labeled-row label="REPOSITORY">
       @if (!editable()) {
-        <div>{{sourceCodeForm.controls.repository.value}}</div>
+        @if (repoData().targetUrl) {
+          <a [href]="repoData().targetUrl" target="_blank" class="d-inline-flex ">
+            @if (repoData().type) {
+              <mat-icon class="repo-icon" [class]="'i-' + repoData().type"></mat-icon>
+            }{{sourceCodeForm.controls.repository.value}}
+          </a>
+        } @else {
+          {{sourceCodeForm.controls.repository.value}}
+        }
       } @else {
         <mat-form-field appearance="outline" class="w-100 no-bottom">
           <input matInput formControlName="repository">
@@ -15,28 +23,22 @@
           <div>
             @switch (sourceCodeForm.controls.scriptType.value) {
               @case (sourceTypesEnum.VersionNum) {
-                <div>
-                  {{sourceCodeForm.controls.version_num.value}}
-                  @if (sourceCodeForm.controls.branch.value) {
-                    (in branch {{sourceCodeForm.controls.branch.value}})
-                  }
-                </div>
+                {{sourceCodeForm.controls.version_num.value}}
+                @if (sourceCodeForm.controls.branch.value) {
+                  (in branch {{sourceCodeForm.controls.branch.value}})
+                }
               }
               @case (sourceTypesEnum.Branch) {
-                <div>
-                  @if (sourceCodeForm.controls.branch.value) {
-                    Latest in branch {{sourceCodeForm.controls.branch.value}}
-                  }
-                </div>
+                @if (sourceCodeForm.controls.branch.value) {
+                  Latest in branch {{sourceCodeForm.controls.branch.value}}
+                }
               }
               @case (sourceTypesEnum.Tag) {
-                <div>
-                  @if (sourceCodeForm.controls.version_num.value) {
-                    {{sourceCodeForm.controls.tag.value}} (commit id {{sourceCodeForm.controls.version_num.value}})
-                  } @else {
-                    {{sourceCodeForm.controls.tag.value}}
-                  }
-                </div>
+                @if (sourceCodeForm.controls.version_num.value) {
+                  {{sourceCodeForm.controls.tag.value}} (commit id {{sourceCodeForm.controls.version_num.value}})
+                } @else {
+                  {{sourceCodeForm.controls.tag.value}}
+                }
               }
             }
           </div>

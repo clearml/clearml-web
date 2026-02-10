@@ -1,82 +1,92 @@
 <sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="NEW RUN"
-  [pageHeader]="title"
-  iconClass="al-ico-pipelines">
-  <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
-    <input #fakeInput name="Don't remove - it take the autofocus dropdown" style="opacity: 0; height: 0; width: 0">
-    @if (params?.length > 0) {
+                    [pageHeader]="getTitle()"
+                    iconClass="al-ico-pipelines">
+
+  <form [formGroup]="form" class="d-flex flex-column light-theme form-container">
+    <!-- Trap focus if strictly necessary, otherwise consider removing -->
+    <input name="focus_trap" style="opacity: 0; height: 0; width: 0">
+
+    @if (paramsArray.controls.length > 0) {
       <div class="section-title first">Parameters</div>
-    }
-    @for (param of params; track param.name) {
-      <div class="param-line">
-        <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="param.name">{{param.name}}</div>
-        @switch (param.type) {
-          @case ('float') {
-            <mat-form-field appearance="outline" class="no-bottom">
-              <input #floatInput="ngModel"  type="text" matInput [(ngModel)]="param.value" [name]="param.name" pattern="[+-]?([0-9]*[.])?[0-9]+" >
-              @if (floatInput?.errors && floatInput?.errors['pattern']) {
-                <mat-error
-                  >
-                  Please provide an float
-                </mat-error>
-              }
-            </mat-form-field>
+
+    <!-- Dynamic Params Loop -->
+    <div formArrayName="params">
+      @for (control of paramsArray.controls; track control.value; let i = $index) {
+        <div class="param-line" [formGroupName]="i">
+          <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="control.value.name">
+            {{ control.value.name }}
+          </div>
+
+          @switch (control.value.type) {
+            @case ('float') {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input type="text" matInput formControlName="value">
+                @if (control.get('value').hasError('pattern')) {
+                  <mat-error>Please provide a float</mat-error>
+                }
+              </mat-form-field>
+            }
+            @case ('int') {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input type="text" step="1" matInput formControlName="value">
+                @if (control.get('value').hasError('pattern')) {
+                  <mat-error>Please provide an integer</mat-error>
+                }
+              </mat-form-field>
+            }
+            @default {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input matInput formControlName="value">
+              </mat-form-field>
+            }
           }
-          @case ('int') {
-            <mat-form-field appearance="outline" class="no-bottom">
-              <input  type="text" step="1" matInput [(ngModel)]="param.value" #intInput="ngModel" [name]="param.name" pattern="^[-\d]\d*$">
-              @if (intInput?.errors && intInput?.errors['pattern']) {
-                <mat-error
-                  >
-                  Please provide an integer
-                </mat-error>
-              }
-            </mat-form-field>
-          }
-          @default {
-            <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput [(ngModel)]="param.value" [name]="param.name">
-            </mat-form-field>
-          }
-        }
-      </div>
+        </div>
+      }
+    </div>
     }
     <div class="section-title d-flex align-items-center">Configuration</div>
+
+    <!-- Queue Selection -->
     <div class="param-line">
-      <div class="param-key" [class.error]="queueInputModel?.errors?.required">Pipeline controller queue*</div>
+      <div class="param-key" [class.error]="form.controls.queue.invalid && form.controls.queue.touched">
+        Pipeline controller queue*
+      </div>
+
       <mat-form-field appearance="outline" class="no-bottom queue-select">
         <input type="text"
-          #queueInput
-          #queueInputModel="ngModel"
-          matInput
-          name="queue"
-          [(ngModel)]="selectedQueue"
-          [matAutocomplete]="auto"
-          required
-          data-id="queueFiled">
+               matInput
+               formControlName="queue"
+               [matAutocomplete]="auto"
+               required
+               data-id="queueFiled">
+
         <i matSuffix
-          class="al-icon sm-md search-icon me-2"
-          [class]="queueInputModel.value ? 'al-ico-dialog-x pointer':'al-ico-search'"
-          (click)="queueInputModel.value && (selectedQueue = null)"
+           class="al-icon sm-md search-icon me-2"
+           [class]="form.controls.queue.value ? 'al-ico-dialog-x pointer' : 'al-ico-search'"
+           (click)="form.controls.queue.value && clearQueue()"
         ></i>
+
         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" class="light-theme">
-          @for (queue of filteredQueues$ | ngrxPush; track queue) {
+          <!-- Using the Computed Signal here directly -->
+          @for (queue of filteredQueues(); track queue.id) {
             <mat-option
               [value]="queue"
               [smTooltip]="queue.display_name ? queue.display_name + ' (' + queue.name + ')' : queue.name"
               smShowTooltipIfEllipsis
             >
-              <div [smSearchText]="queueInput.value">{{queue.caption}}</div>
+              <div [smSearchText]="form.controls.queue.value">{{ queue.caption }}</div>
             </mat-option>
           }
         </mat-autocomplete>
       </mat-form-field>
     </div>
-  </ng-form>
+  </form>
 </sm-dialog-template>
+
 <mat-dialog-actions>
   <button mat-stroked-button mat-dialog-close data-id="cancleNewRun">CANCEL</button>
   <button mat-flat-button
-          [disabled]="enqueueForm.invalid"
+          [disabled]="form.invalid || form.controls.params.invalid"
           (click)="closeDialog(true)"
           data-id="confirmNewRun"
   >RUN</button>

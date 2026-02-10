@@ -1,12 +1,12 @@
-import {Component, ChangeDetectionStrategy, signal, effect, input, computed, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, input, signal, viewChild} from '@angular/core';
 import {ActiveDataPoint, ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
 import {BaseChartDirective} from 'ng2-charts';
 
-import {toObservable} from '@angular/core/rxjs-interop';
-import {combineLatest, fromEvent, of} from 'rxjs';
-import {delay, startWith, switchMap} from 'rxjs/operators';
-import {PushPipe} from '@ngrx/component';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
+import {startWith} from 'rxjs/operators';
+import {fromEvent} from 'rxjs';
+import {HumanizeResultPipe} from '@common/shared/pipes/humanize-result.pipe';
 
 export interface DonutChartData {
   name: string;
@@ -23,16 +23,27 @@ export interface DonutChartData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     BaseChartDirective,
-    PushPipe,
-    ChooseColorDirective
+    ChooseColorDirective,
+    HumanizeResultPipe
   ]
 })
 export class DonutComponent {
-  public doughnutChartType: ChartType = 'doughnut';
+  protected doughnutChartType: ChartType = 'doughnut';
+  private ready = false;
   private chart = viewChild(BaseChartDirective);
 
   highlight = signal<number>(null);
-  donutOptions = {
+  resizing = signal(false);
+  animation = signal(true);
+
+  data = input.required<DonutChartData[]>();
+  colors = input<string[]>();
+  resize = input<number>();
+  units = input('');
+  showPicker = input(true);
+
+  donutOptions = computed(() => ({
+    animation: {animateRotate: this.animation()},
     maintainAspectRatio: false,
     borderWidth: 0,
     layout: {
@@ -45,13 +56,7 @@ export class DonutComponent {
       legend: {display: false},
       tooltip: {enabled: false}
     },
-  } as ChartOptions<'doughnut'>;
-
-  data = input.required<DonutChartData[]>();
-  colors = input<string[]>();
-  resize = input<number>();
-  units = input('');
-  showPicker = input(true);
+  } as ChartOptions<'doughnut'>));
 
   protected donutData = computed<ChartData<'doughnut'>>(() => ({
       labels: this.data().map(slice => slice.name),
@@ -68,7 +73,7 @@ export class DonutComponent {
   protected highlightedData = computed(() => {
     if (this.highlight() !== null) {
       const value = this.donutData().datasets[0].data[this.highlight()];
-      return  {
+      return {
         caption: this.donutData().labels[this.highlight()],
         value,
         percent: Math.round(value / this.total() * 100),
@@ -77,31 +82,60 @@ export class DonutComponent {
       return null;
     }
   });
-  resizing$ = combineLatest([
-    fromEvent(window, 'resize').pipe(startWith(null)),
-    toObservable(this.resize)
-  ])
-    .pipe(
-      switchMap(() => of(of(true), of(false).pipe(delay(100)))),
-      switchMap(v => v)
-    );
+  private resizeTimeout: number;
 
   constructor() {
+    fromEvent(window, 'resize').pipe(startWith(null)).pipe(
+      takeUntilDestroyed(),
+    ).subscribe(() => {
+      this.resizeChart();
+    });
+
+    effect(() => {
+      this.resize();
+      this.resizeChart();
+    });
+
+
     effect(() => {
       if (this.chart()) {
-        window.setTimeout(() => this.chart().update(), 50)
+        window.setTimeout(() => this.chart().update(), 50);
+      }
+    });
+
+    effect(() => {
+      this.data()
+      this.ready = false;
+      window.setTimeout(() => this.ready = true, 300);
+    });
+
+    effect(() => {
+      this.colors();
+      if (this.ready) {
+        this.animation.set(false);
+        window.setTimeout(() => {
+          this.animation.set(true);
+        }, 50);
       }
     });
   }
 
-  public chartHovered({ active }: { event: ChartEvent; active: object[]; }): void {
-    this.highlight.set((active?.[0] as {datasetIndex: number; index: number})?.index ?? null);
+  private resizeChart() {
+    this.resizing.set(true);
+    window.clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = window.setTimeout(() => {
+      this.resizing.set(false);
+    }, 100);
+  }
+
+  public chartHovered({active}: { event: ChartEvent; active: object[]; }): void {
+    this.highlight.set((active?.[0] as { datasetIndex: number; index: number })?.index ?? null);
   }
 
   hoverLegend(slice: number) {
     this.highlight.set(slice);
 
-    const element: ActiveDataPoint  = {datasetIndex: 0, index: slice};
+    const element: ActiveDataPoint = {datasetIndex: 0, index: slice};
     this.chart()?.chart.setActiveElements([element]);
     this.chart()?.chart.update('none');
   }

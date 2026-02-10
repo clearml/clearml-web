@@ -3,7 +3,7 @@ $dot-size: 8px;
 :host {
   display: flex;
   justify-content: center;
-  padding: 2px 8px;
+  padding: 8px;
   position: relative;
   &.hidden {
     display: none;

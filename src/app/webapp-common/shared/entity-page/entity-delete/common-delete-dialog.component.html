@@ -3,7 +3,7 @@
   [header]="header"
   [displayX]="false"
 >
-  @if (!inProgress) {
+  @if (!inProgress()) {
     <!---------------- RESET POPUP -------------->
     @if (resetMode) {
       <div class="mb-3">
@@ -77,21 +77,21 @@
           </ul>
         </div>
       </div>
-      <div [class.visible]="failedFiles?.length > 0" class="files-list-container">
+      <div [class.visible]="failedFiles()?.length > 0" class="files-list-container">
         <div (click)="openToggle()" class="pointer">
-          <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpen"></mat-icon>The following artifacts were not deleted:
+          <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpen()"></mat-icon>The following artifacts were not deleted:
         </div>
-        <div class="more-info mono" [class]="{'info-open': isOpen}">
-          <sm-copy-clipboard label="" [clipboardText]="failedFiles.join('\n')"
+        <div class="more-info mono" [class]="{'info-open': isOpen()}">
+          <sm-copy-clipboard label="" [clipboardText]="failedFiles().join('\n')"
             class="copy ps-2 light"
           ></sm-copy-clipboard>
           <a></a>
-          @for (file of failedFiles | slice:0:1000; track file) {
+          @for (file of failedFiles() | slice:0:1000; track file) {
             <div>
               <div>{{file}}</div>
             </div>
           }
-          @if (failedFiles.length > 1000) {
+          @if (failedFiles().length > 1000) {
             <div>** Additional artifacts may be left **</div>
           }
         </div>

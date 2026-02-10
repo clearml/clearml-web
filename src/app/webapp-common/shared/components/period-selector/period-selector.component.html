@@ -1,0 +1,42 @@
+<div class="selector" [formGroup]="rangeControl" (blur)="onTouched()">
+  <mat-form-field appearance="outline" class="time-selector" subscriptSizing="dynamic">
+    <mat-select formControlName="period">
+      @for (timeFrame of timeFrameOptions(); track timeFrame.value) {
+        <mat-option [value]="timeFrame.value">{{ timeFrame.label }}</mat-option>
+      }
+      <mat-divider class="mb-2"></mat-divider>
+
+      <mat-option value="custom"
+                  smClickStopPropagation
+                  #customOption
+                  class="custom-option"
+                  (click)="$event.preventDefault(); $event.stopPropagation();"
+                  [class.error]="rangeControl.hasError('datesInverted')">
+
+        <div class="custom-option-container" smClickStopPropagation>
+          <mat-form-field class="custom-selector" subscriptSizing="dynamic">
+            <mat-date-range-input [rangePicker]="picker">
+              <input matStartDate
+                     placeholder="Start date"
+                     formControlName="from"
+                     (blur)="applyChanges()"
+                     (keyup.enter)="applyChanges()">
+              <input matEndDate
+                     placeholder="End date"
+                     formControlName="to"
+                     (blur)="applyChanges()"
+                     (keyup.enter)="applyChanges()">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="picker">Custom</mat-datepicker-toggle>
+            <mat-date-range-picker #picker (closed)="applyChanges()"></mat-date-range-picker>
+          </mat-form-field>
+        </div>
+      </mat-option>
+      @if (rangeControl.hasError('datesInverted') && rangeControl.get('from')?.value) {
+        <div class="date-range-alert">Please ensure the start date precedes the end date.</div>
+      }
+    </mat-select>
+  </mat-form-field>
+
+
+</div>

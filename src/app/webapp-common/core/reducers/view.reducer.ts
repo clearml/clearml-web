@@ -1,6 +1,6 @@
-import {ActionCreator, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createSelector, on, ReducerTypes} from '@ngrx/store';
 import * as layoutActions from '../actions/layout.actions';
-import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
+import {apiRequest} from '@common/core/actions/http.actions';
 import {Ace} from 'ace-builds';
 import {IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {
@@ -18,20 +18,16 @@ export interface ViewState {
   loading: Record<string, boolean>;
   dialog: boolean;
   notification: { title: string; message: string };
-  loggedOut: boolean;
   backdropActive: boolean;
   autoRefresh: boolean;
-  compareAutoRefresh: boolean;
   applicationVisible: boolean;
   scaleFactor: number;
   firstLogin: boolean;
-  firstLoginAt: number;
   neverShowPopupAgain: string[];
   neverShowChangesAgain: string;
   plotlyReady: boolean;
   aceReady: boolean;
   aceCaretPosition: Record<string, Ace.Point>;
-  preferencesReady: boolean;
   showUserFocus: boolean;
   redactedArguments: { key: string }[];
   hideRedactedArguments: boolean;
@@ -47,26 +43,23 @@ export interface ViewState {
   forcedTheme: 'light' | 'dark';
   themeColors: Record<string, string>;
   hideEnterpriseFeatures: boolean;
+  extraErrorInfo: Record<string, any>;
 }
 
 export const initViewState: ViewState = {
   loading: {},
   dialog: false,
   notification: null,
-  loggedOut: false,
   backdropActive: false,
   autoRefresh: true,
-  compareAutoRefresh: false,
   applicationVisible: true,
   scaleFactor: 100,
   firstLogin: false,
-  firstLoginAt: +(window?.localStorage?.getItem('firstLogin') || 0),
   neverShowPopupAgain: [],
   neverShowChangesAgain: null,
   plotlyReady: false,
   aceReady: false,
   aceCaretPosition: {},
-  preferencesReady: false,
   showUserFocus: false,
   redactedArguments: [{key: 'CLEARML_API_SECRET_KEY'},
     {key: 'CLEARML_AGENT_GIT_PASS'},
@@ -85,10 +78,10 @@ export const initViewState: ViewState = {
   forcedTheme: null,
   themeColors: null,
   hideEnterpriseFeatures: false,
+  extraErrorInfo: {},
 };
 
 export const views = state => state.views as ViewState;
-export const selectReady = createSelector(views, state => state.preferencesReady);
 export const selectLoading = createSelector(views, state => state.loading);
 export const selectIsLoading = createSelector(views, (state) => Object.values(state.loading).some((value) => value));
 
@@ -96,13 +89,10 @@ export const selectBackdropActive = createSelector(views, state => state.backdro
 
 export const selectNotification = createSelector(views, state => state.notification);
 
-export const selectLoggedOut = createSelector(views, state => state.loggedOut);
 export const selectAutoRefresh = createSelector(views, state => state?.autoRefresh);
-export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state?.applicationVisible);
 export const selectUserTheme = createSelector(views, state => state?.theme ?? state?.defaultTheme ?? 'system');
 export const selectSystemTheme = createSelector(views, state => state?.systemTheme ?? 'dark');
-export const selectDefaultTheme = createSelector(views, state => state?.defaultTheme);
 export const selectForcedTheme = createSelector(views, state => state?.forcedTheme);
 export const selectThemeColors = createSelector(views, state => state.themeColors);
 export const selectThemeMode = createSelector(selectUserTheme, selectSystemTheme, selectForcedTheme,
@@ -110,7 +100,6 @@ export const selectThemeMode = createSelector(selectUserTheme, selectSystemTheme
 export const selectDarkTheme = createSelector(selectThemeMode, mode => mode === 'dark');
 export const selectScaleFactor = createSelector(views, state => state?.scaleFactor);
 export const selectFirstLogin = createSelector(views, state => state.firstLogin);
-export const selectFirstLoginAt = createSelector(views, state => state.firstLoginAt);
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
 export const selectAceReady = createSelector(views, state => state.aceReady);
 export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
@@ -141,10 +130,6 @@ export const selectHideEnterpriseFeatures = createSelector(views, state => state
 
 
 export const viewReducers = [
-  on(requestFailed, (state, action): ViewState => {
-    const isLoggedOut = action.err && action.err.status === 401;
-    return {...state, loggedOut: isLoggedOut};
-  }),
   on(layoutActions.deactivateLoader, (state, action): ViewState => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {[action.endpoint]: removed, ...loading} = state.loading;
@@ -167,7 +152,6 @@ export const viewReducers = [
   on(layoutActions.firstLogin, (state, action): ViewState => ({
     ...state,
     firstLogin: action.first,
-    firstLoginAt: new Date().getTime()
   })),
   on(layoutActions.plotlyReady, (state): ViewState => ({...state, plotlyReady: true})),
   on(layoutActions.aceReady, (state): ViewState => ({...state, aceReady: true})),
@@ -201,10 +185,6 @@ export const viewReducers = [
       ...state.tableCardsCollapsed,
       [action.entityType]: !state.tableCardsCollapsed[action.entityType]
     }
-  })),
-  on(layoutActions.setCompareAutoRefresh, (state, action): ViewState => ({
-    ...state,
-    compareAutoRefresh: action.autoRefresh
   })),
   on(layoutActions.showEmbedReportMenu, (state, action): ViewState => ({
     ...state,

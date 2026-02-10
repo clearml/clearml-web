@@ -2,8 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'filterRegex',
-  standalone: true
-})
+  })
 export class RegexPipe implements PipeTransform{
 
   transform(value, pattern) {

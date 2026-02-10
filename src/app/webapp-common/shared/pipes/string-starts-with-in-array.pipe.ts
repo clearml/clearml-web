@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'stringStartsWithInArray',
-  standalone: true
-})
+  })
 export class StringStartsWithInArrayPipe implements PipeTransform {
 
   transform(value: string, stingsArr: string[] = []): boolean {

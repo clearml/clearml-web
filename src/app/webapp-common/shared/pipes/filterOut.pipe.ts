@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'filterOut',
-  standalone: true
-})
+  })
 export class FilterOutPipe<T> implements PipeTransform {
 
   transform(arr: T[], field: string, value: string | boolean): T[] {

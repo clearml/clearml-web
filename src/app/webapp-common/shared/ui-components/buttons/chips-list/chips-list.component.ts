@@ -44,7 +44,7 @@ export class ChipsListComponent {
         this.visibleLabelsLen = this.chips().length;
         this.measure = true;
         this.cdr.detectChanges();
-        const chipLens = this.chips().map(chip => chip.elRef.nativeElement.offsetWidth);
+        const chipLens = this.chips().map(chip => chip.offsetWidth());
         let totalWidth = 32;
         let len = 0
         const offsetWidth = this.ref.nativeElement.offsetWidth;

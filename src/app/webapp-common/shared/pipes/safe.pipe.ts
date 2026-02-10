@@ -4,8 +4,7 @@ import DOMPurify from 'dompurify';
 
 @Pipe({
   name: 'safe',
-  standalone: true
-})
+  })
 export class SafePipe implements PipeTransform {
 
   constructor(protected sanitizer: DomSanitizer) {
@@ -31,8 +30,7 @@ export class SafePipe implements PipeTransform {
 
 @Pipe({
   name: 'purify',
-  standalone: true
-})
+  })
 export class SaferPipe implements PipeTransform {
 
   constructor(protected sanitizer: DomSanitizer) {

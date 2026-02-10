@@ -128,7 +128,7 @@ export const selectTableCompareUrlParts = createSelector(
     view, selected: (selected.map(e => e.id)), experiments: experiments.map(e => e.id), routeConfig
   }));
 export const selectShowCompareScalarSettings = createSelector(experimentsView, state => state.showCompareScalarSettings);
-export const selectCloneForceParent = createSelector(experimentsView, state => state.cloneForceParent);
+export const selectCloneDefaultOptions = createSelector(experimentsView, state => state.cloneDefaultOptions);
 export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (state): IExperimentInfo => state.infoDataFreeze);
 export const selectExperimentInfoErrors = createSelector(experimentInfo, (state): CommonExperimentInfoState['errors'] => state.errors);
 
@@ -252,7 +252,10 @@ export const selectExperimentConfigObj =
 
 export const selectExperimentHyperParamsSelectedSectionParams =
   createSelector(selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute,
-    (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(get(hyperparams, section, {})).map(([, value]) => value));
+    (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => {
+      const sectionData = get(hyperparams, section);
+      return sectionData && Object.entries(sectionData).map(([, value]) => value)
+    });
 export const selectScalarSingleValue = createSelector(experimentOutput, (state): EventsGetTaskSingleValueMetricsResponseValues[] => state.scalarSingleValue);
 export const selectHasScalarSingleValue = createSelector(selectScalarSingleValue, (scalarSingleValue): boolean => scalarSingleValue?.length > 0);
 export const selectLastMetricsValues = createSelector(experimentOutput, (state): Task['last_metrics'] => state.lastMetrics);

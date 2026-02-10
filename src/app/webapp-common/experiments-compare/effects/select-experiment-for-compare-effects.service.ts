@@ -107,7 +107,7 @@ export class SelectCompareHeaderEffects {
     ]),
     map(([action, oldOrders, projectId, tableCols, metricsCols]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
-      const colIds = tableCols.map(col => col.id).concat(metricsCols[projectId].map(col => col.id));
+      const colIds = tableCols.map(col => col.id).concat(metricsCols[projectId]?.map(col => col.id) ?? []);
       return compareAddDialogSetTableSort({orders, projectId, colIds});
     })
   ));

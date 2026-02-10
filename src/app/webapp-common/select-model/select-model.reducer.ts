@@ -7,6 +7,7 @@ import {MODELS_TABLE_COL_FIELDS} from '@common/models/shared/models.const';
 import * as actions from './select-model.actions';
 import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
+import {unionBy} from 'lodash-es';
 
 export interface SelectModelState {
   models: SelectedModel[];
@@ -27,8 +28,8 @@ export interface SelectModelState {
 }
 
 const selectModelInitState: SelectModelState = {
-  models: [],
-  selectedModelsList: [],
+  models: null,
+  selectedModelsList: null,
   selectedModels: [],
   noMoreModels: false,
   selectedModelSource: null,
@@ -68,6 +69,7 @@ export const selectModelReducer = createReducer(
   on(actions.clearTableFilter, (state): SelectModelState => ({...state, tableFilters: {}})),
   on(actions.tableFilterChanged, (state, action): SelectModelState => ({
     ...state,
+    models: selectModelInitState.models,
     tableFilters: {
       ...state.tableFilters,
       [action.col.id]: {value: action.value, matchMode: action.col.filterMatchMode || action.andFilter ? 'AND' : undefined}
@@ -79,15 +81,22 @@ export const selectModelReducer = createReducer(
 );
 
 export const models = createFeatureSelector<SelectModelState>('selectModel');
-export const selectModels = createSelector(models, (state) => state ? state.models : []);
-export const selectSelectedModelsList = createSelector(models, (state) => state ? state.selectedModelsList : []);
-export const selectCurrentScrollId = createSelector(models, (state) => state.scrollId);
-export const selectGlobalFilter = createSelector(models, (state) => state.globalFilter);
-export const selectTableSortFields = createSelector(models, (state) => state.tableSortFields);
+export const selectModels = createSelector(models, state => state?.models);
+export const selectSelectedModelsList = createSelector(models, state => state?.selectedModelsList);
+export const selectAllModels = createSelector(selectModels, selectSelectedModelsList, (models, addedModels) => Array.isArray(models) ?
+  unionBy(addedModels, models, 'id').map(model => ({
+    ...model,
+    system_tags: model.system_tags?.map((t => t.replace('archive', ' archive')))
+  }))
+  : null
+);
+export const selectCurrentScrollId = createSelector(models, state => state.scrollId);
+export const selectGlobalFilter = createSelector(models, state => state.globalFilter);
+export const selectTableSortFields = createSelector(models, state => state.tableSortFields);
 export const selectSelectModelTableFilters = createSelector(models, state => state.tableFilters);
-export const selectViewMode = createSelector(models, (state) => state.viewMode);
-export const selectSelectedModels = createSelector(models, (state) => state.selectedModels);
-export const selectNoMoreModels = createSelector(models, (state) => state.noMoreModels);
-export const selectShowArchive = createSelector(models, (state) => state.showArchive);
-export const selectFrameworks = createSelector(models, (state) => state.frameworks);
-export const selectTags = createSelector(models, (state) => state.tags);
+export const selectViewMode = createSelector(models, state => state.viewMode);
+export const selectSelectedModels = createSelector(models, state => state.selectedModels);
+export const selectNoMoreModels = createSelector(models, state => state.noMoreModels);
+export const selectShowArchive = createSelector(models, state => state.showArchive);
+export const selectFrameworks = createSelector(models, state => state.frameworks);
+export const selectTags = createSelector(models, state => state.tags);

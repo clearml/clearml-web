@@ -10,6 +10,10 @@
     &.custom-columns {
       width: 370px;
     }
+
+    &.larger {
+      max-width: 740px;
+    }
   }
 
   .mat-mdc-menu-content {

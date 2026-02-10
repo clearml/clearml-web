@@ -10,10 +10,10 @@ import {PlotData} from 'plotly.js';
 
 export const buildMetricsListFlat = (metrics: MetricVariantResult[]): GroupedList => {
   return metrics.reduce((acc, curr) => {
-      acc[`${curr.metric} - ${curr.variant}`] = {};
+    acc[`${curr.metric} - ${curr.variant}`] = {};
     return acc;
   }, {} as Record<string, Record<string, PlotData>>);
-}
+};
 
 export const buildMetricsList = (metrics: MetricVariantResult[]): GroupedList => {
   return metrics.reduce((acc, curr) => {
@@ -25,31 +25,67 @@ export const buildMetricsList = (metrics: MetricVariantResult[]): GroupedList =>
     }
     return acc;
   }, {} as Record<string, Record<string, PlotData>>);
-}
+};
 
 @Component({
-    selector: 'sm-selectable-grouped-filter-list',
-    templateUrl: './selectable-grouped-filter-list.component.html',
-    styleUrls: ['./selectable-grouped-filter-list.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        SearchComponent,
-        GroupedSelectableListComponent
-    ]
+  selector: 'sm-selectable-grouped-filter-list',
+  templateUrl: './selectable-grouped-filter-list.component.html',
+  styleUrls: ['./selectable-grouped-filter-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SearchComponent,
+    GroupedSelectableListComponent
+  ]
 })
 export class SelectableGroupedFilterListComponent {
 
   list = input<GroupedList>();
+  nested = input<boolean>();
+  listNested = computed(() => this.nested() ? this.list() ?? {} : Object.keys(this.list() ?? {})
+    .reduce((acc, metric) => {
+      acc[metric] = {};
+      return acc;
+    }, {} as GroupedList));
   searchTerm = input<string>();
   checkedList = input<string[]>([]);
   titleLabel = input<string>();
   placeHolder = input<string>('Find scalars');
 
   itemSelect = output<string>();
-  hiddenChanged = output<string[]>();
+  selectedChanged = output<string[]>();
   searchTermChanged = output<string>();
 
-  filteredList = computed(() => this.filterList(this.list(), this.searchTerm()));
+  filteredList = computed(() => this.filterList(this.listNested(), this.searchTerm()));
+
+
+  listStrings = computed(() => {
+    const allValues = [];
+    Object.keys(this.listNested()).forEach(key => {
+      allValues.push(key);
+      Object.keys(this.list()[key]).forEach(itemKey => {
+        allValues.push(key + itemKey);
+      });
+    });
+    return allValues;
+  });
+
+  filteredListStrings = computed(() => {
+    const allValues = [];
+    Object.keys(this.filteredList() || {}).forEach(key => {
+      allValues.push(key);
+      Object.keys(this.list()[key]).forEach(itemKey => {
+        if ((key.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
+          itemKey.toLowerCase().includes(this.searchTerm().toLowerCase()))
+        ) {
+          allValues.push(key + itemKey);
+        }
+      });
+    });
+    return allValues;
+  });
+
+  allFilteredSelected = computed(() => this.filteredListStrings().every(filteredItem => this.checkedList().includes(filteredItem)));
+  allSelected = computed(() => this.listStrings().every(item => this.checkedList().includes(item)));
 
   filterList(list: GroupedList, searchTerm: string) {
     if (!searchTerm || searchTerm === '') {
@@ -75,21 +111,6 @@ export class SelectableGroupedFilterListComponent {
     }
   }
 
-  // private hideChildrenForHiddenParent(list: GroupedList) {
-  //   let newCheckList = this.checkedList() ? [...this.checkedList()] : [];
-  //   let hiddenListChanged = false;
-  //   Object.entries(list).forEach(([parent, children]) => {
-  //     if (!this.checkedList()?.includes(parent)) {
-  //       hiddenListChanged = true;
-  //       const remove = Object.keys(children).map(child => parent + child)
-  //       newCheckList = newCheckList.filter(item => !remove.includes(item))
-  //     }
-  //   });
-  //   if (hiddenListChanged) {
-  //     this.hiddenChanged.emit(Array.from(new Set(newCheckList)));
-  //   }
-  // }
-
   onSearchTermChanged(value: string) {
     this.searchTermChanged.emit(value);
   }
@@ -103,7 +124,7 @@ export class SelectableGroupedFilterListComponent {
         newCheckedList = [...newCheckedList, parent];
       }
     }
-    this.hiddenChanged.emit(newCheckedList);
+    this.selectedChanged.emit(newCheckedList);
   }
 
   private shouldHidePrent(parent: string, checkedList: string[]) {
@@ -111,43 +132,56 @@ export class SelectableGroupedFilterListComponent {
   }
 
   toggleHideAll() {
-    if (Object.keys(this.checkedList() ?? {}).length > 0) {
-      this.hiddenChanged.emit([]);
+    if (this.allSelected()) {
+      this.selectedChanged.emit([]);
     } else {
-      const allValues = [];
-      Object.keys(this.list()).forEach(key => {
-        allValues.push(key);
-        Object.keys(this.list()[key]).forEach(itemKey => {
-          if (itemKey !== '__displayName') {
-            allValues.push(key + itemKey);
+      this.selectedChanged.emit(this.listStrings());
+    }
+  }
+
+  toggleHideMatching() {
+    if (this.allFilteredSelected()) {
+      if (this.nested()) {
+        const newList = Object.entries(this.filteredList()).map(([parent, childrenTemp]) => {
+          const children = Object.keys(childrenTemp);
+          const toRemove = children.map(child => parent + child);
+          const removeFromCheckedList = this.checkedList().filter(checkedItem => toRemove.includes(checkedItem));
+          if (this.shouldHidePrent(parent, this.checkedList().filter(checkedItem => !toRemove.includes(checkedItem)))) {
+            removeFromCheckedList.push(parent);
           }
-        });
-      });
-      this.hiddenChanged.emit(allValues);
+          return removeFromCheckedList;
+        }).flat();
+        this.selectedChanged.emit(this.checkedList().filter(checkedItem => !newList.includes(checkedItem)));
+      } else {
+        this.selectedChanged.emit(this.checkedList().filter(allItem => !this.filteredListStrings().some(filteredItem => allItem.startsWith(filteredItem))));
+      }
+    } else {
+      this.selectedChanged.emit(Array.from(new Set([...this.checkedList(), ...this.filteredListStrings()])));
     }
   }
 
   toggleHideGroup(event) {
     const key = event.key;
-    let allValues = [...this.checkedList() ?? []];
+    let newCheckedList = [...this.checkedList() ?? []];
     if (event.hide) {
-      allValues = !allValues.includes(key) ? [...allValues, key] : allValues;
+      newCheckedList = !newCheckedList.includes(key) ? [...newCheckedList, key] : newCheckedList;
       Object.keys(this.list()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
-        if (!allValues.includes(keyItemKey) && itemKey !== '__displayName') {
-          allValues.push(keyItemKey);
+        if (!newCheckedList.includes(keyItemKey)) {
+          newCheckedList.push(keyItemKey);
         }
       });
     } else {
-      const parentKey = `${key}`
-      allValues = allValues.filter(i => !i.startsWith(parentKey) && i !== key);
-      Object.keys(this.list()[key]).forEach(itemKey => {
+      const parentKey = `${key}`;
+      const currentVariants = Object.keys(this.list()[parentKey]).map(child => parentKey + child);
+      newCheckedList = newCheckedList.filter(i => !currentVariants.includes(i)).filter(i => i !== parentKey);
+      Object.keys(this.listNested()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
-        if (allValues.includes(keyItemKey)) {
-          allValues = allValues.filter(longKey => longKey !== (keyItemKey));
+        if (newCheckedList.includes(keyItemKey)) {
+          newCheckedList = newCheckedList.filter(longKey => longKey !== (keyItemKey));
         }
       });
     }
-    this.hiddenChanged.emit(allValues);
+    this.selectedChanged.emit(newCheckedList);
   }
 }

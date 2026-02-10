@@ -48,7 +48,7 @@ export class CreateNewReportFormComponent {
   protected reportForm = this.builder.group({
     name: [null as string, [Validators.required, minLengthTrimmed(3)]],
     description: '',
-    project: [null as string, [Validators.required, minLengthTrimmed(3)]]
+    project: [null as string, [Validators.required, minLengthTrimmed(1)]]
   });
 
   readOnlyProjectsNames = input<string[]>();
