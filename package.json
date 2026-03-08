@@ -62,7 +62,7 @@
     "date-fns": "^4.1.0",
     "diff": "^8.0.3",
     "dom-to-image": "^2.6.0",
-    "dompurify": "^3.3.0",
+    "dompurify": "^3.3.2",
     "export-to-csv": "^1.4.0",
     "filesize": "^11.0.13",
     "has-ansi": "^6.0.2",
