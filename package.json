@@ -67,7 +67,7 @@
     "filesize": "^11.0.13",
     "has-ansi": "^6.0.2",
     "hocon-parser": "^1.0.1",
-    "lodash-es": "^4.17.23",
+    "lodash-es": "^4.18.1",
     "lucene": "^2.1.1",
     "marked": "^12.0.2",
     "ng2-charts": "^8.0.0",
