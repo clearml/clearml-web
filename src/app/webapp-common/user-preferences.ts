@@ -1,5 +1,5 @@
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import {Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 import {cloneDeep, isEqual, get, set} from 'lodash-es';
 import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
@@ -21,6 +21,8 @@ export class UserPreferences {
   private preferences: Record<string, Record<string, any>>;
   private timer: number;
   private prefsQueue: Record<string, any> = {};
+
+  readonly isReady$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.removeFromLocalStorage();
@@ -49,7 +51,10 @@ export class UserPreferences {
           }
 
         }),
-        tap(preferences => this.preferences = preferences)
+        tap(preferences => {
+          this.preferences = preferences;
+          this.isReady$.next(true);
+        })
       );
   }
 

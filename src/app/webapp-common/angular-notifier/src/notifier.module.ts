@@ -43,18 +43,6 @@ export const notifierDefaultConfigFactory = (): NotifierConfig => new NotifierCo
  * Notifier module
  */
 @NgModule({
-  declarations: [
-    NotifierContainerComponent,
-    NotifierNotificationComponent
-  ],
-  exports: [
-    NotifierContainerComponent
-  ],
-  imports: [
-    CommonModule,
-    MatIconButton,
-    MatIcon
-  ],
   providers: [
     NotifierAnimationService,
     NotifierService,

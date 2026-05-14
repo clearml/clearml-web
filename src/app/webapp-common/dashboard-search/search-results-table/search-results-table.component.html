@@ -64,7 +64,7 @@
               }
               @if (!advanced() && activeLinkConfiguration()[i].viewAllResults && itemsList.length === SEARCH_PAGE_SIZE) {
                 <div>
-                  <a [routerLink]="activeLinkConfiguration()[i].viewAllResultsLink" [queryParams]="viewAllQueryParams" (click)="closeDialog.emit()" class="list__view-all-link">View all results</a>
+                  <a [routerLink]="activeLinkConfiguration()[i].viewAllResultsLink" [queryParams]="viewAllQueryParams()" (click)="closeDialog.emit()" class="list__view-all-link">View all results</a>
                 </div>
               }
               @if ((advanced() || !activeLinkConfiguration()[i].viewAllResults) &&

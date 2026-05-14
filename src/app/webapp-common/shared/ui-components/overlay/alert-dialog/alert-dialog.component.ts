@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 import {isAnnotationTask} from '../../../utils/shared-utils';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
@@ -6,57 +6,51 @@ import {MatButton} from '@angular/material/button';
 
 
 @Component({
-    selector: 'sm-alert-dialog',
-    templateUrl: './alert-dialog.component.html',
-    styleUrls: ['./alert-dialog.component.scss'],
-    imports: [
-        DialogTemplateComponent,
-        MatDialogModule,
-        MatButton,
-    ]
+  selector: 'sm-alert-dialog',
+  templateUrl: './alert-dialog.component.html',
+  styleUrls: ['./alert-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    MatDialogModule,
+    MatButton,
+  ]
 })
 export class AlertDialogComponent {
+  protected data = inject<{
+    alertMessage: string;
+    alertSubMessage: string;
+    okMessage: string;
+    moreInfo: Record<string, any>;
+    resultMessage: string
+  }>(MAT_DIALOG_DATA);
+  protected moreInfo = signal(this.data.moreInfo);
+  protected resultMessage = signal(this.data.resultMessage ?? '');
+  protected moreInfoEntities = computed(() => this.moreInfo() && Object.keys(this.moreInfo()));
 
-  public alertMessage;
-  public alertSubMessage;
-  public okMessage;
-  public moreInfoEntities: string[];
-  public isOpen = false;
-  private _moreInfo: any;
-  private _resultMessage: string;
-
-  set moreInfo(moreInfo) {
-    this._moreInfo        = moreInfo;
-    this.moreInfoEntities = moreInfo && Object.keys(moreInfo);
+  public setMoreInfo(moreInfo: Record<string, any>) {
+    this.moreInfo.set(moreInfo);
   }
 
-  get moreInfo() {
-    return this._moreInfo;
+  public setResultMessage(resultMessage: string) {
+    this.resultMessage.set(resultMessage);
   }
 
-  set resultMessage(resultMessage) {
-    this._resultMessage = resultMessage;
-  }
-
-  get resultMessage() {
-    return this._resultMessage;
-  }
-
-  constructor(@Inject(MAT_DIALOG_DATA) data: { alertMessage: string; alertSubMessage: string; okMessage: string; moreInfo: any; resultMessage: string }) {
-    this.alertMessage    = data.alertMessage || '';
-    this.alertSubMessage = data.alertSubMessage;
-    this.moreInfo        = data.moreInfo;
-    this.okMessage       = data.okMessage || 'OK';
-    this.resultMessage   = data.resultMessage;
-  }
-
-  buildUrl(entity, entityName) {
+  gotoUrl(entity, entityName) {
+    let url;
     if (entityName === 'datasets') {
-      return `/datasets/${entity.id}`;
+      url = `/datasets/${entity.id}`;
+    } else if (entityName === 'tasks' && isAnnotationTask(entity)) {
+      url = `/annotations?q=${entity.id}`;
+    } else {
+      url = `/projects/${entity?.project?.id ?? '*'}/experiments/${entity.id}`;
     }
-    if (entityName === 'tasks' && isAnnotationTask(entity)) {
-      return `/annotations?q=${entity.id}`;
+    if (url) {
+      const a = document.createElement('a');
+      a.target = '_blank';
+      a.href = url;
+      a.click();
+      a.remove();
     }
-    return `/projects/${entity?.project?.id ?? '*'}/experiments/${entity.id}`;
   }
 }

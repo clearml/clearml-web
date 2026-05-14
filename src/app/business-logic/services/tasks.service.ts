@@ -5,7 +5,7 @@ import {Task} from '../model/tasks/task';
 import {DEFAULT_QUEUE_TAG} from '../variables';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BlTasksService {
   private previouslyUsedQueue;
 

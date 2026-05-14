@@ -97,11 +97,8 @@ mat-form-field {
 }
 
 .venv {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 48px;
-  align-items: end;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
 
   mat-button-toggle-group {
     height: 40px;

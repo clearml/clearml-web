@@ -29,8 +29,8 @@ import {MatButton} from '@angular/material/button';
 import {QueuesTableComponent} from '@common/workers-and-queues/dumb/queues-table/queues-table.component';
 import {PushPipe} from '@ngrx/component';
 import {QueueInfoComponent} from '@common/workers-and-queues/dumb/queue-info/queue-info.component';
-import {QueueCreateDialogModule} from '@common/shared/queue-create-dialog/queue-create-dialog.module';
 import {injectQueryParams} from 'ngxtension/inject-query-params';
+import {htmlTextShort} from '@common/shared/utils/shared-utils';
 
 const REFRESH_INTERVAL = 30000;
 
@@ -49,7 +49,6 @@ const REFRESH_INTERVAL = 30000;
     MatButton,
     QueuesTableComponent,
     PushPipe,
-    QueueCreateDialogModule,
     QueueInfoComponent
   ]
 })
@@ -117,12 +116,13 @@ export class QueuesComponent {
     this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(ConfirmDialogComponent, {
       data: {
         title: 'Clear all pending tasks',
-        body: `Are you sure you want to dequeue the ${queue.entries_count} task${queue.entries_count > 1 ? 's' : ''} currently pending on the ${queue.caption} queue?`,
+        body: `Are you sure you want to dequeue the ${queue.entries_count} task${queue.entries_count > 1 ? 's' : ''} currently pending on the <b>${htmlTextShort(queue.caption, 200)}</b> queue?`,
         yes: 'Clear Queue',
         no: 'Cancel',
         iconClass: 'al-ico-alert',
         iconColor: 'var(--color-warning)'
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed()
       .pipe(filter(res => res))
       .subscribe(() => this.store.dispatch(queueActions.clearQueue({queue})));
@@ -130,7 +130,7 @@ export class QueuesComponent {
 
 
   renameQueue(queue: Queue) {
-    this.dialog.open<QueueCreateDialogComponent, Queue, boolean>(QueueCreateDialogComponent, {data: queue}).afterClosed()
+    this.dialog.open<QueueCreateDialogComponent, Queue, boolean>(QueueCreateDialogComponent, {data: queue, panelClass: 'dialog-sm'}).afterClosed()
       .pipe(
         filter(q => !!q),
         take(1)
@@ -159,7 +159,9 @@ export class QueuesComponent {
   }
 
   addQueue() {
-    this.dialog.open<QueueCreateDialogComponent, unknown, boolean>(QueueCreateDialogComponent).afterClosed()
+    this.dialog.open<QueueCreateDialogComponent, unknown, boolean>(QueueCreateDialogComponent, {
+        panelClass: 'dialog-sm'
+      }).afterClosed()
       .pipe(
         filter(queue => !!queue),
         take(1)

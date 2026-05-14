@@ -11,7 +11,7 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
-import {selectCompareAddTableFilters, selectCompareAddTableSortFields, selectIsCompare, selectIsModels} from '../../experiments-compare/reducers';
+import {selectIsModels} from '../../experiments-compare/reducers';
 import {FilterMetadata} from 'primeng/api';
 import {SortMeta} from 'primeng/api';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
@@ -25,7 +25,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {INITIAL_EXPERIMENT_COLS_ORDER} from '@common/experiments/experiment.consts';
 
 export const selectExperimentsList = createSelector(experimentsView, state => state.experiments);
-export const selectTableRefreshList = createSelector(experimentsView, state => !!state.refreshList);
+export const selectTableRefreshSessionList = createSelector(experimentsView, state => !!state.refreshList);
 export const selectSelectedTableExperiment = createSelector(experimentsView, state => state.selectedExperiment);
 
 export const selectExperimentsTableColsWidth = createSelector(experimentsView, selectRouterParams,
@@ -33,16 +33,17 @@ export const selectExperimentsTableColsWidth = createSelector(experimentsView, s
 export const selectExperimentsHiddenTableCols = createSelector(experimentsView, selectRouterParams,
   (state, params) => state.hiddenProjectTableCols?.[params?.projectId] ?? experimentsViewInitialState.hiddenTableCols);
 export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
-export const selectMetricVariantsPlots = createSelector(experimentsView, state => state.metricVariantsPlots);
+export const selectCompareMetricVariants = createSelector(experimentsView, state => state.compareMetricVariants);
+export const selectCompareMetricVariantsPlots = createSelector(experimentsView, state => state.compareMetricVariantsPlots);
 export const selectExperimentViewMode = createSelector(selectRouterConfig,
   config => config?.at(-2) === 'compare' ? 'compare' : config?.includes(':experimentId') ? 'info' : 'table');
 export const selectTableCompareView = createSelector(experimentsView, state => state.tableCompareView);
-export const selectMetricVariantForView = createSelector(selectExperimentViewMode, selectTableCompareView, selectMetricVariants, selectMetricVariantsPlots,
-  (viewMode, compareView, scalarVars, plotVars) => viewMode === 'compare' && compareView === 'plots' ? plotVars : scalarVars);
+export const selectMetricVariantForView = createSelector(selectExperimentViewMode, selectTableCompareView, selectMetricVariants, selectCompareMetricVariants, selectCompareMetricVariantsPlots,
+  (viewMode, compareView, tableVars,  scalarVars, plotVars) => viewMode === 'compare' ? (compareView === 'plots' ? plotVars : scalarVars) : tableVars);
 export const selectCompareSelectedMetricsScalars = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetrics?.[params?.projectId]);
 export const selectCompareSelectedMetricsPlots = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetricsPlots?.[params?.projectId]);
-export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') => createSelector(selectMetricVariants,
-  selectMetricVariantsPlots, selectCompareSelectedMetricsScalars, selectCompareSelectedMetricsPlots,
+export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') => createSelector(selectCompareMetricVariants,
+  selectCompareMetricVariantsPlots, selectCompareSelectedMetricsScalars, selectCompareSelectedMetricsPlots,
   (metricVariantsScalars, metricVariantsPlots, selectedMetricsScalars, selectedMetricsPlots): ISmCol[] => {
     const selectedMetricsState = viewMode === 'scalars' ? selectedMetricsScalars : selectedMetricsPlots;
     const metricVariants = viewMode === 'scalars' ? metricVariantsScalars : metricVariantsPlots;
@@ -103,9 +104,8 @@ export const selectSplitSize = createSelector(experimentsView, (state): number =
 export const selectGlobalFilter = createSelector(experimentsView, (state) => state.globalFilter);
 
 export const selectTableSortFields = createSelector(
-  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableSortFields,
-  (state, params, isCompare, compareSortFields): SortMeta[] =>
-    (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? [...INITIAL_EXPERIMENT_COLS_ORDER]
+  experimentsView, selectRouterParams,
+  (state, params): SortMeta[] => state.projectColumnsSortOrder?.[params?.projectId] ?? [...INITIAL_EXPERIMENT_COLS_ORDER]
 );
 
 
@@ -113,9 +113,9 @@ export const selectExperimentsTableFilters = createSelector(experimentsView, sel
   (state, params) => state.projectColumnFilters?.[params?.projectId] ?? {} as Record<string, FilterMetadata>);
 
 export const selectTableFilters = createSelector(
-  experimentsView, selectExperimentsTableFilters, selectIsCompare, selectCompareAddTableFilters, selectIsModels, selectModelExperimentsTableFilters,
-  (state, experimentFilters, isCompare, compareFilters, isModels, modelExperimentsFilters) =>
-    isModels ? modelExperimentsFilters : isCompare ? compareFilters : experimentFilters ?? {} as Record<string, FilterMetadata>);
+  experimentsView, selectExperimentsTableFilters, selectIsModels, selectModelExperimentsTableFilters,
+  (state, experimentFilters, isModels, modelExperimentsFilters) =>
+    isModels ? modelExperimentsFilters : experimentFilters ?? {} as Record<string, FilterMetadata>);
 
 export const selectSelectedExperiments = createSelector(experimentsView, state => state.selectedExperiments);
 export const selectSelectedExperimentsDisableAvailable = createSelector(experimentsView, (state) => state.selectedExperimentsDisableAvailable);

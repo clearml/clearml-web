@@ -48,10 +48,10 @@
         [ngModel]="autoRefreshState()"
         (ngModelChange)="setAutoRefresh.emit($event)"
       >
-        <span class="toggle-label" [class.enabled]="autoRefreshState()">AUTO REFRESH</span>
+        <span class="toggle-label" [class.enabled]="autoRefreshState()" data-id="autoRefreshToggle">AUTO REFRESH</span>
       </mat-slide-toggle>
       <div class="dot" animate.enter="enter" animate.leave="leaving">•</div>
-      <button mat-button (click)="refresh()" animate.enter="enter" animate.leave="leaving">REFRESH</button>
+      <button mat-button (click)="refresh()" animate.enter="enter" animate.leave="leaving" data-id="refreshButton">REFRESH</button>
     }
   </div>
   @if (showMenu()) {

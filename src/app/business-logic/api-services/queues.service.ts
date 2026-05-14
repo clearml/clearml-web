@@ -67,9 +67,11 @@ import { QueuesUpdateResponse } from '../model/queues/queuesUpdateResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {QueuesGetByTaskIdRequest} from '~/business-logic/model/queues/queuesGetByTaskIdRequest';
+import {QueuesGetByTaskIdResponse} from '~/business-logic/model/queues/queuesGetByTaskIdResponse';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiQueuesService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -233,7 +235,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * @param request request body
      * @param options flags and headers to use in webapp
      */
@@ -297,7 +299,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * @param request request body
      * @param options flags and headers to use in webapp
      */
@@ -329,7 +331,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * @param request request body
      * @param options flags and headers to use in webapp
      */
@@ -345,7 +347,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * @param request request body
      * @param options flags and headers to use in webapp
      */
@@ -424,4 +426,19 @@ export class ApiQueuesService {
         );
     }
 
+  /**
+   * Get queue by the enqueued task ID
+   * @param request request body
+   * @param options flags and headers to use in webapp
+   */
+  public queuesGetByTaskId(request: QueuesGetByTaskIdRequest, options?: ApiOptions): Observable<any> {
+    return this.apiRequest.post<QueuesGetByTaskIdResponse>(`${this.basePath}/queues.get_by_task_id`,
+      request,
+      {
+        headers: this.defaultHeaders,
+        withCredentials: this.configuration.withCredentials
+      },
+      options
+    );
+  }
   }

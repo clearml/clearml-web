@@ -69,7 +69,7 @@ import {ProjectsGetUserNamesResponse} from '~/business-logic/model/projects/proj
 import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiProjectsService {
 
     protected basePath = HTTP.API_BASE_URL;

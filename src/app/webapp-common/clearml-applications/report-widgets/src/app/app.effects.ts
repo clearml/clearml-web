@@ -29,7 +29,7 @@ export class AppEffects {
 
   getHeaders(company: string): HttpHeaders {
     let headers = new HttpHeaders();
-    headers = headers.append('X-Allegro-Tenant', company);
+    headers = headers.append('X-Clearml-Tenant', company);
     return headers;
   }
 

@@ -45,7 +45,7 @@
       </section>
     </mat-tree-node>
     <mat-tree-node
-      *matTreeNodeDef="let segment; let lineIndex=index; when: hasChild"
+      *matTreeNodeDef="let segment; when: hasChild"
       [matTreeNodePadding]="segment.level + 1"
       [matTreeNodePaddingIndent]="12"
       [disabled]="!segment.expandable"
@@ -83,9 +83,7 @@
             </span>
           }
         </section>
-        @if (lineIndex === 0 && treeControl.isExpanded(segment)) {
-          <div class="braces">{{ segment.type === 'array' ? ']' : '}' }}</div>
-        }
+
       </section>
     </mat-tree-node>
     <mat-tree-node

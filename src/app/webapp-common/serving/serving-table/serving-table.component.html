@@ -155,7 +155,6 @@
         [contextMenuOpen]="contextMenuActive()"
         [compactColDataTemplate]="compactCol"
         [entityType]="entityType()"
-        [tagsTemplate]="tagList"
         [noSelection]="true"
         [class.no-tags]="true"
       >
@@ -175,6 +174,12 @@
   </sm-table>
 </div>
 
-<ng-template #noData>
-  <sm-serving-empty-state class="center-message"></sm-serving-empty-state>
+<ng-template #noData let-noDataTop="noDataTop" let-minimizedView="minimizedView">
+    <div class="no-output" [class.centered]="minimizedView" [style.top.px]="noDataTop">
+      @if (hasActiveFilters()) {
+        <span>No matching results. <a class="link" (click)="clearTableFiltersAndSearch.emit(tableFilters())">Clear filters</a></span>
+      } @else {
+        <sm-serving-empty-state class="center-message"></sm-serving-empty-state>
+      }
+    </div>
 </ng-template>

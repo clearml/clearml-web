@@ -10,8 +10,8 @@
 } @else {
   <div #contextTrigger
        style="visibility: hidden; position: fixed"
-       [style.left.px]="position.x"
-       [style.top.px]="position.y"
+       [style.left.px]="position().x"
+       [style.top.px]="position().y"
        [matMenuTriggerFor]="experimentMenu">
   </div>
 }
@@ -111,7 +111,7 @@
     </button>
     <hr>
     <button mat-menu-item
-            [matMenuTriggerFor]="tagMenu.matMenu" data-id="Add Tag Option"
+            [matMenuTriggerFor]="tagMenu.matMenu()" data-id="Add Tag Option"
             [disabled]="selectedDisableAvailable()[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
@@ -128,6 +128,11 @@
       <mat-icon fontSet="al" [fontIcon]="icons.MOVE_TO"></mat-icon>
       {{selectedDisableAvailable()[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple()}}
     </button>
+    <hr>
+    <button mat-menu-item data-id="exportTaskButton" (click)="exportTask()">
+      <mat-icon fontSet="al" fontIcon="al-ico-export"></mat-icon>
+      <span>Export</span>
+    </button>
     <ng-content select="[extended]"></ng-content>
   }
 </mat-menu>
@@ -136,11 +141,12 @@
   #tagMenu
   class="light-theme"
   [tags]="experiment()?.tags"
-  [tagsFilterByProject]="!allProjects() && tagsFilterByProject()"
+  [filterByProject]="!allProjects() && filterTagsByProject()"
   [projectTags]="projectTags()"
   [companyTags]="companyTags()"
-  (tagSelected)="tagSelected.emit($event)">
-</sm-tags-menu>
+  (tagSelected)="tagSelected.emit($event)"
+  (getCompanyTags)="getCompanyTags.emit($event)"
+></sm-tags-menu>
 
 <ng-template #stopTemplate let-selectedExperiments>
   <div class="mb-3">
@@ -184,7 +190,7 @@
 </ng-template>
 
 <ng-template #publishTemplate let-selectedExperiments>
-  <div class="mb-3">
+  <div class="d-flex mb-3">
     @if(selectedExperiments.length === 1){
       <span
         class="ellipsis inline font-weight-bold me-1"

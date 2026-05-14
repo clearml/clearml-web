@@ -4,7 +4,6 @@ import {combineLatest, Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
 import {
   getCompanyTags, getProjectUsers,
-  getTags,
   setArchive as setProjectArchive,
   setBreadcrumbsOptions,
   setDeep, setSelectedProject
@@ -15,8 +14,7 @@ import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.ac
 import {
   selectCompanyTags,
   selectIsArchivedMode,
-  selectProjectSystemTags,
-  selectProjectTags, selectRouterProjectId,
+  selectRouterProjectId,
   selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
@@ -119,9 +117,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnDestro
   protected tags$ = this.store.select(selectModelsTags);
   protected metadataKeys$ = this.store.select(selectMetadataKeys);
   protected tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-  protected projectTags$ = this.store.select(selectProjectTags);
   protected companyTags$ = this.store.select(selectCompanyTags);
-  protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected frameworks$ = this.store.select(selectModelsFrameworks);
   override tableMode = this.store.selectSignal(selectTableMode);
   protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
@@ -185,7 +181,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnDestro
         if (projectId !== prevProjectId && Object.keys(params || {}).length === 0) {
           this.emptyUrlInit();
         } else {
-          this.setupContextMenu('models', params.archive === 'true');
+          if (projectId === prevProjectId || prevProjectId === null) {
+            this.setupHeaderTabs('models', params.archive === 'true');
+          }
           if (params.columns) {
             const [, metrics, , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
             const hiddenCols = {};
@@ -230,14 +228,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnDestro
       tagsFilterByProject$: this.tagsFilterByProject$,
       companyTags$: this.companyTags$,
       projectTags$: this.store.select(selectSelectedProjectId).pipe(switchMap(id =>
-        id === '*' ? this.companyTags$ : this.projectTags$
+        id === '*' ? this.companyTags$ : this.tags$
       )),
     });
 
     this.selectModelFromUrl();
     this.store.dispatch(modelsActions.getFrameworks());
     this.store.dispatch(modelsActions.getTags());
-    this.store.dispatch(getTags());
   }
 
   override ngOnDestroy(): void {
@@ -453,9 +450,18 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnDestro
       {relativeTo: this.route.parent.parent});
   }
 
-  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
+  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>, others?: Record<string, string>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId()}));
+    this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId: this.projectId()}));
+    this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId(),
+      others: others || {}
+    }));
+  }
+
+  clearTableFiltersAndSearchHandler(tableFilters: Record<string, FilterMetadata>) {
+    this.clearTableFiltersHandler(tableFilters, {
+      q: null,
+    });
   }
 
   selectMetadataKeysActiveChanged(mode: { customMode: CustomColumnMode }) {

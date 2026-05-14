@@ -37,7 +37,7 @@ import {ServingGetEndpointMetricsHistoryRequest} from '~/business-logic/model/se
 import {ServingGetEndpointMetricsHistoryResponse} from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryResponse';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiServingService {
 
     protected basePath = HTTP.API_BASE_URL;

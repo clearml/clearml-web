@@ -81,7 +81,7 @@ export const reportsReducer = createReducer(
   on(setReport, (state, action): ReportsState  => ({...state, report: action.report})),
   on(setReportChanges, (state, action): ReportsState  => ({
     ...state,
-    report: {...state.report, ...action.changes},
+    report: state.report?.id === action.id ? {...state.report, ...action.changes} : state.report,
     reports: (action.filterOut ?
         state.reports?.filter(report => report.id != action.id) :
         state.reports

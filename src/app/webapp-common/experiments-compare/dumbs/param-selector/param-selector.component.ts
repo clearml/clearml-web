@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
-import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {
   GroupedCheckedFilterListComponent
@@ -18,7 +17,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MenuComponent,
-    ExperimentSharedModule,
     ClickStopPropagationDirective,
     GroupedCheckedFilterListComponent,
     TooltipDirective,

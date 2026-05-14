@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+import { provideRouter } from '@angular/router';
 
 import { DashboardReportsComponent } from './dashboard-reports.component';
 
@@ -8,7 +10,15 @@ describe('DashboardReportsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardReportsComponent]
+      imports: [DashboardReportsComponent],
+      providers: [
+        provideMockStore({
+          initialState: {
+            dashboard: { reports: [] }
+          }
+        }),
+        provideRouter([])
+      ]
     })
     .compileComponents();
 

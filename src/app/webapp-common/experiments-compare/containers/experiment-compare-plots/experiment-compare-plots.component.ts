@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, startWith, take, tap, withLatestFrom} from 'rxjs/operators';
@@ -10,7 +10,6 @@ import {
   getMultiPlotCharts,
   resetExperimentMetrics,
   setExperimentMetricsSearchTerm,
-  setExperimentPlots,
   setExperimentSettings,
   setSelectedExperiments
 } from '../../actions/experiments-compare-charts.actions';
@@ -28,7 +27,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {MetricVariants} from '~/business-logic/model/events/metricVariants';
-import {selectCompareSelectedMetrics, selectMetricVariantsPlots, selectSelectedExperiments, selectSplitSize} from '@common/experiments/reducers';
+import {selectCompareSelectedMetrics, selectCompareMetricVariantsPlots, selectSelectedExperiments, selectSplitSize} from '@common/experiments/reducers';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {getCustomMetricsPerType} from '@common/experiments/actions/common-experiments-view.actions';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
@@ -42,20 +41,26 @@ import {GroupedList} from '@common/tasks/tasks.model';
 import {ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {setChartSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
-import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
   templateUrl: './experiment-compare-plots.component.html',
   styleUrls: ['./experiment-compare-plots.component.scss'],
+  host: {
+    '(window:beforeunload)': 'saveSettingsState()'
+  },
   imports: [
-    SingleGraphStateModule,
     PushPipe,
     SelectableGroupedFilterListComponent,
     ExperimentGraphsComponent
   ]
 })
 export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  private changeDetection = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  private refresh = inject(RefreshService);
+  private reportEmbed = inject(ReportCodeEmbedService);
 
   protected projectId = this.store.selectSignal<string>(selectRouterProjectId);
   private routerParams$: Observable<Params>;
@@ -64,9 +69,10 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   public searchTerm$: Observable<string>;
 
   private subs = new Subscription();
+  protected loading = signal(false);
 
   public graphList: GroupedList;
-  private taskIds: string[];
+  protected taskIds: string[];
   public graphs: Record<string, ExtFrame[]> = undefined;
   public refreshDisabled: boolean;
 
@@ -87,17 +93,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   private previousTaskIds: string[];
   private originalPlotList: { metric: string; variant: string }[];
 
-  @HostListener('window:beforeunload', ['$event']) unloadHandler() {
-    this.saveSettingsState();
-  }
-
-  constructor(
-    private store: Store,
-    private changeDetection: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    private refresh: RefreshService,
-    private reportEmbed: ReportCodeEmbedService
-  ) {
+  constructor( ) {
     this.modelsFeature = this.route.snapshot?.parent.data?.setAllProject;
     this.selectedMetrics$ = this.store.select(selectSelectedMetricsSettingsPlot);
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
@@ -129,17 +125,19 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
           return acc;
         }, {} as Record<string, string[]>);
         const newGraphs = convertMultiPlots(merged, tagsLists);
-        if (Object.keys(newGraphs).length !== 0 && (!this.graphs || !isEqual(newGraphs, this.graphs))) {
-          this.graphs = newGraphs;
-        }
+        this.graphs = {...newGraphs};
         this.changeDetection.detectChanges();
         if (parsingError) {
           this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         }
+
+        if (metricsPlots !== undefined) {
+          this.loading.set(false);
+        }
       }));
 
     this.subs.add(this.routerParams$.pipe(distinctUntilChanged((prev, curr) => isEqual(prev, curr)))
-      .pipe(withLatestFrom(this.store.select(selectMetricVariantsPlots),
+      .pipe(withLatestFrom(this.store.select(selectCompareMetricVariantsPlots),
         this.store.select(selectSelectedExperiments)))
       .subscribe(([params, metrics, selectedExperiments]) => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
@@ -177,12 +175,17 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
           this.settings.selectedMetricsPlot = selectedMetrics.filter(m => !m.hidden).map(m => `${m.metricName} - ${m.variantName}`);
           const variants = Object.entries(metricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}));
           this.selectedVariants = variants;
-          if (this.firstTime || this.previousSelectedMetrics?.length !== selectedMetrics?.length || this.taskIds.length !== this.previousTaskIds.length) {
+          const previousVisibleLength = this.previousSelectedMetrics?.filter(m => !m.hidden).length ?? 0;
+          const currentVisibleLength = selectedMetrics.filter(m => !m.hidden).length;
+          if (this.firstTime || previousVisibleLength !== currentVisibleLength || this.taskIds.length !== this.previousTaskIds.length) {
             this.firstTime = false;
-            this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: variants}));
-          } else if (this.previousSelectedMetrics?.length === 0) {
-            this.graphs = {};
-            this.changeDetection.markForCheck();
+            if (variants.length > 0) {
+              this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: variants}));
+            } else {
+              this.graphs = {};
+              this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: []}));
+              this.changeDetection.markForCheck();
+            }
           }
           this.previousSelectedMetrics = selectedMetrics;
           this.previousTaskIds = this.taskIds;
@@ -203,7 +206,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         {...this.initialSettings, selectedMetricsPlot: this.originalPlotList?.slice(0, 8).map(a => `${a.metric} - ${a.variant}`) ?? []} as ExperimentCompareSettings;
     }));
 
-    this.subs.add(this.store.select(selectMetricVariantsPlots)
+    this.subs.add(this.store.select(selectCompareMetricVariantsPlots)
       .pipe(
         filter(metrics => !!metrics),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)))
@@ -226,7 +229,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
             this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: this.selectedVariants}));
           } else {
             this.graphs = {};
-            this.store.dispatch(setExperimentPlots({plots: {}}));
+            this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: []}));
           }
         }
       }));
@@ -264,6 +267,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
       this.selectedVariants = variants;
       if (variants?.length > 0) {
         this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: variants}));
+      } else {
+        this.graphs = {};
+        this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: []}));
       }
     }
   }
@@ -290,7 +296,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private saveSettingsState() {
+  protected saveSettingsState() {
     if (!isEqual(this.settings.selectedMetricsPlot, this.originalSettings)) {
       this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedMetricsPlot: this.settings.selectedMetricsPlot}}));
     }

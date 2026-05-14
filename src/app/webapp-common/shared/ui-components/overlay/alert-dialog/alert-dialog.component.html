@@ -1,14 +1,16 @@
-<sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="al-ico-alert">
-  @if (moreInfo || resultMessage) {
+<sm-dialog-template [header]="data.alertMessage" [subHeader]="data.alertSubMessage" iconClass="al-ico-alert">
+  @if (moreInfo() || resultMessage()) {
     <div class="more-info">
-      <div>{{resultMessage}}</div>
-      @for (entityName of moreInfoEntities; track entityName) {
+      <div>{{resultMessage()}}</div>
+      @for (entityName of moreInfoEntities(); track entityName) {
         <div>
           <br>
           <div>Relevant {{entityName}}:</div>
-          @for (entity of moreInfo[entityName]; track entity) {
+          @for (entity of moreInfo()[entityName]; track entity) {
             <div class="entities">
-              <a [href]="buildUrl(entity, entityName)" target="_blank"> {{entity.name}}</a>
+              <a href="#" (click)="$event.preventDefault(); gotoUrl(entity, entityName)">
+                {{entity.name}}
+              </a>
             </div>
           }
         </div>
@@ -17,5 +19,5 @@
   }
 </sm-dialog-template>
 <mat-dialog-actions>
-  <button mat-flat-button mat-dialog-close>{{okMessage}}</button>
+  <button mat-flat-button mat-dialog-close>{{data.okMessage || 'OK'}}</button>
 </mat-dialog-actions>

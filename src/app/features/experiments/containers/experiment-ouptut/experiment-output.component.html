@@ -14,6 +14,7 @@
     (closeInfoClicked)="closePanel()"
     (minimizeClicked)="minimizeView()"
     (maximizedClicked)="maximize()"
+    (getCompanyTags)="getCompanyTags()"
   ></sm-experiment-info-header>
   <sm-experiment-info-navbar [minimized]="minimized" [splitSize]="selectSplitSize$ | ngrxPush">
     @if ((routerConfig.includes('scalars') && minimized) || !minimized) {

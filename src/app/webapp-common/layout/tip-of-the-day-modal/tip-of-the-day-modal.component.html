@@ -2,21 +2,24 @@
                     iconClass="al-ico-tips"
                     (xClicked)="matDialogRef.close(neverShowAgain())"
 >
-  <div class="tip-container" smClickStopPropagation>
-    @if (tips()[tipIndex()].image) {
-      <div
-        class="tip-image"
-        [class.full-width]="!tips()[tipIndex()].content"
-        [style.background-image]="'url(' + getThemeImageSrc(tips()[tipIndex()].image) + ')'"></div>
-    }
-    @if (tips()[tipIndex()].content) {
-      <div class="tip-content" [class.full-width]="!tips()[tipIndex()].image">
-      <div
-        class="tip-content"
-        [innerHTML]="tips()[tipIndex()].content | purify"></div>
-      </div>
-    }
+  <div class="tip-container-wrapper">
+    <div class="tip-container" smClickStopPropagation>
+      @if (tips()[tipIndex()].image) {
+        <div
+          class="tip-image"
+          [class.full-width]="!tips()[tipIndex()].content"
+          [style.background-image]="'url(' + getThemeImageSrc(tips()[tipIndex()].image) + ')'"></div>
+      }
+      @if (tips()[tipIndex()].content) {
+        <div class="tip-content" [class.full-width]="!tips()[tipIndex()].image">
+        <div
+          class="tip-content"
+          [innerHTML]="tips()[tipIndex()].content | purify"></div>
+        </div>
+      }
+    </div>
   </div>
+  
 
   <div class="footer" [class.no-gap]="hideDontShow() && tips().length === 1">
     <div class="tip-dont-show" [class.invisible]="hideDontShow()"

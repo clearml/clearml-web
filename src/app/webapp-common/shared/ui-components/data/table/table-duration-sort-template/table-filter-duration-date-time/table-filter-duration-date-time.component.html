@@ -11,7 +11,7 @@
                                   onDateHandler($any($event.value), '_greaterThan')"
       >
     </mat-form-field>
-    <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+    <mat-datepicker-toggle matSuffix [for]="fromPicker" data-id="calendarButton"></mat-datepicker-toggle>
     <mat-datepicker #fromPicker [startAt]="$any(_greaterThan.date)"></mat-datepicker>
     <sm-duration-input-list
       name="lessThan"
@@ -25,7 +25,7 @@
             (click)="hasGreaterThanValue ? onResetHandler('greaterThan') : onAutoFillCurrentTimeHandler('greaterThan')"
             [smTooltip]="hasGreaterThanValue ? 'Clear' : 'Autofill current time'"
     >
-      <mat-icon fontSet="al" [fontIcon]="hasGreaterThanValue ? 'al-ico-dialog-x' : 'al-ico-time'"></mat-icon>
+      <mat-icon fontSet="al" [fontIcon]="hasGreaterThanValue ? 'al-ico-dialog-x' : 'al-ico-time'" data-id="fillRecentTimeButton"></mat-icon>
     </button>
   </div>
 
@@ -42,7 +42,7 @@
                                   onDateHandler($any($event.value), '_lessThan')"
       >
     </mat-form-field>
-    <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+    <mat-datepicker-toggle matSuffix [for]="toPicker" data-id="calendarButton"></mat-datepicker-toggle>
     <mat-datepicker #toPicker [startAt]="_lessThan.date"></mat-datepicker>
     <sm-duration-input-list
       [durationValue]="_lessThan.date ? _lessThan.time || MINIMUM_TIME_DISPLAY : null"

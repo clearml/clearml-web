@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: '#{variables.$icomoon-font-family}';
-  src: url('./#{variables.$icomoon-font-family}.ttf?2sxgo1') format('truetype');
+  src: url('./#{variables.$icomoon-font-family}.ttf?jgwk6g') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,19 +25,29 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-company {
+  &:before {
+    content: variables.$al-ico-company;
+  }
+}
+.al-ico-compacted {
+  &:before {
+    content: variables.$al-ico-compacted;
+  }
+}
 .al-ico-downward {
   &:before {
-    content: variables.$al-ico-downward; 
+    content: variables.$al-ico-downward;
   }
 }
 .al-ico-upward {
   &:before {
-    content: variables.$al-ico-upward; 
+    content: variables.$al-ico-upward;
   }
 }
 .al-ico-package {
   &:before {
-    content: variables.$al-ico-package; 
+    content: variables.$al-ico-package;
   }
 }
 .al-ico-dataviews {
@@ -1031,33 +1041,33 @@
 .al-ico-sort-off {
   &:before {
     content: variables.$al-ico-sort-off;
-    //color: $blue-400; // don't overwrite
+    color: var(--color-outline);
   }
 }
 .al-ico-sort-on-down .path1 {
   &:before {
     content: variables.$al-ico-sort-on-down-path1;
-    //color: $blue-400; // don't overwrite
+    color: var(--color-outline);
   }
 }
 .al-ico-sort-on-down .path2 {
   &:before {
     content: variables.$al-ico-sort-on-down-path2;
     margin-left: -1em;
-    //color: $blue-200; // don't overwrite
+     color: var(--color-on-surface);
   }
 }
 .al-ico-sort-on-up .path1 {
   &:before {
     content: variables.$al-ico-sort-on-up-path1;
-    //color: $blue-400; // don't overwrite
+    color: var(--color-outline);
   }
 }
 .al-ico-sort-on-up .path2 {
   &:before {
     content: variables.$al-ico-sort-on-up-path2;
     margin-left: -1em;
-    //color: $blue-200; // don't overwrite
+    color: var(--color-on-surface);
   }
 }
 .al-ico-arrow-left {

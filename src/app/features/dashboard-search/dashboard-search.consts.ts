@@ -2,6 +2,9 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {EXPERIMENTS_TYPE_LABELS} from '~/shared/constants/non-common-consts';
 import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
+import {Params} from '@angular/router';
+import {convertFiltersToRecord, decodeFilter, encodeFilters} from '@common/shared/utils/tableParamEncode';
+
 
 export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines' | 'datasets' | 'modelEndpoints';
 
@@ -104,3 +107,27 @@ export const activeLinksList = [
     }
   },
 ] as {label: string; name: string; showUserFilter?: boolean, typeOptions: string[],statusOptions?: string[], statusOptionsLabels?:  Record<string,string> , relevantSearchItems: Record<string, SearchPageConfig>}[];
+
+export const convertToViewAllFilter = (qParams: Params, activeLink: ActiveSearchLink, userId: string): Params => {
+  let filters = decodeFilter(qParams.gsfilter || '');
+  if (activeLink === activeSearchLink.models) {
+    filters = filters.map(filter =>
+      filter.col === 'status' ? {
+          col: 'ready',
+          value: filter.value.map(status => String(status !== 'created')),
+        }
+        : filter
+    );
+  }
+  // Remove status filter from entities without status
+  if (![activeSearchLink.reports, activeSearchLink.models, activeSearchLink.experiments, activeSearchLink.openDatasetVersions, activeSearchLink.pipelineRuns].includes(activeLink)) {
+    filters = filters.filter(filter => filter.col !== 'status');
+  }
+
+  const encodedFilters = encodeFilters(convertFiltersToRecord(filters));
+  return {
+    ...(qParams.gq && {q: qParams.gq}),
+    ...(qParams.gqreg && {qreg: qParams.gqreg}),
+    filter: encodedFilters,
+  };
+};

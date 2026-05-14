@@ -2,13 +2,13 @@
 
 ## Building the UI from source
 ### Prerequisite
-* Node 18 with latest npm
+* Node 24 with pnpm@10
 * use git to clone the project to your local machine 
 
 ### Build
 * `cd clearml-web` to the root of the project
-* run `npm ci` to install required node modules
-* run `npm run build`
+* run `pnpm install  --force --frozen-lockfile` to install required node modules
+* run `pnpm run build`
 
 
 ### Development

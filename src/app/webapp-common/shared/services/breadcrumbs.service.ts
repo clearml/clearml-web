@@ -59,6 +59,12 @@ export class BreadcrumbsService {
       );
 
     combineLatest([
+
+
+
+
+
+
       this.store.select(selectProjectAncestors),
       this.store.select(selectBreadcrumbOptions)
     ])
@@ -85,14 +91,15 @@ export class BreadcrumbsService {
                 url: `${breadcrumbOptions.projectsOptions.basePath}/${ancestor.id}/projects`,
                 type: CrumbTypeEnum.Project,
                 hidden: ancestor.hidden,
-                collapsable: true
+                collapsable: true,
+                queryParamsHandling: breadcrumbOptions.projectsOptions.queryParamsHandling
               } as IBreadcrumbsLink))
               .concat(projectCrumb?.url && crumbAfterProject ?
-                [{...projectCrumb, type: CrumbTypeEnum.Project, collapsable: true} as IBreadcrumbsLink] : []
+                [{...projectCrumb, type: CrumbTypeEnum.Project, collapsable: true, queryParamsHandling: breadcrumbOptions.projectsOptions.queryParamsHandling} as IBreadcrumbsLink] : []
               )
             ]),
             ...(projectCrumb && !(projectCrumb.url && projectAncestors && crumbAfterProject) ?
-                [[breadcrumbOptions.projectsOptions.selectedProjectBreadcrumb]] : []
+                [[{...breadcrumbOptions.projectsOptions.selectedProjectBreadcrumb, queryParamsHandling: breadcrumbOptions.projectsOptions.queryParamsHandling}]] : []
             ),
             ...(breadcrumbOptions.subFeatureBreadcrumb && (!breadcrumbOptions.subFeatureBreadcrumb.onlyWithProject || projectAncestors?.length > 0) ?
                 [[breadcrumbOptions.subFeatureBreadcrumb]] : []

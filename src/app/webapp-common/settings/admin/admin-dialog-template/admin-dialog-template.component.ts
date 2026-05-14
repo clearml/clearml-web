@@ -1,4 +1,4 @@
-import {LocationStrategy} from '@angular/common';
+import {DatePipe, LocationStrategy} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, Input, Output, signal} from '@angular/core';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
@@ -8,6 +8,9 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {Store} from '@ngrx/store';
+import {selectCredentialExpirationEnabled} from '~/core/reducers/auth.reducers';
+import {TIME_FORMAT_STRING} from '@common/constants';
 
 
 @Component({
@@ -22,12 +25,17 @@ import {MatTab, MatTabGroup} from '@angular/material/tabs';
         FormsModule,
         MatButton,
         MatTabGroup,
-        MatTab
+        MatTab,
+        DatePipe
     ]
 })
 export class AdminDialogTemplateComponent {
   locationStrategy = inject(LocationStrategy);
   protected configService = inject(ConfigurationService);
+  private store = inject(Store);
+
+  protected expirationEnabled = this.store.selectSignal(selectCredentialExpirationEnabled);
+  protected timeFormatString = TIME_FORMAT_STRING;
 
   public clipboardText: string;
   public label: string;
@@ -39,6 +47,7 @@ export class AdminDialogTemplateComponent {
   @Input() newCredential: CredentialKeyExt;
   @Input() credentialsComment: string;
   @Input() serviceUserMode: boolean;
+  @Input() newServiceUser: boolean;
 
   @Output() updateLabel = new EventEmitter<{ credential: CredentialKeyExt; label: string }>();
   selectedIndex = signal(0);

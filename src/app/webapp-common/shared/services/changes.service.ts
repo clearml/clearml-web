@@ -9,7 +9,7 @@ import {catchError, debounceTime, distinctUntilChanged, filter, map, withLatestF
 import {selectFirstLogin, selectNeverShowAppChanges} from '../../core/reducers/view.reducer';
 import {selectCurrentUser, selectIsAdmin} from '../../core/reducers/users-reducer';
 import {neverShowChangesAgain} from '../../core/actions/layout.actions';
-import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
+import {selectFeatures} from '~/core/reducers/users.reducer';
 import {DeviceDetectorService} from 'ngx-device-detector';
 import {default as semverGte} from 'semver/functions/gte';
 import {default as semverGt} from 'semver/functions/gt';
@@ -51,14 +51,13 @@ export class ChangesService {
       this.store.select(selectRouterConfig),
       this.store.select(selectCurrentUser),
       this.store.select(selectFirstLogin),
-      this.store.select(selectTermsOfUse),
       this.store.select(selectIsAdmin)
     ])
       .pipe(
         takeUntilDestroyed(),
         debounceTime(1000),
-        filter(([, user, firstLogin, tos, isAdmin]) =>
-          isAdmin && !this.mobile && !firstLogin && !!user && !tos?.accept_required && !this.neverShowAgainForVersion && this.matDialog.openDialogs.length === 0),
+        filter(([, user, firstLogin, isAdmin]) =>
+          isAdmin && !this.mobile && !firstLogin && !!user && !this.neverShowAgainForVersion && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr?.[curr.length - 1]))
       .subscribe(() => {
         if (this.shouldDisplayChanges() && this.changesConfig()?.length > 0) {

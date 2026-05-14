@@ -1,17 +1,20 @@
-import {Component, inject, output, input, computed, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
 import {last} from 'lodash-es';
 import {ClipboardModule} from 'ngx-clipboard';
 import {Store} from '@ngrx/store';
 import {NgxResize, ResizeResult} from 'ngxtension/resize';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-snippet-error',
   templateUrl: './snippet-error.component.html',
   styleUrls: ['./snippet-error.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ClipboardModule,
     TooltipDirective,

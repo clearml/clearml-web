@@ -29,6 +29,8 @@
     line-height: 20px;
     text-align: center;
     color: var(--color-on-surface-variant);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .icon {
@@ -53,7 +55,7 @@
     padding: 32px 64px;
     overflow-x: hidden;
     height: 100%;
-    max-height: calc(94vh - 100px);
+    max-height: 94vh;
   }
 
   .include-banner {

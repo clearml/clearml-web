@@ -14,6 +14,7 @@
   [useCurrentEntity]="singleRowContext"
   [backdrop]="menuBackdrop"
   (tagSelected)="addTag($event)"
+  (getCompanyTags)="getCompanyTags.emit()"
 ></sm-model-menu-extended>
 <div class="table-container" [class.card-view]="minimizedView()">
   <sm-table
@@ -39,6 +40,7 @@
     [sortFields]="tableSortFields()"
     [keyboardControl]="true"
     [autoLoadMore]="true"
+    [noDataTemplate]="noDataTemplate"
     (colReordered)="columnsReordered.emit($event)"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (rowClicked)="tableRowClicked($event)"
@@ -60,7 +62,7 @@
         (filterChanged)="tableFilterChanged({id: $event.col}, $event)"
         (menuOpened)="columnFilterOpened($event)"
         (menuClosed)="columnFilterClosed($event)"
-        (clearAll)="clearAllFilters.emit(tableFilters())"
+        (clearAll)="clearTableFilters.emit(tableFilters())"
       ></sm-table-card-filter>
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
@@ -231,4 +233,13 @@
     </ng-template>
   </ng-template>
 </sm-table>
+<ng-template #noDataTemplate let-noDataTop="noDataTop" let-minimizedView="minimizedView">
+  @if (hasActiveFilters()) {
+    <div class="no-output" [class.centered]="minimizedView" [style.top.px]="noDataTop">
+      <span>No matching results. <a class="link" (click)="clearTableFiltersAndSearch.emit(tableFilters())">Clear filters</a></span>
+    </div>
+  } @else if (modelsUpdated) {
+    <div class="no-output" [class.centered]="minimizedView" [style.top.px]="noDataTop"><span>No data to show</span></div>
+  }
+</ng-template>
 </div>

@@ -1,6 +1,6 @@
 <div class="overflow-container" #container>
   @if (isCommunity() && activeWorkspace && !workspaceNeutral()) {
-    <span class="workspace">{{activeWorkspace.name}}</span>
+    <span class="workspace ellipsis" smShowTooltipIfEllipsis [smTooltip]="activeWorkspace.name">{{activeWorkspace.name}}</span>
     <i class="al-icon al-ico-slash"></i>
   }
 
@@ -54,6 +54,7 @@
     } @else {
       @if (breadcrumbGroup?.length > 0) {
         <i [matMenuTriggerFor]="subProjectsMenu"
+          data-id="breadcrumbSubProjectMenu"
           class="menu-trigger-icon al-icon msm pointer"
           [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
           [class.al-ico-d-menu-up]="subProjectsMenuIsOpen" (menuOpened)="subProjectsMenuOpened(true)"
@@ -67,6 +68,7 @@
       <mat-menu #subProjectsMenu="matMenu" >
         @for (breadcrumb of breadcrumbGroup; track breadcrumb) {
           <span mat-menu-item
+            data-id="breadcrumbMenuOption"
             class="sub-project-menu-item"
             [smTooltip]="breadcrumb.name"
             smShowTooltipIfEllipsis

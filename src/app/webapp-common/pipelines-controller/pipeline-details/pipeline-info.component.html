@@ -1,6 +1,17 @@
 <mat-expansion-panel [expanded]="true" (transitionend)="$event.stopPropagation()">
   <mat-expansion-panel-header>
-    <div class="expand-header" data-id="expandInfoPanel">{{ controller() ? 'RUN INFO' : stepWithStatus()?.data?.isStage ? 'STAGE INFO' : 'STEP INFO' }}</div>
+    <mat-panel-title data-id="expandInfoPanel" class="expand-header">
+      {{ controller() ? 'RUN INFO' : stepWithStatus()?.data?.isStage ? 'STAGE INFO' : 'STEP INFO' }}
+    </mat-panel-title>
+    @if (entity()?.id) {
+      <button mat-icon-button
+              [smTooltip]="controller() ? 'Export pipeline information (JSON)' : 'Export step information (JSON)'"
+              (click)="$event.stopPropagation();exportPipelineInfo()"
+              data-id="exportInfo"
+              class="sm me-3">
+        <mat-icon fontSet="al" fontIcon="al-ico-export"></mat-icon>
+      </button>
+    }
   </mat-expansion-panel-header>
   @if (entity()) {
     <div class="panel-body">
@@ -10,7 +21,7 @@
             <mat-icon fontSet="al" fontIcon="al-ico-grid-view"></mat-icon>
           } @else {
             <i
-              class="al-icon lg"
+              class="al-icon md"
               [class]="'al-ico-type-' + (entity()?.type ? (entity().type.toString()).replace('_', '-') : 'training')"
             ></i>
           }

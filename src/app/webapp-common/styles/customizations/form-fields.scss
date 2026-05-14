@@ -26,14 +26,15 @@
   --mat-autocomplete-background-color: var(--color-surface-container-lowest);
   --mat-menu-container-color: var(--color-surface-container-low);
 
+  --mat-menu-item-label-text-size: 14px;
+  --mat-menu-item-label-text-line-height: 16px;
+
   .mat-mdc-select-placeholder {
     --mat-select-placeholder-text-color: var(--color-outline);
   }
 
-  --mat-menu-item-label-text-size: 14px;
-  --mat-menu-item-label-text-line-height: 16px;
-
   &.no-bottom {
+    margin-bottom: 0;
     .mat-mdc-form-field-subscript-wrapper {
       display: none;
     }
@@ -57,10 +58,6 @@
 
   .mat-mdc-form-field-flex {
     height: 100%;
-
-    .mat-mdc-form-field-infix {
-      height: 36px;
-    }
   }
 }
 
@@ -71,8 +68,15 @@
   padding: 5px 0;
 }
 
-.mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix {
-  padding-top: 2px;
+.mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
+  height: 36px;
+
+  .mat-mdc-form-field-infix {
+    min-height: 36px;
+    height: 36px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
 }
 
 .select-panel-width {
@@ -90,7 +94,8 @@
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {
         --mat-mdc-form-field-label-transform: translate(0, -38px) scale(1);
-        left: -12px;
+        left: -11px;
+        display: inline-flex;
       }
     }
 
@@ -108,7 +113,6 @@
   }
 }
 
-
 .mat-mdc-form-field {
   .mat-mdc-form-field-flex {
     .mdc-notched-outline {
@@ -119,12 +123,6 @@
       background-color: var(--color-surface);
     }
   }
-}
-
-
-.mat-mdc-select,
-.cdk-overlay-pane .mat-mdc-select {
-  padding: 4px 0;
 }
 
 .cdk-overlay-pane .mat-mdc-select-panel,
@@ -168,7 +166,7 @@
 .mdc-checkbox {
   transform: scale(0.9); /* Adjust the scale value as needed */
   & + .mdc-label {
-    padding-left: 0px
+    padding-left: 0
   }
 }
 .mat-mdc-checkbox .mat-internal-form-field {
@@ -195,7 +193,6 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield !important;
 }
-
 
 :root.dark-mode {
   .mat-mdc-select-panel,

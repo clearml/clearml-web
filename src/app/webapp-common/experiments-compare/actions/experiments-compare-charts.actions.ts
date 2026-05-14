@@ -62,6 +62,11 @@ export const setExperimentMetricsSearchTerm = createAction(
   props<{ searchTerm: string }>()
 );
 
+export const setHighlightedTaskId = createAction(
+  EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'SET_HIGHLIGHTED_TASK_ID',
+  props<{ taskId: string | null }>()
+);
+
 export const resetExperimentMetrics  = createAction(EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'RESET_EXPERIMENT_METRICS');
 
 export const getGlobalLegendData = createAction(
@@ -70,7 +75,7 @@ export const getGlobalLegendData = createAction(
 );
 export const setGlobalLegendData = createAction(
   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[set global legend data]',
-  props<{data: {name: string, tags: string[], systemTags: string[], id: string, project: {id: string}, last_update?: string, created?: string}[]}>()
+  props<{data: {name: string, tags: string[], systemTags: string[], id: string, project: {id: string}, last_update?: Date, created?: string}[]}>()
 );
 
 // export const setScalarsHoverMode = createAction(

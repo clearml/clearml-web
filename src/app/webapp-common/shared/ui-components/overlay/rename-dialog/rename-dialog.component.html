@@ -1,0 +1,28 @@
+<sm-dialog-template [header]="header" [iconClass]="iconClass">
+  <mat-form-field appearance="outline"
+                  class="thin w-100 mb-3"
+                  floatLabel="always"
+  >
+    <mat-label>{{fieldName | titlecase}}</mat-label>
+    <input matInput
+           #Input
+           [formControl]="nameControl"
+           name="instance-name"
+           type="text"
+           (keydown.enter)="!nameControl.invalid && closeDialog(true)"
+           required>
+    @if (nameControl.errors?.required) {
+      <mat-error>Please provide a {{fieldName}}</mat-error>
+    } @else if (nameControl.errors?.minlength  ===  -1) {
+      <mat-error>{{fieldName | titlecase}} can't contain only spaces</mat-error>
+    } @else if (nameControl.errors?.minlength) {
+      <mat-error>{{fieldName | titlecase}} should be at least 3 characters long</mat-error>
+    } @else if (nameControl.errors?.pattern) {
+      <mat-error>{{ patternError ? patternError : 'Invalid Pattern' }}</mat-error>
+    }
+  </mat-form-field>
+</sm-dialog-template>
+<mat-dialog-actions>
+  <button mat-stroked-button (click)="closeDialog(false)" data-id="Cancel">CANCEL</button>
+  <button mat-flat-button [disabled]="nameControl.invalid || Input.value === data.name" (click)="closeDialog(true)" data-id="Save">SAVE</button>
+</mat-dialog-actions>

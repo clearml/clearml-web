@@ -1,9 +1,15 @@
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  contentChild,
+  input,
+  TemplateRef
+} from '@angular/core';
 import {MatMenuModule, MenuPositionY, MenuPositionX} from '@angular/material/menu';
 import {MatIcon} from '@angular/material/icon';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage, NgTemplateOutlet} from '@angular/common';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
@@ -17,10 +23,12 @@ import {MatIconButton} from '@angular/material/button';
     HesitateDirective,
     ClickStopPropagationDirective,
     NgOptimizedImage,
-    MatIconButton
+    MatIconButton,
+    NgTemplateOutlet,
   ]
 })
 export class MultiLineTooltipComponent {
+  triggerContent = contentChild('TooltipTrigger', {read: TemplateRef});
   iconClass = input<string>();
   iconImage = input<string>();
   customClass = input<string>();

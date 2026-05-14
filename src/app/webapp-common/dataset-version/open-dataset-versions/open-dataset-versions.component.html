@@ -58,10 +58,10 @@
         [parents]="parents$ | ngrxPush"
         [experimentTypes]="types$ | ngrxPush"
         [tags]="tags$ | ngrxPush"
-        [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
+        [searchQuery]="(searchQuery$ | ngrxPush)?.query"
         [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
         [selectedExperiment]="highlited()"
@@ -84,7 +84,8 @@
         (columnResized)="columnResized($event)"
         (contextMenu)="onContextMenuOpen($event)"
         (removeTag)="removeTag($event)"
-        (clearAllFilters)="clearTableFiltersHandler($event)"
+        (clearTableFilters)="clearTableFiltersHandler($event)"
+        (clearTableFiltersAndSearch)="clearTableFiltersAndSearchHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
         (closePanel)="closePanel()"
       >
@@ -106,6 +107,7 @@
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event, entityType)"
   (tagSelected)="tagSelected($event, 'experiments')"
+  (getCompanyTags)="getCompanyTags()"
 ></sm-entity-footer>
 
 <ng-template #contextMenuExtendedTemplate let-contextExperiment>
@@ -117,7 +119,7 @@
     [selectedDisableAvailableIsMultiple]="!singleRowContext"
     [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable((selectedExperiment$ | ngrxPush) || contextExperiment ) : (selectedExperimentsDisableAvailable$ | ngrxPush)"
     [numSelected]="singleRowContext ? 1 : checkedExperiments.length"
-    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+    [filterTagsByProject]="tagsFilterByProject$ | ngrxPush"
     [projectTags]="tags$ | ngrxPush"
     [companyTags]="companyTags$ | ngrxPush"
     [activateFromMenuButton]="false"
@@ -126,6 +128,7 @@
     [tableMode]="!minimizedView()"
     [backdrop]="menuBackdrop"
     (tagSelected)="onAddTag($event, contextExperiment)"
+    (getCompanyTags)="getCompanyTags()"
     (menuOpened)="setContextMenuStatus(true)"
     (menuClosed)="setContextMenuStatus(false)"
   ></sm-open-dataset-version-menu>

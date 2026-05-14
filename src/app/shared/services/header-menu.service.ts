@@ -10,7 +10,7 @@ import {PROJECT_ROUTES} from '~/features/projects/projects.consts';
 export class HeaderMenuService {
   private readonly store = inject(Store);
 
-  setupProjectContextMenu(entitiesType: string, projectId: string, archive: boolean) {
+  setupProjectHeaderTabs(entitiesType: string, projectId: string, archive: boolean) {
     const contextMenu = PROJECT_ROUTES
       .filter(route=> !(projectId ==='*' && ['overview', 'workloads'].includes(route.header)))
       .map(route => {

@@ -1,6 +1,5 @@
-import {Component, HostListener, inject, viewChild, computed} from '@angular/core';
+import {Component, HostListener, inject, viewChild, computed, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogRef} from '@angular/material/dialog';
-import { JsonPipe } from '@angular/common';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
 import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
@@ -20,21 +19,20 @@ export interface EditJsonData {
 }
 
 @Component({
-    selector: 'sm-edit-json',
-    templateUrl: './edit-json.component.html',
-    styleUrls: ['./edit-json.component.scss'],
-    providers: [{ provide: JsonPipe, useClass: JsonPipe }],
-    imports: [
-        DialogTemplateComponent,
-        MatDialogActions,
-        MatButton,
-        CodeEditorComponent
-    ]
+  selector: 'sm-edit-json',
+  templateUrl: './edit-json.component.html',
+  styleUrls: ['./edit-json.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    MatDialogActions,
+    MatButton,
+    CodeEditorComponent
+  ]
 })
 export class EditJsonComponent {
   protected data = inject<EditJsonData>(MAT_DIALOG_DATA);
   private dialogRef = inject<MatDialogRef<EditJsonComponent, string | null>>(MatDialogRef<EditJsonComponent, string | null>);
-  private jsonPipe = inject(JsonPipe);
   private store = inject(Store);
   protected errors: Map<string, boolean>;
   protected textData: string;
@@ -42,23 +40,16 @@ export class EditJsonComponent {
 
   private _readOnly: boolean;
   protected placeHolder: string;
-  protected title: string;
-  protected subtitle: string;
-  protected readonly typeJson: boolean;
-  private readonly format?: 'json' | 'yaml' | 'hocon';
+  protected readOnly = this.data.readOnly;
+  protected title = this.data.title;
+  protected subtitle = this.data.subtitle;
+  protected readonly typeJson: boolean = this.data.format === 'json';
+  private readonly format?: 'json' | 'yaml' | 'hocon' = this.data.format;
   protected mode: string;
 
   protected editor = viewChild(CodeEditorComponent);
   protected aceCaretPosition = this.store.selectSignal(selectAceCaretPosition);
   protected position = computed(() => this.aceCaretPosition()?.[this.title] ?? null)
-
-  set readOnly(readOnly: boolean) {
-    this._readOnly = readOnly;
-  }
-
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
 
   @HostListener('keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -68,8 +59,6 @@ export class EditJsonComponent {
   }
 
   constructor() {
-    this.format = this.data.format;
-    this.typeJson = this.data.format === 'json';
     let defaultPlaceHolder: string;
     if (this.typeJson) {
       defaultPlaceHolder = `e.g.:
@@ -82,20 +71,18 @@ export class EditJsonComponent {
       defaultPlaceHolder = '';
     }
     this.placeHolder = this.data.placeHolder ?? defaultPlaceHolder;
-    if(!this.data.textData) {
+
+    if (!this.data.textData) {
       this.textData = undefined;
     } else if (this.typeJson && typeof this.data.textData !== 'string') {
       if (this.data.reorder) {
-        this.textData = this.jsonPipe.transform(orderJson(this.data.textData));
+        this.textData = JSON.stringify(orderJson(this.data.textData), null, 2);
       } else {
-        this.textData = this.jsonPipe.transform(this.data.textData);
+        this.textData = JSON.stringify(this.data.textData, null, 2);
       }
     } else {
       this.textData = this.data.textData as string;
     }
-    this.readOnly = this.data.readOnly;
-    this.title = this.data.title;
-    this.subtitle = this.data.subtitle;
 
     switch (this.format) {
       case 'hocon':

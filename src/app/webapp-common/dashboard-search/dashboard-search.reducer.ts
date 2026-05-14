@@ -15,7 +15,7 @@ import {
   searchSetTableFilters,
   searchSetTerm,
   searchStart,
-  setEndpointsResults,
+  setEndpointsResults, setErrors,
   setExperimentsResults,
   setLoadingEndpointsResults,
   setModelsResults,
@@ -165,6 +165,10 @@ export const dashboardSearchReducers = [
     ...state,
     resultsCount: action.counts,
     errors: action.errors
+  })),
+  on(setErrors, (state, action): DashboardSearchState => ({
+    ...state,
+    errors: {...state.errors, [action.activeLink]: action.error}
   })),
   on(clearSearchResults, searchStart, (state): DashboardSearchState => ({
     ...state,

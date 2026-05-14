@@ -19,12 +19,21 @@ export const stopClicked = createAction(
 );
 export const startPipeline = createAction(
   EXPERIMENTS_INFO_PREFIX + 'start pipeline',
-  props<{ queue: Queue; args: {name: string; value: string}[]; task: string; }>()
+  props<{
+    queue: Queue;
+    args: {name: string; value: string}[];
+    task: string;
+    createNewPipeline?: boolean;
+    new_project_name?: string;
+    new_pipeline_name?: string;
+    new_pipeline_version?: string;
+    existingPipeline?: boolean;
+  }>()
 );
 
 export const getControllerForStartPipelineDialog = createAction(
   EXPERIMENTS_INFO_PREFIX + 'Get Controller For Start Pipeline',
-  props<{task: string}>()
+  props<{task?: string; project?: string}>()
 );
 
 export const setControllerForStartPipelineDialog = createAction(

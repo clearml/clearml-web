@@ -1,19 +1,30 @@
-import {Component, computed, effect, ElementRef, inject, input, output, signal, viewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ITask} from '~/business-logic/model/al-task';
 import {Model} from '~/business-logic/model/models/model';
-import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
+import {activeLinksList, ActiveSearchLink, activeSearchLink, convertToViewAllFilter} from '~/features/dashboard-search/dashboard-search.consts';
 import {IReport} from '@common/reports/reports.consts';
 import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {KeyValuePipe, NgTemplateOutlet} from '@angular/common';
 import {
   GlobalSearchFilterContainerComponent
 } from '@common/dashboard-search/global-search-filter-container/global-search-filter-container.component';
-import {ActivatedRoute, Params, RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {FilterMetadata} from 'primeng/api';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {convertToViewAllFilter, SEARCH_PAGE_SIZE} from '@common/dashboard-search/dashboard-search.consts';
+import {SEARCH_PAGE_SIZE} from '@common/dashboard-search/dashboard-search.consts';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatIconModule} from '@angular/material/icon';
 import {BreakpointObserver} from '@angular/cdk/layout';
@@ -22,15 +33,29 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {SelectedModel} from '@common/models/shared/models.model';
-import {SearchResultProjectComponent} from '@common/dashboard-search/search-result-project/search-result-project.component';
+import {
+  SearchResultProjectComponent
+} from '@common/dashboard-search/search-result-project/search-result-project.component';
 import {SearchResultTaskComponent} from '@common/dashboard-search/search-result-task/search-result-task.component';
 import {SearchResultModelComponent} from '@common/dashboard-search/search-result-model/search-result-model.component';
-import {SearchResultPipelineRunComponent} from '@common/dashboard-search/search-result-pipeline-run/search-result-pipeline-run.component';
-import {SearchResultPipelineComponent} from '@common/dashboard-search/search-result-pipeline/search-result-pipeline.component';
-import {SearchResultOpenDatasetComponent} from '@common/dashboard-search/search-result-open-dataset/search-result-open-dataset.component';
-import {SearchResultOpenDatasetVersionComponent} from '@common/dashboard-search/search-result-open-dataset-version/search-result-open-dataset-version.component';
-import {SearchResultReportComponent} from '@common/dashboard-search/search-result-report/search-result-report.component';
-import {SearchResultModelEndpointComponent} from '@common/dashboard-search/search-result-model-endpoint/search-result-model-endpoint.component';
+import {
+  SearchResultPipelineRunComponent
+} from '@common/dashboard-search/search-result-pipeline-run/search-result-pipeline-run.component';
+import {
+  SearchResultPipelineComponent
+} from '@common/dashboard-search/search-result-pipeline/search-result-pipeline.component';
+import {
+  SearchResultOpenDatasetComponent
+} from '@common/dashboard-search/search-result-open-dataset/search-result-open-dataset.component';
+import {
+  SearchResultOpenDatasetVersionComponent
+} from '@common/dashboard-search/search-result-open-dataset-version/search-result-open-dataset-version.component';
+import {
+  SearchResultReportComponent
+} from '@common/dashboard-search/search-result-report/search-result-report.component';
+import {
+  SearchResultModelEndpointComponent
+} from '@common/dashboard-search/search-result-model-endpoint/search-result-model-endpoint.component';
 import {ReplaceViaMapPipe} from '@common/shared/pipes/replaceViaMap';
 import {ContainerInfo} from '~/business-logic/model/serving/containerInfo';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
@@ -39,6 +64,7 @@ import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
   selector: 'sm-search-results-table',
   templateUrl: './search-results-table.component.html',
   styleUrls: ['./search-results-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatTabGroup,
     MatTab,
@@ -70,13 +96,13 @@ export class SearchResultsTableComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private route = inject(ActivatedRoute);
 
+  private userShowFilterPrefernces = true;
   protected readonly SEARCH_PAGE_SIZE = SEARCH_PAGE_SIZE;
   protected readonly SEMI_TASKS_LISTS = {
     [activeSearchLink.openDatasetVersions]: activeSearchLink.experiments,
     [activeSearchLink.pipelineRuns]: activeSearchLink.experiments,
   };
   protected readonly searchPages = activeSearchLink;
-  protected viewAllQueryParams: Params;
 
   loading = input.required<boolean>();
   pages = input.required<Record<ActiveSearchLink, number>>();
@@ -132,15 +158,11 @@ export class SearchResultsTableComponent {
     Object.keys(this.filters() || {}).length > 0
   );
   activeIndex = computed<number>(() => this.links().findIndex(item => item.name === this.activeLink()));
-  private userShowFilterPrefernces = true;
+  protected viewAllQueryParams = computed(() => convertToViewAllFilter(this.qParams(), this.activeLink(), this.userId()));
 
   constructor() {
     effect(() => {
-      this.viewAllQueryParams = convertToViewAllFilter(this.qParams(), this.activeLink(), this.userId());
-    });
-
-    effect(() => {
-      if (this.activeLink() === activeSearchLink.modelEndpoints || this.advanced()) {
+      if (this.activeLink() === null ||this.activeLink() === activeSearchLink.modelEndpoints || this.advanced()) {
         this.showFilter.set(false);
       } else {
         this.showFilter.set(this.userShowFilterPrefernces);

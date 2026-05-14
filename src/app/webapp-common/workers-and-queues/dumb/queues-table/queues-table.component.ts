@@ -13,9 +13,6 @@ import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {
-  QueuesMenuExtendedComponent
-} from '~/features/workers-and-queues/queues-menu-extended/queues-menu-extended.component';
-import {
   TableFilterSortComponent
 } from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
@@ -29,6 +26,7 @@ import {ClipboardModule} from 'ngx-clipboard';
 import {MatMenuItem} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {QueuesMenuComponent} from '~/features/workers-and-queues/dumb/queues-menu/queues-menu.component';
 
 
 @Component({
@@ -37,7 +35,7 @@ import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
   styleUrls: ['./queues-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    QueuesMenuExtendedComponent,
+    QueuesMenuComponent,
     TableFilterSortComponent,
     MenuComponent,
     TableComponent,

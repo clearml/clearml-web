@@ -3,19 +3,24 @@
     position: relative;
     z-index: 20;
 
-    .sort-icon {
-      width: 24px;
-      height: 24px;
+    .btn-sort {
+      width:8px;
+      background-color: transparent;
+      border: 0;
       padding: 0;
       display: flex;
       align-items: center;
-      justify-content: center;
-      margin-left: -4px;
-      .mat-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        --mat-icon-button-icon-size: 16px;
+      transform: translateY(-1px);
+      margin-left: -2px;
+      margin-right: 6px;
+      border-radius: 4px;
+      overflow: visible;
+      cursor: pointer;
+      mat-icon {
+        transform: translateX(-4px);
+      }
+      &:hover {
+        background-color: var(--color-tint-14);
       }
     }
   }

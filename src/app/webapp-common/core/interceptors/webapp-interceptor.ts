@@ -14,7 +14,7 @@ export class WebappInterceptor implements HttpInterceptor {
     request = request.clone({
       setHeaders: {
 
-        'X-Allegro-Client': 'Webapp-' + environment.version,
+        'X-Clearml-Client': 'Webapp-' + environment.version,
       }
     });
 

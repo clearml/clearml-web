@@ -1,4 +1,4 @@
-<div class="header-container" [class.login]="isLogin()" [class.wider-tabs]="widerTabs()">
+<div class="header-container" [class.no-tabs]="!contextNavbarLength()">
   <div class="d-flex overflow-hidden">
     <sm-breadcrumbs
       class="spacer"
@@ -21,18 +21,14 @@
       </div>
     </div>
   }
-  @if (!isLogin() && !hideSideNav()) {
+  @if (!hideSideNav()) {
     <sm-header-navbar-tabs></sm-header-navbar-tabs>
-  }
-
-  @if (isLogin()) {
-    <div class="spacer"></div>
   }
 
   @if (!hideMenus()) {
     <div class="right-buttons" data-id="rightSideHeaderpanel">
       @if (!isShareMode()) {
-                <button class="me-2" mat-icon-button (click)="openGlobalSearch()" smTooltip="Search all [ctrl + k]">
+                <button class="me-2" mat-icon-button data-id="globalSearchButton" (click)="openGlobalSearch()" smTooltip="Search all [ctrl + k]">
                     <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="search Icon" ></mat-icon>
                   </button>
       }
@@ -96,7 +92,7 @@
           </button>
         }
         @if (isAdmin() && !environment().communityServer && changesService.hasChanges()) {
-          <button mat-menu-item (click)="changesService.showChangesModal()" data-id="Pro Tips Option">
+          <button mat-menu-item (click)="changesService.showChangesModal()" data-id="versionNotificationsOption">
             <mat-icon fontSet="al" fontIcon="al-ico-bullhorn">Notifications</mat-icon>
             <span>Version Notifications</span>
           </button>

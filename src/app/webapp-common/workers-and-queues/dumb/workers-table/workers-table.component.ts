@@ -39,14 +39,14 @@ export class WorkersTableComponent extends BaseTableView {
       id: WORKERS_TABLE_COL_FIELDS.ID,
       headerType: ColHeaderTypeEnum.sortFilter,
       header: 'AVAILABLE WORKERS',
-      style: {width: '30%', maxWidth: '700px'},
+      style: {width: '200', maxWidth: '700px'},
       sortable: true,
     },
     {
       id: WORKERS_TABLE_COL_FIELDS.TASK,
       headerType: ColHeaderTypeEnum.sortFilter,
       header: 'CURRENTLY RUNNING TASK',
-      style: {width: '30%', maxWidth: '700px'},
+      style: {width: '200', maxWidth: '700px'},
       sortable: true,
     },
     {

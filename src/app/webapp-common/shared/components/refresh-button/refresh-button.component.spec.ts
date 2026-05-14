@@ -1,21 +1,19 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { RefreshButtonComponent } from './refresh-button.component';
-import {StoreModule} from '@ngrx/store';
 
 describe('RefreshButtonComponent', () => {
   let component: RefreshButtonComponent;
   let fixture: ComponentFixture<RefreshButtonComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ RefreshButtonComponent ],
-      imports: [StoreModule.forRoot({})]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ RefreshButtonComponent ],
+      providers: [provideMockStore({})]
     })
     .compileComponents();
-  }));
-
-  beforeEach(() => {
+  });  beforeEach(() => {
     fixture = TestBed.createComponent(RefreshButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

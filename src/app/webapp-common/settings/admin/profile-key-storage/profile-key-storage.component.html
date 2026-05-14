@@ -1,7 +1,11 @@
 <div class="title">
-  WEB APP CLOUD ACCESS <i
-  class="al-icon al-ico-info-circle sm info ms-3"
-  smTooltip="Local, browser cached, access tokens that facilitate retrieving your cloud stored resources"></i>
+  WEB APP CLOUD ACCESS 
+  <mat-icon
+    class="info sm ms-3"
+    fontSet="al" fontIcon="al-ico-info-circle"
+    smTooltip="Local, browser cached, access tokens that facilitate retrieving your cloud stored resources"
+    matTooltipPosition="above"
+  ></mat-icon>
 </div>
 <sm-s3-access
   [ngModel]="s3BucketCredentials()"

@@ -29,7 +29,7 @@ import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables'
 import { Configuration }                                     from '../configuration';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiLoginService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -62,7 +62,7 @@ export class ApiLoginService {
 
 
     /**
-     * 
+     *
      * Logout (including SSO, if used))
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -107,7 +107,7 @@ export class ApiLoginService {
     }
 
     /**
-     * 
+     *
      * Return supported login modes.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

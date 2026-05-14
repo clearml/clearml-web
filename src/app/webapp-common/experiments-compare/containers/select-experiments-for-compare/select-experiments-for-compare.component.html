@@ -1,74 +1,120 @@
-<sm-dialog-template [header]="'Select compared '+ data.entityType + 's'">
-  <div class="select-experiments-container light-theme" (click)="closeSearch()">
-    <div class="search-experiment-for-compare d-flex justify-content-between mb-3">
-      <sm-search
-        #search
-        class="search outline"
-        placeholder="Start typing task name or ID to add to your comparison"
-        [value]="searchTerm()"
-        (valueChanged)="searchTermChanged($event)">
-      </sm-search>
-      <div class="d-flex-center">
-        <mat-slide-toggle
-          class="me-2"
-          [checked]="showArchived$ | ngrxPush"
-          (change)="showArchived($event)"
-        >Include Archived</mat-slide-toggle>
-        <sm-clear-filters-button
-          [tableFilters]="(tableFilters$ | ngrxPush)"
-          (clearTableFilters)="clearTableFilters()"
-        ></sm-clear-filters-button>
-      </div>
-    </div>
-    <div class="hide-table show-table">
-      <sm-experiments-table
-        class="align-self-stretch"
-        [currentUserId]="currentUser()?.id"
-        [selectionReachedLimit]="reachedCompareLimit"
-        [selectionMode]="null"
-        [reorderableColumns]="false"
-        [minimizedView]="false"
-        [colsOrder]="(tableColsOrder$ | ngrxPush)"
-        [tableCols]="tableCols$| ngrxPush"
-        [users]="users$ | ngrxPush"
-        [projects]="projects$ | ngrxPush"
-        [checkedExperiments]="selectedExperimentsIds | idToObjectsArray"
-        [experiments]="experiments$ | ngrxPush"
-        [experimentTypes]="types$ | ngrxPush"
-        [tableFilters]="(tableFilters$ | ngrxPush)"
-        [tableSortFields]="(tableSortFields$ | ngrxPush)"
-        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
-        [tags]="tags$ | ngrxPush"
-        [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
-        [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
-        [parents]="parent$ | ngrxPush"
-        [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
-        [systemTags]="systemTags$ | ngrxPush"
-        [entityType]="entityTypes.experiment"
-        (tagsMenuOpened)="refreshTagsList()"
-        (typesMenuOpened)="refreshTypesList()"
-        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
-        (loadMoreExperiments)="getNextExperiments()"
-        (sortedChanged)="sortedChanged($event)"
-        (filterChanged)="filterChanged($event)"
-        (filterSearchChanged)="filterSearchChanged($event)"
-        (columnResized)="resizeCol($event)"
-      ></sm-experiments-table>
-    </div>
+@if (popupMode) {
+  <button mat-icon-button [mat-dialog-close]="{ids: [], filters: tableFilters(), sortFields: tableSortFields()}" class="stick-to-corner right" data-id="Cross" tabindex="-1">
+    <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+  </button>
+  <div mat-dialog-title class="dialog-title">{{ 'Select compared ' + data.entityType + 's' }}</div>
+  <div class="px-5 h-100">
+  <ng-container *ngTemplateOutlet="mainContent"></ng-container>
   </div>
-  <div class="buttons">
-    <button
-      mat-flat-button
-      [disabled]="selectedExperimentsIds.length===0"
-      type="submit"
-            (click)="applyChanges()"
-            class="yes-button" data-id="ApplyButton">
-      APPLY
-    </button>
+  <mat-dialog-actions>
     <button
       mat-stroked-button
-      (click)="closeDialog()" data-id ="CancelButton">
+      [mat-dialog-close]="{ids: [], filters: tableFilters(), sortFields: tableSortFields()}"
+      data-id="CancelButton">
       CANCEL
     </button>
+    <button
+      mat-flat-button
+      [disabled]="!selectedExperimentsIds() || selectedExperimentsIds().length===0"
+      type="submit"
+      [mat-dialog-close]="{ids: selectedExperimentsIds(), filters: tableFilters(), sortFields: tableSortFields()}"
+      class="yes-button" data-id="ApplyButton">
+      APPLY
+    </button>
+  </mat-dialog-actions>
+} @else {
+  <ng-container *ngTemplateOutlet="mainContent"></ng-container>
+  <mat-dialog-actions>
+    <button
+      mat-stroked-button
+      (click)="closeDialog(false)"
+      data-id="CancelButton">
+      CANCEL
+    </button>
+    <button
+      mat-flat-button
+      [disabled]="!selectedExperimentsIds() || selectedExperimentsIds().length===0"
+      type="submit"
+      (click)="closeDialog(true)"
+      class="yes-button" data-id="ApplyButton">
+      APPLY
+    </button>
+  </mat-dialog-actions>
+}
+
+<ng-template #mainContent>
+  <div class="d-block h-100">
+    <div class="select-experiments-container">
+      <div class="search-experiment-for-compare d-flex justify-content-between mb-3">
+        <sm-search
+          #search
+          class="search outline"
+          [class.shorter]="!popupMode"
+          [placeholder]="`Search for ${data.entityType ? data.entityType + 's' : 'tasks'} ${ popupMode ? 'to add to your comparison' : ''}`"
+          [value]="searchTerm()"
+          (valueChanged)="searchTermChanged($event)">
+        </sm-search>
+        <div class="d-flex-center">
+          @if (popupMode) {
+            <mat-slide-toggle
+              class="me-2"
+              [checked]="showArchived()"
+              (change)="toShowArchived($event)"
+            >Include Archived
+            </mat-slide-toggle>
+            <sm-clear-filters-button
+              [tableFilters]="tableFilters()"
+              (clearTableFilters)="clearTableFilters(false)"
+            ></sm-clear-filters-button>
+          }
+        </div>
+      </div>
+      <div class="hide-table show-table" [class.card-view]="!popupMode">
+        <sm-experiments-table
+          #table
+          class="align-self-stretch d-block h-100"
+          [initialColumns]="initTableCols"
+          [currentUserId]="currentUser()?.id"
+          [selectionReachedLimit]="reachedCompareLimit()"
+          [selectionMode]="popupMode ? null : 'single'"
+          [enableMultiSelect]="popupMode"
+          [reorderableColumns]="false"
+          [minimizedView]="!popupMode"
+          [resizableColumns]="popupMode"
+          [cardHeight]="116"
+          [colsOrder]="selectTaskStore.colsOrder()"
+          [tableCols]="tableCols()"
+          [users]="users()"
+          [projects]="projects()"
+          [checkedExperiments]="selectedExperimentsIds() | idToObjectsArray"
+          [selectedExperiment]="selectedExperiment"
+          [experiments]="experiments()"
+          [experimentTypes]="types()"
+          [tableFilters]="tableFilters()"
+          [searchQuery]="searchTerm()"
+          [tableSortFields]="tableSortFields()"
+          [tableSortOrder]="null"
+          [tags]="tags()"
+          [hyperParamsOptions]="hyperParamsOptions()"
+          [activeParentsFilter]="activeParentsFilter()"
+          [parents]="parents()"
+          [noMoreExperiments]="noMoreExperiments()"
+          [entityType]="entityTypes.experiment"
+          [cardsCollapsed]="cardsCollapsed()"
+          (tagsMenuOpened)="refreshTagsList()"
+          (typesMenuOpened)="refreshTypesList()"
+          (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+          (loadMoreExperiments)="getNextExperiments()"
+          (sortedChanged)="sortedChanged($event)"
+          (filterChanged)="filterChanged($event)"
+          (filterSearchChanged)="filterSearchChanged($event)"
+          (columnResized)="resizeCol($event)"
+          (cardsCollapsedChanged)="cardsCollapsed.set(!cardsCollapsed())"
+          (experimentSelectionChanged)="experimentsSelectionChanged([$event.experiment])"
+          (clearTableFilters)="clearTableFilters(false)"
+          (clearTableFiltersAndSearch)="clearTableFilters(true)"
+        ></sm-experiments-table>
+      </div>
+    </div>
   </div>
-</sm-dialog-template>
+</ng-template>

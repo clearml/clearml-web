@@ -43,8 +43,9 @@
           [projectTags]="projectTags$ | ngrxPush"
           [companyTags]="companyTags$ | ngrxPush"
           [numSelected]="1"
-          (tagSelected)="addTag($event)">
-        </sm-model-menu-extended>
+          (tagSelected)="addTag($event)"
+          (getCompanyTags)="getCompanyTags()"
+        ></sm-model-menu-extended>
         <button class="line-item" mat-icon-button (click)="closeInfoClicked.emit()" data-id="closeButton">
           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
         </button>
@@ -65,14 +66,14 @@
       }
       <span
         #tagsMenuTrigger="matMenuTrigger"
-        [matMenuTriggerFor]="tagsMenu.matMenu"
+        [matMenuTriggerFor]="tagsMenu.matMenu()"
         (menuClosed)="tagsMenuClosed()"
       ></span>
       <sm-tags-menu
         class="light-theme"
         #tagsMenu
         [tags]="model()?.tags"
-        [tagsFilterByProject]="allProjects() || (tagsFilterByProject$ | ngrxPush)"
+        [filterByProject]="allProjects() || (tagsFilterByProject$ | ngrxPush)"
         [projectTags]="(allProjects() ? companyTags$ : projectTags$) | ngrxPush"
         [companyTags]="allProjects() ? null : companyTags$ | ngrxPush"
         (tagSelected)="addTag($event)"

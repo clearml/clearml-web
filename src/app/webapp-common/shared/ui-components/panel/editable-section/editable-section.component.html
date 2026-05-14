@@ -8,7 +8,7 @@
 >
   <div class="edit-wrapper d-flex flex-row-reverse">
     @if (!disableEditable() && !inEditMode() && editable() && !hideEditButton()) {
-      <button mat-flat-button id="editSection" class="edit-pen"
+      <button mat-flat-button id="editSection" class="edit-pen" data-id="editSectionButton"
               (click)="editModeChanged(true)"
       >EDIT
       </button>

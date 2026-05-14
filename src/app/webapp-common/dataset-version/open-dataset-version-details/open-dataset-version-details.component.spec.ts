@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { OpenDatasetVersionDetailsComponent } from './open-dataset-version-details.component';
 
@@ -8,7 +9,8 @@ describe('SimpleDatasetVersionDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ OpenDatasetVersionDetailsComponent ]
+      imports: [ OpenDatasetVersionDetailsComponent ],
+      providers: [provideMockStore({})]
     })
     .compileComponents();
   });

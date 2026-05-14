@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component, computed, input,
-  signal, output, model
+  signal, output, model, effect
 } from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
@@ -74,9 +74,18 @@ export class TableCardFilterComponent {
         value: unknown;
         andFilter?: boolean;
     }>();
+  searchValueChanged =  output<{ value: string; loadMore?: boolean; colId: string; async: boolean }>();
   menuClosed = output<ISmCol>();
   menuOpened = output<ISmCol>();
   clearAll = output();
+
+  constructor() {
+    effect(() => {
+      if(this.optionsFiltered()) {
+        this.loading.set(false);
+      }
+    });
+  }
 
   emitFilterChangedCheckBox(colId: string, values: string[]) {
     this.filterChanged.emit({col: colId, value: values, andFilter: this.andFilter()});
@@ -89,9 +98,14 @@ export class TableCardFilterComponent {
     }
   }
 
-  setSearchTerm($event, key: string) {
-    this.searchTerms[key] = $event.target.value;
-    this.startLoadingIndication();
+  setSearchTerm($event, col: ISmCol) {
+    this.searchTerms[col.id] = $event.target.value;
+    if (col.asyncFilter) {
+      this.searchValueChanged.emit({value: this.searchTerms[col.id], loadMore: false, colId: col.id, async: col.asyncFilter});
+      setTimeout(() => this.loading.set(true));
+    } else {
+      this.startLoadingIndication();
+    }
     this.pageNumber.set(1);
   }
 
@@ -101,11 +115,11 @@ export class TableCardFilterComponent {
     this.menuClosed.emit(col);
   }
 
-  clearSearch(key: string) {
-    this.searchTerms[key] = '';
+  clearSearch(col: ISmCol) {
+    this.searchTerms[col.id] = '';
     this.startLoadingIndication();
     this.pageNumber.set(1);
-    this.setSearchTerm({target: {value: ''}}, key);
+    this.setSearchTerm({target: {value: ''}}, col);
   }
 
   toggleCombination(colId: string) {
@@ -117,7 +131,10 @@ export class TableCardFilterComponent {
     return this.columns().find(col => col.id === option.key);
   }
 
-  loadMore() {
+  loadMore(col: ISmCol) {
+    if (col.asyncFilter) {
+      this.searchValueChanged.emit({value: this.searchTerms[col.id], loadMore: true, colId: col.id, async: col.asyncFilter});
+    }
     window.setTimeout(() => this.pageNumber.update(num => num + 1), 300);
   }
 

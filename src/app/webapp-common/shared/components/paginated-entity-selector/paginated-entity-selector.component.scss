@@ -11,7 +11,11 @@ $user-row-height: 36px;
   mat-form-field {
     width: 100%;
     z-index: 1;
+    margin-bottom: 0;
+  }
 
+  .field-errors {
+    margin-bottom: 8px;
   }
 
   ::ng-deep .mat-mdc-form-field-flex {

@@ -7,7 +7,6 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatIconButton} from '@angular/material/button';
 import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
-import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
 
 @Component({
   selector: 'sm-experiment-menu-extended',
@@ -22,8 +21,7 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
     MatMenuTrigger,
     MatMenu,
     MatIconButton,
-    MenuItemTextPipe,
-    SelectQueueModule
+    MenuItemTextPipe
   ]
 })
 export class ExperimentMenuExtendedComponent extends ExperimentMenuComponent{

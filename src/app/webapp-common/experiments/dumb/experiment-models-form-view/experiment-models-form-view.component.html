@@ -15,7 +15,7 @@
         }
       </div>
       @if (editable()) {
-        <button mat-icon-button smTooltip="Select model" class="ms-3" (click)="chooseModel()">
+        <button mat-icon-button smTooltip="Select model" class="ms-3" data-id="selectModelButton" (click)="chooseModel()">
           <mat-icon fontSet="al" fontIcon="al-ico-edit"></mat-icon>
         </button>
         @if (model()?.id) {

@@ -51,6 +51,11 @@ export const modelDetailsUpdated = createAction(
   props<{ id: Model['id']; changes: Partial<ModelsUpdateRequest> }>()
 );
 
+export const modelUpdatedSuccessfully = createAction(
+  MODELS_PREFIX + 'MODEL_UPDATED_SUCCESSFULLY',
+  props<{ id: string }>()
+);
+
 export const updateModelDetails = createAction(
   MODELS_PREFIX + '[update model details]',
   props<{ id: string; changes: Partial<ModelsUpdateRequest> }>()

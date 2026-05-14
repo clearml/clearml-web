@@ -108,18 +108,6 @@
 
     .controller {
       position: fixed;
-      width: 36px;
-      height: 36px;
-      border-radius: 36px;
-      box-shadow: 0 3px 6px 0 var(--color-surface-container-highest);
-      color: var(--color-on-primary);
-      background-color: var(--color-primary);
-      transition: background-color 0.35s ease, box-shadow 0.35s ease;
-
-      &:hover {
-        background-color: color-mix(in srgb, var(--color-primary) 90%, var(--color-on-primary));
-        box-shadow: none;
-      }
     }
 
     .icon-container {

@@ -4,27 +4,37 @@
   [action]="'leave'"
   (smHesitate)="hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()"
 >
-  @if(iconImage()) {
-    <button mat-icon-button
-            smClickStopPropagation
-            [delay]="100"
-            [action]="'enter'"
-            (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true">
-    <img [ngSrc]="iconImage()" alt="app-icon" width="20" height="20">
-    </button>
-  } @else {
-    <mat-icon
-      smClickStopPropagation
-      fontSet="al"
-      class="pointer"
-      [class]="customClass()"
-      [fontIcon]="iconClass() ?? 'al-ico-info-circle'"
-      [class.xs]="smallIcon()"
-      [delay]="100"
-      [action]="'enter'"
-      (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true"
-    ></mat-icon>
-  }
+        <ng-content select="smTooltipTrigger"></ng-content>
+    @if (triggerContent()) {
+      <span
+        smClickStopPropagation
+        [delay]="100"
+        [action]="'enter'"
+        (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true"
+      >
+        <ng-container [ngTemplateOutlet]="triggerContent()"></ng-container>
+      </span>
+    } @else if (iconImage()) {
+      <button mat-icon-button
+              smClickStopPropagation
+              [delay]="100"
+              [action]="'enter'"
+              (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true">
+        <img [ngSrc]="iconImage()" alt="app-icon" width="20" height="20">
+      </button>
+    } @else {
+      <mat-icon
+        smClickStopPropagation
+        fontSet="al"
+        class="pointer"
+        [class]="customClass()"
+        [fontIcon]="iconClass() ?? 'al-ico-info-circle'"
+        [class.xs]="smallIcon()"
+        [delay]="100"
+        [action]="'enter'"
+        (smHesitate)="trigger.openMenu(); hesitateMenu.hesitateStatus= true"
+      ></mat-icon>
+    }
   <span #trigger="matMenuTrigger" [matMenuTriggerFor]="tooltipMenu" smClickStopPropagation></span>
 </span>
 

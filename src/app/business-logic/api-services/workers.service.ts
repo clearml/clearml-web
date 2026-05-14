@@ -38,7 +38,7 @@ import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables'
 import { Configuration }                                     from '../configuration';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiWorkersService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -71,7 +71,7 @@ export class ApiWorkersService {
 
 
     /**
-     * 
+     *
      * Returns count of active company workers in the selected time range.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -116,7 +116,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Returns information on all registered workers.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -161,7 +161,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Returns worker statistics metric keys grouped by categories.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -206,7 +206,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Returns statistics for the selected workers and time range aggregated by date   intervals.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -251,7 +251,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Register a worker in the system. Called by the Worker Daemon.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -296,7 +296,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Called periodically by the worker daemon to report machine status
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -341,7 +341,7 @@ export class ApiWorkersService {
     }
 
     /**
-     * 
+     *
      * Unregister a worker in the system. Called by the Worker Daemon.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

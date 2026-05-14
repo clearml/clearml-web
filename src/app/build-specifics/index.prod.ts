@@ -1,1 +1,1 @@
-export const extCoreModules = [];
+export const extCoreConfig = [];

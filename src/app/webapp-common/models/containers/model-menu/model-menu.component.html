@@ -1,20 +1,20 @@
 @if (activateFromMenuButton()) {
-  <button mat-icon-button [matMenuTriggerFor]="modelMenu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
+  <button mat-icon-button [matMenuTriggerFor]="modelMenu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen" data-id="modelDetailsHamburgerMenu">
     <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
   </button>
 }
 @if (!activateFromMenuButton()) {
   <div
     style="visibility: hidden; position: fixed"
-    [style.left.px]="position.x"
-    [style.top.px]="position.y"
+    [style.left.px]="position().x"
+    [style.top.px]="position().y"
     [matMenuTriggerFor]="modelMenu">
   </div>
 }
 <mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop()" class="light-theme entity-context-menu">
   @if (selectedDisableAvailable()[menuItems.publish]) {
     @if (tableMode()) {
-      <button mat-menu-item (click)="toggleDetails()">
+      <button mat-menu-item (click)="toggleDetails()" data-id="detailsOption">
         <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>Details
       </button>
     }
@@ -38,7 +38,7 @@
     </button>
     <hr>
     <button mat-menu-item
-            [matMenuTriggerFor]="tagsMenu.matMenu"
+            [matMenuTriggerFor]="tagsMenu.matMenu()"
             [disabled]="isExample()"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()"
@@ -50,11 +50,12 @@
     <sm-tags-menu
       #tagsMenu
       [tags]="model()?.tags"
-      [tagsFilterByProject]="!allProjects() && tagsFilterByProject()"
+      [filterByProject]="!allProjects() && filterTagsByProject()"
       [projectTags]="projectTags()"
       [companyTags]="companyTags()"
-      (tagSelected)="tagSelected.emit($event)">
-    </sm-tags-menu>
+      (tagSelected)="tagSelected.emit($event)"
+      (getCompanyTags)="getCompanyTags.emit()"
+    ></sm-tags-menu>
     <hr>
     <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile()" data-id="downloadOption">
       <mat-icon fontSet="al" [fontIcon]="icons.DOWNLOAD"></mat-icon>

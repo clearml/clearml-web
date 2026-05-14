@@ -136,7 +136,9 @@ export class ModelsViewEffects {
             acc[updatedFilter.col] = {value: updatedFilter.value, matchMode: updatedFilter.filterMatchMode};
             return acc;
           }, {} as Record<string, FilterMetadata>)
-        }, update: true
+        },
+        others: action.others,
+        update: true
       })
     )
   ));

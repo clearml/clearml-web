@@ -1,12 +1,30 @@
 :host {
 
+  .dialog-title {
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    font-size: 24px;
+    padding: 24px;
+  }
   .search.outline {
     width: 450px;
+
+    &.shorter {
+      width: 50%;
+    }
   }
 
   .select-experiments-container {
-    height: calc(100% - 100px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    //padding: 0 64px;
     width: 100%;
+
+    mat-form-field {
+      width: 50%;
+    }
   }
 
   .hide-table {
@@ -14,8 +32,16 @@
     overflow: hidden;
 
     &.show-table {
-      height: calc(100% - 60px);
-      overflow-y: auto;
+      flex-grow: 1;
+      min-height: 400px;
+
+      border: 1px solid var(--color-outline-variant);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    &.card-view {
+      width: 610px;
     }
   }
 
@@ -27,14 +53,7 @@
     padding: 0;
   }
 
-  .buttons {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: center;
-    left: 50%;
-    position: relative;
-    transform: translateX(-50%);
+  mat-dialog-actions {
 
     button {
       width: 130px;
@@ -50,10 +69,18 @@
     .p-datatable-hoverable-rows .p-datatable-selectable-row  {
       cursor: default;
     }
-  }
 
-  ::ng-deep .generic-container {
-    max-height: unset !important;
+    &.card-view {
+      .p-datatable-thead::after {
+        background-color: var(--color-surface) !important;
+        border-bottom: 1px solid var(--color-outline-variant) !important;
+
+      }
+      .card-header {
+        box-shadow: none;
+        background: transparent;
+      }
+    }
   }
 }
 

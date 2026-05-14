@@ -40,6 +40,7 @@
                    [matTooltipShowDelay]="500"
                    smShowTooltipIfEllipsis>{{row?.display_name || row.name}}</a>
                 <sm-copy-clipboard
+                  [smallIcon]="true"
                   class="copy-btn"
                   [label]="''"
                   [tooltipText]="'Copy Queue ID'"

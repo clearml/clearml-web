@@ -6,11 +6,14 @@
         class="add-experiment"
         data-id="entity"
         (click)="showGlobalLegend()"
-      >{{ entityType | uppercase }}S</button>
+        [class.rotated]="globalLegend()"
+      ><span>{{ entityType | uppercase }}S</span>
+      <mat-icon iconPositionEnd fontSet="al" fontIcon="al-ico-dropdown-arrow" class="sm"></mat-icon>
+    </button>
       <button
         mat-flat-button
         class="add-experiment plus icon-only"
-        [smTooltip]="(allowAddExperiment$ | ngrxPush) ?
+        [smTooltip]="allowAddExperiment() ?
           'Add/Remove ' + entityType + 's to comparison' :
           compareLimitations + ' or fewer ' + entityType + 's can be compared'"
         (click)="openAddExperimentSearch()"

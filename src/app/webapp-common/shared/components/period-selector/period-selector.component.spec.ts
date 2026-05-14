@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { PeriodSelectorComponent } from './period-selector.component';
 
@@ -8,7 +9,8 @@ describe('PeriodSelectorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PeriodSelectorComponent]
+      imports: [PeriodSelectorComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { OpenDatasetCardComponent } from './open-dataset-card.component';
 
@@ -8,7 +9,8 @@ describe('SimpleDatasetCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ OpenDatasetCardComponent ]
+      imports: [ OpenDatasetCardComponent ],
+      providers: [provideMockStore({})]
     })
     .compileComponents();
   });
@@ -16,6 +18,8 @@ describe('SimpleDatasetCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(OpenDatasetCardComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('project', { name: 'test', tags: [] });
+    fixture.detectChanges();
     fixture.detectChanges();
   });
 

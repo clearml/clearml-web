@@ -5,7 +5,7 @@
   }
 
   .mat-mdc-tooltip {
-    --mat-tooltip-supporting-text-size: 11px;
+    --mat-tooltip-supporting-text-size: 12px;
     --mat-tooltip-supporting-text-line-height: 14px;
 
     &.break-line {
@@ -47,11 +47,19 @@
     letter-spacing: var(--mat-tooltip-supporting-text-tracking, var(--mat-app-body-small-tracking));
 
     a {
-      color: var(--color-primary-container, var(--mat-app-inverse-on-surface));
+      color: var(--color-inverse-primary);
 
       &:hover {
         color: var(--color-primary-container);
       }
+    }
+
+    code {
+      padding: 1px 4px;
+      font: 11px var(--font-family-monospace);
+      background-color: rgb(from var(--color-inverse-on-surface) r g b / 0.1);
+      border: 1px solid rgb(from var(--color-inverse-on-surface) r g b / 0.2);
+      border-radius: 3px;
     }
 
     > div {

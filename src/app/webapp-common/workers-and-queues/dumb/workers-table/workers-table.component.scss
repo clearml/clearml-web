@@ -7,6 +7,10 @@
   .first-content {
     padding-left: 20px;
   }
+
+  ::ng-deep sm-table tr.header {
+    border-bottom-color: var(--row-default-color) !important;
+  }
 }
 
 .worker-container {

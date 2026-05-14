@@ -1,17 +1,81 @@
-<sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="NEW RUN"
-                    [pageHeader]="getTitle()"
+<sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)"
+                    [header]="form.controls.createNewPipeline.value ? 'RUN IN NEW PIPELINE' : 'NEW RUN'"
+                    [pageHeader]="title()"
                     iconClass="al-ico-pipelines">
 
-  <form [formGroup]="form" class="d-flex flex-column light-theme form-container">
+  <form [formGroup]="form" class="d-flex gap-3 flex-column light-theme form-container">
     <!-- Trap focus if strictly necessary, otherwise consider removing -->
     <input name="focus_trap" style="opacity: 0; height: 0; width: 0">
+    @if (form.controls.createNewPipeline.value) {
+      <div class="section-title">New Pipeline Details</div>
+      <div class="param-line">
+        <div class="param-key" [class.error]="form.controls.pipelineName.invalid && form.controls.pipelineName.touched">Pipeline name*</div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="pipelineName">
+          <mat-error>
+            @if (form.controls.pipelineName.hasError('required')) {
+              Pipeline name is required.
+            }
+            @else if (form.controls.pipelineName.hasError('pattern')) {
+              Pipeline name can't contain slash (/)
+            }
+            @else if (form.controls.pipelineName.hasError('minlength')) {
+              Pipeline name should contain at least 3 characters.
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="param-line">
+        <div class="param-key" [class.error]="form.controls.pipelineVersion.invalid && form.controls.pipelineVersion.touched">Initial version</div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="pipelineVersion">
+          @if (form.controls.pipelineVersion.hasError('pattern')) {
+            <mat-error>Invalid version format</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      <div class="param-line">
+        <div class="param-key align-key" [class.error]="form.controls.project.invalid && form.controls.project.touched">Project*</div>
+        <div class="param-value">
+          <sm-paginated-entity-selector
+            class="project-selector no-bottom"
+            formControlName="project"
+            required
+            [data]="allProjects()"
+            [isRequired]="true"
+            [embeddedErrors]="false"
+            (getEntities)="searchChanged({value: $event})"
+            (loadMore)="loadMore()"
+          ></sm-paginated-entity-selector>
+          <div class="error-message">
+            @if (form.controls.project.hasError('required') && form.controls.project.touched) {
+              Project is required.
+            }
+            @else if (form.controls.project.hasError('minlength') && form.controls.project.touched) {
+              Project name can't contain only spaces.
+            }
+          </div>
+
+          @if (existingPipelineWarning()) {
+            <div class="warning-message">
+              <mat-icon fontSet="al" fontIcon="al-ico-alert" class="sm"></mat-icon>
+              <div>
+                <b>{{ form.controls.project.value }}</b> project already contains a <b>{{ form.controls.pipelineName.value }}</b> pipeline.
+                Clicking <b>RUN</b> will create a new run in that pipeline, based on this run's structure and parameters.
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+    }
 
     @if (paramsArray.controls.length > 0) {
-      <div class="section-title first">Parameters</div>
+      <div class="section-title">Parameters</div>
 
     <!-- Dynamic Params Loop -->
     <div formArrayName="params">
-      @for (control of paramsArray.controls; track control.value; let i = $index) {
+      @for (control of paramsArray.controls; track $index; let i = $index) {
         <div class="param-line" [formGroupName]="i">
           <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="control.value.name">
             {{ control.value.name }}
@@ -36,7 +100,7 @@
             }
             @default {
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <input matInput formControlName="value">
+                <input data-id="parametersField" matInput formControlName="value">
               </mat-form-field>
             }
           }
@@ -58,7 +122,7 @@
                formControlName="queue"
                [matAutocomplete]="auto"
                required
-               data-id="queueFiled">
+               data-id="queueField">
 
         <i matSuffix
            class="al-icon sm-md search-icon me-2"
@@ -70,6 +134,7 @@
           <!-- Using the Computed Signal here directly -->
           @for (queue of filteredQueues(); track queue.id) {
             <mat-option
+              data-id="queueListOption"
               [value]="queue"
               [smTooltip]="queue.display_name ? queue.display_name + ' (' + queue.name + ')' : queue.name"
               smShowTooltipIfEllipsis
@@ -86,7 +151,7 @@
 <mat-dialog-actions>
   <button mat-stroked-button mat-dialog-close data-id="cancleNewRun">CANCEL</button>
   <button mat-flat-button
-          [disabled]="form.invalid || form.controls.params.invalid"
+          [disabled]="form.invalid"
           (click)="closeDialog(true)"
           data-id="confirmNewRun"
   >RUN</button>

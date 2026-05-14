@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, untracked} from '@angular/core';
 import {DateFnsAdapter, MAT_DATE_FNS_FORMATS, provideDateFnsAdapter} from '@angular/material-date-fns-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {addDays, format, parseISO, startOfDay, subSeconds} from 'date-fns';
@@ -188,7 +188,7 @@ export class WorkloadsPageComponent {
     }
     effect(() => {
       if (this.projectId()) {
-        untracked(() => this.contextMenuService.setupProjectContextMenu('workloads', this.projectId(), this.archive() === 'true'));
+        untracked(() => this.contextMenuService.setupProjectHeaderTabs('workloads', this.projectId(), this.archive() === 'true'));
       }
     });
 

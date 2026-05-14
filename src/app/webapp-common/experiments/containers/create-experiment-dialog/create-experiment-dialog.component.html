@@ -23,8 +23,8 @@
         <form #codeForm [formGroup]="codeFormGroup">
           <div class="d-flex align-item-center gap-2">
             <mat-form-field appearance="outline">
-              <mat-label>Task Name</mat-label>
-              <input matInput placeholder="my task" formControlName="name">
+              <mat-label data-id="taskNameHeader">Task Name</mat-label>
+              <input matInput placeholder="my task" formControlName="name" data-id="taskNameField">
               @if (codeFormGroup.controls.name.invalid) {
                 <mat-error>
                   @if (codeFormGroup.controls.name.errors?.required) {
@@ -37,8 +37,8 @@
               }
             </mat-form-field>
             <mat-form-field appearance="outline" style="width: 300px">
-              <mat-label>Task type</mat-label>
-              <mat-select formControlName="taskType">
+              <mat-label>Task Type</mat-label>
+              <mat-select formControlName="taskType" data-id="taskTypeDropdown">
                 <mat-select-trigger>
                   @let selectedType = getSelectedTaskType();
                   <div class="d-flex align-item-center gap-2">
@@ -47,7 +47,7 @@
                   </div>
                 </mat-select-trigger>
                 @for (type of taskTypes; track type) {
-                  <mat-option [value]="type.value">
+                  <mat-option [value]="type.value" data-id="taskTypeOption">
                     <mat-icon fontSet="al" [fontIcon]="type.icon"></mat-icon>
                     {{type.label}}
                   </mat-option>
@@ -56,7 +56,7 @@
             </mat-form-field>
           </div>
           <mat-expansion-panel class="mt-3">
-            <mat-expansion-panel-header>Git</mat-expansion-panel-header>
+            <mat-expansion-panel-header data-id="gitExpansionPanel">Git</mat-expansion-panel-header>
             <section>
               <mat-form-field appearance="outline">
                 <mat-label>Repository URL</mat-label>
@@ -68,9 +68,9 @@
               <div class="d-flex git">
                 <mat-form-field appearance="outline" class="me-3">
                   <mat-label>Type</mat-label>
-                  <mat-select formControlName="type" (selectionChange)="typeChange($event.value)">
+                  <mat-select formControlName="type" (selectionChange)="typeChange($event.value)" data-id="gitTypeDropdown">
                     @for (gitType of gitTypes; track gitType) {
-                      <mat-option [value]="gitType">{{gitType[0].toUpperCase()}}{{gitType.slice(1)}}</mat-option>
+                      <mat-option [value]="gitType" data-id="gitTypeOption">{{gitType[0].toUpperCase()}}{{gitType.slice(1)}}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -104,8 +104,8 @@
               <input matInput placeholder="src" formControlName="directory">
             </mat-form-field>
             <mat-radio-group aria-label="Select Binary Type" formControlName="binaryType" class="d-block mt-4" (change)="binaryChanged($event.value)">
-              <mat-radio-button value="python">Python</mat-radio-button>
-              <mat-radio-button value="shell">Shell</mat-radio-button>
+              <mat-radio-button value="python" data-id="pythonRadioButton">Python</mat-radio-button>
+              <mat-radio-button value="shell" data-id="shellRadioButton">Shell</mat-radio-button>
             </mat-radio-group>
             <mat-form-field appearance="outline">
               <mat-label>Binary</mat-label>
@@ -117,9 +117,9 @@
             <div class="d-flex git">
               <mat-form-field appearance="outline" class="me-3">
                 <mat-label>Type</mat-label>
-                <mat-select formControlName="scriptType" panelClass="light-theme">
+                <mat-select formControlName="scriptType" panelClass="light-theme" data-id="scriptTypeDrodown">
                   @for (scriptType of scriptTypes(); track scriptType) {
-                    <mat-option [value]="scriptType">{{scriptType[0].toUpperCase()}}{{scriptType.slice(1).replace('_', ' ')}}</mat-option>
+                    <mat-option [value]="scriptType" data-id="scriptTypeOption">{{scriptType[0].toUpperCase()}}{{scriptType.slice(1).replace('_', ' ')}}</mat-option>
                   }
                 </mat-select>
               </mat-form-field>
@@ -218,12 +218,12 @@
             <h6 [class.disabled]="envFormGroup.controls.poetry.value">Use Existing Virtual Environment</h6>
             <div class="venv">
               <sm-button-toggle
-                [disabled]="envFormGroup.controls.poetry.value"
                 [options]="venvOptions"
                 formControlName="venvType"
               ></sm-button-toggle>
               <mat-form-field appearance="outline"
                               [style.visibility]="envFormGroup.controls.venvType.value === 'discover' ? 'hidden' : null"
+                              [class.position-absolute]="envFormGroup.controls.venvType.value === 'discover'"
               >
                 <mat-label>Preinstalled venv</mat-label>
                 <input matInput placeholder="clearml" formControlName="venv">
@@ -278,7 +278,7 @@ numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
         </div>
       </mat-step>
       <mat-step [stepControl]="dockerFormGroup" label="Container">
-        <form [formGroup]="dockerFormGroup" class="d-flex flex-column pe-4">
+        <form [formGroup]="dockerFormGroup" class="d-flex gap-3 flex-column pe-4">
           <mat-form-field appearance="outline">
             <mat-label>Image</mat-label>
             <input matInput formControlName="image">
@@ -299,7 +299,7 @@ numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
         </div>
       </mat-step>
       <mat-step #runStep label="Run">
-        <form [formGroup]="queueFormGroup" class="d-flex flex-column">
+        <form [formGroup]="queueFormGroup" class="d-flex gap-3 flex-column">
           <h5>Enqueue task to</h5>
           <section>
             <sm-paginated-entity-selector
@@ -309,14 +309,18 @@ numpy != 1.24.0 # https://github.com/numpy/numpy/issues/22826"></textarea>
               displayField="caption"
               [isRequired]="true"
               (loadMore)="loadMoreQueues()"
-            ></sm-paginated-entity-selector>
-            @if (!queueFormGroup.controls.queue.untouched && queueFormGroup.controls.queue.errors; as errors) {
-              <div class="extra-errors">
-                @if (errors?.notFoundInList) {
-                  <mat-error>Please select a queue from the list</mat-error>
+            >
+              @if (!queueFormGroup.controls.queue.untouched && queueFormGroup.controls.queue.errors; as errors) {
+                <div class="extra-errors">
+                  @if (errors?.required) {
+                  <mat-error>Please select queue.</mat-error>
                 }
-              </div>
-            }
+                @if (errors?.notFoundInList) {
+                    <mat-error>Please select a queue from the list</mat-error>
+                  }
+                </div>
+              }
+            </sm-paginated-entity-selector>
           </section>
           <h5>Output</h5>
           <section>

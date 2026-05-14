@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, signal} from '@angular/core';
 import {CredentialsSettingsActions} from '~/features/settings/settings.actions';
 import {Store} from '@ngrx/store';
+import {Actions, ofType} from '@ngrx/effects';
 import {selectCredentials} from '~/features/settings/settings.selectors';
 import {UpperCasePipe} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -12,6 +13,8 @@ import {GoogleStorageCredentialsComponent} from '@common/settings/storage-creden
 import {AwsStorageCredentialsComponent} from '@common/settings/storage-credentials/aws-storage-credentials/aws-storage-credentials.component';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {take} from 'rxjs/operators';
 
 @Component({
     selector: 'sm-storage-credentials',
@@ -30,15 +33,19 @@ import {MatIcon} from '@angular/material/icon';
         MatIconButton,
         MatIcon,
         MatButton,
+        MatProgressSpinner,
     ]
 })
 export class StorageCredentialsComponent {
 
   private store = inject(Store);
+  private actions$ = inject(Actions);
   private fb = inject(FormBuilder);
- private cdr = inject(ChangeDetectorRef);
+  private cdr = inject(ChangeDetectorRef);
   protected credentials = this.store.selectSignal(selectCredentials);
   protected selectedStorage = signal<'google' | 'azure' | 'aws'>(null);
+  protected saving = signal(false);
+  protected saved = signal(false);
 
   storageForm = this.fb.group({
     aws: this.fb.group({
@@ -137,8 +144,19 @@ export class StorageCredentialsComponent {
   }
 
   save() {
+    this.saving.set(true);
+    this.actions$.pipe(
+      ofType(CredentialsSettingsActions.setCredentials),
+      take(1)
+    ).subscribe(() => {
+      this.saving.set(false);
+      this.saved.set(true);
+      setTimeout(() => {
+        this.storageForm.markAsPristine();
+        this.saved.set(false);
+      }, 1000);
+    });
     this.store.dispatch(CredentialsSettingsActions.updateCredentials({credentials: this.storageForm.value}));
-    this.storageForm.markAsPristine();
   }
 
   cancelChanges() {

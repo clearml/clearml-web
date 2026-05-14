@@ -13,21 +13,23 @@
     </div>
   }
   <div class="graphs-container h-100 w-100">
-    <sm-experiment-graphs
-      [metrics]="graphs"
-      [hideLegend]="minimized"
-      [list]="graphList"
-      [isCompare]="true"
-      [isGroupGraphs]="true"
-      [hiddenList]="settings.selectedMetricsPlot"
-      [exportForReport]="!modelsFeature"
-      [splitSize]="splitSize$ | ngrxPush"
-      (createEmbedCode)="createEmbedCode($event)"
-      (resetGraphs)="resetMetrics()"
-      [defaultHoverMode]="'x unified'"
-      (chartSettingsChanged)="changeChartSettings($event)"
-      >
-    </sm-experiment-graphs>
+      <sm-experiment-graphs
+        [class.hidden]="loading()"
+        [noTasks]="!taskIds?.length"
+        [metrics]="graphs"
+        [hideLegend]="minimized"
+        [list]="graphList"
+        [isCompare]="true"
+        [isGroupGraphs]="true"
+        [hiddenList]="settings.selectedMetricsPlot"
+        [exportForReport]="!modelsFeature"
+        [splitSize]="splitSize$ | ngrxPush"
+        (createEmbedCode)="createEmbedCode($event)"
+        (resetGraphs)="resetMetrics()"
+        [defaultHoverMode]="'x unified'"
+        (chartSettingsChanged)="changeChartSettings($event)"
+        >
+      </sm-experiment-graphs>
   </div>
 </div>
 

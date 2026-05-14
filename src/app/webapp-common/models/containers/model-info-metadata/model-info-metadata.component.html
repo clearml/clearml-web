@@ -1,100 +1,107 @@
 @if (model() !== null) {
-<sm-editable-section #metadataSection
-                     [class.in-edit]="inEdit()"
-                     [editable]="selectedModel()?.company?.id && (isSharedAndNotOwner() === false)"
-                     [saving]="saving()"
-                     [disableSave]="metadataForm()?.invalid"
-                     (cancelClicked)="cancelModelMetaDataChange()"
-                     (saveClicked)="saveFormData()"
-                     (activateEditClicked)="activateEditChanged('metadata')">
-  <sm-section-header label="Metadata"></sm-section-header>
-  @if (inEdit()) {
-      <ng-form #metadataForm="ngForm" smUniqueInListSyncValidator2 prefix2="metadataItemKey-"
+  <sm-editable-section
+    [class.in-edit]="inEdit()"
+    [editable]="selectedModel()?.company?.id && (isSharedAndNotOwner() === false)"
+    [saving]="saving()"
+    [disableSave]="metadataGroup.invalid"
+    (cancelClicked)="cancelModelMetaDataChange()"
+    (saveClicked)="saveFormData()"
+    (activateEditClicked)="activateEditChanged('metadata')"
+  >
+    <sm-section-header label="Metadata"></sm-section-header>
+    @if (inEdit()) {
+      <form #container [formGroup]="metadataGroup">
+        <div formArrayName="metadata">
+          @if (metadataGroup.controls.metadata.controls.length > 0) {
+            <div class="labels">
+              <div>
+                <mat-label class="field-label">Key*</mat-label>
+              </div>
+              <div>
+                <mat-label class="field-label">Type*</mat-label>
+              </div>
+              <div>
+                <mat-label class="field-label">Value</mat-label>
+              </div>
+              <div style="width: 140px"></div>
+            </div>
+          }
+          @for (metadataItem of metadataGroup.controls.metadata.controls; track metadataItem.value.id) {
+            <div [formGroupName]="$index" class="d-flex align-items-start me-3 mb-2">
+              <mat-form-field
+                appearance="outline" class="w-100"
+                [hintLabel]="metadataItem.controls.key.invalid && metadataItem.controls.key.errors?.required ? '*Required': ''"
+              >
+                <input
+                  formControlName="key"
+                  placeholder="Key"
+                  data-id="keyField"
+                  matInput>
+                @if (metadataItem.controls.key.errors?.required) {
+                  <mat-error>
+                    Required
+                  </mat-error>
+                }
+                @if (metadataItem.controls.key.errors?.pattern) {
+                  <mat-error>
+                    Key can't be empty
+                  </mat-error>
+                }
+                @if (metadataItem.controls.key.errors?.uniqueName2) {
+                  <mat-error>
+                    Key must be unique
+                  </mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field [hintLabel]="metadataItem.controls.type.invalid && metadataItem.controls.type.errors?.required? '*Required': ''"
+                              appearance="outline" class="strength w-100">
+                <input
+                  formControlName="type"
+                  placeholder="Type"
+                  data-id="typeField"
+                  matInput>
+                @if (metadataItem.controls.type.errors?.required) {
+                  <mat-error>
+                    Required
+                  </mat-error>
+                }
+                @if (metadataItem.controls.type.errors?.pattern) {
+                  <mat-error>
+                    Type can't be empty
+                  </mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-100">
+                <input
+                  formControlName="value"
+                  placeholder="Value"
+                  data-id="valueField"
+                  matInput>
+              </mat-form-field>
+              <button mat-icon-button (click)="removeRow($index)" data-id="deleteIcon">
+                <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </form>
+      <button mat-stroked-button class="icon-only plus mt-2" (click)="addRow()" data-id="addMetaDataButton">
+        <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+      </button>
+    } @else {
+      <sm-table
+        class="h-100"
+        [columns]="calcCols$ | ngrxPush"
+        [tableData]="metadata"
+        [resizableColumns]="false"
+        [scrollable]="true"
+        [selectionMode]="null"
       >
-        @for (metadataItem of metadata; track metadataItem.id) {
-          <div class="d-flex align-items-start me-3 mb-2">
-            <mat-form-field [hintLabel]="metadataItemKey.invalid && metadataItemKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
-              @if ($index === 0) {
-                <mat-label>Key</mat-label>
-              }
-              <input #metadataItemKey="ngModel"
-                     placeholder="Key"
-                     required
-                     pattern="^(\s+\S+\s*)*(?!\s).*$"
-                     [(ngModel)]="metadataItem.key"
-                     [name]="'metadataItemKey-'| uuid"
-                     matInput>
-              @if (metadataItemKey?.errors?.required) {
-                <mat-error>
-                  Required
-                </mat-error>
-              }
-              @if (metadataItemKey?.errors?.pattern) {
-                <mat-error>
-                  Key can't be empty
-                </mat-error>
-              }
-              @if (metadataForm?.errors?.uniqueName2 && metadataForm?.errors?.uniqueName2[$index]) {
-                <span class="outside-error">Key must be unique.
-              </span>
-              }
-            </mat-form-field>
-            <mat-form-field [hintLabel]="metadataItemType.invalid && metadataItemType?.errors?.required? '*Required': ''"
-                            appearance="outline" class="strength w-100">
-              @if ($index === 0) {
-                <mat-label>Type</mat-label>
-              }
-              <input #metadataItemType="ngModel"
-                     [(ngModel)]="metadataItem.type"
-                     placeholder="Type"
-                     required
-                     pattern="^(\s+\S+\s*)*(?!\s).*$"
-                     [name]="'metadataItemType-' | uuid"
-                     matInput>
-              @if (metadataItemType?.errors?.required) {
-                <mat-error>
-                  Required
-                </mat-error>
-              }
-              @if (metadataItemType?.errors?.pattern) {
-                <mat-error>
-                  Type can't be empty
-                </mat-error>
-              }
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="w-100">
-              @if ($index === 0) {
-                <mat-label>Value</mat-label>
-              }
-              <input #metadataItemKey="ngModel"
-                     [(ngModel)]="metadataItem.value"
-                     placeholder="Value"
-                     [name]="'metadataItemValue-'| uuid"
-                     matInput>
-            </mat-form-field>
-            <button mat-icon-button (click)="removeRow($index)" data-id="deleteIcon" [class.mt-4]="$index === 0">
-              <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
-            </button>
-          </div>
-        }
-        <button mat-stroked-button class="icon-only plus mt-2" (click)="addRow()" data-id="addMetaDataButton">
-          <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
-        </button>
-      </ng-form>
-  } @else {
-    <sm-table
-      class="h-100"
-      [columns]="calcCols$ | ngrxPush"
-      [tableData]="metadata"
-      [resizableColumns]="false"
-      [scrollable]="true"
-      [selectionMode]="null"
-    >
-      <ng-template let-col let-row="rowData" pTemplate="body">
-        <div class="ellipsis" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</div>
-      </ng-template>
-    </sm-table>
-  }
-</sm-editable-section>
+        <ng-template let-col let-row="rowData" pTemplate="body">
+          <div class="ellipsis" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</div>
+        </ng-template>
+      </sm-table>
+    }
+  </sm-editable-section>
 
 }

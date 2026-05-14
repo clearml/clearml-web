@@ -13,7 +13,7 @@
         }
       } @else {
         <mat-form-field appearance="outline" class="w-100 no-bottom">
-          <input matInput formControlName="repository">
+          <input matInput formControlName="repository" data-id="repositoryField">
         </mat-form-field>
       }
     </sm-labeled-row>
@@ -44,10 +44,10 @@
           </div>
         </div>
       } @else {
-        <div class="d-flex w-100" style="gap: 12px">
+        <div class="d-flex w-100 align-items-start" style="gap: 12px">
           <mat-form-field appearance="outline" class="flex-grow-1">
             <mat-label>Type</mat-label>
-            <mat-select panelClass="light-theme" formControlName="scriptType">
+            <mat-select panelClass="light-theme" formControlName="scriptType" data-id="commitDropdownButton">
               @for (type of scriptTypeOptions; track type) {
                 <mat-option [value]="type.value">{{type.label}}</mat-option>
               }
@@ -58,7 +58,7 @@
               <mat-form-field appearance="outline" class="flex-grow-1">
                 <mat-error>Required</mat-error>
                 <mat-label>Commit ID</mat-label>
-                <input matInput type="text" formControlName="version_num"
+                <input matInput type="text" formControlName="version_num" data-id="commitIdField"
                        (blur)="resetOtherScriptParameters(sourceTypesEnum.VersionNum)"
                        [placeholder]="scriptPlaceHolders[sourceTypesEnum.VersionNum]">
               </mat-form-field>
@@ -67,7 +67,7 @@
               <mat-form-field appearance="outline" class="flex-grow-1">
                 <mat-label>Branch</mat-label>
                 <mat-error>Required</mat-error>
-                <input matInput type="text" formControlName="branch"
+                <input matInput type="text" formControlName="branch" data-id="branchField"
                        (blur)="resetOtherScriptParameters(sourceTypesEnum.Branch)"
                        [placeholder]="scriptPlaceHolders[sourceTypesEnum.Branch]">
               </mat-form-field>
@@ -76,7 +76,7 @@
               <mat-form-field appearance="outline" class="flex-grow-1">
                 <mat-error>Required</mat-error>
                 <mat-label>Tag</mat-label>
-                <input matInput type="text" formControlName="tag"
+                <input matInput type="text" formControlName="tag" data-id="tagNameField"
                        (blur)="resetOtherScriptParameters(sourceTypesEnum.Tag)"
                        [placeholder]="scriptPlaceHolders[sourceTypesEnum.Tag]">
               </mat-form-field>
@@ -90,7 +90,7 @@
         <div>{{sourceCodeForm.controls.entry_point.value}}</div>
       } @else {
         <mat-form-field appearance="outline" class="w-100 no-bottom">
-          <input matInput type="text" formControlName="entry_point">
+          <input matInput type="text" formControlName="entry_point" data-id="scriptPathField">
         </mat-form-field>
       }
     </sm-labeled-row>
@@ -100,7 +100,7 @@
       }
       @if (editable()) {
         <mat-form-field appearance="outline" class="w-100 no-bottom">
-          <input matInput type="text" formControlName="working_dir">
+          <input matInput type="text" formControlName="working_dir" data-id="workingDirField">
         </mat-form-field>
       }
     </sm-labeled-row>
@@ -117,7 +117,7 @@
         </div>
       } @else {
         <mat-form-field appearance="outline" class="col-24 no-bottom">
-          <input matInput type="text" formControlName="binary">
+          <input matInput type="text" formControlName="binary" data-id="binaryField">
         </mat-form-field>
       }
     </sm-labeled-row>

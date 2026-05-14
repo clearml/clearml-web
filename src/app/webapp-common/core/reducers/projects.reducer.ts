@@ -2,8 +2,6 @@ import {createReducer, createSelector, on} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
 import {TagColor} from '../actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
-import {getSystemTags} from '~/features/experiments/shared/experiments.utils';
-import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -48,7 +46,6 @@ export interface RootProjects {
   deep: boolean;
   projectTags: string[];
   companyTags: string[];
-  systemTags: string[];
   tagsColors: Record<string, TagColor>;
   tagsFilterByProject: boolean;
   graphVariant: Record<string, ISmCol[]>;
@@ -63,17 +60,20 @@ export interface RootProjects {
   blockUserScript: boolean;
   mainPageTagsFilter: Record<string, { tags: string[]; filterMatchMode: string  }>;
   mainPageUsersFilter: Record<string, { users: string[]  }>;
+  mainPageStatusFilter: Record<string, { statuses: string[]  }>;
   mainPageTagsFilterMatchMode: string;
   defaultNestedModeForFeature: Record<string, boolean>;
   selectedSubFeature: IBreadcrumbsLink;
   tablesFilterProjectsOptions: Partial<ProjectsGetAllResponseSingle>[];
   projectsOptionsScrollId: string;
   breadcrumbOptions: IBreadcrumbsOptions;
+  companyTagsLastUpdate: number;
 }
 
 const initRootProjects: RootProjects = {
   mainPageTagsFilter: {},
   mainPageUsersFilter: {},
+  mainPageStatusFilter: {},
   mainPageTagsFilterMatchMode: 'AND',
   selectedProject: null,
   projectAncestors: null,
@@ -81,7 +81,6 @@ const initRootProjects: RootProjects = {
   deep: false,
   projectTags: [],
   companyTags: [],
-  systemTags: [],
   tagsColors: {},
   tagsFilterByProject: true,
   graphVariant: {},
@@ -98,7 +97,8 @@ const initRootProjects: RootProjects = {
   selectedSubFeature: null,
   breadcrumbOptions: null,
   tablesFilterProjectsOptions: null,
-  projectsOptionsScrollId: null
+  projectsOptionsScrollId: null,
+  companyTagsLastUpdate: 0
 };
 
 export const projects = state => state.rootProjects as RootProjects;
@@ -107,8 +107,8 @@ export const selectMinimizedView = (getId: (params: Record<string, string>) => s
 params => !!getId(params) || Object.hasOwn(params ?? {}, 'ids'));
 export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
 export const selectSelectedBreadcrumbSubFeature = createSelector(projects, state => state.selectedSubFeature);
-export const selectBreadcrumbOptions = createSelector(projects, state => state.breadcrumbOptions);
-export const selectProjectAncestors = createSelector(projects, state => state.projectAncestors);
+export const selectBreadcrumbOptions = createSelector(projects, state => state?.breadcrumbOptions);
+export const selectProjectAncestors = createSelector(projects, state => state?.projectAncestors);
 export const selectSelectedProjectDescription = createSelector(projects, state => state.selectedProject?.description);
 export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : null);
 export const selectIsArchivedMode = createSelector(projects, state => state.archive);
@@ -119,14 +119,15 @@ export const selectProjectTags = createSelector(projects, state => state.project
 
 export const selectMainPageTagsFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageTagsFilter[projectType]?.tags : []);
 export const selectMainPageUsersFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageUsersFilter[projectType]?.users : []);
+export const selectMainPageStatusFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageStatusFilter[projectType]?.statuses : []);
 export const selectMainPageTagsFilterMatchMode = createSelector(projects, selectProjectType, (state, projectType) => projectType? state.mainPageTagsFilter[projectType]?.filterMatchMode : null);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
+export const selectCompanyTagsLastUpdate = createSelector(projects, state => state.companyTagsLastUpdate);
 
-export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state?.tagsColors);
 export const selectLastUpdate = createSelector(projects, state => state.lastUpdate);
 export const selectTagColors = createSelector(selectTagsColors,
-  (tagsColors, props: { tag: string }) => tagsColors[props.tag]);
+  (tagsColors, props: { tag: string }): TagColor => tagsColors[props.tag]);
 const selectSelectedProjectsMetricVariant = createSelector(projects, state => state.graphVariant);
 export const selectSelectedMetricVariant = createSelector(selectSelectedProjectsMetricVariant,
   (projectsVariant, projectId: string) => projectsVariant[projectId]);
@@ -210,7 +211,7 @@ export const projectsReducer = createReducer(
   on(projectsActions.setCompanyTags, (state, action): RootProjects => ({
     ...state,
     companyTags: action.tags,
-    systemTags: action.systemTags
+    companyTagsLastUpdate: Date.now()
   })),
   on(projectsActions.addCompanyTag, (state, action): RootProjects => ({...state, companyTags: Array.from(new Set(state.companyTags.concat(action.tag))).sort()})),
   on(projectsActions.addProjectTags, (state, action): RootProjects => ({
@@ -229,6 +230,13 @@ export const projectsReducer = createReducer(
     mainPageUsersFilter: {
       ...state.mainPageUsersFilter,
       [action.feature]: {...state.mainPageUsersFilter[action.feature], users: action.users}
+    }
+  })),
+  on(projectsActions.setMainPageStatusFilter, (state, action): RootProjects => ({
+    ...state,
+    mainPageStatusFilter: {
+      ...state.mainPageStatusFilter,
+      [action.feature]: {...state.mainPageStatusFilter[action.feature], statuses: action.statuses}
     }
   })),
   on(projectsActions.setMainPageTagsFilterMatchMode, (state, action): RootProjects => ({
@@ -273,7 +281,7 @@ export const projectsReducer = createReducer(
   on(projectsActions.setTablesFilterProjectsOptions, (state, action): RootProjects => ({
     ...state,
     tablesFilterProjectsOptions: action.loadMore ? uniqBy((state.tablesFilterProjectsOptions || []).concat(action.projects), 'id') : uniqBy(action.projects, 'id'),
-projectsOptionsScrollId: action.scrollId
+    projectsOptionsScrollId: action.scrollId
   })),
   on(projectsActions.getTablesFilterProjectsOptions, (state, action): RootProjects => ({...state, ...(!action.loadMore && {tablesFilterProjectsOptions: null, projectsOptionsScrollId: null})})),
 );

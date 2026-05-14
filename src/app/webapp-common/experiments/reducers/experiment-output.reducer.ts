@@ -180,7 +180,6 @@ export const experimentOutputReducer = createReducer(
     searchTerm: ''
   })),
   on(actions.setLogFilter, (state, action): ExperimentOutputState => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
-  on(actions.resetLogFilter, (state): ExperimentOutputState => ({...state, logFilter: null})),
   on(actions.toggleSettings, (state): ExperimentOutputState => ({...state, showSettings: !state.showSettings})),
   on(actions.toggleMetricValuesView, (state): ExperimentOutputState => ({...state, metricValuesView: !state.metricValuesView})),
   on(actions.setGraphsPerRow, (state, action): ExperimentOutputState => ({...state, graphsPerRow: action.graphsPerRow}))

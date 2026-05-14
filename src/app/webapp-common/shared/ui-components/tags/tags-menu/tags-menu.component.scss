@@ -21,11 +21,14 @@
 }
 
 .project-tags-filter {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
+  path {
+    fill: var(--color-outline);
+  }
 
+  &.active path {
+    fill: var(--color-primary);
+  }
+}
 
 ::ng-deep .tags-menu .mat-mdc-menu-content .mat-mdc-menu-item .mat-mdc-menu-item-text {
   display: unset;

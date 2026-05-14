@@ -7,25 +7,42 @@
     <div class="global-legend-container" [class.show]="(showGlobalLegend$ | ngrxPush)" data-id="globalLegendContainer">
       <div class="global-legend">
         @for (exp of globalLegendData$ | ngrxPush; track exp.id) {
-          <div data-id="experimentLegend" class="legend-experiment">
+          <div
+            data-id="experimentLegend"
+            class="legend-experiment"
+            (mouseenter)="setHighlightedTask(exp.id)"
+            (mouseleave)="clearHighlightedTask()"
+          >
             <span #dot class="experiment-color"
-              data-id="experimentLegendColor"
-              [style.background-color]="experimentsColor[exp.id]"
-              [colorButtonRef]="dot"
-              [smChooseColor]="experimentsColor[exp.id]"
-              [stringToColor]="exp.name + '-' + exp.id"
+                  data-id="experimentLegendColor"
+                  [style.background-color]="experimentsColor[exp.id]"
+                  [colorButtonRef]="dot"
+                  [smChooseColor]="experimentsColor[exp.id]"
+                  [stringToColor]="exp.name + '-' + exp.id"
             ></span>
-            <span class="experiment-name"
-              [smTooltip]="duplicateNamesObject[exp.name] ? '' : exp.name" smShowTooltipIfEllipsis>
-              <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags?.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
+            <span class="experiment-name">
+                            <a class="experiment-name-button ellipsis"
+                               [routerLink]="buildUrl(exp)"
+                               [queryParams]="{archive: exp.systemTags?.includes('archived') || undefined}"
+                               [matTooltipShowDelay]="400"
+                               [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : `View ${entityType.replace('experiment', 'task')}`"
+                               [smShowTooltipIfEllipsis]="duplicateNamesObject[exp.name] ? true : exp.name">
+                              {{ exp.name }}
+                            </a>
             </span>
             <sm-tag-list [tags]="exp.tags"></sm-tag-list>
-            @if ((globalLegendData$ | ngrxPush)?.length > 1) {
-              <button mat-icon-button class="small-button" (click)="removeExperiment(exp)" data-id="removeExperimentButton">
-                <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="sm"></mat-icon>
-              </button>
-            }
+            <button mat-icon-button [matMenuTriggerFor]="taskMenu" class="sm"
+                    (click)="selectTask(exp); $event.stopPropagation()" data-id="closeLegend">
+              <mat-icon class="al-ico-bars-menu"></mat-icon>
+            </button>
+            <!--            @if ((globalLegendData$ | ngrxPush)?.length > 1) {-->
+            <!--              <button mat-icon-button class="small-button" (click)="removeExperiment(exp)" data-id="removeExperimentButton">-->
+            <!--                <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="sm"></mat-icon>-->
+            <!--              </button>-->
+            <!--            }-->
           </div>
+        } @empty {
+          <span class="d-flex align-items-center">No {{ entityType.replace('experiment', 'task') }} selected</span>
         }
       </div>
       <button mat-icon-button (click)="closeLegend()" data-id="closeLegend">
@@ -37,3 +54,26 @@
   </div>
 </div>
 
+<mat-menu #taskMenu="matMenu" class="entity-context-menu">
+  @if (selectedTask) {
+    <button mat-menu-item (click)="viewTask(selectedTask)">
+      <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>
+      <span>View {{ entityType.replace('experiment', 'task') }} in new tab</span>
+    </button>
+    <button mat-menu-item (click)="renameTask(selectedTask)">
+      <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>
+      <span>Rename</span>
+    </button>
+    @if ((globalLegendData$ | ngrxPush)?.length > 1) {
+      <button mat-menu-item (click)="toggleArchive(selectedTask)">
+        <mat-icon fontSet="al" [fontIcon]="isArchived(selectedTask) ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
+        <span>{{ isArchived(selectedTask) ? 'Restore from Archive' : 'Archive' }}</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="removeExperiment(selectedTask)">
+        <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>
+        <span>Remove from comparison</span>
+      </button>
+    }
+  }
+</mat-menu>

@@ -35,6 +35,8 @@ import {PushPipe} from '@ngrx/component';
 import {MatButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+
 @Component({
   selector: 'sm-controllers',
   templateUrl: './controllers.component.html',
@@ -51,7 +53,10 @@ import {MatIconModule} from '@angular/material/icon';
     MatIconModule,
     PushPipe,
     MatButton,
-    PipelineControllerMenuComponent
+    PipelineControllerMenuComponent,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
   ]
 })
 export class ControllersComponent extends ExperimentsComponent {
@@ -113,6 +118,10 @@ export class ControllersComponent extends ExperimentsComponent {
 
   newRun() {
     (this.contextMenu() as PipelineControllerMenuComponent).runPipelineController(true);
+  }
+
+  newPipeline() {
+    (this.contextMenu() as PipelineControllerMenuComponent).runPipelineController(true, true);
   }
 
   removeTag({experiment, tag}: { experiment: ISelectedExperiment; tag: string }) {

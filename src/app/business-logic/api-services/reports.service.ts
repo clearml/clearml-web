@@ -48,7 +48,7 @@ import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables'
 import { Configuration }                                     from '../configuration';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiReportsService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -81,7 +81,7 @@ export class ApiReportsService {
 
 
     /**
-     * 
+     *
      * Archive report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -126,7 +126,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Create a new report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -171,7 +171,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Delete report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -216,7 +216,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Get all the company\&#39;s and public report tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -261,7 +261,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Get all the user tags used for the company reports
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -306,7 +306,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Get the tasks data according the passed search criteria + requested events
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -351,7 +351,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Move reports to a project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -396,7 +396,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Publish report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -441,7 +441,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Share or unshare report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -486,7 +486,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Unarchive report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -531,7 +531,7 @@ export class ApiReportsService {
     }
 
     /**
-     * 
+     *
      * Create a new report
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

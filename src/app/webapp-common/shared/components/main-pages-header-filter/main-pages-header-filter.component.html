@@ -1,5 +1,5 @@
 <button mat-icon-button class='cell' [matMenuTriggerFor]="menu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen" (menuOpened)="menuOpen()">
-  <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0)? 'al-ico-filter-on' : 'al-ico-filter-off')">
+  <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0) || (statusFilters()?.length > 0)? 'al-ico-filter-on' : 'al-ico-filter-off')">
     <span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span>
   </mat-icon>
 </button>
@@ -16,18 +16,26 @@
     ></mat-icon>
     <span data-id="TagOption">Tags</span>
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" [disabled]="showOnlyUserWork()" (menuOpened)="usersFilterOpened()">
+  <button mat-menu-item [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" [disabled]="showOnlyUserWork()" (menuOpened)="usersSubMenu.onMenuOpen()">
     <mat-icon matIconPrefix fontSet="al"
               [fontIcon]="!(usersFilters()?.length > 0) ? '' : 'al-ico-success'"
-              data-id="TagCheckbox"
+              data-id="UsersCheckbox"
     ></mat-icon>
-    <span data-id="TagOption">Users</span>
+    <span data-id="UsersOption">Users</span>
   </button>
-
+  @if (statusOptions()?.length>0) {
+  <button mat-menu-item [matMenuTriggerFor]="statusSubMenu" >
+    <mat-icon matIconPrefix fontSet="al"
+              [fontIcon]="!(statusFilters()?.length > 0) ? '' : 'al-ico-success'"
+              data-id="StatusCheckbox"
+    ></mat-icon>
+    <span data-id="StatusOption">Status</span>
+  </button>
+  }
   <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme"  (close)="closeMenu()">
     <form class="filter-form">
       <mat-form-field appearance="fill"  smClickStopPropagation class="tags-menu-input w-100 no-bottom">
-        <input matInput (input)="setSearchTerm($event)" name="filter" [(ngModel)]="searchTerm" autocomplete="off">
+        <input matInput data-id="tagSearchInputField" (input)="setSearchTerm($event)" name="filter" [(ngModel)]="searchTerm" autocomplete="off">
         @if (searchTerm) {
           <button matSuffix mat-icon-button (click)="clearSearch()" data-id="TagsearchIcon">
             <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
@@ -58,12 +66,21 @@
                         (searchValueChanged)="usersSearchValueChanged($event)"
                         [column]="usersColumn"
                         [options]="usersOptions() | filter: usersSearchTerm():'label'"
+                        [afterPinned]="currentUserAfterPinned()"
                         [value]="usersFilters()"
                         class="hidden"></sm-table-filter-sort>
-
+    <mat-menu #statusSubMenu="matMenu">
+    @for (option of statusOptions(); track option.label) {
+      <sm-menu-item
+        [itemLabel]="option.label"
+        [checked]="statusFilters()?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+        (itemClicked)="emitStatusFilterChangedCheckBox($event)"
+      ></sm-menu-item>
+    }
+  </mat-menu>
   <hr/>
   <button mat-menu-item
-    [disabled]="!(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0))"
+    [disabled]="!(showOnlyUserWork() ||  (tagsFilters()?.length > 0) || (usersFilters()?.length > 0) || (statusFilters()?.length>0))"
     smClickStopPropagation
     class="user-filter-button"
     (click)="clearAll()"

@@ -69,7 +69,7 @@ export class DashboardProjectsComponent {
 
   public openCreateProjectDialog() {
     this.dialog = this.matDialog.open(ProjectDialogComponent, {
-      panelClass: 'light-theme',
+      panelClass: 'dialog-md',
       data: {
         mode: 'create',
       }

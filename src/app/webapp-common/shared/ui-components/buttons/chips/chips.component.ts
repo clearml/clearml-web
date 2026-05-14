@@ -24,7 +24,7 @@ import {ChooseColorDirective} from '@common/shared/ui-components/directives/choo
     MatIconButton,
     MatIcon,
     ChooseColorDirective
-  ]
+  ],
 })
 export class ChipsComponent {
   readonly #elRef = inject(ElementRef);

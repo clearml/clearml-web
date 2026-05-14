@@ -6,17 +6,20 @@
   }
 
   mat-icon {
-    color:var(--color-primary);
+    color: var(--color-outline);
     margin-left: 8px;
+  }
+
+  &.color-primary mat-icon {
+    color: var(--color-primary);
   }
 }
 
 .tooltip-container {
-  margin: -4px 0;
   max-width: 400px;
   padding: 8px 12px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: normal;
 
   &.word-break {

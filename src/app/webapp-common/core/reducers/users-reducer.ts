@@ -1,5 +1,5 @@
 import {ActionCreator, createSelector, on, ReducerTypes} from '@ngrx/store';
-import {fetchCurrentUser, logout, setApiVersion, setCurrentUserName, setFilterByUser} from '../actions/users.actions';
+import {fetchCurrentUser, fetchCurrentUserCompleted, logout, setApiVersion, setCurrentUserName, setFilterByUser} from '../actions/users.actions';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {
   GetCurrentUserResponseUserObjectCompany
@@ -23,6 +23,7 @@ export interface UsersState {
   serverVersions: { server: string; api: string };
   gettingStarted: GettingStarted;
   settings: UsersGetCurrentUserResponseSettings;
+  userInitialized: boolean;
 }
 
 export const initUsers: UsersState = {
@@ -34,7 +35,8 @@ export const initUsers: UsersState = {
   showOnlyUserWork: {},
   serverVersions: null,
   gettingStarted: null,
-  settings: null
+  settings: null,
+  userInitialized: false
 };
 
 export const users = state => state.users as UsersState;
@@ -69,6 +71,7 @@ export const selectIsAdminInActiveWorkspace = createSelector(selectCurrentUser, 
     return false;
   });
 export const selectShowOnlyUserWork = createSelector(users, selectProjectType, (state, projectType) => projectType ? state.showOnlyUserWork[projectType] : false);
+export const selectUserInitialized = createSelector(users, state => state.userInitialized);
 
 export const usersReducerFunctions = [
   on(fetchCurrentUser, state => ({...state})),
@@ -84,5 +87,6 @@ export const usersReducerFunctions = [
   on(setFilterByUser, (state, action) => {
     return ({...state, showOnlyUserWork: {...state.showOnlyUserWork, [action.feature]: action.showOnlyUserWork}});
   }),
-  on(setApiVersion, (state, action) => ({...state, serverVersions: action.serverVersions}))
+  on(setApiVersion, (state, action) => ({...state, serverVersions: action.serverVersions})),
+  on(fetchCurrentUserCompleted, state => state.userInitialized ? state : {...state, userInitialized: true})
 ] as ReducerTypes<UsersState, ActionCreator[]>[];

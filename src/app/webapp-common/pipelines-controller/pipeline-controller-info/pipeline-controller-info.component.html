@@ -109,7 +109,6 @@
         @case (statusOption.log) {
           <sm-experiment-output-log
             [experiment]="selected$ | ngrxPush"
-            [step]="selectedEntity()"
             [showHeader]="false"
           ></sm-experiment-output-log>
         }

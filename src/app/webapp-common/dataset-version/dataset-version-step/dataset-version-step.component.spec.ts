@@ -8,7 +8,7 @@ describe('DatasetVersionStepComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DatasetVersionStepComponent ]
+      imports: [ DatasetVersionStepComponent ]
     })
     .compileComponents();
   });
@@ -16,6 +16,7 @@ describe('DatasetVersionStepComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DatasetVersionStepComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('step', { id: 1, stepId: 1, parentIds: [], branchPath: 1, data: {} });
     fixture.detectChanges();
   });
 

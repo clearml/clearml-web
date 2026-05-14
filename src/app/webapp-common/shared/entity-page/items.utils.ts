@@ -34,6 +34,8 @@ export const canEnqueue = (task: Task): boolean =>
 
 export const canRetry = (task: Task): boolean =>
   !!(task && TASKS_STATUS.FAILED === task.status && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
+export const canChangeVersion = (task: Task): boolean =>
+  !!(task && TASKS_STATUS.PUBLISHED !== task.status && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
 
 export const canDequeue = (task: Task): boolean =>
   !!(task && TASKS_STATUS.QUEUED === task.status);
@@ -97,6 +99,11 @@ export const selectionDisabledPipelineRun = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
+
+export const selectionDisabledChangeVersion = (selectedElements: any[]) => {
+  const selectedFiltered = selectedElements.filter(_selected => canChangeVersion(_selected) && !isReadOnly(_selected));
+  return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
+};
 export const selectionDisabledRetry = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => canRetry(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
@@ -147,7 +154,8 @@ export enum MenuItems {
   tags = 'tags',
   showAllItems = 'showAllItems',
   continue = 'continue',
-  retry = 'retry'
+  retry = 'retry',
+  changeVersion = 'changeVersion',
 }
 
 export enum MoreMenuItems {

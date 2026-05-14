@@ -1,7 +1,7 @@
 @if (footerState()) {
   <div class="footer-container" data-id="footerActionMenuBar">
-    @for (footerItem of footerItems(); track $index) {
-      @let footerItemState = footerItem.getItemState(footerState());
+    @for (footerItem of footerItems(); track footerItem.id) {
+      @let footerItemState = footerItemStates()[footerItem.id];
       @if (!footerItem.isTag) {
         @if (!footerItemState?.preventCurrentItem) {
           <span
@@ -57,7 +57,7 @@
         >
           <button
             mat-icon-button
-            [matMenuTriggerFor]="tagsMenu.matMenu"
+            [matMenuTriggerFor]="tagsMenu.matMenu()"
             [disabled]="footerItemState.disable"
             (menuOpened)="tagMenuOpened(tagMenu())"
             (menuClosed)="tagMenuClosed(tagMenu())"
@@ -69,11 +69,12 @@
         <sm-tags-menu
           #tagsMenu
           [tags]="footerItemState.tags"
-          [tagsFilterByProject]="footerItemState.tagsFilterByProject"
+          [filterByProject]="footerItemState.tagsFilterByProject"
           [projectTags]="footerItemState.projectTags"
           [companyTags]="footerItemState.companyTags"
-          (tagSelected)="tagSelected.emit({tag: $event, emitValue: footerItemState.emitValue})">
-        </sm-tags-menu>
+          (tagSelected)="tagSelected.emit({tag: $event, emitValue: footerItemState.emitValue})"
+          (getCompanyTags)="getCompanyTags.emit()"
+        ></sm-tags-menu>
       }
     }
   </div>

@@ -5,8 +5,8 @@
 } @else {
   <div
     style="visibility: hidden; position: fixed"
-    [style.left.px]="position.x"
-    [style.top.px]="position.y"
+    [style.left.px]="position().x"
+    [style.top.px]="position().y"
     [matMenuTriggerFor]="experimentMenu">
   </div>
 }
@@ -19,17 +19,35 @@
     <hr>
   }
   <button mat-menu-item
-          [matMenuTriggerFor]="tagMenu.matMenu"
+          [matMenuTriggerFor]="tagMenu.matMenu()"
           [disabled]="selectedDisableAvailable()[menuItems.tags]?.disable"
           (menuOpened)="tagMenuOpened()"
           (menuClosed)="tagMenuClosed()">
     <mat-icon fontSet="al" [fontIcon]="icons.TAG" data-id="addTagOption"></mat-icon>
     <span>{{selectedDisableAvailable()[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple() }}</span>
   </button>
+  <button
+    mat-menu-item
+    (click)="publishPopup()" data-id="Publish Option"
+    [disabled]="selectedDisableAvailable()[menuItems.publish]?.disable">
+    <mat-icon fontSet="al" [fontIcon]="icons.PUBLISHED"></mat-icon>
+    <span>{{selectedDisableAvailable()[menuItems.publish]?.available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple() }}</span>
+  </button>
+<!--  <button mat-menu-item (click)="renamePopup()" data-id="renameOption">-->
+<!--    <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>Rename-->
+<!--  </button>-->
 
-  <button mat-menu-item (click)="restoreArchive(entityTypeEnum.dataset)"
+<!--  <button mat-menu-item (click)="changeVersion()" data-id="changeVersionOption"-->
+<!--          [disabled]="selectedDisableAvailable()[menuItems.changeVersion]?.disable"-->
+<!--  >-->
+<!--    <mat-icon fontSet="al" [fontIcon]="icons.REFRESH"></mat-icon>Edit Version-->
+<!--  </button>-->
+
+
+
+  <button mat-menu-item (click)="restoreArchive(entityTypeEnum.dataset)" data-id="archiveOption"
           [disabled]="selectedDisableAvailable()[menuItems.archive]?.disable">
-    <mat-icon fontSet="al" [fontIcon]="isArchive() ? icons.RESTORE : icons.ARCHIVE" data-id="archiveOption"></mat-icon>
+    <mat-icon fontSet="al" [fontIcon]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
     {{selectedDisableAvailable()[menuItems.archive]?.available | menuItemText : isArchive() ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple()}}
   </button>
 
@@ -45,8 +63,25 @@
 <sm-tags-menu
   #tagMenu
   [tags]="experiment()?.tags"
-  [tagsFilterByProject]="tagsFilterByProject()"
+  [filterByProject]="filterTagsByProject()"
   [projectTags]="projectTags()"
   [companyTags]="companyTags()"
-  (tagSelected)="tagSelected.emit($event)">
-</sm-tags-menu>
+  (tagSelected)="tagSelected.emit($event)"
+  (getCompanyTags)="getCompanyTags.emit()"
+></sm-tags-menu>
+
+<ng-template #publishTemplate let-selectedExperiments>
+  <div class="mb-3">
+    @if(selectedExperiments.length === 1){
+      <span
+        class="ellipsis inline font-weight-bold me-1"
+        style="max-width: 200px;"
+        [smTooltip]="selectedExperiments[0]?.name"
+        smShowTooltipIfEllipsis
+      >{{selectedExperiments[0]?.name}}</span>
+    } @else {
+      <span class="font-weight-bold me-1">{{selectedExperiments.length}} dataset versions</span>
+    }
+    <span class="inline">status will be set to Published.</span>
+  </div>
+</ng-template>

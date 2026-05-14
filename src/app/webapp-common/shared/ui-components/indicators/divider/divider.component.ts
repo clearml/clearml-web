@@ -1,30 +1,21 @@
-import {Component, ElementRef, Input, Renderer2} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 @Component({
   selector: 'sm-divider',
   template: `
-    <span class="">{{label}}</span>
+    <span class="">{{ label() }}</span>
   `,
   styleUrls: ['./divider.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [],
+  host: {
+    '[style.--width.px]': 'width()',
+    '[style.--margin.px]': 'margin()'
+  }
 })
 export class DividerComponent {
-
-  @Input() label: string;
-
-  @Input() set width(width: number) {
-    this.setCssVar('width', width);
-  }
-
-  @Input() set margin(margin: number) {
-    this.setCssVar('margin', margin);
-  }
-
-  constructor(private element: ElementRef,
-              private renderer: Renderer2) {
-  }
-
-  setCssVar(name: string, valueInPx: number) {
-    this.renderer.setProperty(this.element.nativeElement, 'style', `--${name}: ${valueInPx}px`);
-  }
+  label = input<string>();
+  width = input<number>();
+  margin = input<number>();
 }
 

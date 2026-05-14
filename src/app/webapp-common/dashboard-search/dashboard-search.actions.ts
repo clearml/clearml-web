@@ -159,6 +159,11 @@ export const setResultsCount = createAction(
   SEARCH_PREFIX + 'SET_COUNTS',
   props<{ counts: Record<ActiveSearchLink, number>, errors: Record<ActiveSearchLink, string> }>()
 );
+
+export const setErrors = createAction(
+  SEARCH_PREFIX + 'SET_ERRORS',
+  props<{activeLink: ActiveSearchLink, error: string }>()
+);
 export const getCurrentPageResults = createAction(
   DASHBOARD_PREFIX + '[get current page results]',
   props<{ activeLink: ActiveSearchLink }>()

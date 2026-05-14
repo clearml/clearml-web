@@ -140,7 +140,7 @@ export class LoginComponent {
 
     effect(() => {
       if (this.loginMode() === loginModes.password) {
-        this.loginForm.controls.password.setValidators([minLengthTrimmed(1)]);
+        this.loginForm.controls.password.setValidators([Validators.required, minLengthTrimmed(1)]);
       }
     });
     toObservable(this.githubButton)

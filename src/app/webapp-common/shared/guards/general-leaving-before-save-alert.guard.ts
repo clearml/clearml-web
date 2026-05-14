@@ -5,7 +5,8 @@ import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/co
 import {map} from 'rxjs/operators';
 
 export interface DirtyState {
-  isDirty: Signal<boolean>
+  isDirty: Signal<boolean>;
+  onLeaveConfirmed?(): void;
 }
 
 
@@ -25,8 +26,13 @@ export const generalLeavingBeforeSaveAlertGuard: CanDeactivateFn<DirtyState> = (
       iconClass: 'al-ico-alert',
       iconColor: 'var(--color-warning)',
       centerText: true,
-      width: 440
-    }
+    },
+    panelClass: 'dialog-md'
   }).afterClosed()
-    .pipe(map(leave => !!leave));
+    .pipe(map(leave => {
+      if (leave) {
+        component.onLeaveConfirmed?.();
+      }
+      return !!leave;
+    }));
 };

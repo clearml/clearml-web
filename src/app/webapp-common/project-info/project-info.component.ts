@@ -63,7 +63,7 @@ export class ProjectInfoComponent {
 
     effect(() => {
       if (this.projectId()) {
-        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId(), this.archive() === 'true'));
+        untracked(() => this.contextMenuService.setupProjectHeaderTabs('overview', this.projectId(), this.archive() === 'true'));
       }
     });
     this.setupBreadcrumbsOptions();

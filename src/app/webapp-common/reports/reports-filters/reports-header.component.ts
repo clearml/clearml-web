@@ -11,6 +11,7 @@ import {FormsModule} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {IOption} from '@common/constants';
 
 @Component({
   selector: 'sm-reports-header',
@@ -39,7 +40,8 @@ export class ReportsHeaderComponent {
   projectId = input<string>();
   sortByField = input<string>();
 
-  sortByTitle = computed(() => this.sortByField().includes('name') ? 'NAME' : 'RECENT')
+  sortByTitle = computed(() => this.sortByField().includes('name') ? 'NAME' : 'RECENT');
+  readonly reportsStatusOptions: IOption[] = [{label: 'Draft', value: 'created'},{label: 'Published', value: 'published'}]
 
   reportsFilterChanged = output<string>();
   orderByChanged = output<string>();

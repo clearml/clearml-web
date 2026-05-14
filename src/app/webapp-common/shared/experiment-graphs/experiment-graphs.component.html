@@ -1,23 +1,26 @@
 @if (
   !loading() &&
-  (hiddenList()?.length === 0 || graphsState().noGraphs()) &&
-  !(multipleSingleValueData()?.data?.length > 0 && hiddenList()?.length !== 0) &&
-  !(singleValueData()?.length > 0 && hiddenList()?.length !== 0)
-  ) {
-
+  noGraphs() &&
+  !allHidden() &&
+  !(multipleSingleValueDataFiltered()?.data?.length > 0) &&
+  !(singleValueData()?.length > 0)
+) {
   <div class="no-output">
     <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
-    @if (routeParams().ids === '') {
+    @if (noTasks()) {
       <h4>SELECT TASKS FROM THE LIST TO SHOW THEIR PLOTS</h4>
-    } @else if (!graphsState().noGraphs() && (graphsState().graphList().length > 0 || multipleSingleValueData()?.data.length > 0 || singleValueData()?.length > 0)) {
-      <h4>ALL CHARTS ARE HIDDEN</h4>
     } @else {
       <h4>NO CHART DATA</h4>
     }
   </div>
+} @else if (!loading() && allHidden()) {
+  <div class="no-output">
+    <mat-icon fontSet="al" fontIcon="al-ico-no-data-graph" class="xxl"></mat-icon>
+    <h4>ALL CHARTS ARE HIDDEN</h4>
+  </div>
 }
 <!--faster outside @else-->
-  <div #allMetrics class="metrics-section" [class.hidden]="hiddenList()?.length === 0">
+  <div #allMetrics class="metrics-section">
     @if (singleValueData()?.length > 0 && hiddenList() && hiddenList().includes(singleValueChartTitle)) {
       <div class="d-flex align-items-center justify-content-center summary-container">
         @if (exportForReport()) {
@@ -36,7 +39,7 @@
         }
       </div>
     }
-    @if (plotlyReady() && multipleSingleValueData()?.data?.length > 0 && groupBy() === 'metric') {
+    @if (plotlyReady() && isMultiSingleValuesVisible()) {
       <div class="d-flex align-items-center justify-content-center summary-container">
         <sm-single-graph
           #singleValueGraph
@@ -44,33 +47,35 @@
           [graphsNumber]="1"
           [hideLegend]="hideLegend()"
           [legendStringLength]="legendStringLength()"
-          [chart]="multipleSingleValueData()"
+          [chart]="multipleSingleValueDataFilteredHighlighted()"
           [id]="'singleValues'"
           [isCompare]="isCompare()"
+          [lineWidth]="lineWidth()"
           [defaultHoverMode]="defaultHoverMode()"
           [showLoaderOnDraw]="showLoaderOnDraw()"
-          [identifier]="generateIdentifier(multipleSingleValueData())"
+          [identifier]="generateIdentifier(multipleSingleValueDataFiltered())"
           [exportForReport]="exportForReport()"
           [chartSettings]="(chartSettings['singleValues'] | ngrxPush)"
           (createEmbedCode)="creatingEmbedCode(null, $event)"
           (chartPreferencesChanged)="chartPreferencesChanged({metric:'singleValues'}, $event)"
+          (hiddenTracesChanged)="onHiddenTracesChanged(generateIdentifier(multipleSingleValueDataFiltered()), $event)"
           (maximizeClicked)="maximize($event)"
         ></sm-single-graph>
       </div>
     }
-    <div [class.all-metrics]="graphsState().graphList()?.length > 0"
+    <div [class.all-metrics]="graphList()?.length > 0"
          [class.row]="!isGroupGraphs()"
-         [class.hidden]="isCompare() && multipleSingleValueData() === null && groupBy() === 'metric'"
+         [class.hidden]="isCompare() && multipleSingleValueDataFiltered() === null && groupBy() === 'metric'"
     >
-      @for (metric of (graphsState().graphList()); track metric) {
+      @for (metric of (graphList()); track metric) {
         <div class="metric-group-container less-padding"
              #metricGroup
-             [class.two-in-a-row]="!isGroupGraphs() && graphsState().graphList().length > 1 && isWidthBigEnough()"
+             [class.two-in-a-row]="!isGroupGraphs() && graphList().length > 1 && isWidthBigEnough()"
              [class.hidden]="inHiddenList(metric, '')"
         >
           <div [id]="experimentGraphidPrefix + metric" class="graph-id">
             <div #groupElement>
-              @if (isGroupGraphs() && graphsData()?.[metric]) {
+              @if (isGroupGraphs() && graphsDataHighlighted()?.[metric]) {
                 <div class="metric-group-header" [class.disable-resize]="disableResize()" (click)="collapseGroup(groupElement)">
                   <div class="flex-placeholder"></div>
                   <div class="header-text">{{ metric }}
@@ -78,18 +83,19 @@
                       <span class="counter">({{(visibility()[metric] | getCounterString)}} plots)</span>
                     }
                   </div>
-                  @if (graphsData()?.[metric]?.length > 0) {
+                  @if (graphsDataHighlighted()?.[metric]?.length > 0) {
                     <div class="d-flex gap-3">
                       <button  mat-icon-button
                                class="ms-auto"
                                smTooltip="Copy group embed code"
+                               data-id="copyGroupEmbedCode"
                                matTooltipPosition="below"
-                               (click)="$event.stopPropagation(); creatingEmbedCodeGroup(graphsData()?.[metric], groupCode)">
+                               (click)="$event.stopPropagation(); creatingEmbedCodeGroup(graphsDataHighlighted()?.[metric], groupCode)">
                         <div #groupCode>
                           <mat-icon  fontSet="al" fontIcon="al-ico-code-square"></mat-icon>
                         </div>
                       </button>
-                      <button  mat-icon-button class="ms-auto group-btn">
+                      <button  mat-icon-button class="ms-auto group-btn" data-id="expandCollapsePlotGroup">
                         <mat-icon  fontSet="al" fontIcon="al-ico-ico-chevron-down"></mat-icon>
                       </button>
                     </div>
@@ -97,9 +103,7 @@
                 </div>
               }
               <div class="single-graph">
-                <!--          <div [class.row]="isGroupGraphs"-->
-                <!--               [class.single-graph]="graphsData()[metric].length === 1">-->
-                @for (chartItem of graphsData()?.[metric]; track trackByIdFn(chartItem)) {
+                @for (chartItem of graphsDataHighlighted()?.[metric]; track trackByIdFn(chartItem) + $index) {
                   <div
                     #singleGraphContainer
                     mwlResizable
@@ -119,7 +123,7 @@
                         <sm-single-graph
                           [class.less-padding]="isGroupGraphs()"
                           [class.two-in-a-row]="isGroupGraphs() && chartItem?.data[0]?.type !== 'table' && graphsData()?.[metric].length > 1 && isWidthBigEnough()"
-                          [graphsNumber]="graphsState().numIterations()"
+                          [graphsNumber]="numIterations()"
                           [legendStringLength]="legendStringLength()"
                           [hideLegend]="hideLegend()"
                           [chart]="chartItem"
@@ -132,6 +136,7 @@
                           [smoothType]="smoothType()"
                           [showOriginals]="showOriginals()"
                           [xAxisType]="xAxisType()"
+                          [lineWidth]="lineWidth()"
                           [chartSettings]="(chartSettings[chartItem.id] | ngrxPush)"
                           [height]="height"
                           [width]="width"
@@ -140,6 +145,7 @@
                           [exportForReport]="exportForReport()"
                           (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
                           (chartPreferencesChanged)="chartPreferencesChanged(chartItem, $event)"
+                          (hiddenTracesChanged)="onHiddenTracesChanged(generateIdentifier(chartItem), $event)"
                           (maximizeClicked)="maximize($event)"
                         ></sm-single-graph>
                       } @placeholder {
@@ -177,9 +183,8 @@
           </div>
         </div>
       }
-      @if (graphsState().graphList()?.length) {
+      @if (graphList()?.length) {
         <div style="height: 100px;" class="w-100"></div>
       }
     </div>
   </div>
-

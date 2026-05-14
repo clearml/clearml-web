@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -47,7 +47,6 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {PushPipe} from '@ngrx/component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatIconModule} from '@angular/material/icon';
-import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 @Component({
   selector: 'sm-experiment-output-plots',
@@ -56,7 +55,6 @@ import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-s
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SelectableGroupedFilterListComponent,
-    SingleGraphStateModule,
     MatIconModule,
     MatDrawerContent,
     MatDrawer,
@@ -69,6 +67,12 @@ import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-s
   ]
 })
 export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChanges {
+  private store = inject(Store);
+  private activeRoute = inject(ActivatedRoute);
+  private changeDetection = inject(ChangeDetectorRef);
+  private reportEmbed = inject(ReportCodeEmbedService);
+  protected refreshService = inject(RefreshService);
+
   @Input() isDatasetVersionPreview = false;
   @Input() selected: { id: string };
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
@@ -90,13 +94,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   private plots$: Observable<MetricsPlotEvent[]>;
   private originalPlotList: { metric: string; variant: string }[];
 
-  constructor(
-    private store: Store,
-    private activeRoute: ActivatedRoute,
-    private changeDetection: ChangeDetectorRef,
-    private reportEmbed: ReportCodeEmbedService,
-    protected refreshService: RefreshService
-  ) {
+  constructor( ) {
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
     this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenPlot);

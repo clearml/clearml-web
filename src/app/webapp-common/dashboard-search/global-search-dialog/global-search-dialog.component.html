@@ -31,11 +31,12 @@
           </button>
         } @else {
           <div class="json-info-icon" infoIcon>
-            <sm-multi-line-tooltip iconClass="al-ico-help-outlined" customClass="sm m-0">
+            <sm-multi-line-tooltip iconClass="al-ico-help-outlined" class="color-primary" customClass="sm m-0">
               <span [innerHTML]="advancedTooltip"></span>
             </sm-multi-line-tooltip>
           </div>
         }
+
       </sm-search>
       <button mat-icon-button (click)="enableAdvancedSearch()" [disabled]="activeLink()=== activeSearchLink.modelEndpoints"
               [class.active]="advanced()" smTooltip="Advanced search" data-id="advancedButton">

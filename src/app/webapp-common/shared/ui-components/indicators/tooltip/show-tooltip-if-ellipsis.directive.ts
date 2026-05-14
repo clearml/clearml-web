@@ -1,27 +1,49 @@
-import {Directive, ElementRef, HostListener, input} from '@angular/core';
+import {Directive, ElementRef, inject, input} from '@angular/core';
 import {TooltipDirective} from './tooltip.directive';
 
 @Directive({
   selector: '[smShowTooltipIfEllipsis]',
-  standalone:  true
+  host: {
+    '(mouseenter)': 'setTooltipState()',
+  },
 })
 export class ShowTooltipIfEllipsisDirective {
-  constructor(
-    private matTooltip: TooltipDirective,
-    private elementRef: ElementRef<HTMLElement>
-  ) {}
+  private matTooltip = inject(TooltipDirective);
+  private elementRef = inject(ElementRef<HTMLElement>);
+
   showAlwaysTooltip = input(false);
-  // smShowTooltipIfEllipsis = output<boolean>();
-  @HostListener('mouseenter', ['$event'])
+  smShowTooltipIfEllipsis = input<string | boolean>(undefined);
+  private originalMessage: string;
+
   setTooltipState(): void {
     if (this.showAlwaysTooltip()) {
       return;
     }
     const element = this.elementRef.nativeElement;
+    let isEllipsis: boolean;
     if(element.tagName==='MAT-OPTION' && element.firstElementChild?.tagName==='SPAN' || element.firstElementChild?.classList.contains('ellipsis')){
-      this.matTooltip.disabled = element.firstElementChild.scrollWidth === element.firstElementChild.clientWidth;
+      isEllipsis = element.firstElementChild.scrollWidth > element.firstElementChild.clientWidth;
     } else {
-      this.matTooltip.disabled = element.scrollWidth === element.clientWidth;
+      isEllipsis = element.scrollWidth > element.clientWidth;
+    }
+
+    if (this.smShowTooltipIfEllipsis() !== undefined && this.smShowTooltipIfEllipsis() !== '' && this.smShowTooltipIfEllipsis() !== false) {
+      if (isEllipsis) {
+        if (typeof this.smShowTooltipIfEllipsis() === 'string') {
+          if (!this.originalMessage) {
+            this.originalMessage = this.matTooltip.message;
+          }
+          this.matTooltip.message = this.smShowTooltipIfEllipsis() as string;
+        }
+        this.matTooltip.disabled = false;
+      } else {
+        if (this.originalMessage) {
+          this.matTooltip.message = this.originalMessage;
+        }
+        this.matTooltip.disabled = false;
+      }
+    } else {
+      this.matTooltip.disabled = !isEllipsis;
     }
   }
 }

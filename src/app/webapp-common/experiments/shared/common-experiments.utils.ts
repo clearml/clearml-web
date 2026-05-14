@@ -18,8 +18,9 @@ export const filterArchivedExperiments = (experiments, showArchived): ITableExpe
 
 export const getRoundedNumber = (value: number) => Math.round(value * Math.pow(10, DIGITS_AFTER_DECIMAL)) / Math.pow(10, DIGITS_AFTER_DECIMAL);
 
-export const downloadObjectAsJson = (exportObj, exportName) => {
-  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
+export const downloadObjectAsJson = (exportObj, exportName, prettyPrint = false) => {
+  const jsonString = prettyPrint ? JSON.stringify(exportObj, null, 2) : JSON.stringify(exportObj);
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonString);
   const downloadAnchorNode = document.createElement('a');
   downloadAnchorNode.href= dataStr;
   downloadAnchorNode.download=  exportName + '.json';

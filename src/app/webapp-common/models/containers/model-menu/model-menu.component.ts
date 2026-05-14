@@ -71,10 +71,11 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   numSelected = input(0);
   projectTags = input<string[]>();
   companyTags = input<string[]>();
-  tagsFilterByProject = input<boolean>();
+  filterTagsByProject = input<boolean>();
   activateFromMenuButton = input(true);
   useCurrentEntity = input(false);
-  tagSelected = output<string>();
+  tagSelected  = output<string>();
+  getCompanyTags= output();
 
   protected isExample = computed(() => isReadOnly(this.model()));
   protected isLocalFile = computed(() => this.adminService.isLocalFile(this.model()?.uri));
@@ -100,8 +101,9 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
 <br><br>Published models are read-only and cannot be reset.`,
         yes: 'Publish',
         no: 'Cancel',
-        iconClass: 'al-ico-upload',
-      }
+        iconClass: 'al-ico-publish',
+      },
+      panelClass: 'dialog-md'
     });
 
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
@@ -124,7 +126,8 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
         defaultProject: selectedModels[0].project,
         reference: selectedModels.length > 1 ? selectedModels : selectedModels[0]?.name,
         type: EntityTypeEnum.model
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed()
       .pipe(
         take(1),
@@ -164,7 +167,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
         entityType: EntityTypeEnum.model,
         useCurrentEntity: this.activateFromMenuButton() || this.useCurrentEntity()
       },
-      width: '600px',
+      panelClass: 'dialog-md',
       disableClose: true
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {

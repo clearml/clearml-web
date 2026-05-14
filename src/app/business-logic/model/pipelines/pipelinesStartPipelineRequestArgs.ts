@@ -14,4 +14,5 @@
 
 export interface PipelinesStartPipelineRequestArgs {
     name?: string;
+    value?: string;
 }

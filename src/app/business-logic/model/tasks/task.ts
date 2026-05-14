@@ -112,7 +112,7 @@ export interface Task {
     /**
      * Last time this task was created, updated, changed or events for this task were reported
      */
-    last_update?: string;
+    last_update?: string | Date;
     /**
      * Last time any update was done to the task
      */

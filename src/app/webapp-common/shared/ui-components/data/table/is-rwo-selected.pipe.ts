@@ -10,7 +10,7 @@ export class IsRowSelectedPipe implements PipeTransform {
       return false;
     }
 
-    return entities.length > 0 &&
+    return entities?.length > 0 &&
       (entities.some(selectedEntity => selectedEntity.id === entity.id));
   }
 

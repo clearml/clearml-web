@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   input,
   output,
-  viewChild
 } from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {DialogModule} from 'primeng/dialog';
@@ -51,8 +49,6 @@ export class SelectModelHeaderComponent {
   addModelClicked      = output<void>();
   clearFilters         = output<void>();
 
-  searchElem = viewChild<ElementRef>('search');
-
   onSearchValueChanged(value: string) {
     this.searchValueChanged.emit(value);
   }
@@ -70,6 +66,5 @@ export class SelectModelHeaderComponent {
   }
 
   onSearchFocusOut() {
-    if (!this.searchElem().nativeElement.value) {}
   }
 }

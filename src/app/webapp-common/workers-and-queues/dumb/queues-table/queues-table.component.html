@@ -1,5 +1,5 @@
 <div #tableContainer class="queues-container" [class.short]="!short()">
-  <sm-queues-menu-extended
+  <sm-queues-menu
     [menuOpen]="menuOpen()"
     [menuPosition]="menuPosition()"
     [selectedQueue]="contextQueue"
@@ -8,7 +8,7 @@
     (clearQueue)="clearQueue.emit($event)"
     (menuOpened)="menuOpen.set(true)"
     (menuClosed)="menuOpen.set(false)"
-  ></sm-queues-menu-extended>
+  ></sm-queues-menu>
   <sm-table
     [tableData]="queues()"
     [columns]="cols()"
@@ -39,7 +39,7 @@
           <div class="d-flex align-items-center first id-cell">
             <div class="queue-name" [smTooltip]="queue?.caption" smShowTooltipIfEllipsis>{{queue?.caption}}</div>
             <div class="copy-btn">
-              <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.[0]?.id">
+              <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.[0]?.id" buttonClass="sm">
                 <button
                   mat-menu-item
                   smTooltip="Copy Queue ID"
@@ -48,7 +48,7 @@
                   [cbContent]="queue?.id"
                   (cbOnSuccess)="copySuccess.emit('ID')"
                 >
-                  <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
+                  <mat-icon fontSet="al" class="sm" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
                   ID
                 </button>
                 <button
@@ -59,7 +59,7 @@
                   [cbContent]="queue?.name"
                   (cbOnSuccess)="copySuccess.emit('name')"
                 >
-                  <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
+                  <mat-icon fontSet="al" class="sm" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
                   Name
                 </button>
               </sm-menu>

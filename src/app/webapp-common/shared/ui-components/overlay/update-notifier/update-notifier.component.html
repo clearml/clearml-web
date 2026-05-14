@@ -4,8 +4,8 @@
   <div class="header-container" [class.show]="active()">
     <div class="notifier-container" [class.show]="active()">
       <div></div>
-      <div class="update-container">A newer version of ClearML server ( {{newVersionName}}) is available. <a
-      [href]="newVersionUrl" class="link" target="_blank"> See details.</a></div>
+      <div class="update-container">A newer version of ClearML server ( {{ newVersionName() }}) is available. <a
+      [href]="newVersionUrl()" class="link" target="_blank"> See details.</a></div>
       <button mat-icon-button (click)="dismiss()">
         <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
       </button>
@@ -13,7 +13,7 @@
   </div>
 </div>
 <div class="circle-container" [class.show]="!active()">
-  @if (areAvailableUpdates) {
+  @if (areAvailableUpdates()) {
     <button mat-icon-button (click)="show()">
       <mat-icon fontSet="al" fontIcon="al-ico-alert-purple" class="notification-bell"></mat-icon>
   </button>

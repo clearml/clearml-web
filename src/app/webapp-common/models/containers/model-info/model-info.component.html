@@ -8,9 +8,9 @@
     [editable]="!isExample()"
     [backdropActive]="backdropActive$ | ngrxPush"
     [minimized]="minimized"
+    [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
     (minimizeClicked)="minimizeView()"
     (maximizedClicked)="maximize()"
-    [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
     (modelNameChanged)="updateModelName($event)"
     (closeInfoClicked)="closePanel()"
   >
@@ -28,7 +28,7 @@
        <div class="scalar-buttons">
          @if (routerConfig().includes('scalars')) {
            <div class="table-graph-toggle" [class.maximized]="!minimized">
-             <button mat-icon-button (click)="toggleTableView()"
+             <button mat-icon-button data-id="metricValuesView" (click)="toggleTableView()"
                      [smTooltip]="(metricValuesView$ | ngrxPush) === false ? 'Metric values': 'Graphs'"
              >
                <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | ngrxPush)===false? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon>

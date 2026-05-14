@@ -1,4 +1,4 @@
-import {Component, TemplateRef, input, computed, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, TemplateRef} from '@angular/core';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {NgTemplateOutlet} from '@angular/common';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
@@ -10,6 +10,7 @@ import {normalizeColorToString} from '@common/shared/services/color-hash/color-h
   selector: 'sm-table-card',
   templateUrl: './table-card.component.html',
   styleUrls: ['./table-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgTemplateOutlet
   ]

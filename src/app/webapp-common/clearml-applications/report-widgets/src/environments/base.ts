@@ -31,8 +31,6 @@ export interface Environment {
   userSecret: string;
   companyID: string;
   loginNotice?: string;
-  loginBanner?: string;
-  cookieName?: string;
   baseUrl?: string;
   autoLogin?: boolean;
   whiteLabelLogo?: boolean;
@@ -74,15 +72,13 @@ export const BASE_ENV: Environment = {
   enterpriseServer: true,
   accountAdministration: true,
   production: true,
-  cookieName: 'allegro_token',
   updateCheck: false,
   autoLogin: false,
   apiBaseUrl: null,
   fileBaseUrl: null,
   version,
-  baseUrl: 'https://app.allegro.ai',
-  headerPrefix: 'X-Allegro',
-  loginBanner: '',
+  baseUrl: 'https://app.clear.ml',
+  headerPrefix: 'X-Clearml',
   loginNotice: '',
   userKey: '',
   userSecret: '',

@@ -1,6 +1,6 @@
 import {
   Component, inject, afterNextRender, DestroyRef, input, viewChild,
-  DOCUMENT
+  DOCUMENT, ChangeDetectionStrategy
 } from '@angular/core';
 
 import {CdkPortal, DomPortalOutlet} from '@angular/cdk/portal';
@@ -15,6 +15,7 @@ import {DialogModule} from '@angular/cdk/dialog';
     </ng-container>
   `,
   styleUrls: ['./portal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DialogModule
   ]

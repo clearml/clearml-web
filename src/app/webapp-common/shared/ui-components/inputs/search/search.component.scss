@@ -7,12 +7,11 @@ $search-font-size: 14px;
     min-width: 32px;
     width: 36px;
     overflow: hidden;
+    border-radius: 4px 4px 0 0;
 
     &.animate {
       transition: width 0.4s ease;
     }
-
-    border-radius: 4px 4px 0 0;
 
     &.active {
       width: 100%;
@@ -114,19 +113,27 @@ $search-font-size: 14px;
     display: block;
     min-width: 36px;
     height: 36px;
-    border: 1px solid var(--color-outline);
+    border: 1px solid var(--color-outline-variant);
+
+    border-radius: 18px;
+    --mat-icon-button-state-layer-size: 34px;
+    background-color: var(--color-surface);
 
     &.regex-error {
       border-color: var(--color-error) !important;
     }
 
-    border-radius: 18px;
-    --mat-icon-button-state-layer-size: 34px;
-    background-color: var(--color-surface-container-lowest);
-
     .search-input-container .search-input input {
       padding-left: 16px;
       padding-right: 54px;
+    }
+
+    &:hover {
+      border-color: var(--color-outline);
+    }
+
+    &.has-text {
+      border-color: var(--color-outline);
     }
 
   }
@@ -143,14 +150,14 @@ $search-font-size: 14px;
     .search-input-container {
       height: inherit;
 
+      border-bottom: 1px solid var(--color-outline);
+      width: 100%;
+
       .search-input {
         input {
           padding-left: 0;
         }
       }
-
-      border-bottom: 1px solid var(--color-outline);
-      width: 100%;
     }
   }
 }

@@ -24,9 +24,11 @@ import {MatIconModule} from '@angular/material/icon';
 export class PipelineCardMenuComponent {
   readonly icons = ICONS;
 
+  cardType = input<'pipeline' | 'dataset'>('pipeline');
   project = input<Project>();
   allTags = input<string[]>();
   run = output();
+  clone = output();
   addTag = output<string>();
   rename = output();
   delete = output();

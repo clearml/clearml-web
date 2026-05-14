@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  HostListener, inject,
+  inject,
   OnDestroy,
   OnInit,
   viewChild
@@ -95,6 +95,9 @@ interface ExtTask extends Task {
   selector: 'sm-experiment-compare-metric-values',
   templateUrl: './experiment-compare-metric-values.component.html',
   styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
+  host: {
+    '(window:beforeunload)': 'saveSettingsState()'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SelectableGroupedFilterListComponent,
@@ -149,10 +152,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   } as ExperimentCompareSettings;
   private originalSelection: string[];
   private selectedExperimentsSettings$: Observable<ExperimentCompareSettings>;
-
-  @HostListener('window:beforeunload', ['$event']) unloadHandler() {
-    this.saveSettingsState();
-  }
 
   constructor() {
     this.comparedTasks$ = this.store.select(selectCompareMetricsValuesExperiments);
@@ -398,7 +397,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     }).flat().slice(0, number);
   }
 
-  private saveSettingsState() {
+  protected saveSettingsState() {
     if (!isEqual(this.settings.selectedMetricsScalar, this.originalSelection)) {
       this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedMetricsScalar: this.settings.selectedMetricsScalar}}));
     }

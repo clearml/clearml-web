@@ -19,19 +19,15 @@ const ERROR_AGGREGATION = 600000;
 
 @Injectable()
 export class LayoutEffects {
+  private actions = inject(Actions);
+  private taskService = inject(ApiTasksService);
+  private modelService = inject(ApiModelsService);
+  private notifierService = inject(NotifierService);
+  private dialog = inject(MatDialog);
   protected error = inject(ErrorService);
 
-  private alertDialogRef: MatDialogRef<AlertDialogComponent, any>;
+  private alertDialogRef: MatDialogRef<AlertDialogComponent>;
   private errors = {};
-
-  constructor(
-    private actions: Actions,
-    private taskService: ApiTasksService,
-    private modelService: ApiModelsService,
-    private notifierService: NotifierService,
-    private dialog: MatDialog
-  ) {
-  }
 
   serverErrorMoreInfo = createEffect(() => this.actions.pipe(
     ofType(layoutActions.setServerError),
@@ -44,7 +40,7 @@ export class LayoutEffects {
         map(res => {
           const moreInfo = {[entity]: res[entity]};
           if (this.alertDialogRef) {
-            this.alertDialogRef.componentInstance.moreInfo = moreInfo;
+            this.alertDialogRef.componentInstance.setMoreInfo = moreInfo as any;
           }
         })
       )
@@ -90,7 +86,7 @@ export class LayoutEffects {
       this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions}) :
       EMPTY
     ),
-    mergeMap((actions: Action[]) => actions.length > 0 ? actions : [emptyAction()])
+    mergeMap((actions: Action[]) => actions?.length > 0 ? actions : [emptyAction()])
   ));
 
   requestFailed: Observable<any> = createEffect( () => this.actions.pipe(

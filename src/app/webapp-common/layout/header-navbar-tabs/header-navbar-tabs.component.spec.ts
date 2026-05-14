@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { HeaderNavbarTabsComponent } from './header-navbar-tabs.component';
 
@@ -8,7 +9,8 @@ describe('ContextNavbarComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [HeaderNavbarTabsComponent]
+      imports: [HeaderNavbarTabsComponent],
+      providers: [provideMockStore({})]
     });
     fixture = TestBed.createComponent(HeaderNavbarTabsComponent);
     component = fixture.componentInstance;

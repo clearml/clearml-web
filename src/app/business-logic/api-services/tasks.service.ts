@@ -122,7 +122,7 @@ import {TasksGetOperationsLogResponse} from '~/business-logic/model/tasks/tasksG
 import {ApiOptions} from '~/business-logic/api-services/api';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiTasksService {
 
     protected basePath = HTTP.API_BASE_URL;

@@ -1,4 +1,4 @@
-import {Component, DestroyRef, forwardRef, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, forwardRef, inject, input} from '@angular/core';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {format, isValid, parseISO} from 'date-fns';
@@ -7,19 +7,21 @@ import {MatFormField, MatInputModule} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {MatDivider} from '@angular/material/list';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {enGB} from 'date-fns/locale';
 import {DateFnsAdapter, MAT_DATE_FNS_FORMATS, provideDateFnsAdapter} from '@angular/material-date-fns-adapter';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatIconModule} from '@angular/material/icon';
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {ActivatedRoute, Router} from "@angular/router";
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {ActivatedRoute, Router} from '@angular/router';
 
 // ... other imports (MatSelect, MatDatepicker, etc.)
 
 @Component({
   selector: 'sm-period-selector',
-  standalone: true,
+  templateUrl: './period-selector.component.html',
+  styleUrl: './period-selector.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -42,8 +44,6 @@ import {ActivatedRoute, Router} from "@angular/router";
     {provide: DateAdapter, useClass: DateFnsAdapter, deps: [MAT_DATE_LOCALE]},
     {provide: MAT_DATE_FORMATS, useValue: MAT_DATE_FNS_FORMATS},
     provideDateFnsAdapter()  ],
-  templateUrl: './period-selector.component.html',
-  styleUrl: './period-selector.component.scss'
 
 })
 export class PeriodSelectorComponent implements ControlValueAccessor {

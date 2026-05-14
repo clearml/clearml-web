@@ -143,25 +143,33 @@ export class CommonExperimentsMenuEffects {
         task: action.task,
         ...(action.queue && {queue: action.queue.id}),
         args: action.args,
-        verify_watched_queue: true
-      })
-        .pipe(
-          mergeMap((res: PipelinesStartPipelineResponse) => [
+        verify_watched_queue: true,
+        ...(action.createNewPipeline && action.new_project_name && {new_project_name: action.new_project_name}),
+        ...(action.createNewPipeline && action.new_pipeline_name && {new_pipeline_name: action.new_pipeline_name}),
+        ...(action.createNewPipeline && action.new_pipeline_version != null && {new_pipeline_version: action.new_pipeline_version}),
+      }).pipe(
+        mergeMap((res: PipelinesStartPipelineResponse) => {
+          const navigateProjectId = action.createNewPipeline && !action.existingPipeline && res.new_project?.id;
+          if (navigateProjectId) {
+            this.router.navigate(['pipelines', navigateProjectId, 'tasks']);
+          }
+          return [
             viewActions.getExperiments(),
             viewActions.setSelectedExperiments({experiments: []}),
             viewActions.experimentSelectionChanged({
               experiment: {id: res.pipeline},
-              project: projectId
+              project: navigateProjectId || projectId
             }),
             deactivateLoader(action.type),
             ...(res.queue_watched === false ? [menuActions.openEmptyQueueMessage({queue: action.queue, entityName: 'Pipeline'})] : [])
-          ]),
-          catchError(error => [
-            deactivateLoader(action.type),
-            setServerError(error, null, 'Run Pipeline failed'),
-            requestFailed(error)
-          ])
-        )
+          ];
+        }),
+        catchError(error => [
+          deactivateLoader(action.type),
+          setServerError(error, null, action.createNewPipeline ? 'Run in New Pipeline failed' : 'Run Pipeline failed'),
+          requestFailed(error)
+        ])
+      )
     )
   ));
 
@@ -170,13 +178,11 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.apiTasks.tasksGetAllEx({
-
-        project: projectId,
+        project: action.project || projectId,
         type: [TaskTypeEnum.Controller],
         ...(action.task && {id: [action.task]}),
         ...(!action.task && {order_by: ['-started'], page_size: 1}),
         only_fields: PIPELINE_INFO_ONLY_FIELDS
-
       }).pipe(
         mergeMap((res: TasksGetAllExResponse) => [
           menuActions.setControllerForStartPipelineDialog({task: res?.tasks[0] as unknown as IExperimentInfo}),
@@ -287,8 +293,8 @@ export class CommonExperimentsMenuEffects {
       .pipe(
         tap(() => this.store.dispatch(deactivateLoader(action.type))),
         mergeMap(shouldBeAbortedTasks => (isPipeline ?
-          this.dialog.open(AbortControllerDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}}) :
-          this.dialog.open(AbortAllChildrenDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}})
+          this.dialog.open(AbortControllerDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}, panelClass: 'dialog-md'}) :
+          this.dialog.open(AbortAllChildrenDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}, panelClass: 'dialog-md'})
         ).afterClosed()),
         mergeMap(confirmed => [
           confirmed ? stopClicked({selectedEntities: action.experiments, includePipelineSteps: isPipeline }) : emptyAction(),

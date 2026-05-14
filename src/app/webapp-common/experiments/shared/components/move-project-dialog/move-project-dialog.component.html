@@ -12,45 +12,45 @@
     } to the selected project.
   </div>
   <form (submit)="closeDialog()" class="light-theme" [formGroup]="moveProjectForm">
-    <div class="position-relative">
-      <sm-paginated-entity-selector
-        formControlName="project"
-        [data]="allProjects()"
-        label="Project"
-        placeHolder="Search for project path"
-        [isRequired]="true"
-        [embeddedErrors]="false"
-        [emptyNameValidator]="true"
-        [createNewSuffix]="!moveProjectForm.controls.project.errors && allProjects() !== null && moveProjectForm.controls.project.value && !(moveProjectForm.controls.project.value?.trim() | stringIncludedInArray: projectsNames())"
-        (getEntities)="searchChanged($event)"
-        (loadMore)="loadMore($event)"
-      ></sm-paginated-entity-selector>
-      @if (!moveProjectForm.controls.project.untouched && moveProjectForm.controls.project.errors || moveProjectForm.errors; as errors) {
-        <div class="extra-errors">
-          @if (errors?.required) {
-            <mat-error>Please provide a Project</mat-error>
-          }
-          @else if (errors?.emptyName) {
-            <mat-error>Name can't contain only spaces.</mat-error>
-          }
-          @else if (errors?.sameProject) {
-            <mat-error>
-              Can't move the {{data.type ?? 'item'}} to its current location
-            </mat-error>
-          }
-          @else if (errors?.exampleProject) {
-            <mat-error>
-              Please provide a different name as this project name is taken as an Example project
-            </mat-error>
-          }
-          @else if (errors?.[data.asyncValidator?.errorName]) {
-            <mat-error>
-              {{data.asyncValidator?.errorMessage}}
-            </mat-error>
-          }
-        </div>
-      }
-    </div>
+    <sm-paginated-entity-selector
+      formControlName="project"
+      [data]="allProjects()"
+      label="Project"
+      placeHolder="Search for project path"
+      data-id="searchForProjectPathField"
+      [isRequired]="true"
+      [embeddedErrors]="false"
+      [emptyNameValidator]="true"
+      [createNewSuffix]="!moveProjectForm.controls.project.errors && allProjects() !== null && moveProjectForm.controls.project.value && !(moveProjectForm.controls.project.value?.trim() | stringIncludedInArray: projectsNames())"
+      (getEntities)="searchChanged($event)"
+      (loadMore)="loadMore($event)"
+    >
+    @if (!moveProjectForm.controls.project.untouched && moveProjectForm.controls.project.errors || moveProjectForm.errors; as errors) {
+      <div class="extra-errors">
+        @if (errors?.required) {
+          <mat-error>Please provide a Project</mat-error>
+        }
+        @else if (errors?.emptyName) {
+          <mat-error>Name can't contain only spaces.</mat-error>
+        }
+        @else if (errors?.sameProject) {
+          <mat-error>
+            Can't move the {{data.type ?? 'item'}} to its current location
+          </mat-error>
+        }
+        @else if (errors?.exampleProject) {
+          <mat-error>
+            Please provide a different name as this project name is taken as an Example project
+          </mat-error>
+        }
+        @else if (errors?.[data.asyncValidator?.errorName]) {
+          <mat-error>
+            {{data.asyncValidator?.errorMessage}}
+          </mat-error>
+        }
+      </div>
+    }
+  </sm-paginated-entity-selector>
   </form>
   <div class="buttons">
     <button

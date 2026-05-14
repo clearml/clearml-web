@@ -1,4 +1,4 @@
-import {Component, inject } from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogClose} from '@angular/material/dialog';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
 import {htmlTextShort} from '../../../utils/shared-utils';
@@ -7,15 +7,16 @@ import {MatButton} from '@angular/material/button';
 
 
 @Component({
-    selector: 'sm-operation-error-dialog',
-    templateUrl: './operation-error-dialog.component.html',
-    styleUrls: ['./operation-error-dialog.component.scss'],
-    imports: [
-        DialogTemplateComponent,
-        MatDialogActions,
-        MatButton,
-        MatDialogClose
-    ]
+  selector: 'sm-operation-error-dialog',
+  templateUrl: './operation-error-dialog.component.html',
+  styleUrls: ['./operation-error-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose
+  ]
 })
 export class OperationErrorDialogComponent {
   public data = inject<{
@@ -24,19 +25,11 @@ export class OperationErrorDialogComponent {
     iconClass: string;
   }>(MAT_DIALOG_DATA);
 
-  public title: string;
-  public iconClass = '';
-  public action: ReturnType<typeof openMoreInfoPopup>;
-  public failed: number;
-  public failedList: any[];
-
-  constructor() {
-    this.title = this.data.title || '';
-    this.action = this.data.action;
-    this.failedList = this.data.action.res.failed || [];
-    this.failed = this.data.action.res.failed.length || 0;
-    this.iconClass = this.data.iconClass || '';
-  }
+  protected title = this.data.title || '';
+  protected action = this.data.action;
+  protected failedList = this.data.action.res.failed || [];
+  protected failed = this.data.action.res.failed.length || 0;
+  protected iconClass = this.data.iconClass || '';
 
   getName(fail: any) {
     return htmlTextShort(this.action.parentAction.selectedEntities.find(entity => entity.id === fail.id)?.name);

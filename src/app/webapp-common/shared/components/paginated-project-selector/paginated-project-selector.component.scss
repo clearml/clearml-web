@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  margin-bottom: 12px;
+
+  ::ng-deep .no-bottom-border-radius {
+    .mdc-notched-outline__leading {
+      border-bottom-left-radius: 0;
+    }
+    .mdc-notched-outline__trailing {
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  .selected-items {
+    border: 1px solid var(--color-outline-variant);
+    border-top: none;
+    max-height: 120px;
+    overflow: auto;
+    background-color: var(--color-surface);
+    border-radius: 0 0 4px 4px;
+  }
+}
+
+::ng-deep .light-theme {
+  .mat-pseudo-checkbox {
+    display: none !important;
+  }
+
+  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+    background: none !important;
+
+    .mdc-list-item__primary-text {
+      color: inherit !important;
+    }
+  }
+}
+
+::ng-deep .mat-mdc-form-field-flex {
+  .mat-mdc-form-field-icon-suffix > .mat-icon {
+    padding: 0;
+  }
+}
+
+mat-option {
+  height: 42px;
+  padding: 0 !important;
+  ::ng-deep {
+    .mdc-list-item__content {
+      padding: 0 !important;
+    }
+    .mdc-list-item__primary-text {
+      width: 100%;
+    }
+  }
+}

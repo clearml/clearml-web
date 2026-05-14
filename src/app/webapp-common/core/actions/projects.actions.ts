@@ -116,10 +116,11 @@ export const setTags = createAction(
   PROJECTS_PREFIX + 'set tags',
   props<{ tags: string[] }>()
 );
+export const getCompanyTagsSuccess = createAction(PROJECTS_PREFIX + 'get company tags success');
 
 export const setCompanyTags = createAction(
   PROJECTS_PREFIX + 'set company tags',
-  props<{ tags: string[]; systemTags: string[] }>()
+  props<{tags: string[]}>()
 );
 
 export const addCompanyTag = createAction(
@@ -135,6 +136,11 @@ export const setMainPageTagsFilter = createAction(
 export const setMainPageUsersFilter = createAction(
   PROJECTS_PREFIX + 'set main page users filters',
   props<{ users?: string[]; feature: string}>()
+);
+
+export const setMainPageStatusFilter = createAction(
+  PROJECTS_PREFIX + 'set main page status filters',
+  props<{ statuses?: string[]; feature: string}>()
 );
 
 export const setMainPageTagsFilterMatchMode = createAction(
@@ -241,7 +247,7 @@ export const resetTablesFilterProjectsOptions = createAction(
 
 export const getTablesFilterProjectsOptions = createAction(
   PROJECTS_PREFIX + 'get tables filter projects options',
-  props<{ searchString: string; loadMore: boolean; allowPublic?: boolean}>()
+  props<{ searchString: string; loadMore: boolean; allowPublic?: boolean; additionalProjects?: string[]}>()
 );
 
 export const setTablesFilterProjectsOptions = createAction(

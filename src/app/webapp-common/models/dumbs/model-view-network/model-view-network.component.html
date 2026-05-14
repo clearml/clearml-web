@@ -18,12 +18,14 @@
       <button extra-buttons mat-flat-button
         class="terminal flex-1"
         (click)="protoTextSection().editModeChanged(true)"
+        data-id="editModelConfigurationButton"
       >EDIT</button>
     }
     @if (!model()?.ready && model()?.company?.id && !isSharedAndNotOwner() && design()) {
       <button extra-buttons mat-stroked-button
               class="terminal flex-1"
               (click)="clearProtoText()"
+              data-id="clearModelConfiguration"
       ><mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>CLEAR</button>
     }
     </sm-scroll-textarea>

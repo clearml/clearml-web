@@ -15,7 +15,7 @@
         smUniqueInListSyncValidator2
         prefix2="labelPrefix-"
       >
-        <div class="body-container">
+        <div #body class="body-container">
           <div class="w-100 body">
             @for (parameter of formData; track parameter; let i = $index) {
               <mat-form-field appearance="outline" class="w-100">
@@ -70,11 +70,9 @@
           </div>
         </div>
       </form>
-      <div class="w-100">
-        <button mat-flat-button class="icon-only" (click)="addRow()" data-id="addParameterButton">
-          <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
-        </button>
-      </div>
+      <button mat-flat-button class="icon-only" (click)="addRow()" data-id="addParameterButton">
+        <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+      </button>
   } @else {
     <div class="d-flex header">
       @for (col of columns; track col.id) {

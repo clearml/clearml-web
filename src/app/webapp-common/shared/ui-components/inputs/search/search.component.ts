@@ -24,6 +24,9 @@ import {HesitateDirective} from '@common/shared/ui-components/directives/hesitat
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.has-text]': 'this.searchBarInput().nativeElement.value'
+  },
   imports: [
     MatIcon,
     MatIconButton,
@@ -65,7 +68,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
     this.subs.add(this.value$.pipe(
       tap((val: string) => this.empty.set(val?.length === 0)),
       debounce((val: string) => val.length > 0 ? timer(this.debounceTime()) : timer(0)),
-      filter((val) => val !== this.value()),
+      filter((val) => val.length === 0 || val !== this.value()),
       filter(val => val.length >= this.minimumChars() || val.length === 0)
     )
       .subscribe((value: string) => {
@@ -74,7 +77,9 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
         } else {
           // in case user backspace all chars
           this.valueChanged.emit('');
-          this.clear(true);
+          if (value !== '') {
+            this.clear(true, false);
+          }
         }
         // this.cdr.markForCheck();
       }));
@@ -86,7 +91,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
   onKeyDown(event) {
     if (event.key === 'Escape' || event.key === 'Esc') {
-      this.clear();
+      this.clear(true, !this.empty());
     } else if (event.key === 'Enter' &&
       (!this.enableNavigation() || (this.searchCounterIndex() + 1 < this.searchResultsCount())) &&
       this.searchBarInput().nativeElement.value.length > 0 && !this.disabled()
@@ -107,7 +112,11 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
     this.validateValueChange.emit(this.searchBarInput().nativeElement.value);
   }
 
-  clear(focus = true) {
+  clear(focus = true, emitEvent = true) {
+    if (emitEvent) {
+      this.valueChanged.emit('');
+    }
+    this.empty.set(true);
     this.value$.next('');
     this.searchBarInput().nativeElement.value = '';
     if (focus) {

@@ -1,4 +1,5 @@
 import versionConf from '../version.json';
+import {withDevtools} from '@angular-architects/ngrx-toolkit';
 
 export interface CommunityContext {
   title?: string;
@@ -36,7 +37,6 @@ export interface Environment {
   userSecret: string;
   companyID: string;
   loginNotice?: string;
-  loginBanner?: string;
   autoLogin?: boolean;
   whiteLabelLogo?: boolean;
   whiteLabelLink?: any;
@@ -72,6 +72,7 @@ export interface Environment {
   defaultTheme?: 'light' | 'dark';
   customStyle?: string;
   interfaceCustomization?: InterfaceCustomizations| undefined;
+  storeDevToolsFeature: typeof withDevtools,
 }
 
 export const BASE_ENV = {
@@ -86,13 +87,13 @@ export const BASE_ENV = {
   userSecret: 'XhkH6a6ds9JBnM_MrahYyYdO-wS2bqFSm8gl-V0UZXH26Ydd6Eyi28TeBEoSr6Z3Bes',
   companyID: 'd1bd92a3b039400cbafc60a7a5b1e52b',
   loginNotice: '',
-  loginBanner: '',
   autoLogin: false,
   whiteLabelLogo: null,
   whiteLabelLink: null,
   whiteLabelLoginTitle: null,
   whiteLabelLoginSubtitle: null,
   whiteLabelSlogan: null,
+  storeDevToolsFeature: withDevtools,
   communityContext: {
     background: 'app/webapp-common/assets/icons/human-polygon.svg'
   },
@@ -101,7 +102,7 @@ export const BASE_ENV = {
   showSurvey: false,
   accountAdministration: false,
   useFilesProxy: true,
-  legal: {TOULink: 'https://github.com/allegroai/clearml-server/blob/master/LICENSE'},
+  legal: {TOULink: 'https://github.com/clearml/clearml-server/blob/master/LICENSE'},
   plotlyURL: 'app/webapp-common/assets/plotly-2.35.0.min.js',
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',

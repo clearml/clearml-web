@@ -15,6 +15,7 @@ import {CircleCounterComponent} from '@common/shared/ui-components/indicators/ci
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ProjectCardMenuExtendedComponent} from '~/features/projects/containers/project-card-menu-extended/project-card-menu-extended.component';
 import { MatIconModule } from '@angular/material/icon';
+import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
 
 
 @Component({
@@ -22,6 +23,10 @@ import { MatIconModule } from '@angular/material/icon';
     templateUrl: './project-card.component.html',
     styleUrls: ['./project-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers:[{
+      provide: MAT_TOOLTIP_DEFAULT_OPTIONS, 
+      useValue: {showDelay: 500, hideDelay: 100, position: 'above'} as MatTooltipDefaultOptions
+    },],
   imports: [
     CdkVirtualScrollViewport,
     CardComponent,

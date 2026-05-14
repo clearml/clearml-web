@@ -97,7 +97,7 @@
     {{ experiment()?.id | NA }}
   </sm-labeled-row>
 
-  @for (runtimeItem of $any(experiment()?.runtime) | keyvalue | filterInternal ; track runtimeItem.key) {
+  @for (runtimeItem of runtimeEntries(); track runtimeItem.key) {
     <sm-labeled-row [label]="runtimeItem.key">
       {{ runtimeItem.value }}
     </sm-labeled-row>

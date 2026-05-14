@@ -32,8 +32,8 @@ export const leavingBeforeSaveAlertGuard = (inEditSelector: MemoizedSelector<any
               no       : 'Stay',
               iconClass: 'al-ico-alert',
               iconColor: 'var(--color-warning)',
-              width: 440
-            }
+            },
+            panelClass: 'dialog-sm'
           }).afterClosed().pipe(map((leave)=> !!leave));
         }),
       );

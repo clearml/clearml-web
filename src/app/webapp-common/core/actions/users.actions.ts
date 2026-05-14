@@ -4,13 +4,13 @@ import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/us
 import {UsersUpdateRequest} from '~/business-logic/model/users/usersUpdateRequest';
 
 export const fetchCurrentUser = createAction(USERS_PREFIX +'FETCH_USER');
+export const fetchCurrentUserCompleted = createAction(USERS_PREFIX + 'FETCH_USER_COMPLETED');
 export const updateCurrentUser = createAction(USERS_PREFIX +'UPDATE_USER',
   props<{user: UsersUpdateRequest}>());
 
 export const setCurrentUserName = createAction(USERS_PREFIX + 'SET_CURRENT_USER_NAME',
   props<{name: string}>()
 );
-export const termsOfUseAccepted = createAction(USERS_PREFIX + '[TOS accepted]');
 
 export const logout = createAction(
   USERS_PREFIX + 'LOGOUT',

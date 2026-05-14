@@ -1,10 +1,14 @@
 <div class="credentials-and-code">
   <div class="credentials">
     @if (serviceUserMode && credentialName) {
-      <div class="cred-row">
-        <div class="label">Name</div>
-        <div class="value">{{credentialName}}</div>
-      </div>
+      @if (newServiceUser) {
+        <div class="credentials-section-title">Credentials Details</div>
+      } @else {
+        <div class="cred-row">
+          <div class="label">Label</div>
+          <div class="value">{{newCredential?.label}}</div>
+        </div>
+      }
     }
     <div class="cred-row">
       <div class="label">Access key</div>
@@ -14,6 +18,12 @@
       <div class="label">Secret key</div>
       <div class="value">{{newCredential?.secret_key}}</div>
     </div>
+    @if (expirationEnabled()) {
+      <div class="cred-row">
+        <div class="label">Expiration</div>
+        <div class="value">{{newCredential?.expire ? (newCredential?.expire | date: timeFormatString) : 'Never'}}</div>
+      </div>
+    }
 
   </div>
   <div [class.mt-4]="serviceUserMode">
@@ -118,7 +128,7 @@
 </ng-template>
 </div>
 </div>
-@if (!serviceUserMode) {
+@if (!serviceUserMode && !expirationEnabled()) {
   <form (submit)="onUpdateLabel()">
     <mat-form-field appearance="outline" class="label-input no-bottom">
       <input matInput [(ngModel)]="label" placeholder="Credentials label" name="credentials" [value]="newCredential?.label || ''">

@@ -10,8 +10,7 @@ export const resetContextMenuGuard: CanDeactivateFn<any> = (component,
                                                             nextState) => {
   const numberOfTabsChange = (currentRoute.params?.projectId === '*' && !nextState.url.includes('*')) ||
     nextState.url.includes('*') && !currentState.url.includes('*') ;
-
-  if (numberOfTabsChange || !(nextState.url.includes('projects') && (PROJECTS_FEATURES.some((ent)=> nextState.url.includes('/'+ ent))))){
+  if ((!nextState.url.includes('workers-and-queues')) && (numberOfTabsChange || !(nextState.url.includes('projects') && (PROJECTS_FEATURES.some((ent)=> nextState.url.includes('/'+ ent)))))){
     const store = inject(Store);
     store.dispatch(headerActions.reset());
   }

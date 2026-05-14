@@ -8,7 +8,6 @@ import {
   viewChild
 } from '@angular/core';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
-import {DashboardSearchModule} from '~/features/dashboard-search/dashboard-search.module';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {Store} from '@ngrx/store';
 import {
@@ -43,7 +42,6 @@ import {DashboardSearchComponent} from '~/features/dashboard-search/containers/d
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SearchComponent,
-    DashboardSearchModule,
     DialogTemplateComponent,
     ClickStopPropagationDirective,
     MatIcon,
@@ -113,7 +111,7 @@ export class GlobalSearchDialogComponent {
           this.enableAdvancedSearch();
         }
         this.store.dispatch(searchSetTerm({
-          query: query,
+          query,
           regExp: qregex,
           advanced: advanced
         }));

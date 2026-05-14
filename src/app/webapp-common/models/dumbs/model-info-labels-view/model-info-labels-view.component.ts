@@ -1,4 +1,4 @@
-import {Component, input, output, effect, viewChild} from '@angular/core';
+import {Component, input, output, effect, viewChild, ElementRef} from '@angular/core';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {Model} from '~/business-logic/model/models/model';
 import {FormsModule, NgForm} from '@angular/forms';
@@ -54,6 +54,7 @@ export class ModelInfoLabelsViewComponent {
   saveFormData = output<SelectedModel>();
   cancelClicked = output();
   activateEditClicked = output();
+  bodyContainer = viewChild<ElementRef<HTMLDivElement>>('body');
 
   constructor() {
     effect(() => {
@@ -78,6 +79,9 @@ export class ModelInfoLabelsViewComponent {
       id: this.formData.length + 1,
       label: null,
     });
+    window.setTimeout(() => {
+      this.bodyContainer().nativeElement.scrollTo({top: this.bodyContainer().nativeElement.scrollHeight, behavior: 'smooth'});
+    }, 0);
   }
 
   removeRow(index) {

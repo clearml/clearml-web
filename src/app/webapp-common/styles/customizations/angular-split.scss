@@ -14,7 +14,7 @@ as-split {
 
   &.as-horizontal {
     & > .as-split-gutter {
-      --_as-gutter-background-color: var(--color-surface-container-high);
+      --_as-gutter-background-color: var(--color-outline-variant);
       position: relative;
 
       &::before {

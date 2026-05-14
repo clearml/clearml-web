@@ -4,7 +4,7 @@
     font-size: 14px;
     margin-top: 32px;
     font-weight: 500;
-    &.first {
+    &:first-of-type {
       margin-top: 0;
     }
   }
@@ -12,14 +12,19 @@
   .param-line{
     margin-top: 16px;
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
     .param-key{
       width: 180px;
       font-size: 12px;
+      padding-top: 8px;
+
+      &.align-key.error {
+        transform: translateY(-10px);
+      }
     }
 
-    .mat-mdc-form-field{
+    .mat-mdc-form-field, .param-value {
       width: 340px;
       &.hidden{
         display: none;
@@ -29,5 +34,25 @@
 
   .error {
     color: var(--color-error);
+  }
+
+  .error-message {
+    color: var(--color-error);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .warning-message {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    .al-icon {
+      color: var(--color-warning);
+    }
+  }
+
+  ::ng-deep .mat-mdc-form-field-has-icon-suffix .mat-mdc-text-field-wrapper {
+    padding-right: 12px !important;
   }
 }

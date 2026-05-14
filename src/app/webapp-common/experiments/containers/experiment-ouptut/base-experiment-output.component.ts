@@ -46,6 +46,7 @@ import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {concatLatestFrom} from '@ngrx/operators';
+import {getCompanyTags} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -262,4 +263,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.store.dispatch(removeExperimentSettings({id: this.experimentId}));
   }
 
+  protected getCompanyTags() {
+    this.store.dispatch(getCompanyTags());
+  }
 }

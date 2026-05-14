@@ -67,7 +67,7 @@ export const rootCardQuery = (
     include_stats: true,
     check_own_contents: true, // in order to check if project is empty
     ...(mainPageUsersFilter?.length > 0 && {active_users: mainPageUsersFilter}),
-    ...(showOnlyUserWork && {active_users: [userId]}),
+    ...(showOnlyUserWork && userId && {active_users: [userId]}),
     only_fields: ['id', 'company'],
     ...(mainPageTagsFilter?.length > 0 && {
       children_tags_filter: getTagsFilters(mainPageTagsFilterMatchMode === 'AND', mainPageTagsFilter)

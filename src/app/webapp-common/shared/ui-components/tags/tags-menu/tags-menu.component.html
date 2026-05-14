@@ -1,10 +1,9 @@
 <mat-menu class="tags-menu">
-  <span cdkTrapFocus (keydown.tab)="$event.stopPropagation()" (keydown.shift.tab)="$event.stopPropagation()">
+  <span tabindex="0" (keydown.tab)="$event.stopPropagation()" (keydown.shift.tab)="$event.stopPropagation()">
     <form class="filter-form"
           smClickStopPropagation
-          (submit)="filterText?.trim().length > 0 && (!disableCreateNew() || allTags()?.includes(filterText)) && addTag(filterText);"
           (keydown)="$event.stopPropagation()"
-          (keyup.arrowDown)="createButtons.first ? createButtons.first.focus() : buttons.first?.focus()"
+          (keyup.arrowDown)="createButton().nativeElement ? createButton().nativeElement.focus() : tagButton().nativeElement.focus()"
     >
       <mat-form-field
         class="w-100 no-bottom"
@@ -14,51 +13,65 @@
           #nameInput
           matInput
           placeholder="Add Tag"
-          name="filter"
-          [(ngModel)]="filterText"
+          [formControl]="filterControl"
           class="filter"
           autocomplete="off"
+          (keydown.enter)="$event.preventDefault(); submit()"
         >
         <div matSuffix class="d-flex-center mx-2">
           @if (!disableFilterByProject() && companyTags() !== null && isAllProject() === false) {
-            <i
-              class="icon sm-md me-3 mb-2 pointer"
-              [class]="tagsFilterByProject() ? 'i-project-tags-filter-active' : 'i-project-tags-filter'"
-              smTooltip="Toggle all/project-only tags"
-              data-id="tagFilterButton"
-              (click)="projectTagsFilterToggle()"
-              smClickStopPropagation></i>
+            <button mat-icon-button smClickStopPropagation
+                    (click)="$event.preventDefault(); projectTagsFilterToggle()"
+                    smTooltip="Toggle all/project-only tags"
+                    data-id="tagFilterButton"
+            >
+              <svg class="project-tags-filter" [class.active]="filterByProject()" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path data-name="filter" d="M18.4531 20.9959C18.1871 20.9959 17.9351 20.8803 17.7441 20.6692L17.7391 20.6642L17.7351 20.6592L16.7511 19.5133L16.6291 19.3726V17.1914L14.2291 14.5096L14.2071 14.4855L14.1881 14.4574C13.9761 14.1458 13.9411 13.8 14.0941 13.5095C14.2701 13.1728 14.6611 12.9969 14.9561 12.9969H21.0431C21.3381 12.9969 21.7281 13.1728 21.9051 13.5095C22.0571 13.8 22.0231 14.1458 21.8101 14.4574L21.7921 14.4855L21.7691 14.5096L19.3691 17.1914V20.0541C19.3741 20.3023 19.2821 20.5365 19.1101 20.7154C18.9371 20.8944 18.6981 20.9969 18.4521 20.9969L18.4531 20.9959Z" />
+                  <path data-name="folder" d="M7.5 3.99689C8.72977 3.99689 9.5 5.99689 11 5.99689H17C17.5523 5.99689 18 6.4446 18 6.99689V10.9969H14.9561C14.0523 10.9969 12.9019 11.4749 12.3223 12.5838C11.7684 13.6412 11.9862 14.775 12.5352 15.5818L12.5498 15.6043L12.6309 15.7254L12.7295 15.8328L12.751 15.8572L12.752 15.8563L14.6289 17.9549V17.9969H3C2.44772 17.9969 2 17.5492 2 16.9969V4.99689C2 4.44466 2.44682 3.99698 2.99902 3.99689H7.5Z" />
+              </svg>
+            </button>
           }
-          <i data-id="searchButton" class="al-icon sm-md mb-2" [class.me-3]="!disableFilterByProject()" [class]="filterText? 'al-ico-dialog-x pointer':'al-ico-search'"
-             (click)="filterText && clear()" smClickStopPropagation></i>
+          @if (filterText()) {
+            <button matSuffix mat-icon-button smClickStopPropagation data-id="searchButton"
+                    class="ms-auto sm"
+                    (click)="$event.preventDefault(); filterText() && clear()">
+              <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+            </button>
+          } @else {
+            <mat-icon matSuffix fontSet="al" fontIcon="al-ico-search"></mat-icon>
+          }
         </div>
       </mat-form-field>
     </form>
-    <div class="buttons-container" [class.searching]="filterText">
-      @if (!disableCreateNew() && filterText?.trim().length > 0 && !allTags()?.includes(filterText)) {
+    <div class="buttons-container" [class.searching]="filterText()">
+      @if (!disableCreateNew() && filterText()?.trim().length > 0 && !allTags()?.includes(filterText())) {
         <button
           #tagCreateButton
           mat-menu-item
           class="item"
-          (click)="addTag(filterText)"
+          (click)="addTag(filterText())"
           (keyup.arrowUp)="focus($event)"
-        >"{{ filterText.trim() }}" <span class="new" data-id="createNewTag">(Create New)</span></button>
+        >"{{ filterText().trim() }}" <span class="new" data-id="createNewTag">(Create New)</span></button>
       }
-      @for (tag of allTags() | filter:tags() | filter:filterText; track tag; let i = $index) {
+      @for (tag of slicedTags(); track tag; let i = $index) {
         <button
           #tagButton
           mat-menu-item
           class="item"
           (click)="addTag(tag)"
-          (keyup.arrowUp)="i === 0 && !createButtons.first && focus($event)"
+          (keyup.arrowUp)="i === 0 && !createButton().nativeElement && focus($event)"
           [smTooltip]="tag"
           smShowTooltipIfEllipsis
+          data-id="addTagListElement"
         >{{ tag }}</button>
+      }
+      @if (slicedTags()?.length < filteredTags()?.length) {
+        <sm-dots-load-more (loadMore)="loadMore()"></sm-dots-load-more>
       }
       </div>
     @if (!disableColorManagement()) {
       <hr>
       <button mat-menu-item data-id="TagColors" class="item" (click)="openTagColors()">Tag Colors</button>
     }
-      </span>
+  </span>
 </mat-menu>

@@ -1,5 +1,5 @@
 import {signalStoreFeature} from '@ngrx/signals';
-import {Events, withEffects} from '@ngrx/signals/events';
+import {Events, withEventHandlers} from '@ngrx/signals/events';
 import {inject} from '@angular/core';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
@@ -11,7 +11,7 @@ import {viewEvents} from '@common/core/state/view.events';
 
 export function withViewBridge() {
   return signalStoreFeature(
-    withEffects((
+    withEventHandlers((
         store,
         events = inject(Events),
         globalStore = inject(Store),

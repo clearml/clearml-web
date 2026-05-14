@@ -2,8 +2,6 @@
   (xClicked)="closeDialog(undefined)" [closeOnX]="false"
   [iconClass]="iconClass" [iconData]="iconData"
   [style.--dialog-icon-color]="data.iconColor"
-  [containerClass]="containerClass"
-  [headerClass]="headerClass"
   >
   @if (reference) {
     <div class="reference">{{reference}}</div>
@@ -25,7 +23,7 @@
   }
 
   @if (no || yes) {
-    <div class="buttons" [ngClass]="buttonsClass">
+    <div class="buttons">
       @if (no) {
         <button
           mat-stroked-button

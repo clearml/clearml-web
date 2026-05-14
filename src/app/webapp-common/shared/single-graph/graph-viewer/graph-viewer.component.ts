@@ -1,19 +1,49 @@
-import {AfterViewInit, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, computed,
+  effect,
+  ElementRef,
+  inject,
+  linkedSignal,
+  OnDestroy,
+  OnInit,
+  signal, untracked,
+  viewChild
+} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ExtFrame} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
-import {Observable, Subject, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatFormField, MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
-import {debounceTime, filter, map, take} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {checkIfLegendToTitle, convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {getGraphDisplayFullDetailsScalars, getNextPlotSample, getPlotSample, setGraphDisplayFullDetailsScalars, setGraphDisplayFullDetailsScalarsIsOpen, setViewerBeginningOfTime, setViewerEndOfTime, setXtypeGraphDisplayFullDetailsScalars} from '@common/shared/single-graph/single-graph.actions';
-import {selectCurrentPlotViewer, selectFullScreenChart, selectFullScreenChartIsFetching, selectFullScreenChartXtype, selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime} from '@common/shared/single-graph/single-graph.reducer';
+import {
+  getGraphDisplayFullDetailsScalars,
+  getNextPlotSample,
+  getPlotSample,
+  setGraphDisplayFullDetailsScalars,
+  setGraphDisplayFullDetailsScalarsIsOpen,
+  setViewerBeginningOfTime,
+  setViewerEndOfTime,
+  setXtypeGraphDisplayFullDetailsScalars
+} from '@common/shared/single-graph/single-graph.actions';
+import {
+  selectCurrentPlotViewer,
+  selectFullScreenChart,
+  selectFullScreenChartIsFetching,
+  selectFullScreenChartXtype,
+  selectMinMaxIterations,
+  selectViewerBeginningOfTime,
+  selectViewerEndOfTime
+} from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {Color, LayoutAxis} from 'plotly.js';
-import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 import {GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.consts';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
@@ -22,16 +52,22 @@ import {FormsModule} from '@angular/forms';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {MatIconModule} from '@angular/material/icon';
 import {KeyValuePipe} from '@angular/common';
-import {PushPipe} from '@ngrx/component';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {ChooseColorDirective} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 
 @Component({
   selector: 'sm-graph-viewer',
   templateUrl: './graph-viewer.component.html',
   styleUrls: ['./graph-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onResize()',
+    '(document:keydown)': 'onKeyDown($event)',
+  },
   imports: [
     SingleGraphComponent,
     MatSlideToggle,
@@ -45,46 +81,106 @@ import {ChooseColorDirective} from '@common/shared/ui-components/directives/choo
     MatOption,
     MatIconModule,
     KeyValuePipe,
-    PushPipe,
     MatIconButton,
     TooltipDirective,
     ShowTooltipIfEllipsisDirective,
-    ChooseColorDirective
+    ChooseColorDirective,
+    MatButton
   ]
 })
 export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
-  @ViewChild('singleGraph') singleGraph: SingleGraphComponent;
-  @ViewChild('modalContainer') modalContainer;
-  public height;
-  public width;
-  private sub = new Subscription();
-  public minMaxIterations$: Observable<{ minIteration: number; maxIteration: number }>;
-  public isFetchingData$: Observable<boolean>;
-  public xAxisType$: Observable<GraphViewerData['xAxisType']>;
-  public xAxisType: GraphViewerData['xAxisType'];
-  public isCompare: boolean;
-  public isFullDetailsMode: boolean;
-  public iteration: number;
-  public beginningOfTime$: Observable<boolean>;
-  public endOfTime$: Observable<boolean>;
-  public currentPlotEvent$: Observable<any>;
-  private iterationChanged$ = new Subject<number>();
-  private isForward = true;
-  protected reportWidget = false;
-  private charts: ExtFrame[];
-  public index: number = null;
-  public embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
-  public showSmooth: boolean;
-  protected readonly smoothTypeEnum = smoothTypeEnum;
-  public smoothType: SmoothTypeEnum;
-  public showOrigin: boolean;
-  private _chart: ExtFrame;
-  public title: string;
-  public checkIfLegendToTitle = checkIfLegendToTitle;
-  private range: { xaxis: LayoutAxis[]; yaxis: LayoutAxis[] };
-  protected hideLegend: boolean;
+  protected data = inject<GraphViewerData>(MAT_DIALOG_DATA);
+  protected dialogRef = inject(MatDialogRef<GraphViewerComponent>);
+  private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
+  protected singleGraph = viewChild(SingleGraphComponent);
+  private modalContainer = viewChild<ElementRef<HTMLDivElement>>('modalContainer');
 
-  @HostListener('document:keydown', ['$event'])
+  protected readonly checkIfLegendToTitle = checkIfLegendToTitle;
+  protected readonly smoothTypeEnum = smoothTypeEnum;
+  private sub = new Subscription();
+  private isForward = true;
+  private charts: ExtFrame[];
+  private index: number = null;
+  private range: { xaxis: LayoutAxis[]; yaxis: LayoutAxis[] };
+  protected readonly xAxisTypeOption = [
+    {
+      name: 'Iterations',
+      value: ScalarKeyEnum.Iter
+    },
+    {
+      name: 'Time from start',
+      value: ScalarKeyEnum.Timestamp
+    },
+    {
+      name: 'Wall time',
+      value: ScalarKeyEnum.IsoTime
+    }
+  ];
+
+  protected readonly isCompare = this.data.isCompare;
+  protected readonly showSmooth = ['multiScalar', 'scalar'].includes(this.data.chart.layout.type);
+  protected readonly reportWidget = this.data.id === 'report-widget';
+  protected readonly isFullDetailsMode = this.showSmooth && !this.isCompare && !this.reportWidget;
+  protected readonly id = this.data.id;
+  protected readonly embedFunction = this.data.embedFunction;
+  protected readonly disableNavigation = this.data.hideNavigation;
+  protected readonly hideLegend = !this.data.chart.layout.showlegend;
+
+  protected showOrigin = signal(this.data.showOrigin);
+  protected smoothWeight = signal(this.data.chart.layout.type === 'singleValues' ? 0 : this.data.smoothWeight ?? 0);
+  protected smoothType = signal(this.data.smoothType ?? smoothTypeEnum.exponential);
+  protected plotLoaded = signal(false);
+  protected iteration = signal<number>(null);
+  protected sigma = signal(2);
+  protected chart = signal<ExtFrame>(null);
+  protected freezeColor = signal<Color | undefined>(undefined);
+  protected hiddenTraceIndices = signal<number[]>([]);
+
+  protected readonly chart$ = this.store.select(selectFullScreenChart);
+  protected readonly currentPlotEvent$ = this.store.select(selectCurrentPlotViewer);
+  protected xAxisType = this.store.selectSignal(selectFullScreenChartXtype);
+  protected isFetchingData = this.store.selectSignal(selectFullScreenChartIsFetching);
+  protected minMaxIterations = this.store.selectSignal(selectMinMaxIterations);
+  protected beginningOfTime = this.store.selectSignal(selectViewerBeginningOfTime);
+  protected endOfTime = this.store.selectSignal(selectViewerEndOfTime);
+
+  protected dimensions = linkedSignal(() => ({
+    width: this.modalContainer().nativeElement.clientWidth,
+    height: this.modalContainer().nativeElement.clientHeight - 80
+  }));
+
+  canGoNext = computed(() => !this.endOfTime() && this.plotLoaded());
+  canGoBack = computed(() => !this.beginningOfTime() && this.plotLoaded());
+
+  shouldShowDot = computed(() =>
+    this.singleGraph() && this.chart() && checkIfLegendToTitle(this.chart()) &&
+    (!Array.isArray(this.singleGraph().chart?.data[0]?.line?.color) && !Array.isArray(this.singleGraph().chart?.data[0]?.marker?.color))
+    && (!this.chart().layout.showlegend || (this.chart().data.length === 1 && !this.chart().data[0].showlegend))
+  );
+
+  protected title = computed(() => {
+    const chart = this.chart();
+    if (!chart?.layout) {
+      return '';
+    }
+    const title =  (chart.layout.title as {text: string})?.text ?? chart.layout.title as string;
+    if (this.isCompare) {
+      if (chart.layout.type === 'singleValues' || this.showSmooth && this.data.id !== 'report-widget') {
+        return chart.metric !== title ? `${chart.metric} - ${title}` : title;
+      }
+      return `${chart.metric ?? ''}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
+      ${chart.variant === title ? '' : chart.variants?.length > 0 ? ' - ' + chart.variants?.join(', ') : ''}`;
+    } else {
+      if (this.disableNavigation) {
+        return chart?.variants?.length > 0 ? chart.variants?.join(', ') : chart?.layout?.title as string || chart?.metric;
+      } else {
+        return `${chart.metric}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
+      ${(chart.variants?.length > 0 && chart.variant !== title) ? ' - ' + chart.variants?.join(', ') : ''}`;
+      }
+    }
+  });
+
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'ArrowRight':
@@ -106,98 +202,70 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  @HostListener('window:resize')
   onResize() {
-    if (this.singleGraph) {
-      this.singleGraph.shouldRefresh = true;
+    if (this.singleGraph()) {
+      this.singleGraph().shouldRefresh = true;
     }
-    this.width = this.modalContainer.nativeElement.clientWidth;
-    this.height = this.modalContainer.nativeElement.clientHeight - 80;
+    this.dimensions.set({
+      width: this.modalContainer().nativeElement.clientWidth,
+      height: this.modalContainer().nativeElement.clientHeight - 80
+    })
   }
 
-  public set chart(chart: ExtFrame) {
-    this._chart = chart;
-    this.title = this.getTitle(chart);
-  }
-
-  get chart() {
-    return this._chart;
-  }
-
-  public id: string;
-  public disableNavigation: boolean;
-  public chart$: Observable<ExtFrame>;
-  public plotLoaded = false;
-  public beginningOfTime = false;
-  public endOfTime = false;
-  freezeColor: Color | undefined;
-  smoothWeight: number | null = 0;
-  xAxisTypeOption = [
-    {
-      name: 'Iterations',
-      value: ScalarKeyEnum.Iter
-    },
-    {
-      name: 'Time from start',
-      value: ScalarKeyEnum.Timestamp
-    },
-    {
-      name: 'Wall time',
-      value: ScalarKeyEnum.IsoTime
-    }
-  ];
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: GraphViewerData,
-    public dialogRef: MatDialogRef<GraphViewerComponent>,
-    private store: Store,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.chart$ = this.store.select(selectFullScreenChart);
-    this.currentPlotEvent$ = this.store.select(selectCurrentPlotViewer);
-    this.xAxisType$ = this.store.select(selectFullScreenChartXtype);
-    this.isFetchingData$ = this.store.select(selectFullScreenChartIsFetching);
-    this.minMaxIterations$ = this.store.select(selectMinMaxIterations);
-    this.beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
-    this.endOfTime$ = this.store.select(selectViewerEndOfTime);
-    if (data.xAxisType) {
-      this.store.dispatch(setXtypeGraphDisplayFullDetailsScalars({xAxisType: data.xAxisType}));
+  constructor( ) {
+    if (this.data.xAxisType) {
+      this.store.dispatch(setXtypeGraphDisplayFullDetailsScalars({xAxisType: this.data.xAxisType}));
     }
     this.store.dispatch(setGraphDisplayFullDetailsScalarsIsOpen({isOpen: true}));
-    this.isCompare = data.isCompare;
-    this.showSmooth = ['multiScalar', 'scalar'].includes(data.chart.layout.type);
-    this.reportWidget = this.data.id === 'report-widget';
-    this.isFullDetailsMode = this.showSmooth && !this.isCompare && !this.reportWidget;
-    this.id = data.id;
-    this.embedFunction = data.embedFunction;
-    this.disableNavigation = data.hideNavigation;
-    this.smoothWeight = data.chart.layout.type === 'singleValues' ? 0 : data.smoothWeight ?? 0;
-    this.hideLegend = !data.chart.layout.showlegend;
-    this.smoothType = data.smoothType ?? smoothTypeEnum.exponential;
-    this.showOrigin = data.showOrigin;
 
-    const reqData = {
-      task: this.data.chart.task,
-      metric: this.data.chart.metric,
-      iteration: this.data.chart.iter
-    };
     if (this.isFullDetailsMode) {
-      this.store.dispatch(setGraphDisplayFullDetailsScalars({data: data.chart}));
+      this.store.dispatch(setGraphDisplayFullDetailsScalars({data: this.data.chart}));
+      this.hiddenTraceIndices.set(this.data.chart.data.reduce((acc, trace, i) =>
+        (trace.visible === 'legendonly' ? [...acc, i] : acc), [] as number[]));
     } else if (this.isCompare || this.disableNavigation || this.reportWidget) {
-      this.chart = data.chart;
-      this.plotLoaded = true;
+      this.chart.set(this.data.chart);
+      this.hiddenTraceIndices.set(this.data.chart.data.reduce((acc, trace, i) =>
+        (trace.visible === 'legendonly' ? [...acc, i] : acc), [] as number[]));
+      this.plotLoaded.set(true);
       setTimeout(() => {
-        if (this.chart.layout.xaxis) {
-          this.chart.layout.xaxis.autorange = true;
+        if (this.chart().layout.xaxis) {
+          this.chart().layout.xaxis.autorange = true;
         }
-        if (this.chart.layout.yaxis) {
-          this.chart.layout.yaxis.autorange = true;
+        if (this.chart().layout.yaxis) {
+          this.chart().layout.yaxis.autorange = true;
         }
       });
     } else {
-      this.store.dispatch(getPlotSample(reqData));
-      this.range = {xaxis: data.chart.layout.xaxis.range, yaxis: data.chart.layout.yaxis.range};
+      this.store.dispatch(getPlotSample({
+        task: this.data.chart.task,
+        metric: this.data.chart.metric,
+        iteration: this.data.chart.iter
+      }));
+      this.range = {xaxis: this.data.chart.layout.xaxis.range, yaxis: this.data.chart.layout.yaxis.range};
     }
+
+    let debounceIteration: number;
+    effect(() => {
+      const iteration = this.iteration();
+      untracked(() => {
+      if (iteration !== null && this.chart()?.task) {
+        window.clearTimeout(debounceIteration);
+        debounceIteration = window.setTimeout(() => {
+          this.store.dispatch(getPlotSample({
+            task: this.chart().task,
+            metric: this.chart().metric,
+            iteration
+          }));
+        }, 100);
+      }
+      });
+    });
+
+    effect(() => {
+      if (this.beginningOfTime() || this.endOfTime()) {
+        this.plotLoaded.set(true);
+      }
+    });
   }
 
 
@@ -209,19 +277,20 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)}
       }));
     }
-    this.sub.add(this.xAxisType$.subscribe((xType) => this.xAxisType = xType));
 
     ////////////// PLOTS //////////////////////
 
     this.sub.add(this.currentPlotEvent$
       .pipe(filter(plot => !!plot))
       .subscribe(currentPlotEvents => {
-        this.plotLoaded = true;
+        this.plotLoaded.set(true);
         const groupedPlots = groupIterations(currentPlotEvents);
         const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: 'viewer'});
         if (parsingError){
           this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         }
+        this.hiddenTraceIndices.set(this.data.chart.data.reduce((acc, trace, i) =>
+          (trace.visible === 'legendonly' ? [...acc, i] : acc), [] as number[]));
         Object.values(graphs).forEach((graphss: ExtFrame[]) => {
           graphss.forEach((graph: ExtFrame) => {
             graph.data?.forEach((d, i) => d.visible = this.data.chart.data[i]?.visible);
@@ -251,68 +320,49 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         if (this.index === null) {
           this.index = Math.max(this.charts.findIndex(c => c.variant === this.data.chart.variant), 0);
         } else {
-          this.index = this.charts.findIndex(chrt => chrt.metric === this.chart?.metric && chrt.variant === this.chart?.variant);
+          this.index = this.charts.findIndex(chrt => chrt.metric === this.chart()?.metric && chrt.variant === this.chart()?.variant);
           this.index = this.index === -1 ? (this.isForward ? 0 : this.charts.length - 1) : this.index;
         }
-        this.chart = null;
+        this.chart.set(null);
         this.cdr.detectChanges();
-        this.chart = this.charts[this.index];
+        this.chart.set(this.charts[this.index]);
+        this.applyHiddenTraces();
         if (this.range) {
-          this.chart = {
-            ...this.chart,
+          this.chart.update(chart => ({
+            ...chart,
             layout: {
-              ...this.chart.layout,
-              xaxis: {...this.chart.layout.xaxis, range: this.range.xaxis},
-              yaxis: {...this.chart.layout.yaxis, range: this.range.yaxis},
+              ...chart.layout,
+              xaxis: {...chart.layout.xaxis, range: this.range.xaxis},
+              yaxis: {...chart.layout.yaxis, range: this.range.yaxis},
             }
-          };
+          }));
           this.range = null;
         }
-        this.iteration = currentPlotEvents[0].iter;
+        this.iteration.set(currentPlotEvents[0].iter);
       }));
-    this.sub.add(this.beginningOfTime$.subscribe(beg => {
-      this.beginningOfTime = beg;
-      if (beg) {
-        this.plotLoaded = true;
-      }
-    }));
-    this.sub.add(this.endOfTime$.subscribe(end => {
-      this.endOfTime = end;
-      if (end) {
-        this.plotLoaded = true;
-      }
-    }));
   }
 
   ngAfterViewInit(): void {
     if (!this.isFullDetailsMode && (this.isCompare || this.disableNavigation)) {
-      this.plotLoaded = true;
+      this.plotLoaded.set(true);
       setTimeout(() => {
-        this.singleGraph.redrawPlot();
+        this.singleGraph().redrawPlot();
         this.cdr.markForCheck();
       }, 50);
     }
-    this.height = this.modalContainer.nativeElement.clientHeight - 80;
     this.sub.add(this.chart$
       .pipe(filter(plot => !!plot))
       .subscribe(chart => {
-        this.plotLoaded = true;
-        if (this.singleGraph) {
-          this.singleGraph.shouldRefresh = true;
+        this.plotLoaded.set(true);
+        if (this.singleGraph()) {
+          this.singleGraph().shouldRefresh = true;
         }
-        this.chart = {...chart, layout: {...chart.layout, yaxis: {...chart.layout.yaxis, autorange: true}, xaxis: {...chart.layout.xaxis, autorange: true}}};
-
-        this.cdr.markForCheck();
-      }));
-    this.sub.add(this.iterationChanged$
-      .pipe(debounceTime(100))
-      .subscribe((value) => {
-        const reqData = {
-          task: this.chart.task,
-          metric: this.chart.metric,
-          iteration: value
-        };
-        this.store.dispatch(getPlotSample(reqData));
+        this.chart.set({...chart, layout: {
+            ...chart.layout,
+            yaxis: {...chart.layout.yaxis, autorange: true},
+            xaxis: {...chart.layout.xaxis, autorange: true}
+        }});
+        this.applyHiddenTraces();
       }));
   }
 
@@ -330,10 +380,10 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   ////////////////////// SCALARS /////////////////////////////////////
   xAxisTypeChanged($event: MatSelectChange) {
     if (
-      ((ScalarKeyEnum.Iter === this.xAxisType) && [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes($event.value)) ||
-      ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xAxisType) && (ScalarKeyEnum.Iter === ($event.value)))) {
+      ((ScalarKeyEnum.Iter === this.xAxisType()) && [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes($event.value)) ||
+      ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xAxisType()) && (ScalarKeyEnum.Iter === ($event.value)))) {
       this.store.dispatch(getGraphDisplayFullDetailsScalars({
-        task: this.chart.data[0].task,
+        task: this.chart().data[0].task,
         metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)},
         key: $event.value
       }));
@@ -346,21 +396,21 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     if (value === 0 || value === null) {
       return;
     }
-    if (value > (this.smoothType === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType === smoothTypeEnum.exponential ? 0 : 1)) {
-      this.smoothWeight = null;
+    if (value > (this.smoothType() === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType() === smoothTypeEnum.exponential ? 0 : 1)) {
+      this.smoothWeight.set(null);
     }
     setTimeout(() => {
-      if (this.smoothType === smoothTypeEnum.exponential) {
+      if (this.smoothType() === smoothTypeEnum.exponential) {
         if (value > 0.999) {
-          this.smoothWeight = 0.999;
+          this.smoothWeight.set(0.999);
         } else if (value < 0) {
-          this.smoothWeight = 0;
+          this.smoothWeight.set(0);
         }
       } else {
         if (value > 100) {
-          this.smoothWeight = 100;
+          this.smoothWeight.set(100);
         } else if (value < 1) {
-          this.smoothWeight = 1;
+          this.smoothWeight.set(1);
         }
       }
       this.cdr.markForCheck();
@@ -369,106 +419,83 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
 
   refresh() {
     this.store.dispatch(getGraphDisplayFullDetailsScalars({
-      task: this.chart.data[0].task,
+      task: this.chart().data[0].task,
       metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)}
     }));
   }
 
   ////////////////////// PLOTS /////////////////////////////////////
-  sigma =2;
-
-  changeIteration(value: number) {
-    this.iteration = value;
-    if (this.chart) {
-      this.iterationChanged$.next(value);
-    }
-  }
 
   next() {
-    if (this.canGoNext() && this.chart && !this.disableNavigation) {
+    if (this.canGoNext() && this.chart() && !this.disableNavigation) {
       this.isForward = true;
-      const task = this.chart.task;
+      const task = this.chart().task;
       if (this.charts?.[this.index + 1]) {
-        this.chart = null;
-        this.chart = this.charts[++this.index];
+        this.chart.set(null);
+        this.chart.set(this.charts[++this.index]);
         this.store.dispatch(setViewerBeginningOfTime({beginningOfTime: false}));
       } else {
-        this.plotLoaded = false;
+        this.plotLoaded.set(false);
         this.store.dispatch(getNextPlotSample({task, navigateEarlier: false}));
       }
     }
   }
 
   previous() {
-    if (this.canGoBack() && this.chart && !this.disableNavigation) {
+    if (this.canGoBack() && this.chart() && !this.disableNavigation) {
       this.isForward = false;
-      const task = this.chart.task;
+      const task = this.chart().task;
       if (this.charts?.[this.index - 1]) {
-        this.chart = null;
-        this.chart = this.charts[--this.index];
+        this.chart.set(null);
+        this.chart.set(this.charts[--this.index]);
         this.store.dispatch(setViewerEndOfTime({endOfTime: false}));
       } else {
-        this.plotLoaded = false;
+        this.plotLoaded.set(false);
         this.store.dispatch(getNextPlotSample({task, navigateEarlier: true}));
       }
     }
   }
 
   nextIteration() {
-    if (!this.isFullDetailsMode && this.canGoNext() && this.chart && !this.disableNavigation) {
-      this.plotLoaded = false;
-      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false, iteration: true}));
+    if (!this.isFullDetailsMode && this.canGoNext() && this.chart() && !this.disableNavigation) {
+      this.plotLoaded.set(false);
+      this.store.dispatch(getNextPlotSample({task: this.chart().task, navigateEarlier: false, iteration: true}));
     }
   }
 
   previousIteration() {
-    if (!this.isFullDetailsMode && this.canGoBack() && this.chart && !this.disableNavigation) {
-      this.plotLoaded = false;
-      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true, iteration: true}));
+    if (!this.isFullDetailsMode && this.canGoBack() && this.chart() && !this.disableNavigation) {
+      this.plotLoaded.set(false);
+      this.store.dispatch(getNextPlotSample({task: this.chart().task, navigateEarlier: true, iteration: true}));
     }
-  }
-
-  canGoNext() {
-    return !this.endOfTime && this.plotLoaded;
-  }
-
-  canGoBack() {
-    return !this.beginningOfTime && this.plotLoaded;
   }
 
   selectSmoothType($event: MatSelectChange) {
-    this.smoothWeight = [smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ? 0 : $event.value=== smoothTypeEnum.gaussian? 7: $event.value=== smoothTypeEnum.runningAverage? 5: 10;
-    this.smoothType = $event.value;
-  }
-
-  private getTitle(chart: ExtFrame) {
-    if (!chart?.layout) {
-      return '';
-    }
-    const title =  (chart.layout.title as {text: string})?.text ?? chart.layout.title as string;
-    if (this.isCompare) {
-      if (chart.layout.type === 'singleValues' || this.showSmooth && this.data.id !== 'report-widget') {
-        return chart.metric !== title ? `${chart.metric} - ${title}` : title;
-      }
-      return `${chart.metric ?? ''}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
-      ${chart.variant === title ? '' : chart.variants?.length > 0 ? ' - ' + chart.variants?.join(', ') : ''}`;
-    } else {
-      if (this.disableNavigation) {
-        return chart?.variants?.length > 0 ? chart.variants?.join(', ') : chart?.layout?.title as string || chart?.metric;
-      } else {
-        return `${chart.metric}${chart.metric !== title ? (chart.metric && title ? ' - ' : '') + title : ''}
-      ${(chart.variants?.length > 0 && chart.variant !== title) ? ' - ' + chart.variants?.join(', ') : ''}`;
-      }
-    }
+    this.smoothWeight.set([smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ?
+      0 :
+      $event.value === smoothTypeEnum.gaussian ?
+        7 :
+        $event.value=== smoothTypeEnum.runningAverage ?
+          5 :
+          10
+    );
+    this.smoothType.set($event.value);
   }
 
   setFreezeColor() {
-    this.freezeColor = this.singleGraph.chart?.data[1]?.line?.color ?? this.singleGraph.chart?.data[0]?.line?.color ?? this.freezeColor;
+    this.freezeColor.update(color => this.singleGraph().chart?.data[1]?.line?.color ?? this.singleGraph().chart?.data[0]?.line?.color ?? color);
   }
 
-  shouldShowDot() {
-    return this.singleGraph && this.chart && checkIfLegendToTitle(this.chart) &&
-      (!Array.isArray(this.singleGraph.chart?.data[0]?.line?.color) && !Array.isArray(this.singleGraph.chart?.data[0]?.marker?.color))
-      && (!this.chart.layout.showlegend || (this.chart.data.length === 1 && !this.chart.data[0].showlegend))
+  updateTracesVisibility(hiddenIndices: number[]) {
+    this.hiddenTraceIndices.set(hiddenIndices);
+    this.applyHiddenTraces();
+  }
+
+  protected applyHiddenTraces() {
+    const hidden = this.hiddenTraceIndices();
+    this.chart.update(chart => ({
+      ...chart,
+      data: chart.data.map((trace, i) => ({...trace, visible: hidden.includes(i) ? 'legendonly' : true}))
+    }));
   }
 }

@@ -46,7 +46,7 @@
         <tr>
           <th class="filter-header-cell" [class.freeze-divider]="scrolled" pFrozenColumn [colSpan]="2">
             <div class="filter-header">
-              <button mat-icon-button
+              <button mat-icon-button data-id="metricValuesFilterButton"
                       [class.is-filtered]="dataTable()?.length > dataTableFiltered()?.length"
                       (click)="filterOpen = !filterOpen"
               >

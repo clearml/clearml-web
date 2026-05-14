@@ -15,10 +15,12 @@
   .queues-table-container {
     flex: 1;
     overflow: auto;
+    height: 100%;
   }
 
   ::ng-deep .table-row {
     height: 40px;
+    line-height: normal !important;
     padding: 0 !important;
     display: flex;
     &:last-of-type {
@@ -27,22 +29,33 @@
   }
 
   ::ng-deep {
+    mat-tab-group, 
+    mat-tab-group .mat-mdc-tab-body-wrapper {
+      height: inherit;
+    }
     .mat-mdc-tab-header {
       background-color: var(--row-header-color);
-      border-bottom: 1px solid var(--row-border-color);
+      border-bottom: 1px solid var(--row-header-color);
     }
     .mat-mdc-tab {
       --mat-tab-container-height: 39px;
     }
   } 
 
-  sm-simple-table-2 ::ng-deep .headers, .body {
-    width: 100%;
-    display: grid !important;
-    grid-template-columns: 30% 50% 15%;
-    grid-gap: 12px;
-    padding: 0 12px;
-    line-height: 40px;
+  ::ng-deep sm-simple-table-2 {
+    height: inherit;
+    .headers, .body {
+      width: 100%;
+      display: grid !important;
+      grid-template-columns: 30% 50% 15%;
+      align-items: center;
+      grid-gap: 12px;
+      padding: 0 12px;
+    }
+    .cdk-drop-list {
+      overflow-y: auto;
+      height: calc(100% - 41px);
+    }
   }
 
   .close {
@@ -53,6 +66,7 @@
   }
 
   .id-cell {
+    align-items: center;
     .value {
       flex: 1;
     }

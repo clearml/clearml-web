@@ -8,30 +8,31 @@
         (remove)="removeTag($event)"
       ></sm-tag-list>
       <div class="g-btns">
-        <button mat-icon-button smTooltip="Copy report markdown to clipboard" (click)="copyMarkdown()">
+        <button mat-icon-button smTooltip="Copy report markdown to clipboard" data-id="copyReportMarkdownButton" (click)="copyMarkdown()">
           <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
         </button>
-        <button mat-icon-button smTooltip="Export to PDF" (click)="printReport()">
+        <button mat-icon-button smTooltip="Export to PDF" data-id="reportExportToPdfButton" (click)="printReport()">
           <mat-icon fontSet="al" fontIcon="al-ico-pdf"></mat-icon>
         </button>
         <button #printHiddenButton  class="hidden" ngxPrint printSectionId="print-element-temp" [printDelay]="3000" [useExistingCss]="true" [printStyle]="printStyle">
         </button>
-        <button mat-icon-button (click)="share()" smTooltip="Share">
+        <button mat-icon-button data-id="shareReportButton" (click)="share()" smTooltip="Share">
           <mat-icon fontSet="al" fontIcon="al-ico-shared-item"></mat-icon>
         </button>
-        <button mat-icon-button (click)="moveToProject()" smTooltip="Move to Project">
+        <button mat-icon-button data-id="reportMoveToProjectButton" (click)="moveToProject()" smTooltip="Move to Project">
           <mat-icon fontSet="al" fontIcon="al-ico-move-to"></mat-icon>
         </button>
-        <button mat-icon-button (click)="archive()" [smTooltip]="archived() ? 'Restore' : 'Archive'">
+        <button mat-icon-button data-id="archiveReportButton" (click)="archive()" [smTooltip]="archived() ? 'Restore' : 'Archive'">
           <mat-icon fontSet="al" [fontIcon]="archived() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
         </button>
         @if (archived()) {
-          <button mat-icon-button (click)="deleteReport()" smTooltip="Delete">
+          <button mat-icon-button data-id="deleteReportButton" (click)="deleteReport()" smTooltip="Delete">
             <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
           </button>
         }
         @if (draft()) {
           <button mat-flat-button
+            data-id="publishReportButton"
             [disabled]="!this.report()?.report?.trim()"
             [smTooltip]="!this.report()?.report?.trim() ? 'Can\'t publish an empty report' : ''"
             (click)="publish()"
@@ -43,7 +44,7 @@
         </div>
         <span
           #tagsMenuTrigger="matMenuTrigger"
-          [matMenuTriggerFor]="tagsMenu.matMenu"
+          [matMenuTriggerFor]="tagsMenu.matMenu()"
           (menuClosed)="tagsMenu.clear()"
           class="trigger"
           [style.left.px]="menuPosition.x"
@@ -54,7 +55,7 @@
           [tags]="report()?.tags"
           [projectTags]="reportTags$ | ngrxPush"
           [companyTags]="null"
-          [tagsFilterByProject]="true"
+          [filterByProject]="true"
           (tagSelected)="addTag($event)"
         ></sm-tags-menu>
       </div>
@@ -64,7 +65,7 @@
     <div class="content report">
       @if (!editor.editMode) {
         <div class="hover-button">
-          <button mat-stroked-button class="description-button" (click)="showDescription = !showDescription">
+          <button mat-stroked-button data-id="reportDescriptionButton" class="description-button" (click)="showDescription = !showDescription">
             <mat-icon fontSet="al" fontIcon="al-ico-caret-right" [class.open]="drawer.opened"></mat-icon>
             Description
             <mat-icon iconPositionEnd fontSet="al" fontIcon="al-ico-caret-right" [class.open]="drawer.opened"></mat-icon>
@@ -81,6 +82,7 @@
           <div class="description">
             @if (!example() && report() && !editDesc) {
               <button mat-stroked-button
+                data-id="editReportDescription"
                 class="edit-button"
                 (click)="editReportDesc(descElement)"
                 >EDIT
@@ -94,8 +96,8 @@
             >{{report()?.comment || ''}}</textarea>
             @if (editDesc) {
               <div class="buttons">
-                <button mat-stroked-button (click)="descElement.value = orgDesc; editDesc = false">CANCEL</button>
-                <button mat-flat-button [disabled]="orgDesc === descElement.value" (click)="saveDesc(descElement.value)">SAVE</button>
+                <button mat-stroked-button data-id="cancelButton" (click)="descElement.value = orgDesc; editDesc = false">CANCEL</button>
+                <button mat-flat-button data-id="saveButton" [disabled]="orgDesc === descElement.value" (click)="saveDesc(descElement.value)">SAVE</button>
               </div>
             }
           </div>
@@ -120,7 +122,7 @@
               <div no-data class="flex-middle empty-state">
                 <i class="al-icon al-ico-reports xxl"></i>
                 <div class="no-data-title">THERE'S NOTHING HERE YET…</div>
-                <button mat-flat-button (click)="editor.editClicked()">
+                <button mat-flat-button data-id="editReportButton" (click)="editor.editClicked()">
                   <span>START EDITING THE REPORT</span>
                 </button>
               </div>

@@ -32,6 +32,7 @@ import {MatIconButton} from '@angular/material/button';
 import {PushPipe} from '@ngrx/component';
 import {MatIconModule} from '@angular/material/icon';
 import {ModelMenuExtendedComponent} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
+import { getCompanyTags } from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-model-info-header',
@@ -71,6 +72,7 @@ export class ModelInfoHeaderComponent {
   closeInfoClicked = output();
   maximizedClicked = output();
   minimizeClicked = output();
+
   tagMenuTrigger = viewChild<MatMenuTrigger>('tagsMenuTrigger');
   tagMenu = viewChild(TagsMenuComponent);
 
@@ -109,6 +111,10 @@ export class ModelInfoHeaderComponent {
   tagsMenuClosed() {
     this.store.dispatch(cancelModelEdit());
     this.tagMenu().clear();
+  }
+
+  getCompanyTags() {
+    this.store.dispatch(getCompanyTags());
   }
 
   editExperimentName(edit: boolean) {

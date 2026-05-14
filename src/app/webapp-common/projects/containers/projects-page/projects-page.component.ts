@@ -35,6 +35,7 @@ import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {ProjectSettingsDialogComponent, ProjectSettingsDialogConfig} from '@common/shared/project-dialog/project-settings/project-settings-dialog.component';
 import {ProjectSettingsDialog} from '@common/projects/common-projects.consts';
+import {ProjectSettingsExtendedDialogComponent} from '~/features/projects/containers/project-settings-extended/project-settings-extended.component';
 import {setExperimentMetricsSearchTerm} from '@common/experiments/actions/common-experiment-output.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ProjectsListComponent} from '../../dumb/projects-list/projects-list.component';
@@ -231,13 +232,15 @@ export class ProjectsPageComponent implements OnDestroy {
             showProjects: !!selectedProject,
             featureBreadcrumb: {
               name: 'PROJECTS',
-              url: 'projects'
+              url: 'projects',
+              queryParamsHandling: 'merge'
             },
             projectsOptions: {
               basePath: 'projects',
               filterBaseNameWith: null,
               compareModule: null,
               showSelectedProject: true,
+              queryParamsHandling: 'merge',
               ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
             }
           }
@@ -260,7 +263,8 @@ export class ProjectsPageComponent implements OnDestroy {
         no: 'OK',
         iconClass: 'al-ico-alert',
         iconColor: 'var(--color-warning)'
-      }
+      },
+      panelClass: 'dialog-md',
     }).afterClosed()
       .subscribe(() => {
         this.store.dispatch(resetReadyToDelete());
@@ -275,7 +279,7 @@ export class ProjectsPageComponent implements OnDestroy {
         entityType: this.getName(),
         projectStats: readyForDeletion
       },
-      width: '600px',
+      panelClass: 'dialog-md',
       disableClose: true
     }).afterClosed()
       .subscribe((confirmed) => {
@@ -352,7 +356,8 @@ export class ProjectsPageComponent implements OnDestroy {
       data: {
         mode,
         project: project ?? this.selectedProject
-      }
+      },
+      panelClass: 'dialog-md',
     }).afterClosed()
       .pipe(filter(projectHasBeenUpdated => projectHasBeenUpdated))
       .subscribe(() => {
@@ -363,11 +368,11 @@ export class ProjectsPageComponent implements OnDestroy {
   }
 
   openProjectSettings(project: Project) {
-    this.dialog.open<ProjectSettingsDialogComponent, ProjectSettingsDialogConfig, ProjectSettingsDialog>(ProjectSettingsDialogComponent, {
+    this.dialog.open<ProjectSettingsExtendedDialogComponent, ProjectSettingsDialogConfig, ProjectSettingsDialog>(ProjectSettingsExtendedDialogComponent, {
       data: {
         project: project ?? this.selectedProject
       },
-      width: '760px',
+      panelClass: 'dialog-lg',
     }).afterClosed()
       .subscribe((confirmed) => {
         this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));

@@ -137,18 +137,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private rebootGraph(chart: ExtFrame, clean?: boolean) {
-    const hidden = this._chart?.data
-      .filter(d => !d.isSmoothed)
-      .map((d, i) => d.visible === 'legendonly' && (d.fakePlot === chart.data[i].fakePlot) ? i : null)
-      .filter(index => index !== null);
     if (clean && this.alreadyDrawn && this.type[0] === 'scatter' && chart.data[0]?.x?.length === 1) {
       (Plotly.deleteTraces as typeof plotly.deleteTraces)(this.chartElm, Array.from({length: this.chartElm.data.length ?? 0}, (v, i) => i));
       this.modeBar = null;
     }
     this._chart = cloneDeep(chart);
-    if (hidden?.length > 0) {
-      this._chart.data.forEach((d, i) => d.visible = ((!clean || this.isMaximized) && hidden.includes(i)) ? 'legendonly' : true);
-    }
   }
 
   moveLegendToTitle = input(false);
@@ -157,6 +150,17 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() graphsNumber: number;
   @Input() xAxisType: ScalarKeyEnum;
   @Input() defaultHoverMode: ChartHoverModeEnum;
+  private _lineWidth: number;
+  @Input() set lineWidth(lineWidth: number) {
+    this._lineWidth = lineWidth;
+    if (this.alreadyDrawn) {
+      this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
+    }
+  }
+
+  get lineWidth() {
+    return this._lineWidth;
+  }
   chartSettings = model<ChartPreferences>({});
   hoverMode = linkedSignal(() => this.chartSettings()?.hoverMode ?? this.defaultHoverMode ?? 'x');
   previousHoverMode = computedPrevious(this.hoverMode);
@@ -211,6 +215,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Output() createEmbedCode = new EventEmitter<{ xaxis: ScalarKeyEnum; domRect: DOMRect }>();
   @Output() maximizeClicked = new EventEmitter<GraphViewerData>();
   chartPreferencesChanged = output<ChartPreferences>();
+  hiddenTracesChanged = output<number[]>();
   @ViewChild('drawHere', {static: true}) plotlyContainer: ElementRef;
   private chartElm;
   private _smoothWeight: number;
@@ -300,6 +305,16 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
             this.loading = false;
             this.spikeListener();
             this.updateHoverMode3d(this.chartSettings().hoverMode === 'closest');
+            (res as any).off?.('plotly_restyle');
+            (res as any).on?.('plotly_restyle', (restyleData) => {
+              if (restyleData[0].visible) {
+                const hiddenIndices = (res.data as unknown as ExtData[])
+                  .map((t, i) => ({visible: t.visible, isSmoothed: t.isSmoothed, index: i}))
+                  .filter(t => t.visible === 'legendonly' && !t.isSmoothed)
+                  .map(t => t.index);
+                this.hiddenTracesChanged.emit(hiddenIndices);
+              }
+            });
             this.changeDetector.detectChanges();
           }));
         }
@@ -805,12 +820,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         .style('stroke', Colors.dark.lines)
         .style('stroke-opacity', 1);
     }
-    graph.selectAll('.legendpoints path')
-      .attr('d', 'M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z');
-    graph.selectAll('.legendtoggle')
-      .on('click', () => window.setTimeout(() => graph.selectAll('.legendpoints path')
-        .attr('d', 'M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z'), 300)
-      );
+    // graph.selectAll('.legendpoints path')
+    //   .attr('d', 'M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z');
+    // graph.selectAll('.legendtoggle')
+    //   .on('click', () => window.setTimeout(() => graph.selectAll('.legendpoints path')
+    //     .attr('d', 'M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z'), 300)
+    //   );
   }
 
   private formatChartLines() {
@@ -820,6 +835,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
 
     const graph = this.chart;
+    const normalizedLineWidth = this.isCompare() ? this.normalizeLineWidth(this.lineWidth) : null;
     if (this.isCompare()) {
       graph.data = this.addIdToDuplicateExperiments(this.chart);
     }
@@ -875,9 +891,15 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           graph.data[i].legendgroup = graph.data[i].name;
           graph.data[i].showlegend = false;
           graph.data[i].hoverinfo = 'skip';
-          smoothLines.push(this.resmoothDataset(graph.data[i], color, graph.data[i].visible === 'legendonly'));
+          smoothLines.push(this.resmoothDataset(graph.data[i], color, graph.data[i].visible === 'legendonly', normalizedLineWidth));
           // graph.data[i].visible = this.showOriginals() ? 'legendonly' : true;
         }
+      }
+      if (normalizedLineWidth !== null && graph.data[i].type !== 'bar') {
+        graph.data[i].line = {
+          ...(graph.data[i].line ?? {}),
+          width: normalizedLineWidth
+        };
       }
     }
     this.setAxisText(graph, timeUnit);
@@ -904,13 +926,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
 
 
-  private resmoothDataset(data: ExtData, color, hidden: boolean) {
+  private resmoothDataset(data: ExtData, color, hidden: boolean, lineWidth?: number) {
     if (this.smoothType === smoothTypeEnum.gaussian && data.y.length > 5) {
       interpolateY(data.y);
     }
+    const width = lineWidth ?? data.line?.width ?? 1;
     return {
       ...data,
-      line: {width: 1, ...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
+      line: {...data.line, width, color: `rgb(${color[0]},${color[1]},${color[2]})`},
       legendgroup: data.name,
       name: `${data.name} (Smoothed)${this.scaleFactor() === 100 ? '' : '      '}`,
       showlegend: true,
@@ -919,6 +942,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       hoverinfo: 'all',
       y: getSmoothedLine(data.y, this.smoothWeight, this.smoothType, this.smoothSigma)
     } as ExtData;
+  }
+
+  private normalizeLineWidth(value: number): number | null {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return null;
+    }
+    return Math.min(7, Math.max(0.5, numeric));
   }
 
   private initColorSubscription(forceRedraw = false) {
@@ -1157,6 +1188,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }),
           id: this.identifier,
           xAxisType: this.xAxisType,
+          lineWidth: this.lineWidth,
           chartSettings: this.chartSettings(),
           smoothWeight: this.smoothWeight,
           smoothType: this.smoothType,

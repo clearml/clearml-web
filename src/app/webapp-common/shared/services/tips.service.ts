@@ -14,7 +14,7 @@ import {selectDarkTheme, selectFirstLogin, selectNeverShowPopups} from '../../co
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
-import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
+import {selectFeatures} from '~/core/reducers/users.reducer';
 import {DeviceDetectorService} from 'ngx-device-detector';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 
@@ -53,13 +53,12 @@ export class TipsService {
     combineLatest([
       this.store.select(selectRouterConfig),
       this.store.select(selectCurrentUser),
-      this.store.select(selectFirstLogin),
-      this.store.select(selectTermsOfUse)
+      this.store.select(selectFirstLogin)
     ])
       .pipe(
         takeUntilDestroyed(),
         debounceTime(1000),
-        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos?.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        filter(([, user, firstLogin]) => !this.mobile && !firstLogin && !!user && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr?.[curr?.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');
@@ -127,7 +126,7 @@ export class TipsService {
         hideDontShow: this.neverShowAgain || hideDontShow,
         darkTheme: this.darkTheme()
       },
-      maxWidth: '712px'
+      panelClass: 'dialog-lg'
     }).afterClosed()
       .subscribe((neveShowAgain) => {
         if (neveShowAgain) {

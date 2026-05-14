@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { MatDialogRef } from '@angular/material/dialog';
 
 import { MarkdownCheatSheetDialogComponent } from './markdown-cheat-sheet-dialog.component';
 
@@ -8,7 +10,11 @@ describe('MarkdownCheatSheetDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MarkdownCheatSheetDialogComponent ]
+      imports: [ MarkdownCheatSheetDialogComponent ],
+      providers: [
+        provideHttpClient(),
+        { provide: MatDialogRef, useValue: {} }
+      ]
     })
     .compileComponents();
 

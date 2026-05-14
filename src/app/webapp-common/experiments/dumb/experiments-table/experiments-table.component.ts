@@ -136,12 +136,15 @@ export class ExperimentsTableComponent extends BaseTableView {
   tags = input<string[]>();
   experimentTypes = input<string[]>();
   projects = input<ProjectsGetTaskParentsResponseParents[]>();
-  systemTags = input([] as string[]);
   cardHeight = input(90);
   showColors = input(false);
   reorderableColumns = input(true);
+  resizableColumns = input(true);
   selectionReachedLimit = input<boolean>();
   tableFilters = input<Record<string, FilterMetadata>>({});
+  searchQuery = input<string>();
+  enableMultiSelect = input(true);
+
   experimentSelectionChanged = output<{
     experiment: ITableExperiment;
     openInfo?: boolean;
@@ -169,11 +172,16 @@ export class ExperimentsTableComponent extends BaseTableView {
     experiment: ITableExperiment;
     tag: string;
   }>();
-  clearAllFilters = output<Record<string, FilterMetadata>>();
+  clearTableFilters = output<Record<string, FilterMetadata>>();
+  clearTableFiltersAndSearch = output<Record<string, FilterMetadata>>();
   protected readonly experimentsTableColFields = EXPERIMENTS_TABLE_COL_FIELDS;
   protected readonly timeFormatString = TIME_FORMAT_STRING;
   protected isDevelopment = isDevelopment;
   protected readonly colHeaderTypeEnum = ColHeaderTypeEnum;
+  protected hasActiveFilters = computed(() =>
+    Object.keys(this.tableFilters() ?? {}).length > 0 || (this.searchQuery() && this.searchQuery().trim().length > 0)
+  );
+  protected experimentsUpdated = false;
   protected roundedMetricValues = computed<Record<string, Record<string, boolean>>>(() => {
     const roundedMetricValues = {};
     this.tableCols()
@@ -225,7 +233,7 @@ export class ExperimentsTableComponent extends BaseTableView {
       label: user.name ? user.name : 'Unknown User',
       value: user.id,
       tooltip: ''
-    })) ?? [], [this.currentUserId(), ...this.sortByFilterValues()[EXPERIMENTS_TABLE_COL_FIELDS.USER]]),
+    })) ?? [], [...this.sortByFilterValues()[EXPERIMENTS_TABLE_COL_FIELDS.USER], this.currentUserId()]),
     [EXPERIMENTS_TABLE_COL_FIELDS.TAGS]: this.calcOptionalTagsList(),
     [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: !this.parents() ? null :
       this.sortOptionsList(
@@ -262,6 +270,16 @@ export class ExperimentsTableComponent extends BaseTableView {
     super();
 
     effect(() => {
+      this.experiments();
+      this.experimentsUpdated = true;
+    });
+
+    effect(() => {
+      this.hasActiveFilters();
+      this.experimentsUpdated = false;
+    });
+
+    effect(() => {
       if (this.experiments()?.length > 0) {
         this.selectionChecked.enable();
       } else {
@@ -274,6 +292,12 @@ export class ExperimentsTableComponent extends BaseTableView {
         window.setTimeout(() => !this.contextMenuActive() && this.table()?.focusSelected());
       }
     });
+
+    effect(() => {
+      if (!this.enableMultiSelect()) {
+        this.tableCols()[0].hidden = true;
+      }
+    })
   }
 
   calcOptionalTagsList() {

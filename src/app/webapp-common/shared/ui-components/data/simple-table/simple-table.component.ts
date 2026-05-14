@@ -1,17 +1,18 @@
-import {Component, ContentChild, TemplateRef, input, output} from '@angular/core';
+import {Component, TemplateRef, input, output, contentChild, ChangeDetectionStrategy} from '@angular/core';
 import {CdkDrag, CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
 import {FormsTrackBy} from '../../../utils/forms-track-by';
 import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
-    selector: 'sm-simple-table-2',
-    templateUrl: './simple-table.component.html',
-    styleUrls: ['./simple-table.component.scss'],
-    imports: [
-        CdkDropList,
-        NgTemplateOutlet,
-        CdkDrag
-    ]
+  selector: 'sm-simple-table-2',
+  templateUrl: './simple-table.component.html',
+  styleUrls: ['./simple-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CdkDropList,
+    NgTemplateOutlet,
+    CdkDrag
+  ]
 })
 export class SimpleTableComponent extends FormsTrackBy {
 
@@ -21,7 +22,7 @@ export class SimpleTableComponent extends FormsTrackBy {
     return this.rowsData();
   }
   rowsConfig = input<{collapsible: boolean;}[]>([]);
-  rowsData = input<any[]>();
+  rowsData = input<unknown[]>();
   cols = input<{
         class: string;
         header: string;
@@ -32,7 +33,13 @@ export class SimpleTableComponent extends FormsTrackBy {
   noDataMessage = input<string>();
   entryDropped = output<CdkDragDrop<any>>();
 
-  @ContentChild(TemplateRef) templateRef: TemplateRef<any>;
+  templateRef = contentChild(TemplateRef<{$implicit: {
+      class: string;
+      header: string;
+      subHeader?: string;
+    },
+    row: unknown, rowIndex: number
+  }>);
 
   isRowToggleable(rowIndex: number) {
     return this.rowsConfig()[rowIndex] && this.rowsConfig()[rowIndex].collapsible;
@@ -44,7 +51,7 @@ export class SimpleTableComponent extends FormsTrackBy {
     }
   }
 
-  drop($event: CdkDragDrop<any, any>) {
+  drop($event: CdkDragDrop<unknown, unknown>) {
     this.entryDropped.emit($event);
   }
 }

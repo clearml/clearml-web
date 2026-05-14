@@ -14,7 +14,6 @@ import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
-import {selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
@@ -108,7 +107,6 @@ export class ModelExperimentsTableComponent implements OnDestroy {
         Object.fromEntries(Object.entries(filtersObj).filter(([key]) => key !== 'models.input.model'))
       )
     );
-  protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
 
   constructor() {

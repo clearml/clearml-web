@@ -1,11 +1,11 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, map, retry, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, first, map, retry, switchMap, tap} from 'rxjs/operators';
 import {HTTP} from '~/app.constants';
 import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
-import {BehaviorSubject, EMPTY, Observable, of, timer} from 'rxjs';
+import {BehaviorSubject, combineLatest, EMPTY, Observable, of, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
@@ -21,6 +21,7 @@ import {selectDarkTheme} from '@common/core/reducers/view.reducer';
 import {environment} from '../../../../environments/environment';
 import {TIME_IN_MILLI} from '@common/shared/utils/time-util';
 import {resetCurrentUser} from '~/core/actions/users.action';
+import {selectUserInitialized} from '@common/core/reducers/users-reducer';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error' | 'tenant';
 
@@ -257,11 +258,13 @@ export class BaseLoginService {
       return redirectToLogin(401);
     } else {
       this.store.dispatch(fetchCurrentUser());
-      return this.userPreferences.loadPreferences()
-        .pipe(
-          catchError((err) => redirectToLogin(err.status)),
-          map(() => null)
-        );
+      return combineLatest([
+        this.userPreferences.loadPreferences(),
+        this.store.select(selectUserInitialized).pipe(filter(initialized => initialized), first())
+      ]).pipe(
+        catchError((err) => redirectToLogin(err.status)),
+        map(() => null)
+      );
     }
   }
 
@@ -275,7 +278,6 @@ export class BaseLoginService {
     this.authenticated = false;
     this.store.dispatch(resetCurrentUser());
     this.dialog.closeAll();
-    const redirectUrl: string = window.location.pathname + window.location.search;
-    this.router.navigate(['/login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
+    this.router.navigate(['/login']);
   }
 }

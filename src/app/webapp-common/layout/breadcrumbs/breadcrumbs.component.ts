@@ -77,6 +77,7 @@ export interface IBreadcrumbsOptions {
     filterBaseNameWith: string[];
     compareModule: string;
     showSelectedProject: boolean;
+    queryParamsHandling?: 'merge' | 'preserve' | '';
     selectedProjectBreadcrumb: IBreadcrumbsLink;
   };
 }

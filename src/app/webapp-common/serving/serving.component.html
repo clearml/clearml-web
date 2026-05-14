@@ -41,10 +41,10 @@
         [endpoints]="endpoints$ | ngrxPush"
         [tableCols]="tableCols$ | ngrxPush"
         [minimizedView]="minimizedView()"
-        [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
+        [searchQuery]="(searchQuery$ | ngrxPush)?.query"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [selectedEndpoints]="selectedEndpoints()"
         [selectedEndpoint]="selectedEndpoint()"
@@ -63,6 +63,7 @@
         (filterChanged)="filterChanged($event)"
         (filterSearchChanged)="filterSearchChanged($event)"
         (clearAllFilters)="clearTableFiltersHandler($event)"
+        (clearTableFiltersAndSearch)="clearTableFiltersAndSearchHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
       >
       </sm-serving-table>

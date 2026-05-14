@@ -33,7 +33,7 @@ export interface ISelectedExperiment {
   created?: string;
   completed?: string;
   started?: string;
-  last_update?: string;
+  last_update?: string | Date;
   parent?: {id: string; name: string; project?: {id: string}};
   active_duration?: number;
   project?: Project;
@@ -53,6 +53,7 @@ export interface ISelectedExperiment {
   configuration?: { [key: string]: ConfigurationItem };
   currentUser?: any;
   models?: {input: {name: string; model: IModelInfo}[]; output: {name: string; model: IModelInfo}[]};
+  runtime?: Record<string, string>;
 }
 
 /**

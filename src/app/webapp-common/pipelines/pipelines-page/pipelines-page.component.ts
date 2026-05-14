@@ -29,7 +29,12 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {
   PipelinesEmptyStateComponent
 } from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
-import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
+import {
+  RunPipelineControllerDialogComponent,
+  RunPipelineResult
+} from '@common/pipelines-controller/run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
+import {debounceTime, filter, skip, withLatestFrom} from 'rxjs/operators';
+import * as menuActions from '@common/experiments/actions/common-experiments-menu.actions';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {ProjectsHeaderComponent} from '@common/projects/dumb/projects-header/projects-header.component';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
@@ -153,6 +158,30 @@ if __name__ == '__main__':
 
   createExamples() {
     this.store.dispatch(showExamplePipelines());
+  }
+
+  runPipeline(project: ProjectsGetAllResponseSingle, createNewPipeline = false) {
+    this.dialog.open<RunPipelineControllerDialogComponent, {task: any; createNewPipeline?: boolean; project?: string}, RunPipelineResult>(RunPipelineControllerDialogComponent, {
+      panelClass: 'dialog-md',
+      data: {task: null, createNewPipeline, project: project.id}
+    }).afterClosed()
+      .pipe(filter(res => !!res?.confirmed))
+      .subscribe((res) => {
+        this.store.dispatch(menuActions.startPipeline({
+          task: res.task,
+          args: res.args,
+          queue: res.queue,
+          createNewPipeline: res.createNewPipeline,
+          new_project_name: res.new_project_name,
+          new_pipeline_name: res.new_pipeline_name,
+          new_pipeline_version: res.new_pipeline_version,
+          existingPipeline: res.existingPipeline
+        }));
+      });
+  }
+
+  clonePipeline(project: ProjectsGetAllResponseSingle) {
+    this.runPipeline(project, true);
   }
 
   override shouldReRoute(selectedProject, config) {

@@ -1,4 +1,4 @@
-<form [formGroup]="projectForm" class="d-flex flex-column">
+<form [formGroup]="projectForm" class="d-flex gap-3 flex-column">
   <mat-form-field appearance="outline">
     <mat-label>Project name</mat-label>
     <input
@@ -24,30 +24,27 @@
       </mat-error>
     }
   </mat-form-field>
-
-  <div class="position-relative">
-    <sm-paginated-entity-selector
-      formControlName="parent"
-      [data]="allProjects()"
-      label="Create in"
-      placeHolder="Search for project path"
-      [isRequired]="true"
-      [emptyNameValidator]="true"
-      [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
-      (getEntities)="loadMore($event, false)"
-      (loadMore)="loadMore($event, true)"
-    ></sm-paginated-entity-selector>
-    @if (!projectForm.controls.parent.untouched && projectForm.controls.parent.errors; as errors) {
-      <div class="extra-errors">
-        @if (errors?.required) {
-          <mat-error>Please add name.</mat-error>
-        } @else if (errors?.emptyName) {
-          <mat-error>Project name can't contain only spaces.</mat-error>
-        }
-      </div>
-    }
-  </div>
-
+  <sm-paginated-entity-selector
+    formControlName="parent"
+    [data]="allProjects()"
+    label="Create in"
+    placeHolder="Search for project path"
+    [isRequired]="true"
+    [emptyNameValidator]="true"
+    [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
+    (getEntities)="loadMore($event, false)"
+    (loadMore)="loadMore($event, true)"
+  >
+    <div class="extra-errors">
+      @if (!projectForm.controls.parent.untouched && projectForm.controls.parent.errors; as errors) {
+          @if (errors?.required) {
+            <mat-error>Please add name.</mat-error>
+          } @else if (errors?.emptyName) {
+            <mat-error>Project name can't contain only spaces.</mat-error>
+          }
+      }
+    </div>
+  </sm-paginated-entity-selector>
   <mat-form-field appearance="outline">
     <mat-label>Description</mat-label>
     <textarea class="project-description"

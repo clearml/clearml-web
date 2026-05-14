@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
@@ -24,22 +24,45 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {EMPTY, iif, of} from 'rxjs';
 import {merge} from 'lodash-es';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {setAxisCache, setGlobalLegendData} from '../actions/experiments-compare-charts.actions';
+import {getGlobalLegendData, setAxisCache, setGlobalLegendData} from '../actions/experiments-compare-charts.actions';
 import {EventsGetTaskPlotsResponse} from '~/business-logic/model/events/eventsGetTaskPlotsResponse';
 import {EventsGetMultiTaskPlotsResponse} from '~/business-logic/model/events/eventsGetMultiTaskPlotsResponse';
+import {experimentUpdatedSuccessfully} from '@common/experiments/actions/common-experiments-info.actions';
+import {modelUpdatedSuccessfully} from '@common/models/actions/models-info.actions';
+import {selectRouterData, selectRouterParams} from '@common/core/reducers/router-reducer';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 
 @Injectable()
 export class ExperimentsCompareChartsEffects {
 
-  constructor(private actions$: Actions, private store: Store, private tasksApi: ApiTasksService,
-              private eventsApi: ApiEventsService, private modelsApi: ApiModelsService) {
-  }
+  private readonly actions$ =  inject(Actions);
+  private readonly store =  inject(Store);
+  private readonly tasksApi =  inject(ApiTasksService);
+  private readonly eventsApi =  inject(ApiEventsService);
+  private readonly modelsApi =  inject(ApiModelsService)
+  private readonly refresh = inject(RefreshService);
+
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(chartActions.getMultiScalarCharts, chartActions.getMultiPlotCharts),
     filter(action => !(action as any).payload?.autoRefresh),
     map(action => activeLoader(action.type))
+  ));
+
+  updateGlobalLegendAfterRename$ = createEffect(() => this.actions$.pipe(
+    ofType(experimentUpdatedSuccessfully, modelUpdatedSuccessfully),
+    concatLatestFrom(() => [
+        this.store.select(selectRouterParams).pipe(
+          map(params => params?.ids?.split(',') ?? [])),
+        this.store.select(selectRouterData).pipe(map(data => data?.entityType))
+      ]
+    ),
+    filter(([, ids]) => ids.length > 0),
+    map(([, ids, entityType]) => {
+      this.refresh.tick.next(true)
+      return getGlobalLegendData({ids, entity: entityType})
+    })
   ));
 
   getGlobalLegendData$ = createEffect(() => this.actions$.pipe(
@@ -60,12 +83,12 @@ export class ExperimentsCompareChartsEffects {
             system_tags: string[],
             name: string,
             project: { id: string },
-            last_update?: string,
+            last_update?: Date,
             created?: string
-          }[]
+          }[];
           const ordered = action.ids.map(id => data.find(exp => exp.id === id)).filter(exp => exp)
             .map(exp => ({...exp, systemTags: exp.system_tags}));
-          return setGlobalLegendData({data: ordered})
+          return setGlobalLegendData({data: ordered});
         })
       )
     )
@@ -77,7 +100,7 @@ export class ExperimentsCompareChartsEffects {
       tasks: action.taskIds,
       metrics: action.metrics,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      model_events: action.entity === EntityTypeEnum.model,
+      model_events: action.entity === EntityTypeEnum.model
     })),
     map((res) => chartActions.setExperimentMultiScalarSingleValue({name: {tasks: res?.tasks}})
     )
@@ -89,7 +112,7 @@ export class ExperimentsCompareChartsEffects {
       filter(ready => ready),
       map(() => action))),
     debounceTime(200),
-    concatLatestFrom( () => this.store.select(selectCompareHistogramCacheAxisType)),
+    concatLatestFrom(() => this.store.select(selectCompareHistogramCacheAxisType)),
     mergeMap(([action, prevAxisType]) => {
       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(action.xAxisType) &&
@@ -119,44 +142,47 @@ export class ExperimentsCompareChartsEffects {
 
   getMultiPlotCharts = createEffect(() => this.actions$.pipe(
       ofType(chartActions.getMultiPlotCharts),
-      debounceTime(200),
-      switchMap(action => { if(action.taskIds.length > 0 ){
-        return this.eventsApi.eventsGetMultiTaskPlots({
-          tasks: action.taskIds,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          model_events: action.entity === EntityTypeEnum.model,
-          metrics: action.metrics,
-          last_iters_per_task_metric: true,
-          iters: 1
-        }).pipe(
-          map((res: EventsGetMultiTaskPlotsResponse) => [res.returned, res] as [number, EventsGetMultiTaskPlotsResponse]),
-          expand(([plotsLength, data]) => (data.total < 10000 && data.returned > 0)
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            ? this.eventsApi.eventsGetMultiTaskPlots({
-              tasks: action.taskIds,
+      switchMap(action => {
+        if (action.taskIds.length > 0 && action.metrics?.length > 0) {
+          return of(action).pipe(
+            debounceTime(200),
+            switchMap(a => this.eventsApi.eventsGetMultiTaskPlots({
+              tasks: a.taskIds,
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              model_events: action.entity === EntityTypeEnum.model,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              scroll_id: data.scroll_id,
-              metrics: action.metrics,
+              model_events: a.entity === EntityTypeEnum.model,
+              metrics: a.metrics,
               last_iters_per_task_metric: true,
               iters: 1
             }).pipe(
-              map((res: EventsGetMultiTaskPlotsResponse) => [plotsLength + res.returned, res] as [number, EventsGetTaskPlotsResponse])
-            )
-            : EMPTY
-          ),
-          reduce((acc, [, data]) => merge(acc, data.plots), {})
-        )
-      } else {
-        return of({plots:[]})
-      }
+              map((res: EventsGetMultiTaskPlotsResponse) => [res.returned, res] as [number, EventsGetMultiTaskPlotsResponse]),
+              expand(([plotsLength, data]) => (data.total < 10000 && data.returned > 0)
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                ? this.eventsApi.eventsGetMultiTaskPlots({
+                  tasks: a.taskIds,
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  model_events: a.entity === EntityTypeEnum.model,
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  scroll_id: data.scroll_id,
+                  metrics: a.metrics,
+                  last_iters_per_task_metric: true,
+                  iters: 1
+                }).pipe(
+                  map((res: EventsGetMultiTaskPlotsResponse) => [plotsLength + res.returned, res] as [number, EventsGetTaskPlotsResponse])
+                )
+                : EMPTY
+              ),
+              reduce((acc, [, data]) => merge(acc, data.plots), {})
+            ))
+          );
+        } else {
+          return of({});
+        }
       }),
       mergeMap(plots => [
         chartActions.setExperimentPlots({plots}),
         deactivateLoader(chartActions.getMultiPlotCharts.type)]),
       catchError(error => [
-        requestFailed(error), deactivateLoader(chartActions.getMultiPlotCharts.type),
+        requestFailed(error), deactivateLoader(chartActions.getMultiPlotCharts.type)
         // setServerError(error, null, 'Failed to get Plot Charts', action.autoRefresh)
       ])
     )

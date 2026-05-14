@@ -41,7 +41,7 @@ import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables'
 import { Configuration }                                     from '../configuration';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiUsersService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -74,7 +74,7 @@ export class ApiUsersService {
 
 
     /**
-     * 
+     *
      * Internal. Create a new user object. Reserved for internal use.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -119,7 +119,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Delete a user
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -164,7 +164,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get all user objects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -209,7 +209,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get all user objects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -254,7 +254,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Gets user information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -299,7 +299,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Gets current user information, based on the authenticated user making   the call.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -344,7 +344,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get user preferences
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -389,7 +389,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Set user preferences
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -434,7 +434,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Update a user object
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

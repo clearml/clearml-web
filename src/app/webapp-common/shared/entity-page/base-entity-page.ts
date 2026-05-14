@@ -48,6 +48,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {concatLatestFrom} from '@ngrx/operators';
 import {resetTablesFilterParentsOptions} from '@common/experiments/actions/common-experiments-view.actions';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {getCompanyTags} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -318,8 +319,8 @@ export abstract class BaseEntityPageComponent implements OnDestroy {
 
   setupBreadcrumbsOptions() {}
 
-  public setupContextMenu(entitiesType: string, archive: boolean) {
-    this.contextMenuService.setupProjectContextMenu(entitiesType, this.selectedProjectId, archive);
+  public setupHeaderTabs(entitiesType: string, archive: boolean) {
+    this.contextMenuService.setupProjectHeaderTabs(entitiesType, this.selectedProjectId, archive);
   }
 
   cardsCollapsedToggle() {
@@ -330,4 +331,7 @@ export abstract class BaseEntityPageComponent implements OnDestroy {
     this.store.dispatch(resetTablesFilterParentsOptions());
   }
 
+  protected getCompanyTags() {
+    this.store.dispatch(getCompanyTags());
+  }
 }

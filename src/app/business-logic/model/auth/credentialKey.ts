@@ -14,7 +14,7 @@
 
 export interface CredentialKey {
     /**
-     * 
+     *
      */
     access_key?: string;
     /**
@@ -22,11 +22,15 @@ export interface CredentialKey {
      */
     label?: string;
     /**
-     * 
+     *
      */
     last_used?: string;
     /**
-     * 
+     *
      */
     last_used_from?: string;
+    /**
+     * Expiration date
+     */
+    expire?: string;
 }

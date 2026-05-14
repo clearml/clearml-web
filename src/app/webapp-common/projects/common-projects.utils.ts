@@ -71,7 +71,7 @@ export const distinctParamsUntilChanged$ = (observable: Observable<readonly [str
       initial = false;
       return !equal;
     }),
-    map(([[prev,], [projectId, queryParams]]) => [prev, projectId, queryParams] as [string, string, Params])
+    map(([[prev,], [projectId, queryParams]]) => [(prev ?? null) as string, projectId, queryParams] as [string, string, Params])
   )
 };
 

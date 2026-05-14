@@ -2,7 +2,11 @@ import {Component, effect, viewChild} from '@angular/core';
 import {ControllersComponent} from '@common/pipelines-controller/controllers.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable} from 'rxjs';
-import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+import {
+  CountAvailableAndIsDisableSelectedFiltered,
+  MenuItems,
+  selectionDisabledChangeVersion
+} from '@common/shared/entity-page/items.utils';
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
@@ -22,6 +26,7 @@ import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/ove
 import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
 import {SplitAreaComponent, SplitComponent} from 'angular-split';
 import {PushPipe} from '@ngrx/component';
+import {PublishFooterItem} from '@common/shared/entity-page/footer-items/publish-footer-item';
 
 @Component({
   selector: 'sm-open-dataset-versions',
@@ -95,7 +100,13 @@ export class OpenDatasetVersionsComponent extends ControllersComponent {
     tagsFilterByProject$: Observable<boolean>;
   }) {
     super.createFooterItems(config);
-    this.footerItems.splice(5, 1);
+    this.footerItems.splice(5, 1, new PublishFooterItem(config.entitiesType));
+  }
+  override getSingleSelectedDisableAvailable(experiment) {
+    return {
+      ...(super.getSingleSelectedDisableAvailable(experiment)),
+      [MenuItems.changeVersion]: selectionDisabledChangeVersion([experiment]),
+    };
   }
 
   override downloadTableAsCSV() {

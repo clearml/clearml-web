@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {
   MiniTagsListComponent
@@ -7,30 +7,21 @@ import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-la
 
 @Component({
   selector: 'sm-result-line',
+  templateUrl: './result-line.component.html',
+  styleUrl: './result-line.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatIcon,
     MiniTagsListComponent,
     StatusIconLabelComponent
   ],
-  templateUrl: './result-line.component.html',
-  styleUrl: './result-line.component.scss'
 })
 export class ResultLineComponent {
-
-  public position = {x: 0, y: 0};
-
-
   fontIcon = input.required<string>();
   label = input.required<string>();
   status = input<string>();
   statusOptionsLabels = input.required<Record<string, string>>();
-
   tags = input<string[]>();
-
   itemSelected = output();
   toggleItemHoverActive = output<boolean>();
-
-  itemClicked() {
-    this.itemSelected.emit();
-  }
 }

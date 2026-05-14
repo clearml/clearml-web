@@ -34,7 +34,6 @@ import {SectionHeaderComponent} from '@common/shared/components/section-header/s
 import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
 import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
 import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
-import {ExperimentsModule} from '~/features/experiments/experiments.module';
 import {MatFormField} from '@angular/material/form-field';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
@@ -57,7 +56,6 @@ import {MatInput} from '@angular/material/input';
     ScrollTextareaComponent,
     LabeledRowComponent,
     SectionHeaderComponent,
-    ExperimentsModule,
     MatFormField,
     MatSelect,
     MatOption,
@@ -354,7 +352,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         no: 'Keep',
         iconClass: 'al-ico-trash',
         centerText: true,
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed();
 
   }

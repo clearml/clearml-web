@@ -1,4 +1,4 @@
-import {EXPERIMENT_INFO_ONLY_FIELDS_BASE} from '@common/experiments/experiment.consts';
+import {EXPERIMENT_INFO_ONLY_FIELDS_BASE, TASK_EXPORT_ONLY_FIELDS_BASE} from '@common/experiments/experiment.consts';
 import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 export {INITIAL_EXPERIMENT_TABLE_COLS} from '../../webapp-common/experiments/experiment.consts';
@@ -7,6 +7,8 @@ export const GET_ALL_QUERY_ANY_FIELDS = ['id', 'name', 'comment', 'system_tags',
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getExperimentInfoOnlyFields = (hasDataFeature: boolean) => EXPERIMENT_INFO_ONLY_FIELDS_BASE;
+
+export const getTaskExportOnlyFields = (hasDataFeature: boolean) => TASK_EXPORT_ONLY_FIELDS_BASE;
 
 export interface Link {
   name: string;

@@ -1,22 +1,27 @@
 <button mat-icon-button [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
-  <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
+  <mat-icon fontSet="al" fontIcon="al-ico-bars-menu" data-id="datasetCardMenu"></mat-icon>
 </button>
 <mat-menu #pipelinesMenu="matMenu">
-  <button mat-menu-item (click)="rename.emit()">
+  @if (cardType() === 'pipeline') {
+    <button mat-menu-item (click)="clone.emit()" data-id="runInNewPipelineButton">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>Clone
+    </button>
+  }
+  <button mat-menu-item (click)="rename.emit()" data-id="renameButton">
     <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>Rename
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu()" data-id="addTagButton">
     <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>Add Tag
   </button>
   <hr>
-  <button mat-menu-item (click)="delete.emit()">
+  <button mat-menu-item (click)="delete.emit()" data-id="deleteButton">
     <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>Delete
   </button>
 </mat-menu>
 <sm-tags-menu
   #tagsMenu
   [tags]="project()?.tags"
-  [tagsFilterByProject]="true"
+  [filterByProject]="true"
   [projectTags]="allTags()"
   [companyTags]="null"
   (tagSelected)="addTag.emit($event)">

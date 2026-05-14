@@ -26,6 +26,7 @@
             <mat-form-field appearance="outline" class="no-bottom" data-id="metricField">
               <mat-select
                 #metricSelect
+                data-id="metricDropdownButton"
                 (selectionChange)="selectMetric($event, experimentId)"
                 [value]="selectedMetrics()[experimentId]"
                 >

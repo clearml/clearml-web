@@ -27,6 +27,7 @@ import {
   searchStart,
   searchTableFilterChanged,
   setEndpointsResults,
+  setErrors,
   setExperimentsResults,
   setLoadingEndpointsResults,
   setModelsResults,
@@ -337,7 +338,7 @@ export class DashboardSearchEffects {
           }),
           deactivateLoader(action.type)
         ]),
-        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), setErrors({activeLink: activeSearchLink.projects, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
   searchPipelines = createEffect(() => this.actions.pipe(
@@ -382,7 +383,7 @@ export class DashboardSearchEffects {
         }),
         deactivateLoader(action.type)
       ]),
-      catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+      catchError(error => [deactivateLoader(action.type), requestFailed(error), setErrors({activeLink: activeSearchLink.pipelines, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
   searchOpenDatasets = createEffect(() => this.actions.pipe(
@@ -430,7 +431,7 @@ export class DashboardSearchEffects {
         }),
         deactivateLoader(action.type)
       ]),
-      catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+      catchError(error => [deactivateLoader(action.type), requestFailed(error), setErrors({activeLink: activeSearchLink.datasets, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
 
@@ -474,7 +475,7 @@ export class DashboardSearchEffects {
         }),
         deactivateLoader(action.type)
       ]),
-      catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+      catchError(error => [deactivateLoader(action.type), requestFailed(error), setErrors({activeLink: activeSearchLink.models, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
   searchExperiments = createEffect(() => this.actions.pipe(
@@ -524,7 +525,7 @@ export class DashboardSearchEffects {
         catchError(error => [
           deactivateLoader(action.type),
           requestFailed(error),
-          addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+          setErrors({activeLink: activeSearchLink.experiments, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
   searchReports = createEffect(() => this.actions.pipe(
@@ -567,7 +568,7 @@ export class DashboardSearchEffects {
         }),
         deactivateLoader(action.type)
       ]),
-      catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, `Server error: ${this.errorService.getErrorMsg(error?.error)}`)])))
+      catchError(error => [deactivateLoader(action.type), requestFailed(error), setErrors({activeLink: activeSearchLink.reports, error: this.errorService.getErrorMsg(error?.error)})])))
   ));
 
   getEndpoints = createEffect(() => this.actions.pipe(

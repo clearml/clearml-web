@@ -1,8 +1,15 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  HostListener, inject,
-  Renderer2,
-  input, output, Output, EventEmitter, computed, signal, effect, viewChild
+  computed,
+  effect,
+  EventEmitter,
+  inject,
+  input,
+  output,
+  Output,
+  signal,
+  viewChild
 } from '@angular/core';
 import {
   LMarkdownEditorModule,
@@ -36,6 +43,12 @@ const BREAK_POINT = 990;
   selector: 'sm-markdown-editor',
   templateUrl: './markdown-editor.component.html',
   styleUrls: ['./markdown-editor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onResize()',
+    '[style.--sm-md-preview-display]': 'previewDisplay()',
+    '[style.--sm-md-editor-display]': 'editorDisplay()',
+  },
   imports: [
     TooltipDirective,
     LMarkdownEditorModule,
@@ -51,16 +64,14 @@ const BREAK_POINT = 990;
 export class MarkdownEditorComponent {
   private store = inject(Store);
   private reportService = inject(ReportCodeEmbedBaseService);
-  private renderer = inject(Renderer2);
   protected dialog = inject(MatDialog);
 
-  private ready = false;
-  private preview: Element;
-  private editor: Element;
-  public isDirty: boolean;
-  public editorVisible: boolean;
-  private _editMode: boolean;
-  public options = {
+  protected isDirty = signal(false);
+  private _editMode = signal(false);
+  private innerWidth = signal(window.innerWidth);
+  protected editorVisible = signal(false);
+
+  protected readonly options = {
     enablePreviewContentClick: true,
     fontAwesomeVersion: '6',
     showPreviewPanel: true,
@@ -68,10 +79,30 @@ export class MarkdownEditorComponent {
     showBorder: true,
     hideIcons: ['TogglePreview', 'FullScreen']
   } as MdEditorOption;
-  public ace: Ace.Editor;
-  public isExpand = false;
-  public duplicateNames: boolean;
+  private ace: Ace.Editor;
+  public isExpand = signal(false);
   theme = this.store.selectSignal(selectThemeMode);
+
+  previewDisplay = computed(() => {
+    if (this.innerWidth() > BREAK_POINT) {
+      return 'block';
+    }
+    if (this._editMode()) {
+      return this.editorVisible() ? 'block' : 'none';
+    }
+    return 'block';
+  });
+
+  editorDisplay = computed(() => {
+    if (this.innerWidth() > BREAK_POINT) {
+      return this._editMode() ? 'block' : 'none';
+    }
+    if (this._editMode()) {
+      return this.editorVisible() ? 'none' : 'block';
+    }
+    return 'none';
+  });
+
   public postRender = (dirty: string): string => {
     if (this.blockUserScripts()) {
       return '<div class="d-flex-center flex-column h-100 mt-4">' +
@@ -86,24 +117,40 @@ export class MarkdownEditorComponent {
     model: signal(this.data())
   }));
 
+  protected duplicateNames = computed(() => {
+    this.getData();
+    const names = Array.from(this.getData().matchAll(/<iframe[^>]*?name=(["'])?((?:.(?!\1|>))*.?)\1?/g)).map(a => a[2]);
+    const uniqueNames = new Set(names);
+    let duplicatedNames = [];
+    for (const name of uniqueNames) {
+      const dups = names.map(e => e === name ? name : '').filter(String).slice(1);
+      duplicatedNames = duplicatedNames.concat(dups);
+    }
+    return duplicatedNames.length > 0;
+  });
+
   get getData() {
     return this.state().model;
   }
 
+  get aceEditor() {
+    return this.ace;
+  }
+
   set editMode(editMode: boolean) {
-    this._editMode = editMode;
-    (window as any).holdIframe = editMode;
+    this._editMode.set(editMode);
+    (window as unknown as {holdIframe: boolean}).holdIframe = editMode;
     this.editModeChanged.emit();
     window.setTimeout(() => this.ace?.resize(), 500);
   }
 
   get editMode() {
-    return this._editMode;
+    return this._editMode();
   }
 
   data = input<string>();
   readOnly = input<boolean>();
-  handleUpload = input<(files: File[]) => Promise<UploadResult[]>>();
+  handleUpload = input<(files: FileList) => Promise<UploadResult[]>>();
   resources = input([] as {
     unused: boolean;
     url: string;
@@ -116,27 +163,8 @@ export class MarkdownEditorComponent {
   imageMenuOpened = output<string>();
   editorComponent = viewChild(MDComponent);
 
-  @HostListener('window:resize', ['$event'])
-  updateEditorVisibility() {
-    if (!this.ready) {
-      return;
-    }
-
-    if (window.innerWidth > BREAK_POINT) {
-      if (this.editMode) {
-        this.renderer.setStyle(this.preview, 'display', 'block');
-        this.renderer.setStyle(this.editor, 'display', 'block');
-      } else {
-        this.renderer.setStyle(this.preview, 'display', 'block');
-        this.renderer.setStyle(this.editor, 'display', 'none');
-      }
-    } else if (this.editMode) {
-      this.renderer.setStyle(this.preview, 'display', 'none');
-      this.renderer.setStyle(this.editor, 'display', 'block');
-    } else {
-      this.renderer.setStyle(this.preview, 'display', 'block');
-      this.renderer.setStyle(this.editor, 'display', 'none');
-    }
+  onResize() {
+    this.innerWidth.set(window.innerWidth);
   }
 
   constructor() {
@@ -171,15 +199,13 @@ export class MarkdownEditorComponent {
   save() {
     this.saveInfo.emit(this.getData());
     this.editMode = false;
-    this.isDirty = false;
-    this.updateEditorVisibility();
+    this.isDirty.set(false);
   }
 
   editClicked() {
     this.editMode = true;
-    this.editorVisible = false;
+    this.editorVisible.set(false);
     setTimeout(() => {
-      this.updateEditorVisibility();
       this.ace?.focus();
     });
   }
@@ -193,8 +219,7 @@ export class MarkdownEditorComponent {
       this.getData.set(this.data());
     }
     this.editMode = false;
-    this.isDirty = false;
-    this.updateEditorVisibility();
+    this.isDirty.set(false);
   }
 
   editorReady(ace: Ace.Editor) {
@@ -204,28 +229,22 @@ export class MarkdownEditorComponent {
       fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
       fontSize: 12
     });
-    this.ready = true;
-    this.preview = document.querySelector('.preview-container');
-    this.editor = document.querySelector('.editor-container > div:first-child');
   }
 
   togglePreview() {
-    this.renderer.setStyle(this.preview, 'display', this.editorVisible ? 'none' : 'block');
-    this.renderer.setStyle(this.editor, 'display', !this.editorVisible ? 'none' : 'block');
-    this.editorVisible = !this.editorVisible;
+    this.editorVisible.update(v => !v);
   }
 
   checkDirty() {
     const isDirty = this.getData() !== this.data();
-    if (isDirty !== this.isDirty) {
+    if (isDirty !== this.isDirty()) {
       this.dirtyChanged.emit(isDirty);
     }
-    this.isDirty = isDirty;
-    this.getDuplicateIframes();
+    this.isDirty.set(isDirty);
   }
 
   domFixes() {
-    this.renderer.setProperty(this.editorComponent().previewContainer.nativeElement, 'id', 'print-element');
+    this.editorComponent().previewContainer.nativeElement.id = 'print-element';
 
     if (this.getData().indexOf('```language') > -1) {
       const manager = this.ace.session.getUndoManager();
@@ -245,30 +264,22 @@ export class MarkdownEditorComponent {
   }
 
   expandClicked() {
-    this.isExpand = !this.isExpand;
+    this.isExpand.update(e => !e);
     this.editModeChanged.emit();
   }
 
-  private getDuplicateIframes() {
-    const names = Array.from(this.getData().matchAll(/<iframe[^>]*?name=(["\'])?((?:.(?!\1|>))*.?)\1?/g)).map(a => a[2]);
-    const uniqueNames = new Set(names);
-    let duplicatedNames = [];
-    for (const name of uniqueNames) {
-      const dups = names.map(e => e === name ? name : '').filter(String).slice(1);
-      duplicatedNames = duplicatedNames.concat(dups);
-    }
-    this.duplicateNames = duplicatedNames.length > 0;
-  }
 
   openMDCCheatSheet() {
-    this.dialog.open(MarkdownCheatSheetDialogComponent);
+    this.dialog.open(MarkdownCheatSheetDialogComponent, {
+      panelClass: 'dialog-md'
+    });
   }
 
-  uploadImg(evt) {
+  uploadImg(evt: Event) {
     if (!evt) {
       return;
     }
-    this.handleUpload()(evt.target.files).then(
+    this.handleUpload()((evt.target as HTMLInputElement).files).then(
       results => results.map(result => this.ace.insert(`![${result.name}](${result.url})\n`))
     );
   }

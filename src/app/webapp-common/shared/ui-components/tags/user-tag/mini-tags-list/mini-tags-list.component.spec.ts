@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { MiniTagsListComponent } from './mini-tags-list.component';
 
@@ -8,7 +9,8 @@ describe('MiniTagsListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MiniTagsListComponent]
+      imports: [MiniTagsListComponent],
+      providers: [provideMockStore({})]
     })
     .compileComponents();
 

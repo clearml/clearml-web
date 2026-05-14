@@ -1,4 +1,13 @@
-import {booleanAttribute, Component, ElementRef, input, output, viewChild, inject } from '@angular/core';
+import {
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  input,
+  output,
+  viewChild
+} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {CdkScrollableModule} from '@angular/cdk/scrolling';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
@@ -6,15 +15,16 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 
 @Component({
-    selector: 'sm-dialog-template',
-    templateUrl: './dialog-template.component.html',
-    styleUrls: ['./dialog-template.component.scss'],
-    imports: [
-        CdkScrollableModule,
-        SaferPipe,
-        MatIcon,
-        MatIconButton
-    ]
+  selector: 'sm-dialog-template',
+  templateUrl: './dialog-template.component.html',
+  styleUrls: ['./dialog-template.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CdkScrollableModule,
+    SaferPipe,
+    MatIcon,
+    MatIconButton
+  ]
 })
 export class DialogTemplateComponent {
   private dialog = inject<MatDialogRef<DialogTemplateComponent>>(MatDialogRef<DialogTemplateComponent>);

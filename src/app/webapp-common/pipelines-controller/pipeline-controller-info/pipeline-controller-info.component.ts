@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed,
+  Component,
+  computed,
   DestroyRef,
   effect,
   ElementRef,
@@ -36,7 +37,6 @@ import {PushPipe} from '@ngrx/component';
 import {
   ExperimentOutputLogComponent
 } from '@common/experiments/containers/experiment-output-log/experiment-output-log.component';
-import {PipelinesControllerModule} from '@common/pipelines-controller/pipelines-controller.module';
 import {
   OpenDatasetVersionPreviewComponent
 } from '@common/dataset-version/open-dataset-version-preview/open-dataset-version-preview.component';
@@ -88,7 +88,6 @@ export enum StatusOption {
     ExperimentOutputLogComponent,
     ButtonToggleComponent,
     CodeEditorComponent,
-    PipelinesControllerModule,
     FormsModule,
     MatIconModule,
     MatIconButton,
@@ -317,17 +316,20 @@ export class PipelineControllerInfoComponent implements OnDestroy {
       pipelineObj = JSON.parse(pipeline);
       // pipelineObj = pipelineDummyConfiguration;
       this.hasStages.set(Object.values(pipelineObj).some((value: TreeStep) => !!value?.stage));
+
       pipelineObj = Object.entries(pipelineObj).reduce((acc, [key, val]: [string, TreeStep]) => {
         if (!this.focusOnStageId() || val.stage === this.focusOnStageId()) {
           acc[key] = {
             ...val,
             parents: val.parents.map(parent => `${parent}`)
-              .filter(parent => !this.focusOnStageId() || pipelineObj[parent].stage === this.focusOnStageId()),
+              // Added a '?' before stage to prevent an exception if a missing parent is evaluated
+              .filter(parent => !this.focusOnStageId() || pipelineObj[parent]?.stage === this.focusOnStageId()),
             isStage: false
           };
         }
         return acc;
       }, {});
+
       if (this.enableStaging()) {
         pipelineObj = this.convertToStages(pipelineObj);
       }
@@ -335,29 +337,49 @@ export class PipelineControllerInfoComponent implements OnDestroy {
     } catch {
       return [];
     }
+
     const pipelineKeysArr = Object.keys(pipelineObj).reverse();
-    // sort nodes to prevent @ngneat/dag from crashing
-    const sortedNodes = [];
-    let i = 0;
-    while (pipelineKeysArr.length > 0 || i > pipelineKeysArr.length) {
-      const node = pipelineObj[pipelineKeysArr[i]];
-      const parents = node?.parents ?? [];
-      if (parents.every(parent => sortedNodes.includes(parent))) {
-        sortedNodes.push(pipelineKeysArr[i]);
-        pipelineKeysArr.splice(i, 1);
-        i = 0;
-        continue;
+    const sortedNodes =[];
+
+    // Sort nodes to prevent @ngneat/dag from crashing (Safe Topological Sort)
+    let progress = true;
+    while (pipelineKeysArr.length > 0 && progress) {
+      progress = false; // Will remain false if no items are successfully resolved
+
+      for (let i = 0; i < pipelineKeysArr.length; i++) {
+        const key = pipelineKeysArr[i];
+        const node = pipelineObj[key];
+
+        // Filter out missing dependencies to prevent deadlocks
+        const validParents = (node?.parents ?? []).filter(parent => pipelineObj[parent]);
+
+        if (validParents.every(parent => sortedNodes.includes(parent))) {
+          sortedNodes.push(key);
+          pipelineKeysArr.splice(i, 1);
+          progress = true; // We successfully placed a node, track progress
+          break; // Break the 'for' loop to start the topological search from the beginning
+        }
       }
-      i++;
     }
-    return sortedNodes.map((key, index) => ({
-      id: key,
-      stepId: index + 1,
-      parentIds: [0].concat(pipelineObj[key].parents.map(parent => sortedNodes.indexOf(parent) + 1)),
-      name: key,
-      branchPath: 1,
-      data: pipelineObj[key],
-    } as PipelineItem));
+
+    // Fallback: If any keys remain (caused by circular references or unresolvable gaps),
+    // simply push the rest so they aren't lost and avoid crashing the browser
+    if (pipelineKeysArr.length > 0) {
+      sortedNodes.push(...pipelineKeysArr);
+    }
+
+    return sortedNodes.map((key, index) => {
+      // Safe access during mapping
+      const parents = pipelineObj[key]?.parents ||[];
+      return {
+        id: key,
+        stepId: index + 1,
+        parentIds: [0].concat(parents.map(parent => sortedNodes.indexOf(parent) + 1)),
+        name: key,
+        branchPath: 1,
+        data: pipelineObj[key],
+      } as PipelineItem;
+    });
   }
 
   drawLines() {
@@ -497,4 +519,5 @@ export class PipelineControllerInfoComponent implements OnDestroy {
   expandStageAnimationStarted() {
     this.chartWidth = 0;
   }
+
 }

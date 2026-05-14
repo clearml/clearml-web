@@ -39,19 +39,23 @@ export class CompareScatterPlotComponent {
 
   protected xAxisLabel = computed(() => this.params()?.[0] ? `${this.params()?.[0].section}.${this.params()?.[0].name}` : '');
 
-  protected scalar = computed(() => this.experiments()
-    .map(point => point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value)
-    .filter((paramValue) => paramValue !== undefined)
-    .some(paramValue => isNaN(parseFloat(paramValue)))
-  );
+  protected scalar = computed(() => {
+    if (this.experiments()?.length > 0 && this.params()?.[0]) {
+      return !this.experiments()
+        .map(point => point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value)
+        .filter((paramValue) => paramValue !== undefined)
+        .some(paramValue => isNaN(parseFloat(paramValue)));
+    }
+    return true;
+  });
 
   protected graphData = computed<ScatterPlotSeries[]>(() => {
-    if (this.experiments() && this.params() && this.metric()) {
+    if (this.experiments()?.length > 0 && this.params()?.[0] && this.metric()) {
       return [{
         label: '',
         backgroundColor: '#14aa8c',
         data: this.experiments()
-          .map(point => [point, point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value])
+          .map(point => [point, point.hyperparams[this.params()[0].section]?.[this.params()[0].name]?.value] as [ExtraTask, string])
           .filter(([, paramValue]) => paramValue !== undefined)
           .map(([point, paramValue]) => {
             const numericParam = parseFloat(paramValue);
@@ -84,7 +88,7 @@ export class CompareScatterPlotComponent {
         const a = document.createElement('a');
         a.href = url;
         a.target = '_blank';
-        a.download = `Hyperparam scatter ${Array.isArray(this.params()) ? this.params()[0] : this.params()} x ${this.metric()}`;
+        a.download = `Hyperparam scatter ${this.xAxisLabel() || this.params()} x ${this.metricName() || this.metric()}`;
         a.click();
       });
   }
