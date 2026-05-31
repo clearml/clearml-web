@@ -1,18 +1,9 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output} from '@angular/core';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatDialogActions} from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
-import {
-  uniqueNameValidator,
-} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {uniqueNameValidator,} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {MatInput} from '@angular/material/input';
 import {minLengthTrimmed} from '@common/shared/validators/minLengthTrimmed';
 import {SelectQueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
@@ -26,6 +17,7 @@ export interface QueueFormData {
   selector: 'sm-create-new-queue-form',
   templateUrl: './create-new-queue-form.component.html',
   styleUrls: ['./create-new-queue-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatDialogActions,
     MatButton,

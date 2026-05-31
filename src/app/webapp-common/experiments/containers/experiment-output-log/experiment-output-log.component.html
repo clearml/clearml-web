@@ -3,7 +3,7 @@
     <div class="ellipsis" [smTooltip]="creator()" matTooltipShowDelay="300" smShowTooltipIfEllipsis>
       <b class="me-2">Hostname:</b>{{creator()}}
     </div>
-    <button mat-stroked-button (click)="downloadLog()">
+    <button mat-stroked-button (click)="downloadLog()" data-id="downloadFullLogButton">
       <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
       Download full log
     </button>
@@ -11,7 +11,8 @@
       <input
         matInput
         placeholder="Filter By Regex"
-        [value]="filter$ | ngrxPush"
+        data-id="filterByRegexField"
+        [value]="filter()"
         (keyup)="filterLog($event)"
       />
     </mat-form-field>
@@ -28,9 +29,9 @@
   <sm-experiment-log-info
     [class.no-header]="!showHeader()"
     [logs]="log()"
-    [beginningOfLog]="logBeginning$ | ngrxPush"
-    [filterString]="filter$ | ngrxPush"
-    [fetching]="fetching$ | ngrxPush"
+    [beginningOfLog]="logBeginning()"
+    [filterString]="filter()"
+    [fetching]="fetching()"
     (fetchMore)="getLogs($event)"
     (scrolledToBottom)="this.scrolledToBottom.emit();"
   ></sm-experiment-log-info>

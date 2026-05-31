@@ -1,0 +1,30 @@
+:host {
+  .selected-project-row {
+    display: grid;
+    grid-template-columns: 1fr 42px;
+    gap: 8px;
+    align-items: center;
+    height: 42px;
+
+    > mat-icon {
+      margin-left: 12px;
+      font-style: normal;
+      text-align: center;
+    }
+
+    .al-ico-trash {
+      cursor: pointer;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.35s;
+    }
+
+    &:hover {
+      background-color: var(--mat-menu-item-hover-state-layer-color);
+      .al-ico-trash {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+  }
+}

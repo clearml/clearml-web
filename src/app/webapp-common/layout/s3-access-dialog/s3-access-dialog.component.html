@@ -1,52 +1,52 @@
 <div class="s3-sub-header">
-  <div [innerHTML]="header | purify"></div>
+  <div [innerHTML]="header() | purify"></div>
 </div>
 <div class="container">
-  <form #S3NGForm="ngForm" (submit)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()">
-    @if (!isAzure) {
+  <form [formGroup]="s3Form" (submit)="s3Form.markAllAsTouched(); saveNewCredentials()">
+    @if (!isAzure()) {
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Key</mat-label>
-        <input matInput type="text" name="Key" required placeholder="Key" [(ngModel)]="s3Form.Key" #keyInput="ngModel"
+        <input matInput type="text" name="Key" required placeholder="Key" formControlName="Key"
           autocomplete="off">
-        @if (keyInput.errors?.required) {
+        @if (s3Form.controls.Key.errors?.required) {
           <mat-error>*Required</mat-error>
         }
       </mat-form-field>
     }
     <mat-form-field appearance="outline" class="w-100">
       <mat-label>Secret</mat-label>
-      <input matInput [(ngModel)]="s3Form.Secret" type="text" name="Secret" required #secretInput="ngModel"
+      <input matInput formControlName="Secret" type="text" name="Secret" required
         autocomplete="off"
-        [placeholder]="isAzure ? 'Shared access signature (SAS)' : 'Secret'">
-      @if (secretInput.errors?.required) {
+        [placeholder]="isAzure() ? 'Shared access signature (SAS)' : 'Secret'">
+      @if (s3Form.controls.Secret.errors?.required) {
         <mat-error>*Required</mat-error>
       }
     </mat-form-field>
-    @if (!isAzure) {
+    @if (!isAzure()) {
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Token</mat-label>
-        <input matInput [(ngModel)]="s3Form.Token" type="text" name="Token" placeholder="Token" autocomplete="off">
+        <input matInput formControlName="Token" type="text" name="Token" placeholder="Token" autocomplete="off">
       </mat-form-field>
     }
-    @if (!isAzure && !isGCS) {
+    @if (!isAzure() && !isGCS()) {
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Region</mat-label>
-        <input matInput [(ngModel)]="s3Form.Region" type="text" name="Region" placeholder="AWS Region (e.g. us-east-2)"
+        <input matInput formControlName="Region" type="text" name="Region" placeholder="AWS Region (e.g. us-east-2)"
           autocomplete="off">
       </mat-form-field>
     }
-    @if ((!isAzure) && endpoint) {
+    @if ((!isAzure()) && endpoint()) {
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Endpoint</mat-label>
         <input
           matInput
-          [(ngModel)]="s3Form.Endpoint"
+          formControlName="Endpoint"
           name="Endpoint"
           autocomplete="off"
-          [disabled]="isGCS"
+          [disabled]="isGCS()"
           placeholder="Host (Endpoint)"
           >
-        @if (s3Form.Endpoint.startsWith('http://') && secured) {
+        @if (s3Form.controls.Endpoint.value?.startsWith('http://') && secured) {
           <i
             matSuffix
             class="al-icon sm al-ico-alert"
@@ -56,8 +56,8 @@
       </mat-form-field>
     }
     <div class="w-100 d-flex justify-content-center mt-4">
-      <button mat-flat-button (click)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()"
-        [disabled]="(!saveEnabled) || (formIsSubmitted && S3NGForm.invalid)">SAVE CREDENTIALS
+      <button mat-flat-button (click)="s3Form.markAllAsTouched(); saveNewCredentials()"
+        [disabled]="(!saveEnabled()) || (formIsSubmitted && s3Form.invalid)">SAVE CREDENTIALS
       </button>
     </div>
   </form>

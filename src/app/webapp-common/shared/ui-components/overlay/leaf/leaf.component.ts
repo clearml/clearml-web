@@ -1,12 +1,13 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 
 @Component({
   selector: 'sm-leaf',
   templateUrl: './leaf.component.html',
   styleUrls: ['./leaf.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeafComponent {
-  @Input() codeOpen = false;
-  @Input() codeEnabled = false;
-  @Output() chooseClicked = new EventEmitter();
+  codeOpen = input(false);
+  codeEnabled = input(false);
+  chooseClicked = output();
 }

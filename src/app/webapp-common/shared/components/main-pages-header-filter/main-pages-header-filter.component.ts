@@ -1,17 +1,19 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
+import {FilterMetadata} from 'primeng/api';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
 import {
-  getAllSystemProjects,
+  getAllSystemProjects, setMainPageStatusFilter,
   setMainPageTagsFilter,
   setMainPageTagsFilterMatchMode,
   setMainPageUsersFilter
 } from '@common/core/actions/projects.actions';
+import {setURLParams} from '@common/core/actions/router.actions';
 import {
-  selectAllProjectsUsers,
+  selectAllProjectsUsers, selectMainPageStatusFilter,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode,
-  selectMainPageUsersFilter
+  selectMainPageUsersFilter, selectRouterProjectId
 } from '@common/core/reducers/projects.reducer';
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
@@ -27,7 +29,7 @@ import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/u
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {debounceTime, filter, map} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, pairwise} from 'rxjs/operators';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {decodeFilter} from '@common/shared/utils/tableParamEncode';
 import {concatLatestFrom} from '@ngrx/operators';
@@ -41,6 +43,9 @@ import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {addOrRemoveFromArray} from '@common/shared/utils/shared-utils';
+import {Params} from '@angular/router';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -57,7 +62,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     MatIconButton,
     MatIconModule,
     TableFilterSortComponent,
-    MatButton
+    MatButton,
+    MenuItemComponent
   ]
 })
 export class MainPagesHeaderFilterComponent {
@@ -70,13 +76,14 @@ export class MainPagesHeaderFilterComponent {
   constructor() {
     this.qParams$.pipe(
       takeUntilDestroyed(),
-      filter((params) => params?.filter !== undefined),
+      distinctUntilChanged((a, b) => a?.filter === b?.filter),
       debounceTime(100),
       concatLatestFrom(() => [this.store.select(selectActiveSearch)]),
       filter(([, activeSearch]) => !activeSearch),
-      map(([params,]) => params)
+      map(([params,]) => params as Params)
     ).subscribe((params) => {
-        const filters = params.filter ? decodeFilter(params.filter) : [];
+      if(params?.filter !== undefined) {
+        const filters = params?.filter ? decodeFilter(params.filter) : [];
         const myWorkFilter = filters.find(filter => filter.col === 'myWork');
         this.store.dispatch(setFilterByUser({
           showOnlyUserWork: myWorkFilter?.value.includes('true'),
@@ -86,16 +93,25 @@ export class MainPagesHeaderFilterComponent {
         this.store.dispatch(setMainPageTagsFilter({tags: tagsFilter?.value ?? [], feature: this.currentFeature()}));
         const usersFilter = filters.find(filter => filter.col === 'users');
         this.store.dispatch(setMainPageUsersFilter({users: usersFilter?.value ?? [], feature: this.currentFeature()}));
+        const statusFilter = filters.find(filter => filter.col === 'status');
+        this.store.dispatch(setMainPageStatusFilter({
+          statuses: statusFilter?.value ?? [],
+          feature: this.currentFeature()
+        }));
+      }
     });
+
+    this.store.select(selectRouterProjectId)
+      .pipe(
+        takeUntilDestroyed(),
+        pairwise(),
+        filter(([prev, next]) => prev !== next && next !== undefined)
+      )
+      .subscribe(() => this.store.dispatch(setMainPageStatusFilter({statuses: [], feature: this.currentFeature()})));
   }
 
   usersSearchValueChanged(search: { value: string; loadMore?: boolean }) {
     this.usersSearchTerm.set(search.value);
-  }
-
-  sortOptionsList(list: IOption[], values) {
-    return list.toSorted((a, b) =>
-      sortByArr(a.value, b.value, [null, ...(values || [])]));
   }
 
   usersSearchTerm = signal('');
@@ -103,12 +119,17 @@ export class MainPagesHeaderFilterComponent {
   allTags = input<string[]>();
   currentUser = this.store.selectSignal(selectCurrentUser);
   users = this.store.selectSignal(selectAllProjectsUsers);
-  usersOptions = computed(() => {
-    return this.sortOptionsList(this.users()?.map(user => ({
-      label: user.name ? user.name : 'Unknown User',
-      value: user.id,
-      tooltip: ''
-    })) ?? [], [this.currentUser().id, ...(this.sortByUsersFilter() ?? [])]);
+  statusOptions = input<IOption[]>([]);
+
+  usersOptions = computed(() => this.users()?.map(user => ({
+    label: user.name ? user.name : 'Unknown User',
+    value: user.id,
+    tooltip: ''
+  })) ?? []);
+
+  protected currentUserAfterPinned = computed(() => {
+    const id = this.currentUser()?.id;
+    return id ? [id] : [];
   });
 
   protected tagsLabelValue = computed(() => {
@@ -140,13 +161,14 @@ export class MainPagesHeaderFilterComponent {
 
   protected usersFilters = this.store.selectSignal(
     selectMainPageUsersFilter);
-  protected sortByUsersFilter = signal< string[]>(this.usersFilters());
+  protected statusFilters = this.store.selectSignal(
+    selectMainPageStatusFilter);
 
-  // protected sortByUsersList = computed(() => [this.currentUser().id, ...(this.usersFilters() ?? [])]);
   protected currentFeature = this.store.selectSignal(selectProjectType);
 
   switchUserFocus() {
     this.store.dispatch(setFilterByUser({showOnlyUserWork: !this.showOnlyUserWork(), feature: this.currentFeature()}));
+    this.updateUrlFilters();
   }
 
   setSearchTerm($event) {
@@ -171,17 +193,31 @@ export class MainPagesHeaderFilterComponent {
 
   emitFilterChangedCheckBox(tags: string[]) {
     this.store.dispatch(setMainPageTagsFilter({tags, feature: this.currentFeature()}));
+    this.updateUrlFilters();
   }
 
   emitUsersFilterChangedCheckBox(filter: { value: string[]; andFilter?: boolean; }) {
     this.store.dispatch(setMainPageUsersFilter({users: filter.value, feature: this.currentFeature()}));
+    this.updateUrlFilters();
+  }
+
+
+  emitStatusFilterChangedCheckBox(val) {
+    if (val) {
+      const newValues = addOrRemoveFromArray(this.statusFilters(), val.itemValue);
+      this.store.dispatch(setMainPageStatusFilter({statuses: newValues, feature: this.currentFeature()}));
+      this.updateUrlFilters();
+    }
+
   }
 
   clearAll() {
     this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined, feature: this.currentFeature()}));
     this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature()}));
     this.store.dispatch(setMainPageUsersFilter({users: [], feature: this.currentFeature()}));
+    this.store.dispatch(setMainPageStatusFilter({statuses: [], feature: this.currentFeature()}));
     this.store.dispatch(setFilterByUser({showOnlyUserWork: false, feature: this.currentFeature()}));
+    this.updateUrlFilters();
   }
 
   menuOpen() {
@@ -192,7 +228,25 @@ export class MainPagesHeaderFilterComponent {
     this.sortByTagsFilter.set(this.tagsFilters());
   }
 
-  usersFilterOpened(){
-    this.sortByUsersFilter.set(this.usersFilters());
+  private updateUrlFilters() {
+    const filters: Record<string, FilterMetadata> = {};
+    const tags = this.tagsFilters();
+    const users = this.usersFilters();
+    const statuses = this.statusFilters();
+
+    if (this.showOnlyUserWork()) {
+      filters['myWork'] = {value: ['true']} as FilterMetadata;
+    }
+    if (tags && tags.length > 0) {
+      filters['tags'] = {value: tags, matchMode: this.matchMode() || undefined} as FilterMetadata;
+    }
+    if (users && users.length > 0) {
+      filters['users'] = {value: users} as FilterMetadata;
+    }
+    if (statuses && statuses.length > 0) {
+      filters['status'] = {value: statuses} as FilterMetadata;
+    }
+
+    this.store.dispatch(setURLParams({filters, update: true}));
   }
 }

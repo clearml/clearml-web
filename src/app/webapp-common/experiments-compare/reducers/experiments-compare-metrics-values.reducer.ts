@@ -5,27 +5,20 @@ import {createReducer, on} from '@ngrx/store';
 export interface MetricSortBy {
   keyOrValue?: 'key' | 'value';
   order?: 'asc' | 'desc';
-  keyOrder?: Array<string>;
+  keyOrder?: string[];
 }
 
 export interface IExperimentCompareMetricsValuesState {
-  experiments: Array<Task>;
-  metricSortBy: MetricSortBy;
+  experiments: Task[];
 }
 
 export const initialState: IExperimentCompareMetricsValuesState = {
   experiments : null,
-  metricSortBy: {}
 };
 
 export const experimentsCompareMetricsValuesReducer = createReducer(
   initialState,
-  on(actions.setComparedExperiments, (state, action) => ({...state, experiments: action.experiments})),
-  on(actions.resetState, () => ({...initialState})),
-  on(actions.setMetricValuesSortBy, (state, action) => ({
-    ...state, metricSortBy: {
-      ...state.metricSortBy,
-      [action.metric]: {keyOrValue: action.keyOrValue, order: action.order, keyOrder: action.keyOrder}
-    }
-  })),
+  on(actions.setComparedExperiments, (state, action): IExperimentCompareMetricsValuesState => ({...state, experiments: action.experiments})),
+  on(actions.resetState, (): IExperimentCompareMetricsValuesState => ({...initialState})),
+
 );

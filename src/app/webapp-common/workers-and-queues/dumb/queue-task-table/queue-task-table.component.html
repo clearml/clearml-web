@@ -1,10 +1,10 @@
-<span class="queue-name"><b>{{queue.caption }}</b> - {{queue.id}}</span>
+<span class="queue-name"><b>{{queue().caption }}</b> - {{queue().id}}</span>
 <sm-table
   [rowHeight]="20"
-  [tableData]="tasks"
+  [tableData]="tasks()"
   [columns]="cols"
   [rowsNumber]="5"
-  (rowClicked)="onRowClicked($event)"
+  (rowClicked)="taskSelected.emit($event.data)"
   [reorderableColumns]="false"
   [resizableColumns]="false"
   >

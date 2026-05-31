@@ -47,6 +47,7 @@
           [project]="project"
           [allTags]="allTags()"
           (run)="run.emit()"
+          (clone)="clone.emit()"
           (rename)="editName.inlineActivated()"
           (addTag)="addTag.emit($event)"
           (delete)="delete.emit()"

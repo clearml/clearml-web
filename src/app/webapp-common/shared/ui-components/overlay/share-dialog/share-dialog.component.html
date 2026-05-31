@@ -1,11 +1,11 @@
-<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title"
+<sm-dialog-template [displayX]="!dialogRef.disableClose" [header]="title"
   (xClicked)="closeDialog(undefined)" [closeOnX]="false"
   iconClass="al-ico-get-link-dialog">
   <div class="d-flex">
-    <div class="sub-title" [innerHTML]="(shared ? sharedSubtitle : privateSubtitle) | purify"></div>
+    <div class="sub-title" [innerHTML]="(shared() ? sharedSubtitle : privateSubtitle) | purify"></div>
   </div>
 
-  @if (shared) {
+  @if (shared()) {
     <div class="share-link-container" >
       <div class="ellipsis share-link">{{link}}</div>
       <div ngxClipboard
@@ -19,5 +19,5 @@
   }
 </sm-dialog-template>
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="createLink()">{{shared ? 'Remove' : 'Create'}} link</button>
+  <button mat-button (click)="createLink()">{{shared() ? 'Remove' : 'Create'}} link</button>
 </div>

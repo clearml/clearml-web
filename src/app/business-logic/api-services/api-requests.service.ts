@@ -7,7 +7,7 @@ import {HttpHeaders} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {ApiOptions} from '~/business-logic/api-services/api';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SmApiRequestsService {
 
   constructor(private http: HttpClient) {

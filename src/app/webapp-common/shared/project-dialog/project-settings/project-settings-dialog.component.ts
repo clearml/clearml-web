@@ -1,30 +1,54 @@
-import {ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal, Signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChildren,
+  inject,
+  input,
+  linkedSignal,
+  output,
+  signal,
+  Signal
+} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButton} from '@angular/material/button';
-import {groupByCharts, GroupByCharts, setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {
+  groupByCharts,
+  GroupByCharts,
+  setExperimentSettings
+} from '@common/experiments/actions/common-experiment-output.actions';
 import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {Store} from '@ngrx/store';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogRef} from '@angular/material/dialog';
-import {selectHasScalarSingleValue, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar} from '@common/experiments/reducers';
+import {
+  selectHasScalarSingleValue,
+  selectSelectedExperimentSettings,
+  selectSelectedSettingsHiddenScalar
+} from '@common/experiments/reducers';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {Project} from '~/business-logic/model/projects/project';
-import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
+import {CdkPortalOutlet} from '@angular/cdk/portal';
 import {EditProjectFormComponent} from '@common/shared/project-dialog/edit-project-form/edit-project-form.component';
 import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
-import {SelectableGroupedFilterListComponent} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {sortByFieldSummaryFirst} from '@common/tasks/tasks.utils';
 import {singleValueChartTitle} from '@common/experiments/shared/common-experiments.const';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {PlotData} from 'plotly.js';
-import {GraphSettingsBarComponent} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
+import {
+  GraphSettingsBarComponent
+} from '@common/shared/experiment-graphs/graph-settings-bar/graph-settings-bar.component';
 import {updateProject as dialogUpdateProject} from '@common/shared/project-dialog/project-dialog.actions';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {ProjectSettingsStore} from '@common/shared/project-dialog/project-settings/project-settings-dialog.store';
-import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {ProjectSettingsStore} from '~/features/dashboard-search/project-settings-dashboard-search-permissions.store';
 
 export interface ProjectSettingsDialogConfig {
   project: Project;
@@ -41,19 +65,20 @@ export interface ProjectSettingsDialogConfig {
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatButton,
-    SingleGraphStateModule,
     DialogTemplateComponent,
     MatTabGroup,
     MatTab,
+    CdkPortalOutlet,
     EditProjectFormComponent,
     MatDialogActions,
     SelectableGroupedFilterListComponent,
     GraphSettingsBarComponent,
-    TooltipDirective
+    TooltipDirective,
+    MatTabLabel
   ]
 })
 export class ProjectSettingsDialogComponent {
-  private store = inject(Store);
+  protected store = inject(Store);
   private settingsStore = inject(ProjectSettingsStore);
   private dialogRef = inject(MatDialogRef);
   protected readonly data: ProjectSettingsDialogConfig = inject(MAT_DIALOG_DATA);
@@ -87,6 +112,8 @@ export class ProjectSettingsDialogComponent {
   protected storeSettings = this.store.selectSignal(selectSelectedExperimentSettings(this.data.project.id));
   protected settings = linkedSignal(() => ({...this.defaultSettings, ...this.storeSettings()}));
   protected settingsGroupBy = computed(() => this.settings().groupBy);
+  protected readonlyProject = computed(() => isReadOnly(this.data.project) || this.settingsStore.isReadOnly());
+
 
   protected scalarsWithoutSummary = computed(() => this.settingsStore.scalars().map(variant => variant.metric === singleValueChartTitle ? {...variant, variant: null} : variant))
   protected originalScalarList = computed(() => [
@@ -121,10 +148,17 @@ export class ProjectSettingsDialogComponent {
   protected generalChanged= signal(false);
   protected hiddenChanged= signal(false);
   dialogTitle = signal<string>(`PROJECT SETTINGS: "${this.data.project.name}"`);
+  extraTabs = contentChildren(MatTab);
+  extraDirty = input<boolean>(false);
+  isEditing = input<boolean>(false);
+  saveExtra = output();
+  cancelExtra = output();
+  selectedTabIndex = signal(0);
 
   constructor() {
     this.settingsStore.setProject(this.data.project.id);
     this.settingsStore.loadScalars();
+    (this.settingsStore as { checkPermissions?: () => void }).checkPermissions?.();
   }
 
   changeSmoothness($event: number) {
@@ -159,8 +193,19 @@ export class ProjectSettingsDialogComponent {
     this.settings.update(settings => ({...settings, showOriginals: $event}));
   }
 
+  tabChanged(index: number) {
+    if (this.isEditing()) {
+      this.cancelExtra.emit();
+    }
+    this.selectedTabIndex.set(index);
+  }
+
   closeDialog() {
-    this.dialogRef.close();
+    if (this.isEditing()) {
+      this.cancelExtra.emit();
+    } else {
+      this.dialogRef.close();
+    }
   }
 
   updateProject(projectForm) {
@@ -168,7 +213,7 @@ export class ProjectSettingsDialogComponent {
     this.project = this.convertFormToProject(projectForm);
   }
 
-  private convertFormToProject(projectForm: any): ProjectsCreateRequest {
+  private convertFormToProject(projectForm: { parent: string; name: string; description?: string; system_tags?: string[]; default_output_destination?: string }): ProjectsCreateRequest {
     return {
       name: `${projectForm.parent === 'Projects root' ? '' : projectForm.parent + '/'}${projectForm.name}`,
       ...(projectForm.description && {description: projectForm.description}),
@@ -208,6 +253,7 @@ export class ProjectSettingsDialogComponent {
   }
 
   save() {
+    this.saveExtra.emit();
     if (this.scalarSettingsChanged() || this.hiddenChanged()) {
       this.store.dispatch(setExperimentSettings({
         id: this.data.project.id,
@@ -219,12 +265,15 @@ export class ProjectSettingsDialogComponent {
           ...(this.hiddenChanged() && {hiddenMetricsScalar: this.listOfHidden()})
         }
       }));
-      if (!this.generalChanged()) {
+      if (!this.generalChanged() && !this.isEditing()) {
         this.dialogRef.close();
       }
     }
     if (this.generalChanged()) {
       this.store.dispatch(dialogUpdateProject({req: {...this.project, project: this.data.project.id}, dialogId: this.dialogRef.id}));
+    }
+    if (!this.isEditing() && !this.scalarSettingsChanged() && !this.hiddenChanged() && !this.generalChanged()) {
+      this.dialogRef.close();
     }
   }
 }

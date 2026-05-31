@@ -9,7 +9,7 @@
     @for (option of optionsFiltered(); track option.key) {
       @let col = getColumnByOption(option);
       @if (col) {
-        <button mat-menu-item [matMenuTriggerFor]="subMenu" (menuOpened)="menuOpened.emit(col)">
+        <button mat-menu-item [matMenuTriggerFor]="subMenu" (menuOpened)="menuOpened.emit(col)" data-id="filterButton">
           <mat-icon fontSet="al" fontIcon="al-ico-completed" class="sm"
                     [style.visibility]="this.value()[option.key]?.length > 0 ? 'visible' : 'hidden'"
           ></mat-icon>
@@ -21,13 +21,14 @@
               <mat-form-field appearance="fill" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
                 <input
                   matInput
+                  data-id="searchField"
                   [(ngModel)]="searchTerms[option.key]"
-                  (input)="container.scrollTo({top: 0}); setSearchTerm($event, option.key)"
+                  (input)="container.scrollTo({top: 0}); setSearchTerm($event, col)"
                   name="filter"
                   autocomplete="off"
                 >
                 @if (searchTerms[option.key]) {
-                  <button mat-icon-button matSuffix class="me-1" (click)="clearSearch(option.key)">
+                  <button mat-icon-button matSuffix class="me-1" (click)="clearSearch(col)">
                     <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
                   </button>
                 } @else {
@@ -52,7 +53,7 @@
             <sm-checkbox-three-state-list
               [supportExcludeFilter]="col.excludeFilter"
               [checkedList]="value()[col.id]"
-              [options]="col.paginatedFilterPageSize ?
+              [options]="(loading() && col.asyncFilter) ? null : col.paginatedFilterPageSize ?
                  (option.value | filter : searchTerms[option.key]: 'label')?.slice(0, col.paginatedFilterPageSize * pageNumber()) ?? [] :
                  (option.value | filter : searchTerms[option.key]: 'label')"
               (filterChanged)="emitFilterChangedCheckBox(option.key, $event)"
@@ -61,7 +62,7 @@
             col.paginatedFilterPageSize * pageNumber() <= (option.value | filter : searchTerms[option.key]: 'label')?.length) {
               <sm-dots-load-more
                 [loading]="loading()"
-                (loadMore)="loadMore()"
+                (loadMore)="loadMore(col)"
                 class="mx-auto my-2"
               ></sm-dots-load-more>
             }
@@ -90,7 +91,7 @@
       }
     }
     <hr>
-      <div mat-menu-item class="clear-all mat-menu-item" (click)="isFiltering() && clearAll.emit()" [disabled]="!isFiltering()">Clear all</div>
+      <div mat-menu-item class="clear-all mat-menu-item" (click)="isFiltering() && clearAll.emit(); $event.stopPropagation()" [disabled]="!isFiltering()" data-id="clearAllButton">Clear all</div>
     </mat-menu>
   </div>
 

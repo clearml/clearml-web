@@ -1,63 +1,61 @@
-import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal} from '@angular/core';
 import {User} from '~/business-logic/model/users/user';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 
 @Component({
-    selector: 'sm-update-notifier',
-    templateUrl: './update-notifier.component.html',
-    styleUrls: ['./update-notifier.component.scss'],
-    imports: [
-        MatIconButton,
-        MatIcon
-    ]
+  selector: 'sm-update-notifier',
+  templateUrl: './update-notifier.component.html',
+  styleUrls: ['./update-notifier.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatIconButton,
+    MatIcon
+  ]
 })
 export class UpdateNotifierComponent {
-  public active      = signal(false);
-  areAvailableUpdates = false;
-  private _availableUpdates: any;
-  public newVersionUrl: string;
-  public newVersionName: string;
+  public active = signal(false);
 
-  @Input() dismissedVersion: string;
+  dismissedVersion = input<string>();
+  availableUpdates = input<any>();
+  currentUser = input<User>();
 
-  @Input() set availableUpdates(availableUpdates) {
-    this.areAvailableUpdates = availableUpdates?.['trains-server']?.['newer_available'];
-    this.newVersionUrl       = availableUpdates?.['trains-server']?.['url'];
-    this.newVersionName      = availableUpdates?.['trains-server']?.['version'];
-    this._availableUpdates   = availableUpdates;
-    if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
-      this.active.set(true);
-      this.notifierActive.emit(true);
+  versionDismissed = output<string>();
+  notifierActive = output<boolean>();
+
+  areAvailableUpdates = computed(() => {
+    const user = this.currentUser();
+    const updates = this.availableUpdates();
+    if (user?.role === 'guest') {
+      return false;
     }
-  }
+    return !!updates?.['trains-server']?.['newer_available'];
+  });
 
-  @Input() set currentUser(user: User) {
-    if (user && user.role == 'guest') {
-      this.areAvailableUpdates = false;
-      this.active.set(false);
-      this.notifierActive.emit(false);
-    } else {
-      this.areAvailableUpdates = this._availableUpdates?.['trains-server']?.['newer_available'];
-      if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
+  newVersionUrl = computed(() => this.availableUpdates()?.['trains-server']?.['url']);
+  newVersionName = computed(() => this.availableUpdates()?.['trains-server']?.['version']);
+
+  constructor() {
+    effect(() => {
+      const areAvailable = this.areAvailableUpdates();
+      const newVersion = this.newVersionName();
+      const dismissed = this.dismissedVersion();
+
+      if (areAvailable && dismissed !== newVersion) {
         this.active.set(true);
         this.notifierActive.emit(true);
+      } else {
+        this.active.set(false);
+        this.notifierActive.emit(false);
       }
-    }
-  }
-
-  @Output() versionDismissed = new EventEmitter();
-  @Output() notifierActive = new EventEmitter();
-
-  get availableUpdates() {
-    return this._availableUpdates;
+    });
   }
 
   dismiss() {
     this.active.set(false);
     this.notifierActive.emit(false);
-    this.versionDismissed.emit(this.newVersionName);
+    this.versionDismissed.emit(this.newVersionName());
   }
 
   show() {

@@ -14,6 +14,7 @@ import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tag
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
 import {MatIconModule} from '@angular/material/icon';
+import {exportTaskInfo} from '@common/experiments/actions/common-experiments-info.actions';
 
 
 @Component({
@@ -33,16 +34,24 @@ import {MatIconModule} from '@angular/material/icon';
 export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   entityTypeEnum = EntityTypeEnum;
 
-  runPipelineController(runNew = false) {
-    this.dialog.open<RunPipelineControllerDialogComponent, {task: ISelectedExperiment}, RunPipelineResult>(RunPipelineControllerDialogComponent, {
-      data: {task: runNew ? null : this.experiment()}
+  runPipelineController(runNew = false, createNewPipeline = false) {
+    this.dialog.open<RunPipelineControllerDialogComponent,
+      {task: ISelectedExperiment; createNewPipeline?: boolean}, RunPipelineResult>
+    (RunPipelineControllerDialogComponent, {
+      panelClass: 'dialog-md',
+      data: {task: runNew ? null : this.experiment(), createNewPipeline}
     }).afterClosed()
       .pipe(filter(res => !!res?.confirmed))
       .subscribe((res) => {
         this.store.dispatch(commonMenuActions.startPipeline({
           task: res.task,
           args: res.args,
-          queue: res.queue
+          queue: res.queue,
+          createNewPipeline: res.createNewPipeline,
+          new_project_name: res.new_project_name,
+          new_pipeline_name: res.new_pipeline_name,
+          new_pipeline_version: res.new_pipeline_version,
+          existingPipeline: res.existingPipeline
         }));
       });
   }
@@ -60,5 +69,12 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   abortControllerPopup() {
     const selectedExperiments = this.selectedExperiments() ? selectionDisabledAbort(this.selectedExperiments()).selectedFiltered : [this.experiment()];
     this.store.dispatch(abortAllChildren({experiments: selectedExperiments}));
+  }
+
+  exportPipeline() {
+    const pipeline = this.experiment();
+    if (pipeline?.id) {
+      this.store.dispatch(exportTaskInfo({taskId: pipeline.id, exportType: 'Pipeline'}));
+    }
   }
 }

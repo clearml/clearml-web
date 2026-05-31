@@ -17,6 +17,7 @@
   }
 
   .experiments-table .body {
+    height: 100%;
     display: grid !important;
     grid-template-columns: 30px minmax(30px, auto) minmax(150px, 1fr) 36px;
     align-items: center;
@@ -27,8 +28,10 @@
 
   .workers-table {
     ::ng-deep .headers, .body {
+      height: inherit;
       display: grid !important;
       grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(150px, 1fr);
+      align-items: center;
       gap: 12px;
       padding: 0 18px;
     }
@@ -36,6 +39,7 @@
 
   ::ng-deep .table-row {
     height: 40px;
+    line-height: normal;
     border-bottom: 1px solid var(--color-surface-container-high);
     padding: 0 !important;
     &:last-of-type {
@@ -55,7 +59,7 @@
 
   sm-simple-table-2 ::ng-deep .headers {
     height: 39px;
-    border-bottom: 1px solid var(--color-outline) !important;
+    border-bottom: 1px solid var(--color-outline-variant) !important;
   }
 
   .close {

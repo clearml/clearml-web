@@ -1,3 +1,41 @@
+@mixin table-empty-message() {
+  .no-output {
+    color: var(--color-empty-state);
+    font-size: 14px;
+    display: flex;
+    position: absolute;
+    width: 100%;
+
+    > span {
+      position: sticky;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .link {
+      color: var(--color-primary);
+      cursor: pointer;
+      text-decoration: none;
+      margin-left: 4px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    &.centered {
+      justify-content: center;
+
+      > span {
+        position: static;
+        left: unset;
+        transform: none;
+      }
+    }
+  }
+}
+
 @mixin empty-card-mixin() {
   .empty-state {
     height: 100%;

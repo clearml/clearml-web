@@ -7,7 +7,7 @@ import {inject, Injectable} from '@angular/core';
 import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {emptyAction} from '~/app.constants';
 import {Action, MemoizedSelector, Store} from '@ngrx/store';
-import {forkJoin, Observable, of} from 'rxjs';
+import {forkJoin, Observable, of, from, concat} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
 import {AdminService} from '~/shared/services/admin.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -202,19 +202,42 @@ export class DeleteDialogEffectsBase {
                 id: string;
                 name: string;
                 message: string
-              }[], Record<CloudProviders, string[]>, TasksResetManyResponseSucceeded[],IExperimentInfo ]) => [
-                ...this.pauseAutorefresh(action.entityType),
-                setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
-                setFailedDeletedEntities({failedEntities: failed}),
-                // deleteFileServerSources({files: urlsPerSource['fs']}), // Currently deleting only in BE
-                // deleteS3Sources({files: urlsPerSource['s3']}),
-                // deleteGoogleCloudeSource(urlsPerSource['gc']),
-                // deleteAzure(urlsPerSource['azure']),
-                // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
-                action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction(),
-              (action.resetMode && selectedExperiment?.id) ? experimentUpdatedSuccessfully({id: selectedExperiment?.id}) : emptyAction()
-              ]
-            ),
+              }[], Record<CloudProviders, string[]>, TasksResetManyResponseSucceeded[],IExperimentInfo ]) => {
+                const baseActions = from([
+                  ...this.pauseAutorefresh(action.entityType),
+                  setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
+                  setFailedDeletedEntities({failedEntities: failed}),
+                  // deleteFileServerSources({files: urlsPerSource['fs']}), // Currently deleting only in BE
+                  // deleteS3Sources({files: urlsPerSource['s3']}),
+                  // deleteGoogleCloudeSource(urlsPerSource['gc']),
+                  // deleteAzure(urlsPerSource['azure']),
+                  // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
+                  action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction(),
+                  (action.resetMode && selectedExperiment?.id) ? experimentUpdatedSuccessfully({id: selectedExperiment?.id}) : emptyAction()
+                ] as Action[]);
+
+                if (action.entityType === EntityTypeEnum.controller && failed.length === 0) {
+                  const pid = projectId || entities[0]?.project?.id;
+                  return concat(
+                    baseActions,
+                    this.projectsApi.projectsValidateDelete({project: pid}).pipe(
+                      switchMap(res => {
+                        if (res.tasks === 0) {
+                          this.router.navigate(['pipelines']);
+                          return from([deleteEntities({
+                            entityType: EntityTypeEnum.project,
+                            entity: {id: pid},
+                            deleteArtifacts: true
+                          }) as Action]);
+                        }
+                        return of();
+                      }),
+                      catchError(() => of())
+                    )
+                  );
+                }
+                return baseActions;
+              }),
             catchError(error => {
               if (this.errorService.lastRunError(error.error)) {
                 return this.handleLastRun(projectId || entities[0]?.project?.id);

@@ -1,3 +1,5 @@
+import {AbstractControl} from '@angular/forms';
+
 export function validateJson(obj) {
   try {
     JSON.parse(obj);
@@ -20,6 +22,9 @@ export const safeJsonParse = (str, defaultValue = {}) => {
     return defaultValue;
   }
 }
+
+export const noWhitespaceValidator = (control: AbstractControl) =>
+  typeof control.value === 'string' && !control.value.trim() ? {required: true} : null;
 
 export const NotOnlyWhiteSpacePattern =  /^(?!\s*$).+/;
 

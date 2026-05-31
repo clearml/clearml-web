@@ -33,6 +33,7 @@
   @if (enableSearch()) {
     <mat-form-field appearance="fill" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
       <input matInput
+             data-id="searchField"
              #searchInput
              [placeholder]="searchPlaceholder()"
              (input)="searchValueChanged.emit($any($event.target).value)"

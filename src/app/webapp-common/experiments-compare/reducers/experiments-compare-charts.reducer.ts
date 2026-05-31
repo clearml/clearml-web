@@ -34,7 +34,8 @@ export interface IExperimentCompareChartsState {
   searchTerm: string;
   showSettingsBar: boolean;
   selectedExperiments: string[];
-  globalLegendData: { name: string, tags: string[], systemTags: string[], id: string, project: { id: string }, last_update?: string, created?: string }[];
+  globalLegendData: { name: string, tags: string[], systemTags: string[], id: string, project: { id: string }, last_update?: Date, created?: string }[];
+  highlightedTaskId: string | null;
   // scalarsHoverMode: ChartHoverModeEnum;
 }
 
@@ -57,7 +58,8 @@ export const initialState: IExperimentCompareChartsState = {
   searchTerm: '',
   showSettingsBar: false,
   selectedExperiments: [], // TODO: Move this to the general compare reducer
-  globalLegendData: null
+  globalLegendData: null,
+  highlightedTaskId: null
   // scalarsHoverMode: 'x'
 };
 
@@ -71,7 +73,7 @@ export const experimentsCompareChartsReducer = createReducer(
   on(actions.setExperimentHistogram, (state, action): IExperimentCompareChartsState => ({
     ...state,
     metricsHistogramCharts: action.payload,
-    cachedAxisType: action.axisType
+    ...(action.axisType && {cachedAxisType: action.axisType})
   })),
   on(actions.setExperimentMultiScalarSingleValue, (state, action): IExperimentCompareChartsState => ({...state, multiSingleValues: action.name ? action.name.tasks : []})),
   on(actions.setAxisCache, (state, action): IExperimentCompareChartsState => ({
@@ -79,11 +81,15 @@ export const experimentsCompareChartsReducer = createReducer(
     cachedAxisType: (action as ReturnType<typeof actions.setAxisCache>).axis
   })),
   on(actions.setExperimentPlots, (state, action): IExperimentCompareChartsState => ({...state, metricsPlotsCharts: action.plots})),
+  on(actions.setHighlightedTaskId, (state, action): IExperimentCompareChartsState => ({
+    ...state,
+    highlightedTaskId: action.taskId
+  })),
   on(actions.setExperimentSettings, (state, action) => {
     const sortedIds = [...(action.id ?? [])].sort();
     const changesWithTimestamp = {
       ...action.changes,
-      lineWidth: action.changes?.lineWidth ?? state.settingsList?.[sortedIds.join()]?.lineWidth ?? 2,
+      lineWidth: action.changes?.lineWidth ?? state.settingsList?.[sortedIds.join()]?.lineWidth ?? 1,
       id: sortedIds,
       lastModified: (new Date()).getTime()
     } as ExperimentCompareSettings;

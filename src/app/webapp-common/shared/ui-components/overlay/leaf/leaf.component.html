@@ -1,4 +1,4 @@
-<div class="h-100" [class]="codeEnabled ? 'code' : 'no-code'">
-  <div class="choose-container" [class.open-code]="codeOpen && codeEnabled" (click)="chooseClicked.emit()"><ng-content></ng-content></div>
-  <div class="code-container" [class.open-code]="codeOpen && codeEnabled"><ng-content select="[sm-code]"></ng-content></div>
+<div class="h-100" [class]="codeEnabled() ? 'code' : 'no-code'">
+  <div class="choose-container" [class.open-code]="codeOpen() && codeEnabled()" (click)="chooseClicked.emit()"><ng-content></ng-content></div>
+  <div class="code-container" [class.open-code]="codeOpen() && codeEnabled()"><ng-content select="[sm-code]"></ng-content></div>
 </div>

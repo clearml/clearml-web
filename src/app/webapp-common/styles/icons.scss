@@ -101,11 +101,6 @@
   @include icon.icon('#{variables.$assets-icons-path}/expand-collapse-all.svg');
 }
 
-// no font icon
-.i-dataview {
-  @include icon.icon('#{variables.$assets-icons-path}/dataview-icon.svg');
-}
-
 .i-in_progress, .i-Uploading {
   @include icon.icon('#{variables.$assets-icons-path}/running-green.svg');
 
@@ -173,29 +168,8 @@
   @include icon.icon('#{variables.$assets-icons-path}/draft-light-blue.svg');
 }
 
-
-// no font icon
-.i-v-neon {
-  @include icon.icon('#{variables.$assets-icons-path}/v.svg');
-}
-
-// no font icon
-.i-v-black {
-  @include icon.icon('#{variables.$assets-icons-path}/black-v.svg');
-}
-
-// two colors
-.i-alert {
-  @include icon.icon('#{variables.$assets-icons-path}/alert.svg');
-}
-
 .i-annotation-blue-neon {
   @include icon.icon('#{variables.$assets-icons-path}/annotation-blue-neon.svg');
-}
-
-// No font icon
-.i-terms {
-  @include icon.icon('#{variables.$assets-icons-path}/terms-icon.svg');
 }
 
 // Icon font is only one color
@@ -295,14 +269,6 @@
 
 .i-microsoft {
   @include icon.icon('#{variables.$assets-icons-path}/ico-microsoft.svg');
-}
-
-.i-project-tags-filter-active {
-  @include icon.icon('#{variables.$assets-icons-path}/project-tags-filter-active.svg');
-}
-
-.i-project-tags-filter {
-  @include icon.icon('#{variables.$assets-icons-path}/project-tags-filter.svg');
 }
 
 .i-c-logo {

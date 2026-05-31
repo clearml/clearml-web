@@ -1,7 +1,7 @@
 <sm-dialog-template iconClass="al-ico-tag" header="TAG COLORS">
   <form class="filter-form">
     <mat-form-field appearance="fill" class="w-100">
-      <input smClickStopPropagation  matInput placeholder="Search" name="filter" [(ngModel)]="filterText" autocomplete="off">
+      <input smClickStopPropagation  matInput placeholder="Search" name="filter" data-id="tagColorSearchField" [(ngModel)]="filterText" autocomplete="off">
       @if (filterText) {
         <button matSuffix mat-icon-button (click)="clearSearch()">
           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
@@ -21,11 +21,11 @@
 
   <mat-menu #subMenu="matMenu">
     <ng-template matMenuContent let-tag="tag" let-color="color">
-      <button mat-menu-item (click)="setForeground(tag, 'black')">
+      <button mat-menu-item data-id="blackOption" (click)="setForeground(tag, 'black')">
         <mat-icon fontSet="al" [fontIcon]="color === 'black' && 'al-ico-success'"></mat-icon>
         Black
       </button>
-      <button mat-menu-item (click)="setForeground(tag, 'white')">
+      <button mat-menu-item data-id="whiteOption" (click)="setForeground(tag, 'white')">
         <mat-icon fontSet="al" [fontIcon]="color === 'white' && 'al-ico-success'"></mat-icon>
         White
       </button>
@@ -47,8 +47,8 @@
     ></div>
     <ng-template #buttons>
       <div class="buttons">
-        <button mat-stroked-button (click)="picker().closeDialog()">CLOSE</button>
-        <button mat-flat-button (click)="setBackground()">APPLY</button>
+        <button mat-stroked-button data-id="closeButton" (click)="picker().closeDialog()">CLOSE</button>
+        <button mat-flat-button data-id="applyButton" (click)="setBackground()">APPLY</button>
       </div>
     </ng-template>
   </div>
@@ -62,7 +62,7 @@
           [class.menu-opened]="trigger.menuOpen"
           class="tag pointer"
           data-id="tagColorButton"
-          [style.backgroundColor]="$any(colors)?.background"
+          [style.background-color]="$any(colors)?.background"
           [style.color]="$any(colors)?.foreground"
           [matMenuTriggerFor]="colorMenu"
           [matMenuTriggerData]="{tag: tag.caption, colors: colors}"

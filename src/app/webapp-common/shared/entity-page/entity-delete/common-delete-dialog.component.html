@@ -33,6 +33,7 @@
           #checkboxInput="ngModel"
           [(ngModel)]="deleteArtifacts"
           name="isApprove"
+          data-id="removeArtifactsCheckbox"
           >Remove all related artifacts and debug samples from ClearML file server
         </mat-checkbox>
       </div>
@@ -45,14 +46,14 @@
         </button>
       </div>
     } @else {
-      <div>Deleting @if (progressPercent > 0) {
-        <span>{{progressPercent}}%</span>
+      <div>Deleting @if (progressPercent() > 0) {
+        <span>{{progressPercent()}}%</span>
       }</div>
-      <mat-progress-bar class="progress-bar" [mode]="progressPercent? 'determinate' : 'indeterminate'"
-        [value]="progressPercent">
+      <mat-progress-bar class="progress-bar" [mode]="progressPercent()? 'determinate' : 'indeterminate'"
+        [value]="progressPercent()">
       </mat-progress-bar>
-      @if (totalFilesNumber > 0) {
-        @if (!showFinishMessage) {
+      @if (totalFilesNumber() > 0) {
+        @if (!showFinishMessage()) {
           <div class="progress-message">
             Deleting artifacts. This may take some time. Please do not close the window.
           </div>
@@ -62,13 +63,13 @@
           </div>
         }
       }
-      <div [class.visible]="(failedEntities$ | ngrxPush)?.length > 0" class="files-list-container">
+      <div [class.visible]="failedEntities()?.length > 0" class="files-list-container">
         <div (click)="openToggleEntities()" class="pointer">
-          <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpenEntities"></mat-icon>The following {{entityType}}s were not deleted:
+          <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpenEntities()"></mat-icon>The following {{entityType}}s were not deleted:
         </div>
-        <div class="more-info" [class]="{'info-open': isOpenEntities}">
+        <div class="more-info" [class]="{'info-open': isOpenEntities()}">
           <ul class="list-container">
-            @for (entity of (failedEntities$ | ngrxPush); track entity) {
+            @for (entity of failedEntities(); track entity) {
               <li>
                 <div>{{entity.name}}</div>
                 <div class="error-reason">{{entity.message}}</div>
@@ -98,7 +99,7 @@
       </div>
       <br><br>
       <div class="buttons">
-        <button mat-stroked-button (click)="closeDialog(true)" [disabled]="progressPercent < 100">
+        <button mat-stroked-button (click)="closeDialog(true)" [disabled]="progressPercent() < 100">
           CLOSE
         </button>
       </div>

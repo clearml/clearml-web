@@ -41,7 +41,7 @@ export const setExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set experiments]',
   props<{ experiments: ITableExperiment[]; noPreferences?: boolean }>()
 );
-export const setTableRefreshPending = createAction(
+export const setTableRefreshSessionPending = createAction(
   EXPERIMENTS_PREFIX + ' [set experiments temporary]',
   props<{ refresh: boolean }>()
 );
@@ -141,7 +141,7 @@ export const getParents = createAction(
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
-  props<{ filters: TableFilter[]; projectId: string }>()
+  props<{ filters: TableFilter[]; projectId: string; others?: Record<string, string>; }>()
 );
 
 export const tableSortChanged = createAction(
@@ -202,6 +202,10 @@ export const getCustomHyperParams = createAction(EXPERIMENTS_PREFIX + ' [get cus
 
 export const setCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [set custom metrics]',
+  props<{ metrics: MetricVariantResult[]}>()
+);
+export const setCompareCustomMetrics = createAction(
+  EXPERIMENTS_PREFIX + ' [set compare custom metrics]',
   props<{ metrics: MetricVariantResult[], projectId: string; compareView: EventTypeEnum}>()
 );
 export const setCustomHyperParams = createAction(

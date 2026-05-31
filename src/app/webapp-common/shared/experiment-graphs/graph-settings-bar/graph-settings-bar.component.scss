@@ -15,6 +15,8 @@
   }
 
   .vertical-layout {
+    font-size: 14px;
+
     .divider {
       border-left: unset;
       padding-left: unset;
@@ -22,8 +24,6 @@
       border-top: 1px solid var(--color-outline-variant);
       padding-top: 16px;
     }
-
-    font-size: 14px;
 
     &.x-axis-options {
       flex-direction: column;
@@ -81,7 +81,6 @@
       align-items: center;
       white-space: nowrap;
       padding-right: 12px;
-      padding-bottom: 4px;
     }
 
     .axis-text-margin-left {
@@ -100,6 +99,28 @@
 
   &.graph-settings-menu {
     padding: 12px;
+  }
+
+  .line-width-control {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--color-outline-variant);
+    padding-top: 16px;
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      width: 200px;
+    }
+
+    mat-slider {
+      flex: 1;
+    }
+
+    .line-width-input {
+      margin-right: 4px;
+    }
   }
 }
 

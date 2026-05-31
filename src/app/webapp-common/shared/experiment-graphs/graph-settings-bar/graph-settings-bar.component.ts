@@ -1,4 +1,4 @@
-import {Component, computed, ElementRef, HostListener, inject, input, Input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatFormField, MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
 import {GroupByCharts} from '@common/experiments/actions/common-experiment-output.actions';
@@ -10,11 +10,15 @@ import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {injectResize} from 'ngxtension/resize';
+import {distinctUntilChanged, map} from 'rxjs';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-graph-settings-bar',
   templateUrl: './graph-settings-bar.component.html',
   styleUrls: ['./graph-settings-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatFormField,
     MatSelect,
@@ -27,56 +31,22 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
     MatIconButton,
     MatButton,
     TooltipDirective,
-    MatSlideToggle
+    MatSlideToggle,
+    PushPipe
   ]
 })
 export class GraphSettingsBarComponent {
+  protected shortMode$ = injectResize({emitInitialResult: true})
+    .pipe(
+      map(res => res.width),
+      distinctUntilChanged(),
+      map(width => width < this.shortModeWidth)
+    );
   private readonly shortModeWidth = 1250;
-  readonly scalarKeyEnum = ScalarKeyEnum;
-  readonly round = Math.round;
+  protected readonly scalarKeyEnum = ScalarKeyEnum;
+  protected readonly round = Math.round;
   protected readonly smoothTypeEnum = smoothTypeEnum;
-  private el = inject(ElementRef);
-
-  public shortMode = signal(this.el.nativeElement.clientWidth < this.shortModeWidth);
-
-  @Input() set splitSize(splitSize: number) {
-    this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
-  }
-
-  smoothWeight = input<number>();
-  smoothSigma = input<number>();
-  smoothType = input<SmoothTypeEnum>();
-  xAxisType = input<ScalarKeyEnum>(ScalarKeyEnum.Iter);
-  groupBy = input<GroupByCharts>('metric');
-  showOrigin = input<boolean>(true);
-  groupByOptions = input<{
-        name: string;
-        value: GroupByCharts;
-    }[]>();
-  verticalLayout = input<boolean>(false);
-  clearable = input<boolean>(false);
-  changeWeight = output<number>();
-  changeSigma = output<number>();
-  changeSmoothType = output<SmoothTypeEnum>();
-  changeXAxisType = output<ScalarKeyEnum>();
-  changeGroupBy = output<GroupByCharts>();
-  changeShowOrigin = output<boolean>();
-  toggleSettings = output();
-  setToProject = output();
-
-  smoothState = computed(() => ({
-    smoothWeight: this.smoothWeight(),
-    weight: signal(this.smoothWeight()),
-    smoothSigma: this.smoothSigma(),
-    sigma: signal(this.smoothSigma())
-  }));
-
-  @HostListener('window:resize')
-  onResize() {
-    this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
-  }
-
-  xAxisTypeOption = [
+  protected readonly xAxisTypeOption = [
     {
       name: 'Iterations',
       value: ScalarKeyEnum.Iter
@@ -91,11 +61,42 @@ export class GraphSettingsBarComponent {
     },
   ];
 
-  constructor() {
-    window.setTimeout(() => {
-      this.shortMode.set(this.el.nativeElement.clientWidth < this.shortModeWidth);
-    }, 100);
-  }
+
+  showLineWidth = input<boolean>(false);
+  smoothWeight = input<number>();
+  smoothSigma = input<number>();
+  smoothType = input<SmoothTypeEnum>();
+  xAxisType = input<ScalarKeyEnum>(ScalarKeyEnum.Iter);
+  groupBy = input<GroupByCharts>('metric');
+  showOrigin = input<boolean>(true);
+  lineWidth = input<number>(1);
+  groupByOptions = input<{
+        name: string;
+        value: GroupByCharts;
+    }[]>();
+  verticalLayout = input<boolean>(false);
+  clearable = input<boolean>(false);
+  changeWeight = output<number>();
+  changeSigma = output<number>();
+  changeSmoothType = output<SmoothTypeEnum>();
+  changeXAxisType = output<ScalarKeyEnum>();
+  changeGroupBy = output<GroupByCharts>();
+  changeLineWidth = output<number>();
+  changeShowOrigin = output<boolean>();
+  toggleSettings = output();
+  setToProject = output();
+
+  smoothState = computed(() => ({
+    smoothWeight: this.smoothWeight(),
+    weight: signal(this.smoothWeight()),
+    smoothSigma: this.smoothSigma(),
+    sigma: signal(this.smoothSigma())
+  }));
+
+  localLineWidth = computed(() => ({
+    width: this.lineWidth()
+  }))
+
   xAxisTypeChanged(key: MatSelectChange) {
     this.changeXAxisType.emit(key.value);
   }
@@ -109,8 +110,12 @@ export class GraphSettingsBarComponent {
     this.changeSmoothType.emit($event.value);
   }
 
-
   setToProjectLevel() {
     this.setToProject.emit()
+  }
+
+  protected lineWidthChanged(width: number) {
+    this.changeLineWidth.emit(width);
+
   }
 }

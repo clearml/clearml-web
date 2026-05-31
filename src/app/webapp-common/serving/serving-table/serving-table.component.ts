@@ -87,7 +87,7 @@ export class ServingTableComponent extends BaseTableView {
   prevSelectedEndpoint = computedPrevious(this.selectedEndpoint);
   tableFilters = input<Record<string, FilterMetadata>>();
   metadataValuesOptions = input<Record<ISmCol['id'], string[]>>();
-  systemTags = input([] as string[]);
+  searchQuery = input<string>();
 
   // @Input() set users(users: User[]) {
   //   this.filtersOptions[servingTableColFields.USER] = users.map(user => ({
@@ -123,8 +123,13 @@ export class ServingTableComponent extends BaseTableView {
         widthPx: number;
     }>();
   clearAllFilters = output<Record<string, FilterMetadata>>();
+  clearTableFiltersAndSearch = output<Record<string, FilterMetadata>>();
 
   public readonly initialColumns = servingTableCols;
+  protected hasActiveFilters = computed(() =>
+    Object.keys(this.tableFilters() ?? {}).length > 0 || (this.searchQuery() && this.searchQuery().trim().length > 0)
+  );
+  protected endpointsUpdated = false;
 
 
   protected columns = computed(() => this.tableCols()
@@ -204,6 +209,16 @@ export class ServingTableComponent extends BaseTableView {
 
   constructor() {
     super();
+
+    effect(() => {
+      this.endpoints();
+      this.endpointsUpdated = true;
+    });
+
+    effect(() => {
+      this.hasActiveFilters();
+      this.endpointsUpdated = false;
+    });
 
     effect(() => {
       if (this.prevSelectedEndpoint()?.id !== this.selectedEndpoint()?.id) {

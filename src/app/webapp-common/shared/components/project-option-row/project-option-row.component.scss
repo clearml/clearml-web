@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  width: 100%;
+  .project-option-row {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding-right: 16px;
+  }
+}

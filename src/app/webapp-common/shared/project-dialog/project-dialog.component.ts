@@ -1,5 +1,5 @@
 import * as createNewProjectActions from './project-dialog.actions';
-import {Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
@@ -14,7 +14,6 @@ import {
 import {
   ProjectMoveToFormComponent
 } from '@common/shared/project-dialog/project-move-to-form/project-move-to-form.component';
-import {PushPipe} from '@ngrx/component';
 
 export interface ProjectDialogConfig {
   project: Project;
@@ -28,11 +27,11 @@ export const OutputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WI
   selector: 'sm-project-create-dialog',
   templateUrl: './project-dialog.component.html',
   styleUrls: ['./project-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DialogTemplateComponent,
     CreateNewProjectFormComponent,
     ProjectMoveToFormComponent,
-    PushPipe
   ]
 })
 export class ProjectDialogComponent {
@@ -41,7 +40,6 @@ export class ProjectDialogComponent {
   private store = inject(Store);
   private matDialogRef = inject(MatDialogRef<ProjectDialogComponent>);
 
-  public header: string;
   public modeParameters: Record<string, { header: string; icon: string }> = {
     create: {
       header: 'NEW PROJECT',
@@ -57,9 +55,9 @@ export class ProjectDialogComponent {
     },
 
   };
-  public baseProject: Project = this.data.project;
-  public mode = this.data.mode;
-  protected projects$ = this.store.select(selectTablesFilterProjectsOptions);
+  protected readonly baseProject: Project = this.data.project;
+  protected readonly mode = this.data.mode;
+  protected projects = this.store.selectSignal(selectTablesFilterProjectsOptions);
 
   constructor() {
     this.store.dispatch(getTablesFilterProjectsOptions({searchString: '', loadMore: false}));

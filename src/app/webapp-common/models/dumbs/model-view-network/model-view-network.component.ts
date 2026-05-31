@@ -89,7 +89,8 @@ export class ModelViewNetworkComponent {
         no       : 'Keep',
         iconClass: 'al-ico-trash',
         centerText: true,
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed()
       .pipe(
         take(1),

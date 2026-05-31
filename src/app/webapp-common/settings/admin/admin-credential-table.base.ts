@@ -5,6 +5,7 @@ import {ICONS} from '../../constants';
 import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
 import {EditCredentialLabelDialogComponent} from '@common/shared/ui-components/overlay/edit-credential-label-dialog/edit-credential-label-dialog.component';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
+import {htmlTextShort} from '@common/shared/utils/shared-utils';
 
 @Directive()
 export class AdminCredentialTableBaseDirective {
@@ -22,13 +23,14 @@ export class AdminCredentialTableBaseDirective {
     const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Are you sure?',
-        body: `Are you sure you want to revoke the ${credential.label || ''} credentials (${credential.access_key})?<br>\n
-              Once revoked, these credentials cannot be recovered.`,
+        body: `Are you sure you want to revoke the <b>${htmlTextShort(credential.label, 200) || ''}</b> credentials (<code>${credential.access_key}</code>)?<br>\n
+              <p>Once revoked, these credentials cannot be recovered.</p>`,
         yes: 'Revoke',
         no: 'Cancel',
         iconClass: 'al-ico-alert',
         iconColor: 'var(--color-warning)'
-      }
+      },
+      panelClass: 'dialog-md'
     });
 
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
@@ -46,9 +48,6 @@ export class AdminCredentialTableBaseDirective {
         yes: ' SAVE ',
         no: 'CANCEL',
         iconClass: 'al-ico-access-key',
-        width: '200px',
-
-        'max-width': '200px'
       }
     }).afterClosed().subscribe((label) => {
       if (typeof label === 'string') {

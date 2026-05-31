@@ -1,7 +1,7 @@
 import {
   Component,
   OnChanges,
-  SimpleChanges, inject, viewChild, viewChildren, output, effect, input, signal
+  SimpleChanges, inject, viewChild, viewChildren, output, effect, input, signal, ElementRef
 } from '@angular/core';
 import {cloneDeep} from 'lodash-es';
 import {v4 as uuidV4} from 'uuid';
@@ -58,6 +58,7 @@ export interface ExecutionParameter {
     MatError,
     MatIconModule,
     MatDivider,
+    CdkVirtualScrollViewport,
     CdkFixedSizeVirtualScroll,
     SearchTextDirective,
     TooltipDirective,
@@ -77,7 +78,7 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   private resize$ = injectResize({emitInitialResult: true});
 
   public form = signal<ExecutionParameter[]>([]);
-  private clickedRow: number;
+  private clickedRow: number = null;
 
   protected search = '';
   protected searchIndexList: { index: number; col: string }[] = [];
@@ -109,15 +110,17 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   public hyperParameters = viewChild<NgForm>('hyperParameters');
   private executionParametersTable = viewChild<TableComponent<ExecutionParameter>>(TableComponent);
 
-  private formContainer = viewChild(CdkVirtualScrollViewport);
+  private formContainer = viewChild<ElementRef<HTMLElement>>('formContainer');
   private rows = viewChildren<MatInput>('row');
   private viewPort = viewChild(CdkVirtualScrollViewport);
 
   constructor() {
     effect(() => {
       if (this.formContainer() && this.clickedRow !== null) {
-        this.formContainer().scrollToIndex(this.clickedRow, 'smooth');
-        this.clickedRow = null;
+        window.setTimeout(() => {
+          this.viewPort().scrollToIndex(this.clickedRow, 'smooth');
+          this.clickedRow = null;
+        }, 50);
       }
     });
 
@@ -243,7 +246,7 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
 
   private isJson(value: string): boolean {
       try {
-        const a = JSON.parse(value);
+        JSON.parse(value);
         return true;
       } catch {
         return false;
@@ -251,7 +254,7 @@ export class ExperimentExecutionParametersComponent implements OnChanges {
   }
 
   openJsonViewer(parameter: ExecutionParameter, readOnly: boolean) {
-    let text= '';
+    let text: string;
     let isJson = false;
     try {
       text = JSON.parse(parameter.value);

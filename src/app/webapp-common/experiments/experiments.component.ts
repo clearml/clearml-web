@@ -32,12 +32,11 @@ import {
   selectTableCompareView,
   selectTableFilters,
   selectTableMode,
-  selectTableRefreshList,
+  selectTableRefreshSessionList,
   selectTableSortFields
 } from './reducers';
 import {
   selectCompanyTags,
-  selectProjectSystemTags,
   selectRouterProjectId,
   selectSelectedProjectId,
   selectTagsFilterByProject
@@ -174,7 +173,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   public menuBackdrop: boolean;
   protected setTableModeAction = experimentsActions.setTableMode;
   private sortFields: SortMeta[];
-  protected override parents: ProjectsGetTaskParentsResponseParents[];
 
   protected override splitSize = this.store.selectSignal(selectSplitSize);
   protected override showAllSelectedIsActive$ = this.store.select(selectShowAllSelectedIsActive);
@@ -185,7 +183,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   protected noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
   protected tableFilters$ = this.store.select(selectTableFilters);
   protected selectedExperimentsDisableAvailable$ = this.store.select(selectSelectedExperimentsDisableAvailable);
-  protected selectedExperimentsHasUpdate$ = this.store.select(selectTableRefreshList);
+  protected selectedExperimentsHasUpdate$ = this.store.select(selectTableRefreshSessionList);
   protected checkedExperiments$ = this.store.select(selectSelectedExperiments)
     .pipe(tap((selectedExperiments: ITableExperiment[]) => {
       this.checkedExperiments = selectedExperiments;
@@ -198,7 +196,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
   protected tags$ = this.store.select(selectExperimentsTags);
   protected tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
   protected companyTags$ = this.store.select(selectCompanyTags);
-  protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
   protected metricVariants$ = this.store.select(selectMetricVariants);
   protected metricLoading$ = this.store.select(selectMetricsLoading);
@@ -293,8 +290,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
         if (projectId !== prevProjectId && Object.keys(params || {}).length === 0) {
           this.emptyUrlInit();
         } else {
-          if (this.entityType === this.entityTypeEnum.experiment) {
-            this.setupContextMenu('tasks', params.archive === 'true');
+          if ((projectId === prevProjectId || prevProjectId === null) && this.entityType === this.entityTypeEnum.experiment) {
+            this.setupHeaderTabs('tasks', params.archive === 'true');
           }
           if (params.columns) {
             const [cols, metrics, hyperParams, , allIds] = decodeColumns(params.columns, this.tableCols);
@@ -721,9 +718,18 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
     return params?.experimentId;
   }
 
-  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
+  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>, others?: Record<string, string>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(experimentsActions.tableFilterChanged({filters, projectId: this.selectedProjectId}));
+    this.store.dispatch(experimentsActions.setTableFilters({filters: [], projectId: this.selectedProjectId}));
+    this.store.dispatch(experimentsActions.tableFilterChanged({filters, projectId: this.selectedProjectId,
+      others: others || {}
+    }));
+  }
+
+  clearTableFiltersAndSearchHandler(tableFilters: Record<string, FilterMetadata>) {
+    this.clearTableFiltersHandler(tableFilters, {
+      q: null,
+    });
   }
 
   onContextMenuOpen({x, y, single, backdrop}: { x: number; y: number; single?: boolean; backdrop?: boolean }) {
@@ -857,5 +863,4 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnD
       }));
     }
   }
-
 }

@@ -9,7 +9,7 @@
                       [sortOrder]="sortByTitle() === 'NAME' && sortOrder()"
                       (itemClicked)="orderByChanged.emit('name')"></sm-menu-item>
       </sm-menu>
-      <sm-main-pages-header-filter [allTags]="allTags()"></sm-main-pages-header-filter>
+      <sm-main-pages-header-filter [allTags]="allTags()" [statusOptions]="reportsStatusOptions"></sm-main-pages-header-filter>
       <sm-button-toggle
         [ngModel]="!!projectId()"
         (ngModelChange)="!archive() && !(!!projectId() && $event) && toggleNestedView.emit($any($event))"
@@ -29,6 +29,7 @@
     ></sm-toggle-archive>
     @if (!disableCreate()) {
       <button mat-flat-button
+              data-id="createNewReport"
               [disabled]="archive()"
               (click)="createReportClicked.emit(projectId())">
         <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>

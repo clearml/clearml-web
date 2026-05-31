@@ -3,7 +3,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
     margin-top: 32px;
   }
 
@@ -26,7 +25,7 @@
   }
 
   sm-selectable-grouped-filter-list {
-    max-height: 350px;
+    max-height: 320px;
     min-height: 200px;
   }
 
@@ -62,6 +61,41 @@
     sm-search,
     sm-grouped-selectable-list {
       padding: 0;
+    }
+  }
+
+
+  ::ng-deep .mat-mdc-tab-body-content {
+    overflow: hidden;
+  }
+
+  .invalid-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-error, #f44336);
+    margin-left: 4px;
+    margin-top: -10px;
+    flex-shrink: 0;
+  }
+
+  mat-dialog-actions {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+
+    .spacer {
+      flex: 1;
+    }
+
+    button[mat-flat-button] {
+      border-radius: 20px;
+      min-width: 100px;
+      font-weight: 600;
+    }
+
+    button[mat-stroked-button] {
+      font-weight: 600;
     }
   }
 }

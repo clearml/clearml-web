@@ -157,7 +157,7 @@ export const setTableSort = createAction(
 
 export const tableFilterChanged = createAction(
   MODELS_PREFIX + '[table filters changed]',
-  props<{ filters: TableFilter[]; projectId: string }>()
+  props<{ filters: TableFilter[]; projectId: string; others?: Record<string, string>; }>()
 );
 
 export const getModelsMetadataValuesForKey = createAction(

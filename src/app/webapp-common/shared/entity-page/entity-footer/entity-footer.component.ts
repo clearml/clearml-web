@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output, computed } from '@angular/core';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {IFooterState, ItemFooterModel} from '../footer-items/footer-items.models';
+import {IFooterState, ItemFooterModel, ItemState} from '../footer-items/footer-items.models';
 import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import {ICONS} from '@common/constants';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -33,6 +33,19 @@ export class EntityFooterComponent<E extends {id: string}> extends BaseContextMe
         emitValue: any;
     }>();
   tagSelected = output<{tag: string, emitValue: any}>();
+  getCompanyTags = output();
+
+  protected footerItemStates = computed(() => {
+    const state = this.footerState();
+    const items = this.footerItems();
+    if (!state) {
+      return {} as Record<string, ItemState>;
+    }
+    return items.reduce((acc, item) => {
+      acc[item.id] = item.getItemState(state);
+      return acc;
+    }, {} as Record<string, ItemState>);
+  });
 
   icons = ICONS;
 }

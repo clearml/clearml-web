@@ -11,7 +11,7 @@
       [class.hidden]="!debugImages.debugImages?.[selected()?.id]?.data"
       [hideNavigation]="true"
       [disableStatusRefreshFilter]="true"
-      [selected]="selected()" >
+      [selected]="$any(selected())" >
     </sm-debug-images>
     @if (plots.plotsList !== undefined && plots.plotsListLength < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected()?.id]?.data) {
       <div class="no-data flex-middle">No preview to show</div>

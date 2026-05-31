@@ -29,7 +29,7 @@ import {
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {MatIcon} from '@angular/material/icon';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-table-filter-sort',
@@ -47,7 +47,6 @@ import {MatButton, MatIconButton} from '@angular/material/button';
     TableFilterDurationDateTimeComponent,
     DotsLoadMoreComponent,
     MatIcon,
-    MatIconButton,
     MatButton,
   ],
 })
@@ -65,6 +64,7 @@ export class TableFilterSortComponent {
   public column = input.required<ISmCol>();
   public searchValue = input<string>('');
   public options = input<{ label: string; value: string; tooltip?: string }[]>();
+  public afterPinned = input<string[]>([]);
   public subOptions = input<{ label: string; value: string }[]>();
   public tooltip = input(false);
   smMenu = viewChild(MenuComponent);
@@ -79,6 +79,7 @@ export class TableFilterSortComponent {
   public searchValueChanged = output<{ value: string; loadMore?: boolean }>();
 
   // Internal State Signals
+  protected pinnedValues = signal<string[]>([]);
   protected pageNumber = signal(1);
   private lengthBeforeLoad = signal<number | null>(null);
   protected loading = signal(false); // For "load more" spinner
@@ -86,6 +87,24 @@ export class TableFilterSortComponent {
 
 
   // Computed Signals
+  protected sortedOptions = computed(() => {
+    const options = this.options();
+    const pinned = this.pinnedValues();
+    const after = this.afterPinned();
+
+    if (!options?.length || (!pinned?.length && !after?.length)) {
+      return options;
+    }
+
+    const afterSet = new Set(after ?? []);
+    const pinnedSet = new Set([null, ...(pinned ?? [])]);
+    const pinnedTop = options.filter(opt => !afterSet.has(opt.value) && pinnedSet.has(opt.value));
+    const afterMid = options.filter(opt => afterSet.has(opt.value));
+    const rest = options.filter(opt => !afterSet.has(opt.value) && !pinnedSet.has(opt.value));
+
+    return [...pinnedTop, ...afterMid, ...rest];
+  });
+
   protected paginatedOptions = computed(() => {
     // When a new search is happening, return null to trigger the spinner in the child component.
     if (this.searching() && !this.noMoreOptions()) {
@@ -93,15 +112,16 @@ export class TableFilterSortComponent {
     }
 
     const col = this.column();
+    const options = this.sortedOptions();
     if (!col.paginatedFilterPageSize || this.noMoreOptions()) {
-      return this.options();
+      return options;
     }
-    return this.options()?.slice(0, col.paginatedFilterPageSize * this.pageNumber());
+    return options?.slice(0, col.paginatedFilterPageSize * this.pageNumber());
   });
 
   protected noMoreOptions = computed(() => {
     const col = this.column();
-    const options = this.options();
+    const options = this.sortedOptions();
 
     // Logic for non-async filters (Cycle is removed here)
     if (!col.asyncFilter) {
@@ -111,7 +131,7 @@ export class TableFilterSortComponent {
       // Calculate if the number of items that should be displayed exceeds the total available.
       const displayedCount = col.paginatedFilterPageSize * this.pageNumber();
       return displayedCount >= options.length;
-    }
+      }
 
     // Logic for async filters (remains the same)
     if (this.loading()) {
@@ -124,11 +144,7 @@ export class TableFilterSortComponent {
       return true;
     }
 
-    if (prevLength !== null && options && options.length === prevLength) {
-      return true;
-    }
-
-    return false;
+    return prevLength !== null && options && options.length === prevLength;
   });
 
   public isFiltered = computed(() => (this.value()?.length ?? 0) > 0 || (this.subValue()?.length ?? 0) > 0);
@@ -173,7 +189,16 @@ export class TableFilterSortComponent {
     if (this.loading() || this.noMoreOptions()) {
       return;
     }
-    // Store the current number of options BEFORE requesting more.
+
+    const col = this.column();
+
+    // For non-async filters, just increment the page number to show more local items
+    if (!col.asyncFilter) {
+      this.pageNumber.update(num => num + 1);
+      return;
+    }
+
+    // For async filters, fetch more data from the server
     this.lengthBeforeLoad.set(this.options()?.length ?? 0);
     this.pageNumber.update(num => num + 1);
     this.loading.set(true);
@@ -195,6 +220,7 @@ export class TableFilterSortComponent {
   }
 
   public onMenuOpen(): void {
+    this.pinnedValues.set(this.value());
     this.menuOpened.emit();
     // If the menu is opened and there are no options, trigger an initial search.
     if (!this.options()?.length) {

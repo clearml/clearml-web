@@ -199,9 +199,15 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
     return params?.endpointId;
   }
 
-  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
+  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>, others?: Record<string, string>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(ServingActions.loadingTableFiltersChanged({filters}));
+    this.store.dispatch(ServingActions.loadingTableFiltersChanged({filters, others: others || {}}));
+  }
+
+  clearTableFiltersAndSearchHandler(tableFilters: Record<string, FilterMetadata>) {
+    this.clearTableFiltersHandler(tableFilters, {
+      q: null,
+    });
   }
 
   getCustomMetrics() {

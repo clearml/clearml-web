@@ -14,7 +14,7 @@
     <span matSuffix class="creat-new-suffix">(Create New)</span>
   }
   @if (control.value) {
-   <button class="sm" mat-icon-button matSuffix (click)="$event.stopPropagation(); control.setValue(null); getEntities.emit(null); inputRef.focus()">
+   <button class="sm" mat-icon-button matSuffix (click)="$event.preventDefault(); $event.stopPropagation(); control.setValue(null); getEntities.emit(null); inputRef.focus()">
      <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
    </button>
   } @else {
@@ -46,3 +46,6 @@
     <mat-option disabled style="height: 0; min-height: 0; padding:0"></mat-option>
   </mat-autocomplete>
 </mat-form-field>
+<div class="field-errors">
+  <ng-content></ng-content>
+</div>

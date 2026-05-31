@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -8,7 +9,7 @@ import {
   viewChildren
 } from '@angular/core';
 import {injectResize} from 'ngxtension/resize';
-import {combineLatest, map, distinctUntilChanged} from 'rxjs';
+import {combineLatest, distinctUntilChanged, map} from 'rxjs';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {NgTemplateOutlet} from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -16,12 +17,13 @@ import {debounceTime} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-dynamic-label-list',
+  templateUrl: './dynamic-label-list.component.html',
+  styleUrl: './dynamic-label-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgTemplateOutlet,
     TooltipDirective
   ],
-  templateUrl: './dynamic-label-list.component.html',
-  styleUrl: './dynamic-label-list.component.scss'
 })
 export class DynamicLabelListComponent {
   private readonly ref = inject(ElementRef);

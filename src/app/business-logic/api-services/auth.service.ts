@@ -45,7 +45,7 @@ import {AuthEditCredentialsRequest} from '~/business-logic/model/auth/authEditCr
 import {AuthEditCredentialsResponse} from '~/business-logic/model/auth/authEditCredentialsResponse';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiAuthService {
 
     protected basePath = HTTP.API_BASE_URL;

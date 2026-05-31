@@ -179,7 +179,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     }>();
   cardsCollapsedToggle = output();
 
-  protected visibleColumns = computed(() => this.columns().filter(col => !col.hidden));
+  protected visibleColumns = computed(() => (this.columns() ?? []).filter(col => !col.hidden));
   protected currRowsNumber = computed(() => this.tableData()?.length ?? this.rowsNumber() ?? 0);
   protected tableSate = computed(() => ({
     table: this.tableData(),
@@ -212,6 +212,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     effect(() => {
       if (!this.minimizedView() && this.table()) {
         this.table().filters = this.filters();
+        this.table().multiSortMeta = this.sortFields();
         if (this.active) {
           this.table().first = 0;
           this.firstChanged.emit(0);
@@ -279,9 +280,6 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
       let totalWidth = 0;
       this.table().destroyStyleElement();
       if (this.minimizedView()) {
-        // if (this.table?.styleElement) {
-        //   this.table.styleElement.innerHTML = '';
-        // }
         totalWidth = Math.max(width, 300);
         this.table().columnWidthsState = `${totalWidth - (this.isChrome ? 13 : 4)}`;
       } else {
@@ -562,7 +560,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   }
 
   getOrder(colId: string) {
-    return this.sortFields().find(field => field.field === colId)?.order;
+    return this.sortFields()?.find(field => field.field === colId)?.order;
   }
 
   checkClick(param: { data: D; e: MouseEvent }) {

@@ -1,7 +1,6 @@
 import {TemplateRef} from '@angular/core';
 
 export interface ConfirmDialogConfig<Context = unknown> {
-  width?: number;
   centerText?: boolean;
   title?: string;
   body?: string;
@@ -15,7 +14,4 @@ export interface ConfirmDialogConfig<Context = unknown> {
   iconData?: string; // the icon class (see icons.scss).
   codeSnippet?: string;
   showNeverShowAgain?: boolean;
-  containerClass?: string;
-  headerClass?: string;
-  buttonsClass?: string;
 }

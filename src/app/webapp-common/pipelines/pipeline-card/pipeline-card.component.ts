@@ -44,6 +44,7 @@ export class PipelineCardComponent extends ProjectCardComponent {
   protected readonly timeFormatString = TIME_FORMAT_STRING;
   allTags = input<string[]>();
   run = output();
+  clone = output();
   addTag = output<string>();
   removeTag = output<string>();
   delete = output();

@@ -58,10 +58,10 @@
         [tags]="tags$ | ngrxPush"
         [modelsProjectTags]="tags$ | ngrxPush"
         [metadataValuesOptions]="metadataColsOptions$ | ngrxPush"
-        [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
+        [searchQuery]="(searchQuery$ | ngrxPush)?.query"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
         [checkedModels]="checkedModels()"
         [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | ngrxPush"
@@ -78,10 +78,12 @@
         (filterChanged)="filterChanged($event)"
         (filterSearchChanged)="filterSearchChanged($event)"
         (loadMoreModels)="getNextModels()"
-        (clearAllFilters)="clearTableFiltersHandler($event)"
+        (clearTableFilters)="clearTableFiltersHandler($event)"
+        (clearTableFiltersAndSearch)="clearTableFiltersAndSearchHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
         (closePanel)="closePanel()"
         (resetFilterOptions)="resetTablesFilterOptions()"
+        (getCompanyTags)="getCompanyTags()"
       >
       </sm-models-table>
     </as-split-area>
@@ -96,4 +98,5 @@
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'models')"
+  (getCompanyTags)="getCompanyTags()"
 ></sm-entity-footer>

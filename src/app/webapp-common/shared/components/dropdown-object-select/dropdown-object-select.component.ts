@@ -199,11 +199,14 @@ export class DropdownObjectSelectComponent implements ControlValueAccessor, Vali
       this.control.setErrors(null);
     }
 
-    return this.isRequired() && !this.control.value ? {required: true} :
+    const isValid =  this.isRequired() && !this.control.value ? {required: true} :
       (this.minLength() && this.control.value?.[displayField]?.length < this.minLength() ? {minlength: true} :
         (this.emptyNameValidator() && this.control.value?.[displayField]?.length > 0 && this.control.value?.[displayField]?.trim().length === 0 ? {emptyName: true} :
           (valueIsInNotOptions ?
-            {invalid: true} : null)));
+            !this.isRequired() && !this.control.value?.value && this.control.value as any === '' ? null : {invalid: true} :
+            null)));
+    this.control.setErrors(isValid);
+    return isValid;
   }
 
   registerOnValidatorChange(fn) {

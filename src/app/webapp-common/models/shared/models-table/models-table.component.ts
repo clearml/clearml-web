@@ -116,12 +116,12 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   selectedModel = input<SelectedModel>(null);
   private prevSelectedModel = computedPrevious(this.selectedModel);
   tableFilters = input<Record<string, FilterMetadata>>({});
+  searchQuery = input<string>();
   users = input<User[]>([]);
   metadataValuesOptions = input<Record<ISmCol['id'], string[]>>();
   frameworks = input<string[]>([]);
   tags = input<string[]>([]);
   modelsProjectTags = input<string[]>([]);
-  systemTags = input([] as string[]);
   columnResizeMode = input('expand' as 'fit' | 'expand');
 
   @Output() modelsSelectionChanged = new EventEmitter<SelectedModel[]>();
@@ -140,7 +140,14 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
         columnId: string;
         widthPx: number;
     }>();
-  clearAllFilters = output<Record<string, FilterMetadata>>();
+  clearTableFilters = output<Record<string, FilterMetadata>>();
+  clearTableFiltersAndSearch = output<Record<string, FilterMetadata>>();
+  getCompanyTags = output();
+
+  protected hasActiveFilters = computed(() =>
+    Object.keys(this.tableFilters() ?? {}).length > 0 || (this.searchQuery() && this.searchQuery().trim().length > 0)
+  );
+  protected modelsUpdated = false;
 
   protected tagsFilterByProject = this.store.selectSignal(selectTagsFilterByProject);
   protected projectTags = this.store.selectSignal(selectProjectTags);
@@ -211,7 +218,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
       label: user.name ? user.name : 'Unknown User',
       value: user.id,
       tooltip: ''
-    })) ?? [], [this.currentUserId(), ...this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.USER]]),
+    })) ?? [], [...this.sortByFilterValues()[MODELS_TABLE_COL_FIELDS.USER], this.currentUserId()]),
     [MODELS_TABLE_COL_FIELDS.TAGS]: this.calcOptionalTagsList(),
     [MODELS_TABLE_COL_FIELDS.PROJECT]: !this.projects() ? null :
       this.sortOptionsList(
@@ -243,6 +250,16 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
 
   constructor() {
     super();
+
+    effect(() => {
+      this.models();
+      this.modelsUpdated = true;
+    });
+
+    effect(() => {
+      this.hasActiveFilters();
+      this.modelsUpdated = false;
+    });
 
     effect(() => {
       if (this.selectedModel() && this.selectedModel().id !== this.prevSelectedModel()?.id) {

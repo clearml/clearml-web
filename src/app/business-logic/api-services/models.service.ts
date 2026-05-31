@@ -70,7 +70,7 @@ import {ModelsUpdateTagsRequest} from '~/business-logic/model/models/modelsUpdat
 import {ModelsUpdateTagsResponse} from '~/business-logic/model/models/modelsUpdateTagsResponse';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiModelsService {
 
     protected basePath = HTTP.API_BASE_URL;

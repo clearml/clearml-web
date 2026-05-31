@@ -37,6 +37,12 @@
     margin-bottom: 24px;
   }
 
+  .credentials-section-title {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--color-on-surface);
+  }
+
   .credentials-and-code {
     overflow: hidden;
     transition: max-height 1s ease;

@@ -1,6 +1,6 @@
 <h4>
-  {{label}}
-  @if (error) {
-    <span class="error" [smTooltip]="error" tooltipType='validation' [matTooltipShowDelay]="0"></span>
+  {{ label() }}
+  @if (error()) {
+    <span class="error" [smTooltip]="error()" tooltipType='validation' [matTooltipShowDelay]="0"></span>
   }
 </h4>

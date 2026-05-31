@@ -4,7 +4,7 @@ import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {catchError, filter, map, mergeMap, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {getExperimentInfoOnlyFields} from '~/features/experiments/experiments.consts';
+import {getExperimentInfoOnlyFields, getTaskExportOnlyFields} from '~/features/experiments/experiments.consts';
 import {
   experimentInfo,
   selectExperimentFormValidity,
@@ -52,7 +52,7 @@ import {
 } from '../reducers';
 import {convertStopToComplete} from '../shared/common-experiments.utils';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
-import {from, of} from 'rxjs';
+import {forkJoin, from, of} from 'rxjs';
 import {emptyAction} from '~/app.constants';
 import {ReplaceHyperparamsEnum} from '~/business-logic/model/tasks/replaceHyperparamsEnum';
 import {Router} from '@angular/router';
@@ -68,6 +68,8 @@ import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdE
 import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
 import {ITask} from '~/business-logic/model/al-task';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {downloadObjectAsJson} from '@common/experiments/shared/common-experiments.utils';
+import {buildTaskExportData, generateTaskExportFilename} from '@common/experiments/shared/task-export.utils';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {fromFetch} from 'rxjs/fetch';
 import {isFileserverUrl} from '~/shared/utils/url';
@@ -77,6 +79,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {UserPreferences} from '@common/user-preferences';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 
 
 @Injectable()
@@ -158,7 +161,7 @@ export class CommonExperimentsInfoEffects {
                 changes: {configuration: configurations}
               }),
               selectedConfiguration ? getExperimentConfigurationObj() : emptyAction(),
-              deactivateLoader(action.type),
+              deactivateLoader(action.type)
             ];
           }),
           catchError(error => [
@@ -232,7 +235,7 @@ export class CommonExperimentsInfoEffects {
       ),
       catchError(error => [
         requestFailed(error),
-        deactivateLoader(action.type),
+        deactivateLoader(action.type)
       ])
     ))
   ));
@@ -309,52 +312,52 @@ export class CommonExperimentsInfoEffects {
 
         only_fields: graphView ? PIPELINE_INFO_ONLY_FIELDS : getExperimentInfoOnlyFields(hasDataFeature)
       })
-      .pipe(
-        switchMap((res: TasksGetByIdExResponse) => {
-          // fetch steps real status
-          const task = res.tasks[0];
-          const ids = this.getPipelineStepsIds(task);
-          return graphView && task.status === TaskStatusEnum.Stopped && ids.length ?
-            this.apiTasks.tasksGetAllEx({
-              id: ids,
-              only_fields: ['status'],
-              search_hidden: true
-            }).pipe(
-              map((steps: TasksGetAllExResponse) => steps?.tasks.length ?
-                this.updateStepsStatus(task, steps.tasks) :
-                task),
-            ) :
-            of(res.tasks[0]);
-        }),
-        concatLatestFrom(() => this.store.select(selectPipelineSelectedStep)),
-        mergeMap(([task, selectedStep]) => {
-          if (task) {
-            this.previousSelectedLastUpdate = task.last_change;
-            let experiment = convertStopToComplete([task])[0];
-            experiment = this.commonExperimentReverterService.revertReadOnly(experiment);
-            return [
-              commonInfoActions.setExperimentInfoData({experiment: this.reverter.revertExperiment(experiment)}),
-              commonInfoActions.setExperiment({experiment}),
-              updateExperiment({id: action.experimentId, changes: experiment}),
-              deactivateLoader(action.type),
-              deactivateLoader(commonInfoActions.getExperimentInfo.type),
-              setBackdrop({active: false}),
-              deactivateEdit(),
-              setExperimentSaving({saving: false}),
-              graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : emptyAction()
-            ];
-          } else {
-            this.router.navigate(['']);
-            return [deactivateLoader(action.type)];
-          }
-        }),
-        catchError(error => [
-          requestFailed(error),
-          deactivateLoader(action.type),
-          deactivateLoader(commonInfoActions.getExperimentInfo.type),
-          ...(action.autoRefresh ? [] : [setServerError(error, null, 'Fetch task failed')])
-        ])
-      )
+        .pipe(
+          switchMap((res: TasksGetByIdExResponse) => {
+            // fetch steps real status
+            const task = res.tasks[0];
+            const ids = this.getPipelineStepsIds(task);
+            return graphView && task.status === TaskStatusEnum.Stopped && ids.length ?
+              this.apiTasks.tasksGetAllEx({
+                id: ids,
+                only_fields: ['status'],
+                search_hidden: true
+              }).pipe(
+                map((steps: TasksGetAllExResponse) => steps?.tasks.length ?
+                  this.updateStepsStatus(task, steps.tasks) :
+                  task)
+              ) :
+              of(res.tasks[0]);
+          }),
+          concatLatestFrom(() => this.store.select(selectPipelineSelectedStep)),
+          mergeMap(([task, selectedStep]) => {
+            if (task) {
+              this.previousSelectedLastUpdate = task.last_change;
+              let experiment = convertStopToComplete([task])[0];
+              experiment = this.commonExperimentReverterService.revertReadOnly(experiment);
+              return [
+                commonInfoActions.setExperimentInfoData({experiment: this.reverter.revertExperiment(experiment)}),
+                commonInfoActions.setExperiment({experiment}),
+                updateExperiment({id: action.experimentId, changes: experiment}),
+                deactivateLoader(action.type),
+                deactivateLoader(commonInfoActions.getExperimentInfo.type),
+                setBackdrop({active: false}),
+                deactivateEdit(),
+                setExperimentSaving({saving: false}),
+                graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : emptyAction()
+              ];
+            } else {
+              this.router.navigate(['']);
+              return [deactivateLoader(action.type)];
+            }
+          }),
+          catchError(error => [
+            requestFailed(error),
+            deactivateLoader(action.type),
+            deactivateLoader(commonInfoActions.getExperimentInfo.type),
+            ...(action.autoRefresh ? [] : [setServerError(error, null, 'Fetch task failed')])
+          ])
+        )
     )
   ));
 
@@ -407,7 +410,7 @@ export class CommonExperimentsInfoEffects {
           ...getExtraHeaders(workspace?.id),
           method: 'GET',
           credentials: 'include',
-          mode: 'cors',
+          mode: 'cors'
         })
         .pipe(
           switchMap(res => from(res.blob()).pipe(
@@ -422,7 +425,7 @@ export class CommonExperimentsInfoEffects {
               a.click();
             })
           )),
-          catchError(() => of(action.url)),
+          catchError(() => of(action.url))
         ) :
       of(null)
         .pipe(map(() => {
@@ -440,7 +443,7 @@ export class CommonExperimentsInfoEffects {
     map((status: string) => status ?
       commonInfoActions.downloadArtifacts({url: status}) :
       commonInfoActions.downloadSuccess())
-  ),);
+  ));
 
 
   // Changes fields which can be applied regardless of experiment draft state i.e name, comments, tags
@@ -483,14 +486,14 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectExperimentInfoData),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentInfoDataFreeze),
-      this.store.select(selectExperimentFormValidity),
+      this.store.select(selectExperimentFormValidity)
     ]),
     filter(([, , , , valid]) => valid),
     switchMap(([, infoData, selectedExperiment, infoFreeze]) =>
       this.apiTasks.tasksEdit(this.converter.convertExperiment(infoData, selectedExperiment, infoFreeze))
         .pipe(
           mergeMap(() => [
-            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id}),
+            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id})
           ]),
           catchError(err => [
             requestFailed(err),
@@ -528,7 +531,7 @@ export class CommonExperimentsInfoEffects {
             setBackdrop({active: false})
           ])
         );
-    }),
+    })
   ));
 
   saveExperimentHyperParams$ = createEffect(() => this.actions$.pipe(
@@ -539,37 +542,48 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute)
     ]),
     filter(([, , valid]) => valid),
-    switchMap(([action, selectedExperiment, , section]) =>
-      this.apiTasks.tasksEditHyperParams({
-        task: selectedExperiment.id,
-        hyperparams: action.hyperparams.length > 0 ? action.hyperparams : [{section}],
-        replace_hyperparams: ReplaceHyperparamsEnum.Section
-      })
-        .pipe(
-          mergeMap(() => [
-            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id}),
-          ]),
-          catchError(err => [
-            requestFailed(err),
-            setServerError(err),
-            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id}),
-            cancelExperimentEdit(),
-            setBackdrop({active: false})
-          ])
-        )
-    ),
+    switchMap(([action, selectedExperiment1, , section]) => {
+        const selectedExperiment = action.task ?? selectedExperiment1;
+        const shouldUpdateRuntimeVersion = selectedExperiment.type === TaskTypeEnum.DataProcessing &&
+          selectedExperiment.runtime?.version && action.hyperparams.length === 1 && action.hyperparams[0].name === 'version';
+        return forkJoin([
+          this.apiTasks.tasksEditHyperParams({
+            task: selectedExperiment.id,
+            hyperparams: action.hyperparams.length > 0 ? action.hyperparams : [{section}],
+            replace_hyperparams: ReplaceHyperparamsEnum.Section
+          }),
+          ...(shouldUpdateRuntimeVersion ? [this.apiTasks.tasksEdit({
+            force: true,
+            task: selectedExperiment.id,
+            runtime: {...selectedExperiment.runtime, version: action.hyperparams[0].value}
+          })] : [])
+        ])
+          .pipe(
+            mergeMap(() => [
+              commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id})
+            ]),
+            catchError(err => [
+              requestFailed(err),
+              setServerError(err),
+              commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id}),
+              cancelExperimentEdit(),
+              setBackdrop({active: false})
+            ])
+          );
+      }
+    )
   ));
 
   saveExperimentConfigObj$ = createEffect(() => this.actions$.pipe(
     ofType(saveExperimentConfigObj),
     concatLatestFrom(() => [
-      this.store.select(selectSelectedExperimentFromRouter),
+      this.store.select(selectSelectedExperimentFromRouter)
     ]),
     switchMap(([action, selectedExperiment]) =>
       this.apiTasks.tasksEditConfiguration({task: selectedExperiment, configuration: action.configuration})
         .pipe(
           mergeMap(() => [
-            commonInfoActions.getExperimentConfigurationObj(),
+            commonInfoActions.getExperimentConfigurationObj()
             // commonInfoActions.setExperimentSaving({saving: false}),
           ]),
           catchError(err => [
@@ -581,7 +595,7 @@ export class CommonExperimentsInfoEffects {
             setBackdrop({active: false})
           ])
         )
-    ),
+    )
   ));
 
   deleteExperimentHyperParamsSection$ = createEffect(() => this.actions$.pipe(
@@ -600,7 +614,7 @@ export class CommonExperimentsInfoEffects {
         .pipe(
           tap(() => this.router.navigateByUrl(this.router.url.replace('/hyper-param/' + section, ''))),
           mergeMap(() => [
-            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id}),
+            commonInfoActions.experimentUpdatedSuccessfully({id: selectedExperiment.id})
           ]),
           catchError(err => [
             requestFailed(err),
@@ -610,7 +624,7 @@ export class CommonExperimentsInfoEffects {
             setBackdrop({active: false})
           ])
         )
-    ),
+    )
   ));
 
   navigateToDataset = createEffect(() => this.actions$.pipe(
@@ -632,6 +646,39 @@ export class CommonExperimentsInfoEffects {
       }
     }),
     catchError(() => of(addMessage(MESSAGES_SEVERITY.WARN, 'Dataset not found')))
+  ));
+
+  exportTaskInfo$ = createEffect(() => this.actions$.pipe(
+    ofType(commonInfoActions.exportTaskInfo),
+    concatLatestFrom(() => this.store.select(selectHasDataFeature)),
+    switchMap(([action, hasDataFeature]) =>
+      this.apiTasks.tasksGetByIdEx({
+        id: [action.taskId],
+        only_fields: getTaskExportOnlyFields(hasDataFeature)
+      }).pipe(
+        mergeMap((res: TasksGetByIdExResponse) => {
+          const task = res.tasks[0];
+          if (!task) {
+            return [addMessage('error', 'Task not found')];
+          }
+
+          try {
+            const exportData = buildTaskExportData(task);
+            const filename = generateTaskExportFilename(task.id);
+            downloadObjectAsJson(exportData, filename, true);
+
+            return [addMessage('success', `${action.exportType ?? 'Task'} exported successfully`)];
+          } catch (error) {
+            console.error('Export failed:', error);
+            return [addMessage('error', 'Failed to export task. Please try again.')];
+          }
+        }),
+        catchError(error => [
+          requestFailed(error),
+          addMessage('error', 'Failed to export task. Please try again.')
+        ])
+      )
+    )
   ));
 
   private getPipelineStepsIds(task: Task) {

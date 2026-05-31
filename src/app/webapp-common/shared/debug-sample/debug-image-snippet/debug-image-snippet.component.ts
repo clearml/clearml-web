@@ -1,7 +1,15 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  ElementRef, inject,
-  OnDestroy, signal, input, output, viewChild, viewChildren, computed
+  computed,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  output,
+  signal,
+  viewChild,
+  viewChildren
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {switchMap} from 'rxjs/operators';
@@ -20,7 +28,9 @@ import {ClipboardModule} from 'ngx-clipboard';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {SafePipe} from '@common/shared/pipes/safe.pipe';
 import {AsyncPipe} from '@angular/common';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 // import {Event} from '@common/debug-images/debug-images-types';
 
@@ -28,6 +38,7 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
   selector: 'sm-debug-image-snippet',
   templateUrl: './debug-image-snippet.component.html',
   styleUrls: ['./debug-image-snippet.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SnippetErrorComponent,
     ClipboardModule,

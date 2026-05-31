@@ -45,10 +45,6 @@
     }
   }
 
-  .card-header {
-    box-shadow: var(--mat-app-elevation-shadow-level-2);
-  }
-
   .table-header {
     display: flex;
     align-items: center;
@@ -144,6 +140,16 @@
     }
   }
 
+  .card-view .no-data-wrapper {
+    justify-content: center;
+
+    span {
+      position: static;
+      left: unset;
+      transform: none;
+    }
+  }
+
   tr:not(.cards-table) {
     &:not(.no-data-row):not(.load-more-wrapper) {
       border-bottom: 1px solid var(--row-border-color);
@@ -182,14 +188,14 @@
     }
 
     &.selected {
-      .card-wrapper {
-        border-bottom-color: var(--row-border-color);
-      }
-
       background-color: var(--row-selected-color);
       color: var(--row-selected-text-color);
 
       --mat-checkbox-unselected-icon-color: var(--color-on-surface);
+
+      .card-wrapper {
+        border-bottom-color: var(--row-border-color);
+      }
 
       ::ng-deep mat-checkbox:not(.mat-mdc-checkbox-checked) {
         .mdc-checkbox:hover .mdc-checkbox__background {
@@ -290,10 +296,8 @@
     &.cards-table {
 
       .card-wrapper {
-        margin: 6px 2px 6px 12px;
-        border: 1px solid var(--row-border-color);
+        border-bottom: 1px solid var(--row-border-color);
         background-color: var(--row-default-color);
-        border-radius: 4px;
         overflow: hidden;
         animation-name: expand;
         animation-duration: 0.35s;
@@ -304,11 +308,6 @@
         }
       }
 
-      &:first-child {
-        .card-wrapper {
-          margin-top: 12px;
-        }
-      }
 
       &:hover:not(.selected):not(.simple) .card-wrapper {
         background-color: var(--row-default-hover-color);
@@ -329,7 +328,6 @@
         .card-wrapper {
           background-color: var(--row-selection-color);
           color: var(--row-selection-text-color);
-          border-color: var(--row-selection-border-color);
         }
 
         &:hover, &.context-menu-opened, &.context-menu-opened-row {
@@ -346,10 +344,6 @@
 
 
   @supports (-moz-appearance:none) {
-    tr.cards-table .card-wrapper {
-      margin: 6px 12px;
-    }
-
     tr:not(.cards-table):not(.no-data-row):not(.load-more-wrapper) td:first-child::after {
       content: "";
       position: absolute;

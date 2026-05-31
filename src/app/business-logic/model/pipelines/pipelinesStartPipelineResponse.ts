@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-
+import { PipelinesStartPipelineResponseNewProject } from '././pipelinesStartPipelineResponseNewProject';
 
 export interface PipelinesStartPipelineResponse {
     /**
@@ -21,5 +21,9 @@ export interface PipelinesStartPipelineResponse {
      * True if the task was successfuly enqueued
      */
     enqueued?: boolean;
+    /**
+    * Returns Trueif there are workers or autscalers working with the queue
+    */
     queue_watched?: boolean;
+    new_project?: PipelinesStartPipelineResponseNewProject;
 }

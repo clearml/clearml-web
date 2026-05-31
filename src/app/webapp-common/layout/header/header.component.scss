@@ -19,7 +19,7 @@
 
   .header-container {
     display: grid;
-    grid-template-columns: minmax(150px, 25%) 1fr minmax(150px, 25%);
+    grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr);
     grid-gap: 32px;
     background-color: color-mix(in srgb, var(--color-surface-container-high), transparent 80%);
     color: var(--color-primary);
@@ -33,9 +33,10 @@
       min-width: 0;
     }
 
-    &.wider-tabs {
-      grid-template-columns: minmax(150px, auto) 1fr minmax(150px, auto);
+    &.no-tabs {
+      grid-template-columns:  1fr 0 minmax(150px, auto);
     }
+
     .header-title {
       font-size: 15px;
       font-weight: 500;

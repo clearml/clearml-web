@@ -30,6 +30,7 @@
       @if (!hideMenu()) {
         <sm-pipeline-card-menu
           class="menu-wrapper"
+          [cardType]="'dataset'"
           [project]="project"
           [allTags]="allTags()"
           (run)="run.emit()"

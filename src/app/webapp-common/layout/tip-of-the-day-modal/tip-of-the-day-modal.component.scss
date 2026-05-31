@@ -1,5 +1,10 @@
 
 :host {
+
+  .tip-container-wrapper {
+    container-type: inline-size;
+    container-name: tips;
+  }
   .tip-container {
     display: flex;
     justify-content: space-between;
@@ -65,5 +70,15 @@
 
   .tip-content {
     width: 100%;
+  }
+}
+
+
+@container tips (max-width: 520px) {
+  .tip-container {
+    flex-wrap: wrap;
+  }
+  .tip-image {
+    margin: 0 auto;
   }
 }

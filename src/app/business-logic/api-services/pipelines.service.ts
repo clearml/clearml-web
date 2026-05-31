@@ -14,6 +14,7 @@
 
 import {HTTP} from '../../app.constants';
 import {SmApiRequestsService} from "./api-requests.service";
+import {ApiOptions} from '~/business-logic/api-services/api';
 
 import { Inject, Injectable, Optional }                      from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams,
@@ -22,6 +23,8 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
+import { PipelinesCheckNewRunRequest } from '../model/pipelines/pipelinesCheckNewRunRequest';
+import { PipelinesCheckNewRunResponse } from '../model/pipelines/pipelinesCheckNewRunResponse';
 import { PipelinesStartPipelineRequest } from '../model/pipelines/pipelinesStartPipelineRequest';
 import { PipelinesStartPipelineResponse } from '../model/pipelines/pipelinesStartPipelineResponse';
 
@@ -31,7 +34,7 @@ import {PipelinesDeleteRunsRequest} from '~/business-logic/model/pipelines/pipel
 import {PipelinesDeleteRunsResponse} from '~/business-logic/model/pipelines/pipelinesDeleteRunsResponse';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiPipelinesService {
 
     protected basePath = HTTP.API_BASE_URL;
@@ -63,6 +66,22 @@ export class ApiPipelinesService {
     }
 
     /**
+     * Check whether the pipeline can be started under the given project
+     * @param request request body
+     * @param options flags and headers to use in webapp
+     */
+    public pipelinesCheckNewRun(request: PipelinesCheckNewRunRequest, options?: ApiOptions): Observable<any> {
+        return this.apiRequest.post<PipelinesCheckNewRunResponse>(`${this.basePath}/pipelines.check_new_run`,
+            request,
+            {
+                headers: this.defaultHeaders,
+                withCredentials: this.configuration.withCredentials
+            },
+            options
+        );
+    }
+
+  /**
      *
      * Delete pipeline runs
      * @param request request body
@@ -109,7 +128,7 @@ export class ApiPipelinesService {
 
 
     /**
-     * 
+     *
      * Start a pipeline
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

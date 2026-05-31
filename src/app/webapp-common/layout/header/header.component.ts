@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, OnInit, signal, Type} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal, Type} from '@angular/core';
 import {ChangesService} from '@common/shared/services/changes.service';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser, selectIsAdmin} from '../../core/reducers/users-reducer';
@@ -18,7 +18,7 @@ import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
-import {selectDarkTheme, selectForcedTheme} from '@common/core/reducers/view.reducer';
+import {selectDarkTheme, selectForcedTheme, selectHeaderMenu} from '@common/core/reducers/view.reducer';
 import {AppearanceComponent} from '../appearance/appearance.component';
 import {BreadcrumbsComponent} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
@@ -82,13 +82,17 @@ export class HeaderComponent implements OnInit {
   protected hideSideNav = signal<boolean>(false);
   protected showAutoRefresh = signal<boolean>(false);
   protected searchActive = signal(false);
-  protected widerTabs = signal(false);
   public activeWorkspace = toSignal<GetCurrentUserResponseUserObjectCompany>(this.store.select(selectActiveWorkspace)
     .pipe(
       filter(workspace => !!workspace),
       distinctUntilChanged()
     )
   );
+
+  protected contextNavbar = this.store.selectSignal(selectHeaderMenu);
+    contextNavbarLength = computed(() => {
+    return this.contextNavbar()?.length;
+  });
 
   // Ctrl + K -> Global Search Dialog
   globalSearchTrigger(e: KeyboardEvent): void {
@@ -140,7 +144,6 @@ export class HeaderComponent implements OnInit {
     }
     this.showAutoRefresh.set(last.snapshot.data.showAutoRefresh);
     this.searchActive.set(active || last.snapshot.data.search);
-    this.widerTabs.set(last.snapshot.data.widerTabs);
   }
 
   logout() {
@@ -150,7 +153,7 @@ export class HeaderComponent implements OnInit {
 
   openWelcome(event: MouseEvent) {
     event.preventDefault();
-    this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
+    this.dialog.open(WelcomeMessageComponent, {data: {step: 2}, panelClass: 'dialog-md'});
   }
 
   openAppearance(event: MouseEvent) {

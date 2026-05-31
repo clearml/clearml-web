@@ -1,5 +1,5 @@
 <div class="selector" [formGroup]="rangeControl" (blur)="onTouched()">
-  <mat-form-field appearance="outline" class="time-selector" subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" class="time-selector no-bottom" subscriptSizing="dynamic">
     <mat-select formControlName="period">
       @for (timeFrame of timeFrameOptions(); track timeFrame.value) {
         <mat-option [value]="timeFrame.value">{{ timeFrame.label }}</mat-option>
@@ -14,17 +14,19 @@
                   [class.error]="rangeControl.hasError('datesInverted')">
 
         <div class="custom-option-container" smClickStopPropagation>
-          <mat-form-field class="custom-selector" subscriptSizing="dynamic">
+          <mat-form-field class="custom-selector no-bottom" subscriptSizing="dynamic">
             <mat-date-range-input [rangePicker]="picker">
               <input matStartDate
                      placeholder="Start date"
                      formControlName="from"
                      (blur)="applyChanges()"
+                     (keydown)="$event.stopPropagation()"
                      (keyup.enter)="applyChanges()">
               <input matEndDate
                      placeholder="End date"
                      formControlName="to"
                      (blur)="applyChanges()"
+                     (keydown)="$event.stopPropagation()"
                      (keyup.enter)="applyChanges()">
             </mat-date-range-input>
             <mat-datepicker-toggle matIconSuffix [for]="picker">Custom</mat-datepicker-toggle>

@@ -31,7 +31,7 @@ export const ICONS = {
   REMOVE: 'al-ico-trash',
   MOVE_TO: 'al-ico-move-to',
   PLUGIN: 'al-ico-plugin',
-  ADD: 'fa-plus',
+  ADD: 'al-ico-add',
   TABLE: 'al-ico-table-view',
   DETAILS: 'al-ico-experiment-view',
   EDIT: 'al-ico-edit',
@@ -48,7 +48,8 @@ export const ICONS = {
   METADATA: 'al-ico-metadata',
   ID: 'al-ico-id',
   CHECK: 'al-ico-success',
-  PALETTE: 'al-ico-palette'
+  PALETTE: 'al-ico-palette',
+  REFRESH: 'al-ico-refresh'
 };
 
 export type IconNames = keyof typeof ICONS;

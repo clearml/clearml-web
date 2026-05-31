@@ -12,7 +12,7 @@ export interface ITableExperiment {
   status: Task['status'];
   tags: Task['tags'];
   system_tags: Task['system_tags'];
-  last_update?: Date;
+  last_update?: string | Date;
   active_duration?: Date;
 }
 

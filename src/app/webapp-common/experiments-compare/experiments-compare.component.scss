@@ -136,8 +136,10 @@ $header-height: 60px;
     font-weight: 500;
     margin-right: 6px;
     max-width: 300px;
-    > a {
+    > .experiment-name-button {
       color: var(--color-on-surface-variant);
+      display: block;
+      max-width: 100%;
       &:hover {
         color: var(--color-on-surface);;
         text-decoration: underline;

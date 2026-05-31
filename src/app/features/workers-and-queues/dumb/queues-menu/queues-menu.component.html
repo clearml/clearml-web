@@ -1,0 +1,27 @@
+@if (menuOpen()) {
+  <sm-menu
+    [position]="menuPosition()"
+    [header]=""
+    [showCart]="false"
+    [showOverlay]="false"
+    [openOnInit]="true"
+  >
+    @if (queuesManager) {
+      <sm-menu-item
+        itemLabel="Delete"
+        [disabled]="selectedQueue()?.entries_count > 0"
+        (itemClicked)="deleteQueue.emit(selectedQueue())"
+      ></sm-menu-item>
+      <sm-menu-item
+        itemLabel="Update"
+        [disabled]="!!selectedQueue().profile_connection"
+        (itemClicked)="renameQueue.emit(selectedQueue())"
+      ></sm-menu-item>
+    }
+    <sm-menu-item
+      itemLabel="Clear"
+      (itemClicked)="clearQueue.emit(selectedQueue())"
+      [disabled]="selectedQueue()?.entries_count === 0"
+    ></sm-menu-item>
+  </sm-menu>
+}

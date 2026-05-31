@@ -6,6 +6,7 @@
           #searchExperiments
           matInput
           name="search-experiments"
+          data-id="searchTasksField"
           autocomplete="off"
           smClickStopPropagation
           placeholder="Search for tasks"
@@ -29,12 +30,12 @@
         [tableFilters]="(tableFilters$ | ngrxPush)"
         [tags]="tags"
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
-        [systemTags]="systemTags$ | ngrxPush"
         [entityType]="entityTypes.experiment"
         [selectedExperiment]="null"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (loadMoreExperiments)="getNextExperiments()"
         (filterChanged)="filterChanged($event)"
+        (clearTableFiltersAndSearch)="clearTableFilters()"
         (columnResized)="resizeCol($event)"
       ></sm-experiments-table>
     </div>

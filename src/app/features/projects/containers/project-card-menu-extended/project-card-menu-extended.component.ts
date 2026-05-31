@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {ProjectCardMenuComponent} from '@common/shared/ui-components/panel/project-card-menu/project-card-menu.component';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {MatDivider} from '@angular/material/divider';
 
 
 @Component({
@@ -11,6 +12,7 @@ import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.compon
   imports: [
     MenuItemComponent,
     MenuComponent,
+    MatDivider,
   ]
 })
 export class ProjectCardMenuExtendedComponent extends ProjectCardMenuComponent {

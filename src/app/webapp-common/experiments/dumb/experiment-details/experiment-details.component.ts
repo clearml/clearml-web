@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, input, Input, viewChild, output } from '@angular/core';
+import {Component, computed, ElementRef, inject, input, Input, viewChild, output } from '@angular/core';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '@common/constants';
@@ -11,8 +11,7 @@ import {SectionHeaderComponent} from '@common/shared/components/section-header/s
 import {RouterLink} from '@angular/router';
 import {DurationPipe} from '@common/shared/pipes/duration.pipe';
 import {NAPipe} from '@common/shared/pipes/na.pipe';
-import {FilterInternalPipe} from '@common/shared/pipes/filter-internal.pipe';
-import {DatePipe, KeyValuePipe} from '@angular/common';
+import {DatePipe} from '@angular/common';
 
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
@@ -30,9 +29,7 @@ export const EXPERIMENT_COMMENT = 'ExperimentComment';
     RouterLink,
     DurationPipe,
     NAPipe,
-    FilterInternalPipe,
-    DatePipe,
-    KeyValuePipe
+    DatePipe
   ]
 })
 export class ExperimentDetailsComponent {
@@ -48,6 +45,16 @@ export class ExperimentDetailsComponent {
   experiment = input<IExperimentInfo>();
   editable = input<boolean>();
   isExample = input<boolean>();
+
+  runtimeEntries = computed(() =>
+    Object.entries(this.experiment()?.runtime ?? {})
+      .filter(([key]) => !key.startsWith('_'))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => ({
+        key,
+        value: typeof value === 'object' && value !== null ? JSON.stringify(value) : value
+      }))
+  );
 
   @Input() set experimentComment(experimentComment: string) {
     this.experimentCommentText = experimentComment;

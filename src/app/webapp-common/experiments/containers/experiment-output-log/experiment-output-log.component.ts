@@ -6,56 +6,48 @@ import {
   inject,
   input,
   output,
-  signal,
   untracked,
   viewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
-  selectExperimentBeginningOfLog,
-  selectExperimentLog,
-  selectLogFilter,
-  selectLogLoading,
   selectSelectedExperimentFromRouter
 } from '../../reducers';
 import {filter} from 'rxjs/operators';
-import {last} from 'lodash-es';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {
-  downloadFullLog,
-  getExperimentLog,
-  resetLogFilter,
   resetOutput,
-  setLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {RefreshService} from '@common/core/services/refresh.service';
-import {activeLoader} from '@common/core/actions/layout.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {selectThemeMode} from '@common/core/reducers/view.reducer';
 import {MatFormField} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton} from '@angular/material/button';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {PushPipe} from '@ngrx/component';
 import {MatInput} from '@angular/material/input';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {PipelineItem} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
+import {injectDispatch} from '@ngrx/signals/events';
+import {
+  experimentOutputLogEvents,
+  ExperimentOutputLogStore
+} from './experiment-output-log.store';
 
 @Component({
   selector: 'sm-experiment-output-log',
   templateUrl: './experiment-output-log.component.html',
   styleUrls: ['./experiment-output-log.component.scss'],
+  providers: [ExperimentOutputLogStore],
   imports: [
     ExperimentLogInfoComponent,
     MatFormField,
     MatIcon,
     MatButton,
     TooltipDirective,
-    PushPipe,
     MatInput,
     ShowTooltipIfEllipsisDirective
   ]
@@ -64,29 +56,30 @@ export class ExperimentOutputLogComponent {
   private store = inject(Store);
   private refresh = inject(RefreshService);
   private readonly destroy = inject(DestroyRef);
+  protected readonly logStore = inject(ExperimentOutputLogStore);
+  private readonly dispatcher = injectDispatch(experimentOutputLogEvents);
 
   showHeader = input(true);
   experiment = input<IExperimentInfo>();
-  step = input<PipelineItem>();
 
   scrolledToBottom = output();
 
 
-  protected log = this.store.selectSignal(selectExperimentLog);
-  protected logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
-  protected filter$ = this.store.select(selectLogFilter);
-  protected fetching$ = this.store.select(selectLogLoading);
+  protected log = this.logStore.log;
+  protected logBeginning = this.logStore.beginningOfLog;
+  protected filter = this.logStore.logFilter;
+  protected fetching = this.logStore.loading;
 
   private selectedExperiment = this.store.selectSignal(selectSelectedExperiment);
   private experimentId = this.store.selectSignal(selectSelectedExperimentFromRouter);
   protected theme = this.store.selectSignal(selectThemeMode);
 
-  protected creator = computed(() => this.log()?.at(-1)?.worker ?? '');
-  protected hasLog = computed(() => Array.isArray(this.log()) ? this.log().length > 0 : null);
+  protected creator = this.logStore.creator;
+  protected hasLog = this.logStore.hasLog;
   private logRef = viewChild(ExperimentLogInfoComponent);
   protected logState = computed(() => ({
     log: this.log(),
-    loading: signal(!this.log())
+    loading: this.fetching
   }));
 
   protected currExperiment = computed(() => {
@@ -101,29 +94,20 @@ export class ExperimentOutputLogComponent {
     }
   });
 
-  protected currExperimentId = computed((): string => this.currExperiment()?.id);
+  protected currExperimentId = computed((): string => this.experiment()?.id ?? this.experimentId());
   protected currExperimentStartedTime = computed(() => this.currExperiment()?.started);
-  private prevStartedTime: any;
+  private prevStartedTime: string;
 
   constructor() {
     effect(() => {
-      if (!this.step() && this.currExperimentId() === this.selectedExperiment()?.id) {
+      if (this.currExperimentId()) {
+        this.prevStartedTime = null;
         untracked(() => {
           this.fetchLog(this.currExperimentId());
         });
-      }
-    });
-
-    effect(() => {
-      if (this.currExperimentId()) {
-        this.prevStartedTime = null;
-      }
-    });
-
-    effect(() => {
-      if (this.step() && this.step().data.job_id === this.currExperimentId()) {
+      } else {
         untracked(() => {
-          this.fetchLog((this.currExperimentId()));
+          this.dispatcher.resetLog();
         });
       }
     });
@@ -144,42 +128,35 @@ export class ExperimentOutputLogComponent {
       .pipe(
         takeUntilDestroyed(),
         filter(autoRefresh => autoRefresh !== null && !this.logState().loading() && !!this.currExperiment()?.id && (!this.logRef() || this.logRef().atEnd || autoRefresh === false)))
-      .subscribe(autoRefresh => this.store.dispatch(getExperimentLog({
-        id: this.currExperiment().id,
-        ...(autoRefresh && {
-          direction: autoRefresh ? 'next' : 'prev',
-          from: last(this.logRef()?.orgLogs)?.timestamp,
-          autoRefresh: true
-        }),
-      })));
+      .subscribe(() => this.dispatcher.getLogs({
+          id: this.currExperiment().id,
+          direction: 'prev',
+          refresh: true
+        })
+);
 
     this.destroy.onDestroy(() => {
-      this.store.dispatch(resetLogFilter());
+      this.dispatcher.resetLog();
       this.store.dispatch(resetOutput());
     });
   }
 
 
   fetchLog(id: string) {
-    this.logState().loading.set(true);
     this.store.dispatch(resetOutput());
+    this.dispatcher.getLogs({id, direction: null});
     this.logRef()?.reset();
-    if (id) {
-      this.store.dispatch(activeLoader(getExperimentLog.type));
-      this.store.dispatch(getExperimentLog({id, direction: null}));
-    }
   }
 
   public filterLog(event: KeyboardEvent) {
-    this.store.dispatch(setLogFilter({filter: (event.target as HTMLInputElement).value}));
+    this.dispatcher.setLogFilter({filter: (event.target as HTMLInputElement).value});
   }
 
   getLogs({direction, from}: { direction: string; from?: number }) {
-    this.store.dispatch(getExperimentLog({id: this.currExperiment().id, direction, from, refresh: !from}));
-    this.logState().loading.set(true);
+    this.dispatcher.getLogs({id: this.currExperiment().id, direction, from, refresh: !from});
   }
 
   downloadLog() {
-    this.store.dispatch(downloadFullLog({experimentId: this.currExperiment().id}));
+    this.dispatcher.downloadLog({id: this.currExperiment().id});
   }
 }

@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+import { provideRouter } from '@angular/router';
+import { ApiOrganizationService } from '~/business-logic/api-services/organization.service';
+import { ColorHashService } from '@common/shared/services/color-hash/color-hash.service';
 
 import { WorkloadsPageComponent } from './workloads-page.component';
 
@@ -8,7 +12,17 @@ describe('WorkloadsPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WorkloadsPageComponent]
+      imports: [WorkloadsPageComponent],
+      providers: [
+        provideMockStore({
+          initialState: {
+            rootProjects: { selectedProject: null }
+          }
+        }),
+        provideRouter([]),
+        { provide: ApiOrganizationService, useValue: {} },
+        { provide: ColorHashService, useValue: {} }
+      ]
     })
     .compileComponents();
 

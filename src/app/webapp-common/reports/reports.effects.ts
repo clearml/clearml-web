@@ -43,7 +43,7 @@ import {Report} from '~/business-logic/model/reports/report';
 import {ReportsUpdateResponse} from '~/business-logic/model/reports/reportsUpdateResponse';
 import {ReportsMoveResponse} from '~/business-logic/model/reports/reportsMoveResponse';
 import {
-  selectHideExamples,
+  selectHideExamples, selectMainPageStatusFilter,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode, selectMainPageUsersFilter,
   selectSelectedProjectId
@@ -70,6 +70,7 @@ import {of} from 'rxjs';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
+import {ReportStatusEnum} from '~/business-logic/model/reports/reportStatusEnum';
 
 @Injectable()
 export class ReportsEffects {
@@ -114,6 +115,7 @@ export class ReportsEffects {
       this.store.select(selectReportsSortOrder),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectMainPageTagsFilter),
+      this.store.select(selectMainPageStatusFilter),
       this.store.select(selectMainPageTagsFilterMatchMode),
       this.store.select(selectCurrentUser),
       this.store.select(selectReportsQueryString),
@@ -121,16 +123,16 @@ export class ReportsEffects {
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectMainPageUsersFilter),
     ]),
-    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId, mainPageUsersFilter]) =>
+    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageStatusFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId, mainPageUsersFilter]) =>
       this.reportsApiService.reportsGetAllEx({
-
         only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
         size: PAGE_SIZE,
         project: projectId === '*' ? null : projectId,
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
         system_tags: [archive ? '__$and' : excludedKey, 'archived'],
-        ...(mainPageUsersFilter?.length > 0 && {user :mainPageUsersFilter}),
+        ...(mainPageUsersFilter?.length > 0 && {user: mainPageUsersFilter}),
+        ...(mainPageStatusFilter?.length > 0 && {status: [...mainPageStatusFilter] as ReportStatusEnum[]}),
         ...(showOnlyUserWork && {user: [user.id]}),
         order_by: [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
         ...(mainPageTagsFilter?.length > 0 && {
@@ -245,7 +247,8 @@ export class ReportsEffects {
           reference: action.report.name,
           allowRootProject: true,
           type: EntityTypeEnum.report
-        }
+        },
+        panelClass: 'dialog-md'
       }).afterClosed()
         .pipe(
           filter(project => !!project),

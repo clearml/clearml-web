@@ -7,6 +7,7 @@ import {Store} from '@ngrx/store';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {map} from 'rxjs/operators';
 import {AppComponent} from '~/app.component';
+import {experimentsProviders} from '~/features/experiments/shared/experiments.providers';
 
 
 const authenticationRequiredGuard: CanActivateFn = (route) => {
@@ -32,17 +33,17 @@ export const routes: Routes = [
       {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
       {
         path: 'dashboard',
-        loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule),
+        loadChildren: () => import('./features/dashboard/dashboard.routes').then(r => r.routes),
         data: {search: true, userFocus: true},
       },
       {
         path: 'projects',
         data: {search: true},
-        loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule),
+        loadChildren: () => import('./features/projects/projects.routes').then(r => r.routes),
       },
       {
         path: 'settings',
-        loadChildren: () => import('./features/settings/settings.module').then(m => m.SettingsModule),
+        loadChildren: () => import('./features/settings/settings.routes').then(r => r.routes),
         data: {search: false, workspaceNeutral: false, },
       },
       {
@@ -63,22 +64,23 @@ export const routes: Routes = [
               },
               {
                 path: 'workloads',
-                loadChildren: () => import('./webapp-common/project-workloads/workloads.routes').then(r => r.routes),
-                data: {search: true},
+                loadComponent: () => import('./webapp-common/project-workloads/workloads-page/workloads-page.component').then(c => c.WorkloadsPageComponent),
+                data: {search: false, archiveLabel: ''},
                 canDeactivate: [resetContextMenuGuard]
               },
-              {path: 'projects', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
+              {path: 'projects', loadChildren: () => import('./features/projects/projects.routes').then(r => r.routes)},
               {path: 'experiments', redirectTo: 'tasks'},
               {
                 path: 'tasks',
                 data: {autoSearchTab: 'tasks'},
-                loadChildren: () => import('./features/experiments/experiments.module').then(m => m.ExperimentsModule),
+                loadChildren: () => import('@common/experiments/experiment-routes').then(r => r.routes),
+                providers: [experimentsProviders],
                 canDeactivate: [resetContextMenuGuard]
               },
               {
                 path: 'models',
                 data: {autoSearchTab: 'models'},
-                loadChildren: () => import('./webapp-common/models/models.module').then(m => m.ModelsModule),
+                loadChildren: () => import('./webapp-common/models/models.routes').then(r => r.routes),
                 canDeactivate: [resetContextMenuGuard]
               },
               {path: 'compare-experiments', redirectTo: 'compare-tasks'},
@@ -86,12 +88,12 @@ export const routes: Routes = [
                 path: 'compare-tasks',
                 data: {entityType: EntityTypeEnum.experiment, search: false, autoSearchTab: 'tasks'},
                 loadChildren: () =>
-                  import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
+                  import('./webapp-common/experiments-compare/experiments-compare.routes').then(r => r.routes)
               },
               {
                 path: 'compare-models',
                 data: {entityType: EntityTypeEnum.model, autoSearchTab: 'models' },
-                loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
+                loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.routes').then(r => r.routes)
               },
             ]
           },
@@ -100,7 +102,7 @@ export const routes: Routes = [
       {
         path: 'pipelines',
         data: {search: true, autoSearchTab: 'pipelines'},
-        loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule),
+        loadChildren: () => import('@common/pipelines/pipelines.routes').then(r => r.routes),
       },
       {
         path: 'pipelines',
@@ -112,7 +114,7 @@ export const routes: Routes = [
               {
                 path: 'pipelines',
                 loadChildren: () =>
-                  import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule)},
+                  import('@common/pipelines/pipelines.routes').then(r => r.routes)},
               {
                 path: 'projects',
                 loadComponent: () =>
@@ -122,14 +124,14 @@ export const routes: Routes = [
               {
                 path: 'tasks',
                 loadChildren: () =>
-                  import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
+                  import('@common/pipelines-controller/pipelines-controller.routes').then(r => r.routes)
               },
               {path: 'compare-experiments', redirectTo: 'compare-tasks'},
               {
                 path: 'compare-tasks',
                 data: {entityType: EntityTypeEnum.controller},
                 loadChildren: () =>
-                  import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
+                  import('./webapp-common/experiments-compare/experiments-compare.routes').then(r => r.routes)
               },
             ]
           },
@@ -138,18 +140,18 @@ export const routes: Routes = [
       {
         path: 'datasets',
         data: {search: true, autoSearchTab: 'datasets'},
-        loadChildren: () => import('./features/datasets/datasets.module').then(m => m.DatasetsModule)
+        loadChildren: () => import('./features/datasets/datasets.routes').then(r => r.routes)
       },
       {
         path: 'reports',
         data: {autoSearchTab: 'reports'},
-        loadChildren: () => import('./webapp-common/reports/reports.module').then(m => m.ReportsModule)
+        loadChildren: () => import('./webapp-common/reports/reports.routes').then(r => r.routes)
       },
-      {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
+      {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.routes').then(r => r.routes)},
       {
         path: 'endpoints',
+        loadChildren: () => import('./webapp-common/serving/serving.routes').then(r => r.routes),
         data: {autoSearchTab: 'modelEndpoints'},
-        loadChildren: () => import('./webapp-common/serving/serving.module').then(m => m.ServingModule),
         canDeactivate: [resetContextMenuGuard]
       },
       {
@@ -160,7 +162,7 @@ export const routes: Routes = [
     ]
   },
   {path: 'login', canActivate: [authenticationRequiredGuard],
-    loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule)
+    loadChildren: () => import('./features/login/login.routes').then(r => r.routes)
   },
   {path: '404', loadComponent: () => import('./features/not-found/not-found/not-found.component').then(c => c.NotFoundComponent)},
   {path: '**', loadComponent: () => import('./features/not-found/not-found/not-found.component').then(c => c.NotFoundComponent)},

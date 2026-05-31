@@ -26,5 +26,20 @@ export interface PipelinesStartPipelineRequest {
      * Task arguments, name/value to be placed in the hyperparameters Args section
      */
     args?: Array<PipelinesStartPipelineRequestArgs>;
+    /**
+    * If passed then check wheter there are any workers watiching the queue
+    */
     verify_watched_queue?: boolean;
+    /**
+     * Existing project name to start a pipeline in. If not provider then run in the   current project
+     */
+    new_project_name?: string;
+    /**
+     * New pipeline name to start a pipeline in. Used only if new project name is   passed. If not passed then task name is used
+     */
+    new_pipeline_name?: string;
+    /**
+     * The run number to start with
+     */
+    new_pipeline_run?: number;
 }

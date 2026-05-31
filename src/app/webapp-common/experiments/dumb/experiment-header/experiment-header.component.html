@@ -45,12 +45,13 @@
     @if (tableMode() === 'compare') {
       <mat-form-field appearance="outline" class="compare-view-select no-bottom">
         <mat-select
+          data-id="compareViewDropdown"
           name="compareView"
           [ngModel]="compareView()"
           (selectionChange)="compareViewChanged.emit($event.value)"
         >
-          <mat-option value="scalars">Scalars</mat-option>
-          <mat-option value="plots">Plots</mat-option>
+          <mat-option data-id="scalarsCompare" value="scalars">Scalars</mat-option>
+          <mat-option data-id="plotsCompare" value="plots">Plots</mat-option>
         </mat-select>
       </mat-form-field>
     }

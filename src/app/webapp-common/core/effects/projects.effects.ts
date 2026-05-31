@@ -1,4 +1,4 @@
-import {Injectable, inject} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {concatLatestFrom} from '@ngrx/operators';
@@ -6,22 +6,9 @@ import {ApiProjectsService} from '~/business-logic/api-services/projects.service
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 import * as actions from '../actions/projects.actions';
 import {
-  downloadForGetAll,
-  setMainPageTagsFilter,
-  setProjectAncestors,
-  setShowHidden,
-  setTablesFilterProjectsOptions
+  downloadForGetAll, setMainPageTagsFilter, setProjectAncestors, setShowHidden, setTablesFilterProjectsOptions
 } from '../actions/projects.actions';
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  map,
-  mergeMap,
-  switchMap,
-  withLatestFrom
-} from 'rxjs/operators';
+import {catchError, debounceTime, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {resetState} from '../../models/actions/models-view.actions';
@@ -31,18 +18,8 @@ import {selectRouterConfig, selectRouterParams} from '../reducers/router-reducer
 import {EMPTY, forkJoin, Observable, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
-import {
-  ScatterPlotPoint,
-  selectAllProjectsUsers, selectIsDeepMode,
-  selectMainPageTagsFilter,
-  selectProjectsOptionsScrollId, selectRouterProjectId,
-  selectSelectedMetricVariantForCurrProject,
-  selectSelectedProjectId,
-  selectShowHidden
-} from '../reducers/projects.reducer';
-import {
-  OperationErrorDialogComponent
-} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
+import {ScatterPlotPoint, selectAllProjectsUsers, selectCompanyTagsLastUpdate, selectIsDeepMode, selectMainPageTagsFilter, selectProjectsOptionsScrollId, selectRouterProjectId, selectSelectedMetricVariantForCurrProject, selectSelectedProjectId, selectShowHidden} from '../reducers/projects.reducer';
+import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {createMetricColumn, excludedKey, MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ITask} from '~/business-logic/model/al-task';
@@ -59,7 +36,6 @@ import {HTTP} from '~/app.constants';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {selectExperimentsTableFilters} from '@common/experiments/reducers';
 import {Params} from '@angular/router';
-import {selectCompareAddTableFilters} from '@common/experiments-compare/reducers';
 import {selectTableFilters} from '@common/models/reducers';
 import {selectSelectModelTableFilters} from '@common/select-model/select-model.reducer';
 import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
@@ -68,9 +44,49 @@ import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/o
 import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 import {ProjectsGetUserNamesResponse} from '~/business-logic/model/projects/projectsGetUserNamesResponse';
 import {fetchUsersForTypes} from '~/features/projects/projects.consts';
+import {FilterMetadata} from 'primeng/api';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Tasks'};
 
+export const getPaginatedAndSearchedAndSelectedProjects = (action, projectsApi: ApiProjectsService, showHidden: boolean, scrollId: string, filters: Record<string, FilterMetadata>, additionalProjects?: string[]) => forkJoin([
+  projectsApi.projectsGetAllEx({
+    allow_public: action.allowPublic,
+    page_size: rootProjectsPageSize,
+    size: rootProjectsPageSize,
+    order_by: ['name'],
+    only_fields: ['name', 'company'],
+    search_hidden: showHidden,
+    _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
+    scroll_id: !!action.loadMore && scrollId ? scrollId : null
+  } as ProjectsGetAllExRequest),
+  !action.loadMore && action.searchString?.length > 0 ?
+    projectsApi.projectsGetAllEx({
+      only_fields: ['name', 'company'],
+      search_hidden: showHidden,
+      _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']}
+    } as ProjectsGetAllExRequest)
+      .pipe(
+        map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString))
+      ) :
+    of([]),
+  !action.loadMore && (filters?.['project.name']?.value.length || additionalProjects?.length) ?
+    projectsApi.projectsGetAllEx({
+      id: [...filters['project.name']?.value || [], ...(additionalProjects ?? [])],
+      only_fields: ['name', 'company']
+
+    } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+    of([])
+])
+  .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
+      projects: [
+        ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
+        ...allProjects.projects,
+        ...selectedProjects
+      ],
+      scrollId: allProjects.scroll_id,
+      loadMore: action.loadMore
+    })
+  ))
 
 @Injectable()
 export class ProjectsEffects {
@@ -110,47 +126,7 @@ export class ProjectsEffects {
       this.store.select(selectProjectsOptionsScrollId),
       this.getRelevantTableFilters(this.store.select(selectRouterConfig))
     ]),
-    switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
-        this.projectsApi.projectsGetAllEx({
-
-          allow_public: action.allowPublic,
-          page_size: rootProjectsPageSize,
-          size: rootProjectsPageSize,
-          order_by: ['name'],
-          only_fields: ['name', 'company'],
-          search_hidden: showHidden,
-          _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
-          scroll_id: !!action.loadMore && scrollId ? scrollId : null
-        } as ProjectsGetAllExRequest),
-        !action.loadMore && action.searchString?.length > 0 ?
-          this.projectsApi.projectsGetAllEx({
-            only_fields: ['name', 'company'],
-            search_hidden: showHidden,
-            _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']}
-
-          } as ProjectsGetAllExRequest)
-            .pipe(
-              map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString))
-            ) :
-          of([]),
-        !action.loadMore && filters['project.name']?.value.length ?
-          this.projectsApi.projectsGetAllEx({
-            id: filters['project.name']?.value,
-            only_fields: ['name', 'company']
-
-          } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
-          of([])
-      ])
-        .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
-            projects: [
-              ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
-              ...allProjects.projects,
-              ...selectedProjects
-            ],
-            scrollId: allProjects.scroll_id,
-            loadMore: action.loadMore
-          })
-        ))
+    switchMap(([action, showHidden, scrollId, filters]) => getPaginatedAndSearchedAndSelectedProjects(action, this.projectsApi, showHidden, scrollId, filters, action.additionalProjects)
     ),
     map((projects: {
       projects: ProjectsGetAllResponseSingle[];
@@ -230,17 +206,24 @@ export class ProjectsEffects {
   ), {dispatch: false});
 
   //getAll but not projects'
-  getAllTags = createEffect(() => this.actions$.pipe(
+  getCompanyTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getCompanyTags),
-    switchMap((action) => this.orgApi.organizationGetTags({include_system: true})
-      .pipe(
-        mergeMap((res: OrganizationGetTagsResponse) => [actions.setCompanyTags({
-          tags: res.tags,
-          systemTags: res.system_tags
-        }), deactivateLoader(action.type)]),
-        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
-      )
-    )
+    concatLatestFrom(() => this.store.select(selectCompanyTagsLastUpdate)),
+    switchMap(([action, lastUpdate]) => {
+      if (Date.now() - lastUpdate < 60 * 60 * 1000) {
+        return [actions.getCompanyTagsSuccess()];
+      }
+      return this.orgApi.organizationGetTags({})
+        .pipe(
+          map((res: OrganizationGetTagsResponse) =>             actions.setCompanyTags({tags: res.tags})),
+          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+        );
+    })
+  ));
+
+  getCompanyTagsSuccess = createEffect(() => this.actions$.pipe(
+    ofType(actions.getCompanyTagsSuccess, actions.setCompanyTags),
+    map(() => deactivateLoader(actions.getCompanyTags.type))
   ));
 
   getProjectsTags = createEffect(() => this.actions$.pipe(
@@ -300,7 +283,8 @@ export class ProjectsEffects {
           title: `${action.operationName} ${action.entityType}`,
           action,
           iconClass: `d-block al-ico-${action.operationName} al-icon w-auto`
-        }
+        },
+        panelClass: 'dialog-md'
       }).afterClosed()
     )
   ), {dispatch: false});
@@ -466,9 +450,7 @@ export class ProjectsEffects {
 
   private getRelevantTableFilters(routerConfig$: Observable<Params>) {
     return routerConfig$.pipe(switchMap(config => {
-      if (config.includes('compare-tasks')) {
-        return this.store.select(selectCompareAddTableFilters);
-      } else if (config?.includes('models')) {
+      if (config?.includes('models')) {
         return this.store.select(selectTableFilters);
       } else if (config?.includes('compare-models') || config?.includes('input-model')) {
         return this.store.select(selectSelectModelTableFilters);

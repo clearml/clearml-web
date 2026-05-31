@@ -19,7 +19,7 @@
 <div class="list">
   @for (category of (itemsObjectListFiltered() | keyvalue: compareByKey); track category.key) {
     <mat-expansion-panel [expanded]="expanded()[category.key]">
-      <mat-expansion-panel-header expandedHeight="36px" collapsedHeight="36px" (click)="toggleExpand(category.key)">
+      <mat-expansion-panel-header expandedHeight="36px" collapsedHeight="36px" data-id="expansionPanelHeader" (click)="toggleExpand(category.key)">
         <div class="ellipsis item-key" [smTooltip]="renameMap[category.key] || category.key" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>
           {{ renameMap[category.key] || category.key }}
         </div>
@@ -34,7 +34,7 @@
                [smTooltip]="!item.checked && selectionLimitReached()? 'You can only select up to ' + limitSelection() + ' parameters' : ''"
                customClass="parameter-tooltip"
                (click)="(!selectionLimitReached() || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
-            <mat-checkbox smClickStopPropagation [checked]="item.checked" (change)="(!selectionLimitReached() || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
+            <mat-checkbox data-id="selectParametersCheckbox" smClickStopPropagation [checked]="item.checked" (change)="(!selectionLimitReached() || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
               <div class="ellipsis" [smTooltip]="item.value" smShowTooltipIfEllipsis>{{ item.value }}</div>
             </mat-checkbox>
           </div>

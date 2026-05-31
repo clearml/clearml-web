@@ -1,4 +1,4 @@
-import {Component, signal} from '@angular/core';
+import {Component, input, signal} from '@angular/core';
 import {ModelMenuComponent} from '@common/models/containers/model-menu/model-menu.component';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {MatIconModule} from '@angular/material/icon';
@@ -23,4 +23,7 @@ import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
 export class ModelMenuExtendedComponent extends ModelMenuComponent {
 
   contextMenu = signal(this);
+
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  override filterTagsByProject = input<boolean>(undefined, { alias: 'tagsFilterByProject' });
 }

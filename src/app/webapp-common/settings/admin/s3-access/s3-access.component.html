@@ -26,17 +26,17 @@
           <ng-container [formGroupName]="$index">
 
             <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput class="form-control" formControlName="Bucket"></mat-form-field>
+              <input matInput class="form-control" formControlName="Bucket" data-id="bucketField"></mat-form-field>
             <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput class="form-control" formControlName="Key"></mat-form-field>
+              <input matInput class="form-control" formControlName="Key" data-id="keyField"></mat-form-field>
             <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput class="form-control" formControlName="Secret"></mat-form-field>
+              <input matInput class="form-control" formControlName="Secret" data-id="secretField"></mat-form-field>
             <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput class="form-control" formControlName="Token"></mat-form-field>
+              <input matInput class="form-control" formControlName="Token" data-id="tokenField"></mat-form-field>
             <mat-form-field appearance="outline" class="no-bottom">
-              <input matInput class="form-control" formControlName="Region" placeholder="us-east-2"></mat-form-field>
+              <input matInput class="form-control" formControlName="Region" placeholder="us-east-2" data-id="regionField"></mat-form-field>
             <mat-form-field appearance="outline" class="no-bottom">
-              <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
+              <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3" data-id="hostField">
             </mat-form-field>
             <div class="d-flex justify-content-end">
               @if (endpoint.value.startsWith('http://') && secured) {
@@ -44,7 +44,7 @@
                 <i class="al-icon sm-md al-ico-alert"></i>
               </span>
               }
-              <button mat-icon-button smTooltip="Remove" matTooltipShowDelay="500" (click)="removeBucket($index)">
+              <button mat-icon-button smTooltip="Remove" matTooltipShowDelay="500" (click)="removeBucket($index)" data-id="removeButton">
                 <mat-icon fontSet="al" [fontIcon]="ICONS.REMOVE"></mat-icon>
               </button>
             </div>
@@ -53,9 +53,9 @@
       }
     </div>
     <div>
-      <button mat-button (click)="addBucket({})">
+      <button mat-stroked-button class="mb-4" (click)="addBucket({})" data-id="addAccessKeysButton">
         <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
-        Add Access Keys
+        ADD ACCESS KEYS
       </button>
     </div>
   </form>

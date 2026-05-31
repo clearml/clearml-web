@@ -27,6 +27,7 @@ export interface ViewState {
   neverShowChangesAgain: string;
   plotlyReady: boolean;
   aceReady: boolean;
+  aceExtToolsReady: boolean;
   aceCaretPosition: Record<string, Ace.Point>;
   showUserFocus: boolean;
   redactedArguments: { key: string }[];
@@ -59,6 +60,7 @@ export const initViewState: ViewState = {
   neverShowChangesAgain: null,
   plotlyReady: false,
   aceReady: false,
+  aceExtToolsReady: false,
   aceCaretPosition: {},
   showUserFocus: false,
   redactedArguments: [{key: 'CLEARML_API_SECRET_KEY'},
@@ -102,6 +104,7 @@ export const selectScaleFactor = createSelector(views, state => state?.scaleFact
 export const selectFirstLogin = createSelector(views, state => state.firstLogin);
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
 export const selectAceReady = createSelector(views, state => state.aceReady);
+export const selectAceExtToolsReady = createSelector(views, state => state.aceExtToolsReady);
 export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 export const selectNeverShowAppChanges = createSelector(views, (state): string => state.neverShowChangesAgain);
@@ -155,6 +158,7 @@ export const viewReducers = [
   })),
   on(layoutActions.plotlyReady, (state): ViewState => ({...state, plotlyReady: true})),
   on(layoutActions.aceReady, (state): ViewState => ({...state, aceReady: true})),
+  on(layoutActions.aceExtToolsReady, (state): ViewState => ({...state, aceExtToolsReady: true})),
   on(layoutActions.saveAceCaretPosition, (state, action): ViewState => ({
     ...state,
     aceCaretPosition: {...state.aceCaretPosition, [action.id]: action.position}

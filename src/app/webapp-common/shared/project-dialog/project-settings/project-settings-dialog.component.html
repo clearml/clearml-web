@@ -4,12 +4,26 @@
   headerClass="no-uppercase"
 >
 
-  <mat-tab-group [mat-stretch-tabs]="false" mat-align-tabs="center" class="with-border" [dynamicHeight]="true">
+  <mat-tab-group
+    [mat-stretch-tabs]="false"
+    mat-align-tabs="center"
+    class="with-border"
+    [dynamicHeight]="true"
+    [selectedIndex]="selectedTabIndex()"
+    (selectedIndexChange)="tabChanged($event)"
+  >
 
     <mat-tab label="GENERAL">
+      <ng-template mat-tab-label>
+        GENERAL
+        @if (generalForm.projectForm?.invalid) {
+          <span class="invalid-dot"></span>
+        }
+      </ng-template>
       <sm-edit-project-form
         #generalForm
         [project]="data.project"
+        [isReadOnly]="readonlyProject()"
         (projectUpdated)="updateProject($event)"
         (cancelClicked)="closeDialog()"
         class="data-project">
@@ -51,13 +65,21 @@
         ></sm-selectable-grouped-filter-list>
       </div>
     </mat-tab>
+    @for (tab of extraTabs(); track tab) {
+      <mat-tab [label]="tab.textLabel">
+        <ng-template [cdkPortalOutlet]="tab.content"></ng-template>
+      </mat-tab>
+    }
+    <ng-content></ng-content>
   </mat-tab-group>
 
 
-  <mat-dialog-actions>
+  @if (!isEditing()){
+    <mat-dialog-actions>
     <button mat-stroked-button (click)="closeDialog()" data-id="Cancel">CANCEL</button>
-    <button mat-flat-button (click)="save()" [disabled]="generalForm.projectForm.controls.default_output_destination.invalid || generalForm.projectForm.invalid || (!scalarSettingsChanged() && !generalChanged() && !hiddenChanged())" data-id="Save">
+    <button mat-flat-button (click)="save()" [disabled]="readonlyProject() || generalForm.projectForm.controls.default_output_destination.invalid || generalForm.projectForm.invalid || (!scalarSettingsChanged() && !generalChanged() && !hiddenChanged() && !extraDirty())" data-id="Save">
       SAVE
     </button>
   </mat-dialog-actions>
+  }
 </sm-dialog-template>

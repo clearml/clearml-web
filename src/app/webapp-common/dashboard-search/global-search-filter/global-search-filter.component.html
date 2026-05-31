@@ -3,7 +3,7 @@
     <section>
       <div class="filter-head">
         <h4>Users</h4>
-        <button mat-icon-button class="sm" [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" (menuOpened)="usersMenuChangedState(true)">
+        <button mat-icon-button data-id="addUsersFilterButton" class="sm" [matMenuTriggerFor]="usersSubMenu?.smMenu()?.menu()" (menuOpened)="usersMenuChangedState(true)">
           <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
         </button>
       </div>
@@ -17,10 +17,10 @@
                             class="d-none"
       ></sm-table-filter-sort>
       <mat-chip-listbox aria-labelledby="status-chip-list-label">
-        @for (user of selectedUsers(); track user.id) {
+        @for (user of selectedUsers(); track user?.id) {
           <mat-chip-row (removed)="removeSelectedUser(user.id)">
                           <span class="name ellipsis">{{ user.name }}</span>
-              <button class="remove-button" matChipRemove>
+              <button class="remove-button" matChipRemove data-id="removeGlobalUserFilter">
                           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="xs pointer"></mat-icon>
         </button>
 
@@ -81,7 +81,7 @@
   <section>
     <div class="filter-head mb-1">
       <h4>Tags</h4>
-      <button mat-icon-button class="sm" (click)="openTagMenu()">
+      <button mat-icon-button class="sm" data-id="addTagFilterButton" (click)="openTagMenu()">
         <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
       </button>
     </div>
@@ -94,7 +94,7 @@
       (remove)="removeTag($event)"></sm-tag-list>
     <span
       #tagsMenuTrigger="matMenuTrigger"
-      [matMenuTriggerFor]="tagsMenu.matMenu"
+      [matMenuTriggerFor]="tagsMenu.matMenu()"
       (menuClosed)="tagsMenuClosed()"
     ></span>
     <sm-tags-menu
@@ -112,7 +112,7 @@
   </section>
 
   <div class="clear-all">
-    <a href="#" (click)="$event.preventDefault(); clearAllFilters()" [class.disabled]="!isFiltered()">Clear all filters</a>
+    <a href="#" data-id="globalClearAllFilters" (click)="$event.preventDefault(); clearAllFilters()" [class.disabled]="!isFiltered()">Clear all filters</a>
   </div>
 </form>
 

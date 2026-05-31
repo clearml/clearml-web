@@ -8,9 +8,9 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
+import {exportTaskInfo, StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
-import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
+import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
@@ -21,6 +21,7 @@ import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
 import {KeyValuePipe, TitleCasePipe} from '@angular/common';
 import {FilterMonitorMetricPipe} from '@common/shared/pipes/filter-monitor-metric.pipe';
 import {MatIconModule} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-pipeline-info',
@@ -39,7 +40,9 @@ import {MatIconModule} from '@angular/material/icon';
     RegexPipe,
     TitleCasePipe,
     FilterMonitorMetricPipe,
-    KeyValuePipe
+    KeyValuePipe,
+    MatIconButton,
+    MatExpansionPanelTitle
   ]
 })
 export class PipelineInfoComponent {
@@ -57,5 +60,12 @@ export class PipelineInfoComponent {
 
   copyToClipboard() {
     this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'ID copied successfully'));
+  }
+
+  exportPipelineInfo(): void {
+    const entity = this.entity();
+    if (entity?.id) {
+      this.store.dispatch(exportTaskInfo({taskId: entity.id, exportType: this.controller() ? 'Pipeline' : 'Step'}));
+    }
   }
 }

@@ -1,0 +1,5 @@
+<div (click)="optionClicked.emit($event)" class="project-option-row">
+  <mat-checkbox [checked]="selected()" (change)="toggleSelection.emit()"
+                (click)="$event.stopPropagation()"></mat-checkbox>
+  <div class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="project().name" [smSearchText]="searchedText()">{{ project().name }}</div>
+</div>

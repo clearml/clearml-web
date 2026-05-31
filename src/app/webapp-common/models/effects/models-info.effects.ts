@@ -208,6 +208,7 @@ export class ModelsInfoEffects {
             const changes = res?.fields || action.changes;
             return [
               viewActions.updateModel({id: action.id, changes}),
+              infoActions.modelUpdatedSuccessfully({id: action.id}),
               ...(selectedModel?.id === action.id ?
                   [infoActions.modelDetailsUpdated({id: action.id, changes})]
                   : []

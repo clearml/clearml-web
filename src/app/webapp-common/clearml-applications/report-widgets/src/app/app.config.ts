@@ -1,6 +1,6 @@
-import {ApplicationConfig, importProvidersFrom, provideZonelessChangeDetection} from '@angular/core';
-import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
+import {ApplicationConfig, provideZonelessChangeDetection} from '@angular/core';
+import {provideState, provideStore} from '@ngrx/store';
+import {provideEffects} from '@ngrx/effects';
 import {appFeature} from '@common/clearml-applications/report-widgets/src/app/app.reducer';
 import {authReducer} from '~/core/reducers/auth.reducers';
 import {AppEffects} from '@common/clearml-applications/report-widgets/src/app/app.effects';
@@ -14,21 +14,20 @@ import {singleGraphReducer} from '@common/shared/single-graph/single-graph.reduc
 import {SingleGraphEffects} from '@common/shared/single-graph/single-graph.effects';
 import {extCoreConfig, extCoreEffects} from '~/build-specifics/reports-index';
 import {colorPreferenceReducer} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
+import {debugSampleProviders} from '@common/shared/debug-sample/debug-sample.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    importProvidersFrom(
-      StoreModule.forRoot({}),
-      StoreModule.forFeature(appFeature),
-      StoreModule.forFeature({name: 'auth', reducer: authReducer}),
-      StoreModule.forFeature('singleGraph', singleGraphReducer),
-      StoreModule.forFeature('colorsPreference', colorPreferenceReducer),
-      // StoreModule.forFeature({name: 'users', reducer: usersReducer}),
-      EffectsModule.forRoot([AppEffects, SingleGraphEffects, ...extCoreEffects]),
-    ),
+    provideStore({}),
+    provideState(appFeature),
+    provideState({name: 'auth', reducer: authReducer}),
+    provideState('singleGraph', singleGraphReducer),
+    provideState('colorsPreference', colorPreferenceReducer),
+    provideEffects([AppEffects, SingleGraphEffects, ...extCoreEffects]),
     ...extCoreConfig,
     provideZonelessChangeDetection(),
     provideHttpClient(),
+    ...debugSampleProviders,
     AdminService,
     ApiEventsService,
     SmApiRequestsService,

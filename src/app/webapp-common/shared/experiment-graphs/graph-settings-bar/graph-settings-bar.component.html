@@ -1,4 +1,4 @@
-<div class="x-axis-options" [class.vertical-layout]="verticalLayout()" [class.short-mode]="shortMode() && !verticalLayout()" data-id="scalarSettings">
+<div class="x-axis-options" [class.vertical-layout]="verticalLayout()" [class.short-mode]="(shortMode$ | ngrxPush) && !verticalLayout()" data-id="scalarSettings">
   <div class="d-flex field" [class.width-100]="verticalLayout()">
     <span class="label-text" data-id="GroupBytext">Group by</span>
     <mat-form-field appearance="outline" class="group-by-field no-bottom thin" data-id="GroupByField">
@@ -82,6 +82,17 @@
       </div>
     }
     <mat-slide-toggle class="smooth-slide-field" [ngModel]="showOrigin()" (ngModelChange)="changeShowOrigin.emit($event)" labelPosition="before">Show Originals</mat-slide-toggle>
+  }
+  @if (showLineWidth()) {
+    <div class="field line-width-control" [class.width-100]="verticalLayout()">
+      <span class="label-text" data-id="HorizontalLineWidth">Line Width</span>
+      <div class="slider-row">
+        <mat-slider [min]="0.5" [max]="7" [step]="0.5" (dblclick)="lineWidthChanged(1)">
+          <input matSliderThumb [(ngModel)]="localLineWidth().width" (ngModelChange)="lineWidthChanged($any($event))"/>
+        </mat-slider>
+        <div class="line-width-input">{{ localLineWidth().width }}</div>
+      </div>
+    </div>
   }
   @if (!verticalLayout()) {
     <button mat-icon-button class="close-button" (click)="toggleSettings.emit()" data-id="CloseScalarSetting">

@@ -123,7 +123,7 @@ export class ReportComponent implements OnDestroy {
     iframe: {border: 'none', width: '840px'}
   };
   public widthExpanded = false;
-  public handleUpload: (files: File[]) => Promise<UploadResult[]>;
+  public handleUpload: (files: FileList) => Promise<UploadResult[]>;
   public showDescription = false;
   public resources = signal<{ unused: boolean; url: string }[]>(null);
   public menuPosition = {x: 0, y: 0};
@@ -153,8 +153,12 @@ export class ReportComponent implements OnDestroy {
     });
 
     effect(() => {
-      const archived = this.archived()
+      const report = this.report();
+      const archived = this.archived();
       window.setTimeout(() => {
+        if (report?.id !== this.route.snapshot.params['reportId']) {
+          return;
+        }
         this.router.navigate(['.'], {
           relativeTo: this.route,
           skipLocationChange: true,
@@ -173,7 +177,7 @@ export class ReportComponent implements OnDestroy {
       )
       .subscribe(id => this.store.dispatch(getReport({id})));
 
-    this.handleUpload = (files: File[]): Promise<UploadResult[]> => {
+    this.handleUpload = (files: FileList): Promise<UploadResult[]> => {
       this.store.dispatch(activeLoader('upload'));
       const filesServerUrl = convertToReverseProxy(HTTP.FILE_BASE_URL);
 
@@ -328,7 +332,8 @@ export class ReportComponent implements OnDestroy {
         yes: 'Publish',
         no: 'Cancel',
         iconClass: 'al-ico-publish'
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed().subscribe(accept =>
       accept && this.store.dispatch(publishReport({id: this.report().id}))
     );
@@ -365,7 +370,7 @@ export class ReportComponent implements OnDestroy {
   }
 
   editModeChanged() {
-    this.widthExpanded = this.mdEditor().isExpand;
+    this.widthExpanded = this.mdEditor().isExpand();
     this.store.dispatch(setEditMode({editing: this.mdEditor().editMode}));
     if (!this.mdEditor().editMode) {
       this.dirtyChanged(false);
@@ -397,7 +402,7 @@ export class ReportComponent implements OnDestroy {
     )
       .subscribe(() => {
         const test = new RegExp(`!\\[(.*)\\]\\(${escapeRegex(resource)}\\)`, 'gm');
-        const ace = this.mdEditor().ace;
+        const ace = this.mdEditor().aceEditor;
         let range = ace.find(test, {
           wrap: true,
           caseSensitive: true,

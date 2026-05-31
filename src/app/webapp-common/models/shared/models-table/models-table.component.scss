@@ -1,3 +1,4 @@
+@use "mixins/empty" as empty;
 @use "../../../layout/layout";
 
 ::ng-deep sm-models footer.d-flex.justify-content-center {
@@ -73,6 +74,10 @@
   sm-table-card-filter {
     margin-left: 1em;
   }
+
+  .mat-mdc-checkbox {
+    display: flex;
+  }
 }
 
 .menu-title {
@@ -104,3 +109,5 @@
   opacity: 0;
   transition: opacity 0.2s ease-in;
 }
+
+@include empty.table-empty-message();

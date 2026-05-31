@@ -44,6 +44,8 @@ export interface ExperimentsViewState {
   showAllSelectedIsActive: boolean;
   metricVariants: MetricVariantResult[];
   metricVariantsPlots: MetricVariantResult[];
+  compareMetricVariants: MetricVariantResult[];
+  compareMetricVariantsPlots: MetricVariantResult[];
   compareSelectedMetrics: Record<string, { metrics: Partial<ISmCol>[]; lastModified: number }>;
   compareSelectedMetricsPlots: Record<string, { metrics: Partial<ISmCol>[]; lastModified: number }>;
   hyperParams: {name: string; section: string}[];
@@ -86,6 +88,8 @@ export const experimentsViewInitialState: ExperimentsViewState = {
   metricsCols: {},
   metricVariants: null,
   metricVariantsPlots: null,
+  compareMetricVariants: null,
+  compareMetricVariantsPlots: null,
   compareSelectedMetrics: {},
   compareSelectedMetricsPlots: {},
   hyperParams: [],
@@ -120,7 +124,8 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     experiments: experimentsViewInitialState.experiments,
     selectedExperiment: experimentsViewInitialState.selectedExperiment,
     metricVariants: experimentsViewInitialState.metricVariants,
-    ...(!action.skipResetMetric && {metricVariantsPlots: experimentsViewInitialState.metricVariantsPlots}),
+    compareMetricVariants: experimentsViewInitialState.compareMetricVariants,
+    ...(!action.skipResetMetric && {metricVariantsPlots: experimentsViewInitialState.metricVariantsPlots, compareMetricVariantsPlots: experimentsViewInitialState.compareMetricVariantsPlots}),
     showAllSelectedIsActive: experimentsViewInitialState.showAllSelectedIsActive,
     // tableMode: experimentsViewInitialState.tableMode
   })),
@@ -129,6 +134,8 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     selectedExperiments: experimentsViewInitialState.selectedExperiments,
     metricVariants: experimentsViewInitialState.metricVariants,
     metricVariantsPlots: experimentsViewInitialState.metricVariantsPlots,
+    compareMetricVariants: experimentsViewInitialState.compareMetricVariants,
+    compareMetricVariantsPlots: experimentsViewInitialState.compareMetricVariantsPlots,
     hyperParamsOptions: experimentsViewInitialState.hyperParamsOptions
   })),
   on(actions.showOnlySelected, (state, action): ExperimentsViewState => ({
@@ -159,7 +166,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     }, state as ExperimentsViewState)
   ),
   on(actions.setExperiments, (state, action): ExperimentsViewState => ({...state, experiments: action.experiments})),
-  on(actions.setTableRefreshPending, (state, action): ExperimentsViewState => ({...state, refreshList: action.refresh})),
+  on(actions.setTableRefreshSessionPending, (state, action): ExperimentsViewState => ({...state, refreshList: action.refresh})),
   on(actions.setExperimentInPlace, (state, action): ExperimentsViewState => ({
     ...state, experiments: state.experiments
       ?.map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
@@ -368,9 +375,14 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
       [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field.startsWith('hyperparams'))
     }
   })),
-  on(actions.setCustomMetrics, (state, action): ExperimentsViewState => {
+  on(actions.setCustomMetrics, (state, action): ExperimentsViewState => ({
+      ...state,
+      metricVariants: action.metrics,
+      metricsLoading: false
+    })),
+  on(actions.setCompareCustomMetrics, (state, action): ExperimentsViewState => {
     const selectedMetricsKey = action.compareView === EventTypeEnum.TrainingStatsScalar ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
-    const metricsKey = action.compareView === EventTypeEnum.TrainingStatsScalar ? 'metricVariants' : 'metricVariantsPlots';
+    const metricsKey = action.compareView === EventTypeEnum.TrainingStatsScalar ? 'compareMetricVariants' : 'compareMetricVariantsPlots';
     const metricsIds = action.metrics.map(metric => `last_metrics.${metric.metric_hash}.${metric.variant_hash}.value`);
     const newState = {
       ...state,

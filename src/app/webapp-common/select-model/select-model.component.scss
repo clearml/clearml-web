@@ -1,4 +1,8 @@
 :host {
+  sm-dialog-template {
+    height: calc(100% - 70px);
+  }
+
   .space-line {
     height: 14px;
   }
@@ -6,21 +10,27 @@
   sm-models-table {
     display: block;
     height: 100%;
-    padding: 16px 0;
   }
 
   .model-table-container {
-    height: calc(100% - 134px);
+    height: calc(100% - 113px);
     width: 100%;
   }
 
-  .buttons {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
+  .model-info-container {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 4px;
+    overflow: hidden;
+  }
 
+  mat-dialog-actions {
     button {
       width: 130px;
+      text-transform: uppercase;
+    }
+
+    .yes-button {
+      margin-left: 16px;
     }
   }
 
@@ -34,6 +44,7 @@
 
   ::ng-deep .generic-container {
     max-height: unset !important;
+    padding: 24px 42px 0 42px !important;
   }
 }
 

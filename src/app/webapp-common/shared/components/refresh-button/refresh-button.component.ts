@@ -1,4 +1,4 @@
-import {Component, input, output, inject, signal} from '@angular/core';
+import {Component, input, output, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {Store} from '@ngrx/store';
 import {selectAutoRefresh} from '@common/core/reducers/view.reducer';
@@ -11,6 +11,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
   selector: 'sm-refresh-button',
   templateUrl: './refresh-button.component.html',
   styleUrls: ['./refresh-button.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     HesitateDirective,

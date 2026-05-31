@@ -3,7 +3,8 @@ import {
   Component,
   Input,
   OnDestroy,
-  ChangeDetectorRef, AfterViewInit, ElementRef, viewChild, input, output } from '@angular/core';
+  ChangeDetectorRef, AfterViewInit, ElementRef, viewChild, input, output, inject
+} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {last, findLastIndex} from 'lodash-es';
@@ -41,6 +42,9 @@ interface LogRow {
     ]
 })
 export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
+  private cdr = inject(ChangeDetectorRef);
+  private element = inject(ElementRef);
+
   public orgLogs: Log[];
   public lines = [] as LogRow[];
   private initial = true;
@@ -96,11 +100,11 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     const autoRefresh = this.fetchPrev === null;
     this.orgLogs = log;
     this.calcLines();
-    let prevLocation;
+    let prevLocation: number;
     if (autoRefresh && this.atEnd) {
       prevLocation = this.lines.length;
     } else {
-      prevLocation = findLastIndex(this.lines, this.prevLine) + this.prevLineOffset;
+      prevLocation = findLastIndex(this.lines, this.prevLine) + this.prevLineOffset + (this.atEnd ? 1 : 0);
     }
     this.fetchPrev = null;
     if (!this.initial && prevLocation) {
@@ -130,8 +134,6 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
         direction: string;
         from?: number;
     }>();
-
-  constructor(private cdr: ChangeDetectorRef, private element: ElementRef) {}
 
   ngAfterViewInit() {
     this.scrollSubscription = this.logContainer()?.elementScrolled().subscribe((event: Event) => {
@@ -216,7 +218,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
       });
   }
 
-  trackByTimestampFn(index: number, line: LogRow) {
+  trackByTimestampFn(_: number, line: LogRow) {
     return line.timestamp;
   }
 

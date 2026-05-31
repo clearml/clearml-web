@@ -1,18 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { ClearInstalledPackgesDialogComponent } from './clear-installed-packages-dialog.component';
+import { ClearInstalledPackagesDialogComponent } from './clear-installed-packages-dialog.component';
 
-describe('ClearInstalledPackgesDialogComponent', () => {
-  let component: ClearInstalledPackgesDialogComponent;
-  let fixture: ComponentFixture<ClearInstalledPackgesDialogComponent>;
+describe('ClearInstalledPackagesDialogComponent', () => {
+  let component: ClearInstalledPackagesDialogComponent;
+  let fixture: ComponentFixture<ClearInstalledPackagesDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClearInstalledPackgesDialogComponent]
+      imports: [ClearInstalledPackagesDialogComponent],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MatDialogRef, useValue: {} }
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ClearInstalledPackgesDialogComponent);
+    fixture = TestBed.createComponent(ClearInstalledPackagesDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

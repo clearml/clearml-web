@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Model} from '../model/models/model';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BlModelsService {
 
   constructor() {

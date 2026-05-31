@@ -2,25 +2,25 @@
   <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
 </button>
 <mat-menu #pipelinesMenu="matMenu">
-  <button mat-menu-item (click)="rename.emit()" [disabled]="isExample">
+  <button mat-menu-item data-id="renameOption" (click)="rename.emit()" [disabled]="isExample">
     <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>Rename
   </button>
-  <button mat-menu-item (click)="share.emit()">
+  <button mat-menu-item data-id="shareOption" (click)="share.emit()">
     <mat-icon fontSet="al" [fontIcon]="icons.SHARE"></mat-icon>Share
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu">
+  <button mat-menu-item data-id="addTagOption" [matMenuTriggerFor]="tagsMenu.matMenu()">
     <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>Add Tag
   </button>
   <hr>
-    <button mat-menu-item (click)="moveTo.emit()" [disabled]="isExample">
+    <button mat-menu-item data-id="moveToOption" (click)="moveTo.emit()" [disabled]="isExample">
       <mat-icon fontSet="al" [fontIcon]="icons.MOVE_TO"></mat-icon>Move to
     </button>
-    <button mat-menu-item (click)="archive.emit(!isArchived)" [disabled]="isExample">
+    <button mat-menu-item data-id="archiveOption" (click)="archive.emit(!isArchived)" [disabled]="isExample">
       <mat-icon fontSet="al"
                 [fontIcon]="isArchived ? icons.RESTORE : icons.ARCHIVE"></mat-icon>{{isArchived ? 'Restore from archive' : 'Archive'}}
     </button>
     @if (isArchived) {
-      <button mat-menu-item (click)="delete.emit()">
+      <button mat-menu-item data-id="deleteOption" (click)="delete.emit()">
         <mat-icon fontSet="al"
                   [fontIcon]="icons.REMOVE"></mat-icon>Delete
       </button>
@@ -31,7 +31,7 @@
     #tagsMenu
     class="light-theme"
     [tags]="report?.tags"
-    [tagsFilterByProject]="true"
+    [filterByProject]="true"
     [projectTags]="allTags"
     [companyTags]="null"
     (tagSelected)="addTag.emit($event)">

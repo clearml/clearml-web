@@ -22,5 +22,31 @@
   sm-experiment-compare-scalar-charts {
     height: 100%;
   }
-}
 
+  .new-run {
+    display: flex;
+    align-items: center;
+    border-radius: var(--mat-button-filled-container-shape) 0 0 var(--mat-button-filled-container-shape);
+    &.arrow {
+      border-radius: 0 var(--mat-button-filled-container-shape) var(--mat-button-filled-container-shape) 0;
+      padding: 0 16px 0 12px;
+      min-width: 34px;
+      border-left: var(--color-on-tertiary) 1px solid;
+      .mat-icon {
+        margin: unset;
+      }
+    }
+    &:focus {
+      position: relative;
+      z-index: 1;
+    }
+
+    .mat-icon {
+      transition: transform 0.3s;
+    }
+
+    &.rotated .mat-icon {
+      transform: rotate(-180deg);
+    }
+  }
+}

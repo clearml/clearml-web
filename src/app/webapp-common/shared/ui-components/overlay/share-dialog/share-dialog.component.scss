@@ -1,8 +1,6 @@
 @use "mixins/link";
 
 :host {
-  width: 570px;
-
   @include link.link();
 
   .sub-title {

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+import { provideRouter } from '@angular/router';
 
 import { ModelInfoExperimentsComponent } from './model-info-experiments.component';
 
@@ -8,7 +10,11 @@ describe('ModelInfoExperimentsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ModelInfoExperimentsComponent ]
+      imports: [ModelInfoExperimentsComponent],
+      providers: [
+        provideMockStore({}),
+        provideRouter([])
+      ]
     })
     .compileComponents();
 

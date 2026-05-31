@@ -1,4 +1,4 @@
-<form [formGroup]="reportForm" (submit)="reportForm.invalid && send()" class="d-flex flex-column">
+<form [formGroup]="reportForm" (submit)="reportForm.invalid && send()" class="d-flex gap-3 flex-column">
   <mat-form-field appearance="outline" class="mat-light">
     <mat-label>Report name</mat-label>
     @if (reportForm.controls.name.touched && reportForm.controls.name.errors; as errors) {
@@ -10,7 +10,7 @@
           Report name already exists.
         }
         @else if (errors?.minlength) {
-          Report name should contain more than 3 characters.
+          Report name should contain at least 3 characters.
         }
       </mat-error>
     }
@@ -30,19 +30,19 @@
     (getEntities)="loadMore($event, false)"
     (loadMore)="loadMore($event, true)"
     (createNewSelected)="createNewSelected($event)"
-  ></sm-paginated-entity-selector>
-  @if (!reportForm.controls.project.untouched && reportForm.controls.project.errors; as errors) {
+  >
     <div class="extra-errors">
-      @if (errors?.required) {
-        <mat-error>Please select project.</mat-error>
-      }
-      @else if (errors?.minlength < 0) {
-        <mat-error>Project name can't contain only spaces</mat-error>
+      @if (!reportForm.controls.project.untouched && reportForm.controls.project.errors; as errors) {
+        @if (errors?.required) {
+          <mat-error>Please select project.</mat-error>
+        }
+        @else if (errors?.minlength < 0) {
+          <mat-error>Project name can't contain only spaces</mat-error>
+        }
       }
     </div>
-  }
-
-  <mat-form-field appearance="outline" class="mt-4">
+</sm-paginated-entity-selector>
+  <mat-form-field appearance="outline">
     @if (reportForm.controls.description?.invalid) {
       <mat-error>Please add description.
       </mat-error>

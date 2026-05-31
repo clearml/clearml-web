@@ -126,7 +126,8 @@ export class ExperimentInfoTaskModelComponent {
         no: 'Keep',
         iconClass: 'al-ico-trash',
         centerText: true,
-      }
+      },
+      panelClass: 'dialog-md'
     });
 
     confirmDialogRef.afterClosed().pipe(take(1)).subscribe((confirmed) => {

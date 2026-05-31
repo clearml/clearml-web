@@ -1,7 +1,7 @@
 <sm-dialog-template [iconClass]="modeParameters[mode]?.icon" [header]="modeParameters[mode]?.header">
   @if ( mode === 'create') {
     <sm-create-new-project-form
-      [projects]="projects$ | ngrxPush"
+      [projects]="projects()"
       [baseProject]="baseProject"
       (filterSearchChanged)="filterSearchChanged($event)"
       (projectCreated)="createProject($event)">
@@ -9,7 +9,7 @@
   }
   @if ( mode === 'move') {
     <sm-project-move-to-form
-      [projects]="projects$ | ngrxPush"
+      [projects]="projects()"
       [baseProject]="baseProject"
       (moveProject)="moveProject($event)"
       (filterSearchChanged)="filterSearchChanged($event)"

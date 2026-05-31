@@ -52,7 +52,7 @@
   position: absolute !important;
   top: 0;
 
-  z-index: variables.$generic-base-z-index + 99;
+  z-index: variables.$generic-base-z-index + 99 !important;
   margin: 16px;
 
   &.right {
@@ -86,4 +86,38 @@
   justify-content: center;
   height: 100%;
   width: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  height: 64px;
+  padding: 0 24px;
+
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-surface-container-high);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .btn-toggle-sidenav {
+      margin-left: -12px;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      & :first-child {
+        text-transform: uppercase;
+        color: var(--color-on-primary-container);
+      }
+    }
+  }
 }

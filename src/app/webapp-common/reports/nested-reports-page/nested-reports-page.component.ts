@@ -6,14 +6,21 @@ import {
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ReportsPageComponent} from '@common/reports/reports-page/reports-page.component';
 import {getAllProjectsPageProjects, resetProjects, setProjectsOrderBy} from '@common/projects/common-projects.actions';
-import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
-import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '@common/core/reducers/projects.reducer';
+import {setDefaultNestedModeForFeature, setMainPageStatusFilter} from '@common/core/actions/projects.actions';
+import {
+  selectMainPageStatusFilter,
+  selectMainPageTagsFilter,
+  selectMainPageTagsFilterMatchMode
+} from '@common/core/reducers/projects.reducer';
 import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, skip} from 'rxjs/operators';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {PushPipe} from '@ngrx/component';
 import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import {decodeFilter, encodeFilters} from '@common/shared/utils/tableParamEncode';
+import {setURLParams} from '@common/core/actions/router.actions';
+import {FilterMetadata} from 'primeng/api';
 
 @Component({
     selector: 'sm-nested-reports-page',
@@ -71,8 +78,22 @@ export class NestedReportsPageComponent extends ReportsPageComponent implements 
   }
   override ngOnInit() {
     super.ngOnInit();
+    this.store.dispatch(setMainPageStatusFilter({statuses: [], feature: this.entityType}));
+    const queryParams = this.route.snapshot.queryParams;
+    if (queryParams.filter) {
+      const filters = decodeFilter(queryParams.filter);
+      if (filters.some(f => f.col === 'status')) {
+        const remainingFilters = filters.filter(f => f.col !== 'status');
+        const filtersRecord: Record<string, FilterMetadata> = {};
+        remainingFilters.forEach(f => {
+          filtersRecord[f.col] = {value: f.value, matchMode: f.filterMatchMode} as FilterMetadata;
+        });
+        this.store.dispatch(setURLParams({filters: filtersRecord, update: true}));
+      }
+    }
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
+      this.store.select(selectMainPageStatusFilter),
       this.store.select(selectMainPageTagsFilterMatchMode)
     ]).pipe(debounceTime(0), skip(1))
       .subscribe(() => {

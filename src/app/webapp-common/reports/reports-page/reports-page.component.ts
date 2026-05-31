@@ -31,21 +31,27 @@ import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../constants';
 import {
   selectDefaultNestedModeForFeature,
+  selectMainPageStatusFilter,
   selectMainPageTagsFilter,
-  selectMainPageTagsFilterMatchMode, selectMainPageUsersFilter
+  selectMainPageTagsFilterMatchMode,
+  selectMainPageUsersFilter
 } from '../../core/reducers/projects.reducer';
 import {debounceTime, filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {setBreadcrumbsOptions, setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
+import {
+  setBreadcrumbsOptions,
+  setDefaultNestedModeForFeature,
+} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ProjectsPageComponent} from '@common/projects/containers/projects-page/projects-page.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {ReportsListComponent} from '@common/reports/reports-list/reports-list.component';
 import {ReportsHeaderComponent} from '@common/reports/reports-filters/reports-header.component';
 import {PushPipe} from '@ngrx/component';
+import {convertFiltersToRecord, decodeFilter, encodeFilters} from '@common/shared/utils/tableParamEncode';
 
 @Component({
   selector: 'sm-reports-page',
@@ -80,7 +86,7 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
   public openCreateReportDialog(projectId) {
     this.dialog.open(ReportDialogComponent, {
       data: {defaultProjectId: projectId},
-      panelClass: 'light-theme',
+      panelClass: 'dialog-md',
     })
       .afterClosed()
       .subscribe(report => {
@@ -102,7 +108,9 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
 
   ngOnInit(): void {
     this.subs.add(combineLatest([
+        this.store.select(selectCurrentUser),
         this.store.select(selectMainPageTagsFilter),
+        this.store.select(selectMainPageStatusFilter),
         this.store.select(selectMainPageTagsFilterMatchMode),
         this.store.select(selectShowOnlyUserWork),
         this.store.select(selectMainPageUsersFilter),
@@ -124,6 +132,7 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
           )
       ])
         .pipe(
+          filter(([user]) => !!user),
           debounceTime(100),
         )
         .subscribe(() => {
@@ -141,11 +150,15 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
   }
 
   reportSelected(report: IReport) {
-    this.router.navigate(['reports', (report.project as Project)?.id ?? '*', report.id]);
+    this.router.navigate(['reports', (report.project as Project)?.id ?? '*', report.id], {queryParamsHandling: 'merge'});
   }
 
   toggleArchive(archive: boolean) {
-    this.router.navigate(['.'], {relativeTo: this.route, queryParams: {...(archive && {archive})}});
+    this.router.navigate(['.'], {
+      relativeTo: this.route,
+      queryParams: {archive: archive || null},
+      queryParamsHandling: 'merge'
+    });
   }
 
   reportCardUpdateName($event: { name: string; report: IReport }) {
@@ -201,9 +214,19 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
   toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: 'reports', isNested: nested}));
     if (nested) {
-      this.router.navigate(['*', 'projects'], {relativeTo: this.route});
+      let filter = null;
+      const currentFilter = this.route.snapshot.queryParams.filter;
+      if (currentFilter) {
+        const filters = decodeFilter(currentFilter);
+        const remainingFilters = filters.filter(f => f.col !== 'status');
+        if (remainingFilters.length > 0) {
+          filter = encodeFilters(convertFiltersToRecord(remainingFilters));
+        }
+      }
+      const projectId = this.route.snapshot.params.projectId || this.route.snapshot.parent?.params.projectId || '*';
+      this.router.navigate(['reports', projectId, 'projects'], {queryParams: {filter}, queryParamsHandling: 'merge'});
     } else {
-      this.router.navigateByUrl('reports');
+      this.router.navigate(['reports'], {queryParamsHandling: 'merge'});
     }
   }
 
@@ -217,13 +240,15 @@ export class ReportsPageComponent extends ProjectsPageComponent implements OnIni
           featureBreadcrumb: {
             name: 'REPORTS',
             url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports',
-            linkLast: !this.nested && selectedProject?.id === '*'
+            linkLast: !this.nested && selectedProject?.id === '*',
+            queryParamsHandling: 'merge'
           },
           projectsOptions: {
             basePath: 'reports',
             filterBaseNameWith: ['.reports'],
             compareModule: null,
             showSelectedProject: true,
+            queryParamsHandling: 'merge',
             ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
           }
         }

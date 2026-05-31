@@ -13,7 +13,10 @@ export const download = (data: string, exportName: string) => {
 
 export const prepareColsForDownload = (cols: ISmCol[], valuesMap?: Record<string, {key: string; value: unknown}[]>) =>
   cols.filter(col => col.id !== 'selected' && col.includeInDownload !== false && (col.includeInDownload || !col.hidden))
-    .map(col => col.getter && isArray(col.getter) ? col.getter.map(getterKey => ({...col, downloadKey: getterKey})) : col).flat()
+    .map(col => {
+      const getter = col.getter;
+      return (getter && isArray(getter)) ? (getter as string[]).map(getterKey => ({...col, downloadKey: getterKey})) : col;
+    }).flat()
     .map(thisCol =>
       ({
         field: thisCol.downloadKey ?? thisCol.getter as string ?? thisCol.id,

@@ -105,7 +105,8 @@ span {
 
 .workspace {
   white-space: nowrap;
-  max-width: 400px;
+  max-width: 250px;
+  min-width: 100px;
 }
 
 .share {

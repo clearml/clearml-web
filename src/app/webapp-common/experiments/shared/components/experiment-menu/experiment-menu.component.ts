@@ -1,6 +1,7 @@
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
-import {filter, switchMap, take} from 'rxjs/operators';
+import {filter, switchMap, take, catchError} from 'rxjs/operators';
+import {of} from 'rxjs';
 import {ICONS} from '@common/constants';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
@@ -32,6 +33,8 @@ import {cloneExtraToggles, EntityTypeEnum} from '~/shared/constants/non-common-c
 import {
   autoRefreshExperimentInfo,
   deactivateEdit,
+  experimentDetailsUpdated,
+  exportTaskInfo,
   setExperiment
 } from '../../../actions/common-experiments-info.actions';
 import {neverShowPopupAgain} from '@common/core/actions/layout.actions';
@@ -70,7 +73,9 @@ import {
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatIconButton} from '@angular/material/button';
 import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
-import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
+import {
+  RenameDialogComponent,
+} from '@common/shared/ui-components/overlay/rename-dialog/rename-dialog.component';
 
 
 @Component({
@@ -86,8 +91,7 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
     MatMenuTrigger,
     MatMenu,
     MatIconButton,
-    MenuItemTextPipe,
-    SelectQueueModule
+    MenuItemTextPipe
   ]
 })
 export class ExperimentMenuComponent extends BaseContextMenuComponent {
@@ -108,7 +112,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
   selectedExperiment = input<IExperimentInfo>();
   isSharedNotInWorkspaces = input(false);
-  tagsFilterByProject = input<boolean>();
+  filterTagsByProject = input<boolean>();
   projectTags = input<string[]>();
   companyTags = input<string[]>();
   numSelected = input(0);
@@ -130,6 +134,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   protected isCommunity = computed(() => this.configService.configuration().communityServer);
 
   tagSelected = output<string>();
+  getCompanyTags = output();
   stopTemplate = viewChild.required<TemplateRef<{ $implicit: ISelectedExperiment[] }>>('stopTemplate ');
   dequeueTemplate = viewChild.required<TemplateRef<{
     $implicit: ISelectedExperiment[];
@@ -203,7 +208,8 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
           taskIds: selectedExperiments.map(exp => exp.id),
           reference: selectedExperiments[0].name,
           retryMode
-        }
+        },
+        panelClass: 'dialog-md'
       });
 
     selectQueueDialog.afterClosed().subscribe(res => {
@@ -216,11 +222,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
   dequeuePopup() {
     const selectedExperiments = this.selectedExperiments() ? selectionDisabledDequeue(this.selectedExperiments()).selectedFiltered : [this.experiment()];
-    this.queueApi.queuesGetAll({only_fields: ['id', 'entries', 'name', 'display_name']})
+    this.queueApi.queuesGetByTaskId({task: selectedExperiments[0].id})
       .pipe(
         take(1),
-        switchMap(({queues}) => {
-          const queue = queues.find(q => q.entries.some(entry => entry.task === selectedExperiments[0].id));
+        catchError(() => of(null)),
+        switchMap((queue) => {
           return this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig<{
             $implicit: ISelectedExperiment[];
             queueName?: string
@@ -230,16 +236,17 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
               template: this.dequeueTemplate(),
               templateContext: {
                 $implicit: selectedExperiments,
-                ...(queues && {queueName: queue.display_name || queue.name})
+                ...(queue && {queueName: queue.display_name || queue.name})
               },
               yes: 'Dequeue',
               no: 'Cancel',
               iconClass: 'al-ico-alert',
               iconColor: 'var(--color-warning)'
-            }
+            },
+            panelClass: 'dialog-md'
           }).afterClosed();
         }),
-        filter(response => response)
+        filter(response => !!response)
       )
       .subscribe(() => this.dequeueExperiment(selectedExperiments));
   }
@@ -272,6 +279,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         resetMode: true,
         devWarning
       },
+      panelClass: 'dialog-md',
       disableClose: true
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
@@ -301,13 +309,26 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         yes: 'Abort',
         no: 'Cancel',
         iconClass: 'al-ico-abort',
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {
           this.store.dispatch(commonMenuActions.stopClicked({selectedEntities: selectedExperiments}));
         }
       });
+  }
+
+  public renamePopup() {
+    const selectedExperiments = this.experiment() ?? this.selectedExperiments()[0];
+
+    this.dialog.open<RenameDialogComponent>(RenameDialogComponent, {
+      data:{name: this.experiment().name, iconClass: 'al-ico-edit' },
+    }).afterClosed().subscribe((name) => {
+      if (name) {
+        this.store.dispatch(experimentDetailsUpdated({id: selectedExperiments.id, changes: name}));
+      }
+    })
   }
 
   public publishPopup() {
@@ -322,8 +343,9 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         templateContext: {$implicit: selectedExperiments},
         yes: 'Publish',
         no: 'Cancel',
-        iconClass: 'al-ico-publish',
-      }
+        iconClass: 'al-ico-publish'
+      },
+      panelClass: 'dialog-md'
     }).afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.publishExperiment(selectedExperiments);
@@ -342,7 +364,8 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         link: `${window.location.origin}/projects/${this.experiment().project.id}/experiments/${this.experiment().id}/output/execution`,
         alreadyShared: this.experiment()?.system_tags.includes('shared'),
         task: this.experiment()?.id
-      }
+      },
+      panelClass: 'dialog-md'
     });
   }
 
@@ -355,7 +378,8 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         defaultProject: this.experiment()?.project,
         reference: selectedExperiments.length > 1 ? selectedExperiments : selectedExperiments[0]?.name,
         type: EntityTypeEnum.experiment
-      }
+      },
+      panelClass: 'dialog-md'
     });
     dialog.afterClosed()
       .pipe(
@@ -384,7 +408,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         defaultName: this.experiment().name,
         extraToggles: cloneExtraToggles()
       },
-      width: '640px'
+      panelClass: 'dialog-md'
     }).afterClosed().pipe(
       take(1),
       filter(res => !!res),
@@ -415,6 +439,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         useCurrentEntity: this.activateFromMenuButton() || this.useCurrentEntity(),
         includeChildren
       },
+      panelClass: 'dialog-md',
 
       disableClose: true
     });
@@ -492,5 +517,12 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
       cacheKey: generateColorKey(this.experiment().name, this.experiment().id, undefined, this.isCompare()),
       alpha: null
     }));
+  }
+
+  exportTask() {
+    const task = this.experiment();
+    if (task?.id) {
+      this.store.dispatch(exportTaskInfo({taskId: task.id}));
+    }
   }
 }

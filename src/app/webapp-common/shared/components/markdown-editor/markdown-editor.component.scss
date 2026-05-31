@@ -155,8 +155,16 @@
 }
 
 :host {
-  ::ng-deep md-editor.scripts-blocked .md-layout .preview-panel {
-    height: 100% !important;
+  ::ng-deep {
+    .preview-container {
+      display: var(--sm-md-preview-display, block) !important;
+    }
+    .editor-container > div:first-child {
+      display: var(--sm-md-editor-display, block) !important;
+    }
+    md-editor.scripts-blocked .md-layout .preview-panel {
+      height: 100% !important;
+    }
   }
 
   ::ng-deep md-editor .md-editor-container {
@@ -335,10 +343,10 @@
         }
 
         iframe:not(.iframe-maximized) {
+          border: none;
           &:nth-child(1) {
             margin-top: 40px;
           }
-          border: none;
         }
 
         em code {

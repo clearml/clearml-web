@@ -467,6 +467,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   maximize() {
     this.maximized.update(state => !state);
-    window.setTimeout(() => this.prepareGraph());
+    requestAnimationFrame(() => {
+      if (this.data) {
+        this.drawChart();
+      }
+    });
   }
 }

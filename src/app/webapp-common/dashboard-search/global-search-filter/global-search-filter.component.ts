@@ -196,7 +196,7 @@ export class GlobalSearchFilterComponent {
 
   protected sortByUsersList = computed(() => {
     this.usersMenuOpen();
-    return [this.currentUserId(), ...(this.userFilter.value ?? [])]});
+    return [...(this.userFilter.value ?? []), this.currentUserId()]});
   currentUserId = input<string>();
 
  protected loading = signal(false);
@@ -272,5 +272,4 @@ export class GlobalSearchFilterComponent {
   clearAllFilters() {
     this.resetFilters.emit();
   }
-
 }

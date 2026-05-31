@@ -7,7 +7,7 @@ export class IdToObjectsArrayPipe implements PipeTransform {
 
   transform(arr: string[]): any[] {
     if (!arr) {
-      return arr;
+      return [];
     }
     return arr.map(parameter => ({id: parameter}));
   }

@@ -2,7 +2,8 @@ import {
   Component, computed,
   ElementRef,
   HostListener,
-  inject, viewChild, input, output } from '@angular/core';
+  inject, viewChild, input, output, signal
+} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
@@ -20,19 +21,21 @@ export class BaseContextMenuComponent {
   protected store = inject(Store);
   protected eRef = inject(ElementRef);
 
-  public position = {x: 0, y: 0};
-  public menuItems = MenuItems;
-  public projectId = this.store.selectSignal(selectSelectedProjectId);
-  public allProjects = computed(() => this.projectId() === '*');
+  protected readonly menuItems = MenuItems;
 
-  protected tagMenu = viewChild(TagsMenuComponent);
-  protected trigger = viewChild(MatMenuTrigger);
   selectedDisableAvailable = input<Record<string, CountAvailableAndIsDisableSelectedFiltered>>({});
   selectedDisableAvailableIsMultiple = input(true);
   tableMode = input<boolean>();
   backdrop = input<boolean>();
   menuOpened = output();
   menuClosed = output();
+
+  protected tagMenu = viewChild(TagsMenuComponent);
+  protected trigger = viewChild(MatMenuTrigger);
+
+  protected position = signal({x: 0, y: 0});
+  public projectId = this.store.selectSignal(selectSelectedProjectId);
+  public allProjects = computed(() => this.projectId() === '*');
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
@@ -47,7 +50,7 @@ export class BaseContextMenuComponent {
       this.trigger().closeMenu();
       this.menuClosed.emit();
     }
-    this.position = position;
+    this.position.set(position);
     window.setTimeout(() => {
       this.trigger().updatePosition();
       this.trigger().openMenu();

@@ -241,7 +241,7 @@ export const cleanUserData = (user: User): User => user && Object.entries(user).
 
 export const addMultipleSortColumns = (oldOrders, colId, isShift) => {
   let orders;
-  const currentSortField = oldOrders.find(field => field.field === colId);
+  const currentSortField = oldOrders?.find(field => field.field === colId);
   const newField = {
     field: colId,
     order: currentSortField?.order ? (currentSortField.order * -1) : TABLE_SORT_ORDER.DESC
@@ -249,7 +249,7 @@ export const addMultipleSortColumns = (oldOrders, colId, isShift) => {
 
   if (isShift) {
     if (currentSortField) {
-      orders = oldOrders.map(field => field.field === colId ? newField : field);
+      orders = oldOrders?.map(field => field.field === colId ? newField : field);
     } else {
       orders = [...oldOrders, newField];
     }

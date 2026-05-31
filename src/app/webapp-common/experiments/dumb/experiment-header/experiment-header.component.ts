@@ -23,7 +23,6 @@ import {NgTemplateOutlet} from '@angular/common';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {CommonSearchComponent} from '@common/common-search/containers/common-search/common-search.component';
-import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 @Component({
     selector: 'sm-experiment-header',
@@ -49,7 +48,6 @@ import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-s
     NgTemplateOutlet,
     MatIconButton,
     MatIcon,
-    SingleGraphStateModule,
     CommonSearchComponent,
   ]
 })

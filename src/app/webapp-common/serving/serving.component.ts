@@ -4,7 +4,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {combineLatest, Observable, of} from 'rxjs';
 import {ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api';
-import {selectCompanyTags, selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
+import {selectCompanyTags} from '@common/core/reducers/projects.reducer';
 import {debounceTime, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {Params, RouterOutlet} from '@angular/router';
@@ -23,6 +23,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {SplitAreaComponent, SplitComponent} from 'angular-split';
 import {ServingHeaderComponent} from '@common/serving/serving-header/serving-header.component';
 import {PushPipe} from '@ngrx/component';
+import {selectSearchQuery} from '@common/common-search/common-search.reducer';
 
 type EndpointsTableViewMode = 'active' | 'loading';
 
@@ -61,9 +62,9 @@ export class ServingComponent extends BaseEntityPageComponent implements OnDestr
   protected tableColsOrder$ = this.store.select(servingFeature.selectColsOrder);
   protected tags$ = this.store.select(servingFeature.selectTags);
   protected companyTags$ = this.store.select(selectCompanyTags);
-  protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected tableMode$ = this.store.select(servingFeature.selectTableMode);
   protected filteredTableCols$ = this.store.select(servingFeature.selectFilteredTableCols);
+  protected searchQuery$ = this.store.select(selectSearchQuery);
 
   protected tableCols$ = this.filteredTableCols$.pipe(
     distinctUntilChanged(isEqual),
@@ -261,9 +262,15 @@ export class ServingComponent extends BaseEntityPageComponent implements OnDestr
     return params?.endpointId;
   }
 
-  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
+  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>, others?: Record<string, string>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(ServingActions.tableFiltersChanged({filters}));
+    this.store.dispatch(ServingActions.tableFiltersChanged({filters, others: others || {}}));
+  }
+
+  clearTableFiltersAndSearchHandler(tableFilters: Record<string, FilterMetadata>) {
+    this.clearTableFiltersHandler(tableFilters, {
+      q: null,
+    });
   }
 
   getCustomMetrics() {

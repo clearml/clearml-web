@@ -138,6 +138,8 @@ export const PIPELINE_INFO_ONLY_FIELDS = [
   'last_update',
   'last_change',
   'completed',
+  'project.id',
+  'project.name',
   'models.output.model.name',
   'models.output.model.project',
   'execution.artifacts',

@@ -36,8 +36,9 @@ export class DashboardReportsComponent {
   protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
 
   openCreateDialog() {
-    this.dialog.open<ReportDialogComponent, unknown, IReportsCreateRequest>(ReportDialogComponent)
-      .afterClosed()
+    this.dialog.open<ReportDialogComponent, unknown, IReportsCreateRequest>(ReportDialogComponent, {
+      panelClass: 'dialog-md'
+    }).afterClosed()
       .subscribe(report => {
         if (report) {
           this.store.dispatch(createReport({reportsCreateRequest: report}));

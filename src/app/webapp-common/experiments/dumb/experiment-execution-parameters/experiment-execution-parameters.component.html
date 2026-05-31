@@ -1,8 +1,8 @@
-<form [class.editable]="editable()" #hyperParameters="ngForm">
-  <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="58" minBufferPx="280" maxBufferPx="560">
-    @if (editable()) {
+@if (editable()) {
+  <form [class.editable]="editable()" #hyperParameters="ngForm">
+    <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="58" minBufferPx="280" maxBufferPx="560">
       @for (parameter of form(); track parameter.id) {
-        <div class="w-100 d-flex pe-2">
+        <div class="w-100 d-flex pe-2 align-items-start">
           <mat-form-field
             [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
             appearance="outline"
@@ -13,6 +13,7 @@
               [(ngModel)]="parameter['name']"
               (keydown.enter)="nextRow($event, $index)"
               placeholder="Parameter"
+              data-id="parameterField"
               name="parameterKey-{{parameter.id}}"
               matInput
               smUniqueNameValidator
@@ -42,6 +43,7 @@
               (keydown.enter)="nextRow($event, $index)"
               name="parameterValue-{{parameter.id}}"
               placeholder="Value"
+              data-id="valueField"
               [class.highlight-text]="(searchedText()?.length > 0) && parameter['value'].includes(searchedText())"
               [class.current-match]="searchIndexList[matchIndex]?.index === $index && searchIndexList[matchIndex]?.col==='value'"
               matInput/>
@@ -51,21 +53,18 @@
               </button>
             }
           </mat-form-field>
-          <button mat-icon-button class="remove-button" (click)="removeRow($index)">
+          <button mat-icon-button class="remove-button" data-id="deleteUserProperty" (click)="removeRow($index)">
             <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
           </button>
         </div>
       }
-    }
-  </cdk-virtual-scroll-viewport>
-</form>
-@if (editable()) {
+    </cdk-virtual-scroll-viewport>
+  </form>
   <button mat-stroked-button (click)="addRow()">
     <mat-icon fontSet="al" fontIcon="al-ico-plus" data-id="AddParamterButton"></mat-icon>
     ADD PARAMETER
   </button>
-}
-@if (!editable()) {
+} @else {
   <div class="table-container">
     <sm-table
       [columns]="calcCols$ | ngrxPush"
@@ -81,6 +80,7 @@
       [selectionMode]="null"
       [selection]="[]"
       (rowClicked)="rowActivated($event)"
+      (rowDoubleClicked)="rowActivated($event)"
     >
       <ng-template pTemplate="body"
                    let-col

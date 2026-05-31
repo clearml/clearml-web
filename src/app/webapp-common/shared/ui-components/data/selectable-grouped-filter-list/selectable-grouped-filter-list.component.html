@@ -11,9 +11,9 @@
 ></sm-search>
 <div class="toggle-all-text">
   @if (searchTerm()) {
-    <span (click)="toggleHideMatching()">{{ allFilteredSelected() ? 'Hide matching' : 'Show matching' }}</span>
+    <span (click)="toggleHideMatching()" data-id="hideShowMatchingButton">{{ allFilteredSelected() ? 'Hide matching' : 'Show matching' }}</span>
   } @else {
-  <span (click)="toggleHideAll()">{{ allSelected() ? 'Hide all' : 'Show all' }}</span>
+  <span (click)="toggleHideAll()" data-id="hideShowAllButton">{{ allSelected() ? 'Hide all' : 'Show all' }}</span>
   }
 </div>
 <div class="toggle-all-text">
@@ -26,4 +26,5 @@
   (itemSelect)="itemSelect.emit($event)"
   (itemCheck)="toggleHide($event)"
   (groupChecked)="toggleHideGroup($event)"
+  data-id="toggleGraphList"
 ></sm-grouped-selectable-list>

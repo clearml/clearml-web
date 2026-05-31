@@ -25,7 +25,6 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {MatIconButton} from '@angular/material/button';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatIconModule} from '@angular/material/icon';
-import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
 
 @Component({
   selector: 'sm-queue-info',
@@ -42,8 +41,7 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
     TooltipDirective,
     MatIconButton,
     MatTab,
-    MatTabGroup,
-    SelectQueueModule
+    MatTabGroup
   ]
 })
 export class QueueInfoComponent {
@@ -138,7 +136,8 @@ export class QueueInfoComponent {
       data: {
         taskIds: [this.menuSelectedExperiment.id],
         reference: this.menuSelectedExperiment.name
-      }
+      },
+      panelClass: 'dialog-md'
     }).afterClosed()
       .subscribe((res) => {
         if (res?.confirmed) {

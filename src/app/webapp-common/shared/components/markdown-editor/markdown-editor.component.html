@@ -1,6 +1,6 @@
 @if (data() || editMode) {
   <div class="md-editor-preview" [class.editor]="editMode">
-    <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
+    <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty()" [class.editor-hidden]="editorVisible()">
       <div class="actions">
         @if (!editMode) {
         <div class="actions-buttons">
@@ -8,25 +8,26 @@
             <button
               mat-stroked-button
               class="btn-expand-view me-2 icon-only"
-              [smTooltip]="isExpand ? 'Minimize view' : 'Expand view'"
+              [smTooltip]="isExpand() ? 'Minimize view' : 'Expand view'"
               matTooltipPosition="below"
+              data-id="expandMinimizeButton"
               (click)="expandClicked()"
             >
-              <mat-icon fontSet="al" [fontIcon]="isExpand ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></mat-icon>
+              <mat-icon fontSet="al" [fontIcon]="isExpand() ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></mat-icon>
             </button>
           }
           @if (!readOnly()) {
-            <button mat-stroked-button class="outline" (click)="editClicked()">EDIT</button>
+            <button mat-stroked-button class="outline" data-id="editReportButton" (click)="editClicked()">EDIT</button>
           }
         </div>
         }
       </div>
       @if (editMode) {
         <button mat-button class="preview-toggle" (click)="togglePreview()">
-          {{ editorVisible ? 'EDIT' : 'PREVIEW' }}
+          {{ editorVisible() ? 'EDIT' : 'PREVIEW' }}
         </button>
       }
-      @if (editMode && !editorVisible) {
+      @if (editMode && !editorVisible()) {
         <span class="preview-header">PREVIEW</span>
       }
       <md-editor #editorComponent
@@ -50,7 +51,7 @@
               smClickStopPropagation
               class="action-menu dark"
               >
-              <button mat-menu-item class="action" (click)="imgInput.click()">
+              <button mat-menu-item class="action" data-id="uploadImageButton" (click)="imgInput.click()">
                 <mat-icon fontSet="al" fontIcon="al-ico-upload"></mat-icon>
                 Upload Image
               </button>
@@ -80,6 +81,7 @@
               type="button"
               smTooltip="Image resources"
               class="btn-upload-image"
+              data-id="imageResourcesButton"
             >
               <mat-icon fontSet="al" fontIcon="al-ico-image"></mat-icon>
               <mat-icon fontSet="al" fontIcon="al-ico-dropdown-arrow"></mat-icon>
@@ -89,21 +91,21 @@
         </md-editor>
       </div>
       <div class="md-footer">
-        <button mat-icon-button class="help" (click)="openMDCCheatSheet()" smTooltip="Markdown cheat sheet">
+        <button mat-icon-button class="help" data-id="markdownCheatSheetButton" (click)="openMDCCheatSheet()" smTooltip="Markdown cheat sheet">
           <mat-icon fontSet="al" fontIcon="al-ico-markdown"></mat-icon>
         </button>
-        <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">
-          @if (duplicateNames) {
+        <div [class]="(editMode && isDirty() ? 'active' : '') + ' md-warning'">
+          @if (duplicateNames()) {
             <span>* You have duplicate names on different iframes</span>
           }
-          @if (!duplicateNames) {
+          @if (!duplicateNames()) {
             <span>* You have unsaved changes</span>
           }
         </div>
         @if (editMode) {
           <div class="right-buttons">
-            <button mat-stroked-button (click)="cancelClicked()">CANCEL</button>
-            <button mat-flat-button [disabled]="!isDirty || duplicateNames" (click)="save()">SAVE</button>
+            <button mat-stroked-button data-id="cancelEditReportButton" (click)="cancelClicked()">CANCEL</button>
+            <button mat-flat-button [disabled]="!isDirty() || duplicateNames()" data-id="saveEditReportButton" (click)="save()">SAVE</button>
           </div>
         }
       </div>

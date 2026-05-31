@@ -1,29 +1,32 @@
 .table-card {
   &.item-color{
     border-left: 8px solid;
+    padding: 16px;
+  }
+  &:not(.item-color){
+    padding: 13px 16px 13px 24px;
   }
   display: grid;
-  grid-template-columns: 20px 32px 1fr;
+  grid-template-columns: auto auto 1fr;
   align-items: center;
-  gap: 0 6px;
-  padding: 16px 16px 16px 10px;
+
   grid-template-areas:
     "cbx type-icon card-name"
     ". tags tags"
     ". data data";
   &.two-columns {
-    grid-template-columns: 24px 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-areas:
     "cbx card-name"
     ". tags"
     ". data";
   }
   &.no-selection {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-areas:
-    "card-name"
-    "tags"
-    "data";
+    "type-icon card-name"
+    "tags tags"
+    "data data";
   }
 
   &.checked.selected {
@@ -37,8 +40,8 @@
   }
 }
 
-.cbx { grid-area: cbx; margin-right: auto; }
-.type-icon { grid-area: type-icon; display: flex; justify-content: center; }
+.cbx { grid-area: cbx; margin-right: 12px; }
+.type-icon { grid-area: type-icon; display: flex; margin-right: 6px;}
 .card-name { grid-area: card-name; display: flex; overflow: hidden; align-items: center;}
 .tags {
   grid-area: tags;
@@ -53,9 +56,8 @@
 }
 
 .no-selection .data {
-  margin-top: 0;
+  margin-top: 8px;
 }
-
 
 .name-container {
   min-width: 0;

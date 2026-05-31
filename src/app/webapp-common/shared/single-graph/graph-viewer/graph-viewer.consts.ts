@@ -6,6 +6,7 @@ export interface GraphViewerData {
   chart: ExtFrame;
   id: string;
   xAxisType?: 'iter' | 'timestamp' | 'iso_time';
+  lineWidth?: number;
   chartSettings?: ChartPreferences;
   smoothWeight?: number;
   smoothType?: SmoothTypeEnum;

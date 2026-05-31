@@ -1,7 +1,7 @@
 <div class="sm-card-list-layout">
   <div #header class="sm-card-list-header">
     <div class="recent-title">RECENT REPORTS
-      <a mat-button class="view-all"
+      <a mat-button class="view-all" data-id="viewAllReports"
          [routerLink]="defaultNestedModeForFeature()?.['reports']? '/reports/*/projects' : '/reports'"
       >VIEW ALL</a>
     </div>

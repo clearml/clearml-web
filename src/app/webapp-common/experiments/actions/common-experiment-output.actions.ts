@@ -114,8 +114,6 @@ export const setLogFilter = createAction(
   props<{filter: string}>()
 );
 
-export const resetLogFilter = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_LOG_FILTER');
-export const downloadFullLog = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'DOWNLOAD_FULL_LOG', props<{ experimentId: string }>());
 export const toggleSettings = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_SETTINGS');
 export const toggleMetricValuesView = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_METRIC_VALUES_VIEW');
 export const setGraphsPerRow = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_GRAPHS_PER_ROW', props<{ graphsPerRow: number }>());

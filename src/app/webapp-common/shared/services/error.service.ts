@@ -36,7 +36,7 @@ export class ErrorService {
       55: this.template`Could not complete identity verification. Your sign-up session has probably timed out, please try again.
 ** If this issue persists, the identity provider may be down - please try again later.`,
       56: this.template`The invitation to ${'user_name'}'s team has expired. Contact ${'user_name'} to join their team, or sign up for a free standalone account.`,
-      57: this.template`Account already exists for this ${'provider'}  identity. Use 'Log In' Instead.`,
+      57: this.template`Account already exists for this ${'provider'}  identity. Use 'Log In' instead.`,
       58: this.template`No account exists. Use the provider you signed up with or sign up to create a new account`,
       62: this.template`Please check your email to continue the signup process`,
       67: this.template`${'email'} does not have access to ClearML - Ask your admin to whitelist this address`,

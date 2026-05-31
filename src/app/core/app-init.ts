@@ -15,7 +15,9 @@ export const loadUserAndPreferences = ()=>
     ])
       .pipe(
         switchMap(() => loginService.loginFlow()),
-        finalize(() => resolve(null))
+        finalize(() => {
+          resolve(null)
+        })
       )
       .subscribe((url: string) => {
         if (url) {

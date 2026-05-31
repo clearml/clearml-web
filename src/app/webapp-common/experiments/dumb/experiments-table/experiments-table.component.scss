@@ -1,3 +1,4 @@
+@use "mixins/empty" as empty;
 
 :host {
 
@@ -81,10 +82,15 @@
   .compact-columns-data {
     color: var(--color-on-surface-variant);
     font-size: 12px;
+    gap: 12px;
 
     &.selected {
       color: var(--color-primary-container);
     }
+  }
+
+  .mat-mdc-checkbox {
+    display: flex;
   }
 }
 
@@ -125,3 +131,5 @@ sm-experiment-status-icon-label {
   opacity: 0;
   transition: opacity 0.2s ease-in;
 }
+
+@include empty.table-empty-message();

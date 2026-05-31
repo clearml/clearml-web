@@ -34,7 +34,6 @@ import {
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {ScalarKeyEnum} from '~/business-logic/model/reports/scalarKeyEnum';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
-import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
 import {
   SingleValueSummaryTableComponent
 } from '@common/shared/single-value-summary-table/single-value-summary-table.component';
@@ -57,7 +56,6 @@ export interface SelectedMetricVariant extends MetricVariantResult {
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    DebugSampleModule,
     ParallelCoordinatesGraphComponent,
     SingleValueSummaryTableComponent,
     DebugImageSnippetComponent,

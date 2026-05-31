@@ -1,21 +1,15 @@
 <div class="filter-sort-container d-flex align-items-center" [class.active]="value()?.length > 0 || subValue()?.length > 0">
   @if (column().sortable) {
-    <button mat-icon-button class="sort-icon" (click)="switchSortOrder($event)" data-id="Sort Icon">
-      <mat-icon fontSet="al">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-          <g fill="none" fill-rule="evenodd">
-            <path d="M0 0h16v16H0z"/>
-            @if (this.sortOrder()?.order) {
-              <path class="arrow" [class.active]="this.sortOrder()?.order === TABLE_SORT_ORDER.DESC"
-                    d="M8.193 12.83l-2.028-2.592c-.198-.253-.221-.697-.051-.992.09-.156.22-.246.358-.246h4.056c.26 0 .472.315.472.704 0 .205-.06.4-.165.534l-2.028 2.593c-.177.225-.437.225-.614 0z"/>
-              <path class="arrow" [class.active]="this.sortOrder()?.order === TABLE_SORT_ORDER.ASC"
-                    d="M8.807 2.17l2.028 2.592c.198.253.221.697.051.992-.09.156-.22.246-.358.246H6.472C6.212 6 6 5.685 6 5.296c0-.205.06-.4.165-.534l2.028-2.593c.177-.225.437-.225.614 0z"/>
-            } @else {
-              <path class="arrow" d="M8.193 12.83l-2.028-2.592c-.198-.253-.221-.697-.051-.992.09-.156.22-.246.358-.246h4.056c.26 0 .472.315.472.704 0 .205-.06.4-.165.534l-2.028 2.593c-.177.225-.437.225-.614 0zM8.807 2.17l2.028 2.592c.198.253.221.697.051.992-.09.156-.22.246-.358.246H6.472C6.212 6 6 5.685 6 5.296c0-.205.06-.4.165-.534l2.028-2.593c.177-.225.437-.225.614 0z" />
-            }
-          </g>
-        </svg>
-      </mat-icon>
+    <button class="sm btn-sort" data-id="sortTableColumn" (click)="switchSortOrder($event)">
+        @if (this.sortOrder()?.order) {
+          @if (this.sortOrder()?.order === TABLE_SORT_ORDER.DESC) {
+            <mat-icon fontSet="al" fontIcon="al-ico-sort-on-down" class="sm"><span class="path1"></span><span class="path2"></span></mat-icon>
+          } @else {
+            <mat-icon fontSet="al" fontIcon="al-ico-sort-on-up" class="sm"><span class="path1"></span><span class="path2"></span></mat-icon>
+          }
+          } @else {
+            <mat-icon fontSet="al" fontIcon="al-ico-sort-off" class="sm"></mat-icon>
+          }
     </button>
   }
   @if (column().filterable) {

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { PipelineCardMenuComponent } from './pipeline-card-menu.component';
 import {MatMenuModule} from '@angular/material/menu';
@@ -9,10 +10,11 @@ describe('PipelineCardMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PipelineCardMenuComponent ],
       imports: [
+        PipelineCardMenuComponent,
         MatMenuModule
-      ]
+      ],
+      providers: [provideMockStore({})]
     })
     .compileComponents();
   });
@@ -20,6 +22,9 @@ describe('PipelineCardMenuComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(PipelineCardMenuComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('project', { tags: [] });
+    fixture.componentRef.setInput('allTags', []);
+    fixture.detectChanges();
     fixture.detectChanges();
   });
 

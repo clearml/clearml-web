@@ -6,6 +6,9 @@ import {NotifierConfig} from '../models/notifier-config.model';
 import {NotifierNotification} from '../models/notifier-notification.model';
 import {NotifierService} from '../services/notifier.service';
 import {NotifierTimerService} from '../services/notifier-timer.service';
+import {NgTemplateOutlet} from '@angular/common';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 /**
  * Notifier notification component
@@ -16,21 +19,25 @@ import {NotifierTimerService} from '../services/notifier-timer.service';
  * mouse movements.
  */
 @Component({
-    changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
-    host: {
-        '(click)': 'onNotificationClick()',
-        '(mouseout)': 'onNotificationMouseout()',
-        '(mouseover)': 'onNotificationMouseover()',
-        class: 'notifier__notification'
-    },
-    providers: [
-        // We provide the timer to the component's local injector, so that every notification components gets its own
-        // instance of the timer service, thus running their timers independently from each other
-        NotifierTimerService
-    ],
-    selector: 'notifier-notification',
-    templateUrl: './notifier-notification.component.html',
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush, // (#perfmatters)
+  host: {
+    '(click)': 'onNotificationClick()',
+    '(mouseout)': 'onNotificationMouseout()',
+    '(mouseover)': 'onNotificationMouseover()',
+    class: 'notifier__notification'
+  },
+  providers: [
+    // We provide the timer to the component's local injector, so that every notification components gets its own
+    // instance of the timer service, thus running their timers independently from each other
+    NotifierTimerService
+  ],
+  selector: 'notifier-notification',
+  templateUrl: './notifier-notification.component.html',
+  imports: [
+    NgTemplateOutlet,
+    MatIcon,
+    MatIconButton,
+  ]
 })
 export class NotifierNotificationComponent implements AfterViewInit {
 
@@ -182,7 +189,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
         const animationData: NotifierAnimationData = this.animationService.getAnimationData('show', this.notification);
 
         // Set initial styles (styles before animation), prevents quick flicker when animation starts
-        const animatedProperties: Array<string> = Object.keys(animationData.keyframes[0]);
+        const animatedProperties: string[] = Object.keys(animationData.keyframes[0]);
         for (let i: number = animatedProperties.length - 1; i >= 0; i--) {
           this.renderer.setStyle(this.element, animatedProperties[i],
             animationData.keyframes[0][animatedProperties[i]]);

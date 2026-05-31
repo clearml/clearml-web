@@ -14,7 +14,8 @@ export const createUserPrefReducer = (
   syncedKeys: string[],
   actionsPrefix: string[],
   userPreferences: UserPreferences,
-  reducer: ActionReducer<any>
+  reducer: ActionReducer<any>,
+  debounce = 2000
 ): ActionReducer<any, ExtAction> => {
 
   if (firstRun[key] === undefined) {
@@ -53,7 +54,7 @@ export const createUserPrefReducer = (
 
     const val = pick(nextState[key], syncedKeys );
     clearTimeout(timeout);
-    timeout = window.setTimeout(() => userPreferences.setPreferences(key, val), 2000);
+    timeout = window.setTimeout(() => userPreferences.setPreferences(key, val), debounce);
     return nextState;
   };
 };

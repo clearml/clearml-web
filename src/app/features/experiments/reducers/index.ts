@@ -22,6 +22,8 @@ export const experimentsReducers: ActionReducerMap<ExperimentState, any> = {
   output: experimentOutputReducer,
 };
 
+export const reducers = experimentsReducers;
+
 export const experiments = state => state.experiments ?? {} as ExperimentState;
 
 // view selectors.

@@ -1,19 +1,37 @@
 
 sm-editable-section.in-edit{
   display: flex;
+  height: 100%;
   flex-direction: column;
-  padding: 12px;
 }
 
 .mat-mdc-form-field{ margin-right: 12px}
-.outside-error {
-  position: absolute;
-  top: 46px;
-  left: -10px;
-  font-size: 11px;
-  color: var(--color-error);
+
+.labels {
+  display: flex;
+  gap: 11px;
+
+  & > div {
+    width: 100%;
+  }
+}
+
+.field-label {
+  color: var(--color-on-surface-variant);
+  font-size: 12px;
+  letter-spacing: var(--mat-form-field-container-text-tracking, var(--mat-sys-body-large-tracking));
 }
 
 .remove-row {
   margin-bottom: 22px;
+}
+
+form {
+  height: calc(100% - 64px);
+  overflow: auto;
+}
+
+button.icon-only {
+  position: absolute;
+  bottom: 24px;
 }

@@ -17,7 +17,7 @@
       (click)="toggleRow(i)"
       >
       <ng-template
-        [ngTemplateOutlet]="templateRef"
+        [ngTemplateOutlet]="templateRef()"
         [ngTemplateOutletContext]="{$implicit: cols()[i], row: row, rowIndex: i}">
       </ng-template>
     </div>

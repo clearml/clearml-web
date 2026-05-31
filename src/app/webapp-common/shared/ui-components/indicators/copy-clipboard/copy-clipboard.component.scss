@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 button {
   &.hideBackground {
     background: none !important;
@@ -6,7 +8,13 @@ button {
   }
 }
 :host-context(.inverse-theme) {
+  button {
+    @include mat.button-overrides((
+      text-label-text-color: var(--color-inverse-primary),
+    ));
+  }
   button .mat-icon.al-icon.mat-icon-no-color {
+    color: var(--color-inverse-primary) !important;
     &.al-ico-copy-to-clipboard, &.al-ico-success {
       --mat-icon-color: var(--color-inverse-primary) !important;
     }

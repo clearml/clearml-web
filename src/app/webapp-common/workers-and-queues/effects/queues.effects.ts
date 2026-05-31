@@ -18,7 +18,7 @@ import {QueueMetrics} from '~/business-logic/model/queues/queueMetrics';
 import {cloneDeep, escape} from 'lodash-es';
 import {addFullRangeMarkers, addStats, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions';
-import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
+import {addMultipleSortColumns, htmlTextShort} from '../../shared/utils/shared-utils';
 import {calculateQueuesCaption, sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
@@ -26,6 +26,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {ErrorService} from '@common/shared/services/error.service';
+import {queueFields} from '~/features/workers-and-queues/workers-and-queues.consts';
+import {iif, of} from 'rxjs';
 
 @Injectable()
 export class QueuesEffect {
@@ -52,9 +54,9 @@ export class QueuesEffect {
       concatLatestFrom(
         () => this.store.select(selectQueuesTableSortFields)),
       switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({
-        only_fields: ['display_name', 'last_update', 'name', 'tags', 'workers', 'entries'],
+        only_fields: queueFields,
         count_task_entries: true,
-        max_task_entries: -1
+        max_task_entries: 1
       })
         .pipe(
           mergeMap(res => [
@@ -69,7 +71,7 @@ export class QueuesEffect {
   fetchSelectedQueue = createEffect(() => {
     return this.actions.pipe(
       ofType(queueActions.fetchQueue),
-      switchMap((action) =>
+      switchMap((action) => iif(() => !!action.id,
         this.queuesApi.queuesGetAllEx({
           id: [action.id],
           only_fields: ['*', 'entries.task.name']
@@ -79,8 +81,9 @@ export class QueuesEffect {
             deactivateLoader(action.type)
           ]),
           catchError(err => [deactivateLoader(action.type), requestFailed(err)])
-        ))
-    )
+        ),
+        of(deactivateLoader(action.type))
+      )))
   });
 
   deleteQueues = createEffect(() => {
@@ -91,12 +94,13 @@ export class QueuesEffect {
         {
           data: {
             title: 'Delete Queue',
-            body: `Are you sure you would like to delete the "<b>${escape(action.queue.caption)}</b>" queue?`,
+            body: `Are you sure you would like to delete the "<b>${htmlTextShort(action.queue.caption)}</b>" queue?`,
             centerText: true,
             yes: 'Delete',
             no: 'Cancel',
             iconClass: 'al-ico-trash'
-          }
+          },
+          panelClass: 'dialog-md'
         }).afterClosed().pipe(
         filter(response => response),
         map(() => action)
@@ -139,7 +143,10 @@ export class QueuesEffect {
         queue: queue.id,
         task: action.task
       }).pipe(
-        map(() => queueActions.fetchQueue({id: queue.id, autoRefresh: true})),
+        mergeMap(() => [
+          queueActions.fetchQueue({id: queue.id, autoRefresh: true}),
+          queueActions.getQueues({autoRefresh: true})
+        ]),
         catchError(err => [
           deactivateLoader(action.type),
           requestFailed(err),
@@ -155,7 +162,10 @@ export class QueuesEffect {
       queue: queue.id,
       task: action.task
     }).pipe(
-      map(() => queueActions.fetchQueue({id: queue.id, autoRefresh: true})),
+        mergeMap(() => [
+          queueActions.fetchQueue({id: queue.id, autoRefresh: true}),
+          queueActions.getQueues({autoRefresh: true})
+        ]),
       catchError(err => [deactivateLoader(action.type),
         requestFailed(err),
         addMessage(MESSAGES_SEVERITY.ERROR, 'Move Task failed')])
@@ -171,7 +181,10 @@ export class QueuesEffect {
         task: action.task,
         count: (action.current - action.previous)
       }).pipe(
-        map(() => queueActions.fetchQueue({id: queue.id, autoRefresh: true})),
+        mergeMap(() => [
+          queueActions.fetchQueue({id: queue.id, autoRefresh: true}),
+          queueActions.getQueues({autoRefresh: true})
+        ]),
         catchError(err => [
           queueActions.fetchQueue({id: queue.id}),
           deactivateLoader(action.type),

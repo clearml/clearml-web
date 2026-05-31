@@ -1,14 +1,11 @@
-import {Component, Inject, OnDestroy, signal, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnDestroy, signal, viewChild} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags} from '@common/core/reducers/projects.reducer';
 import {map, switchMap} from 'rxjs/operators';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Tag} from '../tag-list/tag-list.component';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef
-} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {deactivateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {cancelModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -25,27 +22,33 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-    selector: 'sm-tag-color-menu',
-    templateUrl: './tag-color-menu.component.html',
-    styleUrls: ['./tag-color-menu.component.scss'],
-    imports: [
-        MatInputModule,
-        FormsModule,
-        DialogTemplateComponent,
-        MatMenuModule,
-        ColorPickerDirective,
-        CdkVirtualScrollViewport,
-        CdkVirtualForOf,
-        FilterPipe,
-        ClickStopPropagationDirective,
-        CdkFixedSizeVirtualScroll,
-        PushPipe,
-        MatButton,
-        MatIcon,
-        MatIconButton
-    ]
+  selector: 'sm-tag-color-menu',
+  templateUrl: './tag-color-menu.component.html',
+  styleUrls: ['./tag-color-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatInputModule,
+    FormsModule,
+    DialogTemplateComponent,
+    MatMenuModule,
+    ColorPickerDirective,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    FilterPipe,
+    ClickStopPropagationDirective,
+    CdkFixedSizeVirtualScroll,
+    PushPipe,
+    MatButton,
+    MatIcon,
+    MatIconButton
+  ]
 })
 export class TagColorMenuComponent implements OnDestroy {
+  protected data = inject<{tags?: string[]}>(MAT_DIALOG_DATA);
+  private store = inject(Store);
+  private colorService = inject(TagColorService);
+  private matDialogRef = inject(MatDialogRef<TagColorMenuComponent>);
+
   filterText: string;
   public tags$: Observable<Tag[]>;
   presetColors = TagColorService.predefined.map(color => color.background) as string[];
@@ -54,15 +57,12 @@ export class TagColorMenuComponent implements OnDestroy {
   protected picker = viewChild(ColorPickerDirective);
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {tags?: string[]},
-    private store: Store,
-    private colorService: TagColorService,
-    private matDialogRef: MatDialogRef<TagColorMenuComponent>,
+
   ) {
     this.tags$ = this.store.select(selectRouterParams)
       .pipe(
         map(params => params?.projectId),
-        switchMap( id => Array.isArray(data.tags) ? of(data.tags) :
+        switchMap( id => Array.isArray(this.data.tags) ? of(this.data.tags) :
           id === '*' ? this.store.select(selectCompanyTags) : this.store.select(selectProjectTags)),
         map((tags: string[]) => tags.map(tag => ({caption: tag, colorObservable: this.colorService.getColor(tag)} as Tag))));
   }

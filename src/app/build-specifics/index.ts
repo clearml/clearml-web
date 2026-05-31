@@ -1,10 +1,9 @@
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import {provideStoreDevtools} from '@ngrx/store-devtools';
 
-export const extCoreModules = [
-  StoreDevtoolsModule.instrument({
+export const extCoreConfig = [
+  provideStoreDevtools({
     maxAge: 100,
     trace: true,
-    traceLimit: 50,
-    connectInZone: true
+    traceLimit: 50
   })
 ];

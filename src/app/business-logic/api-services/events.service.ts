@@ -68,7 +68,7 @@ import {EventsGetMultiTaskMetricsResponse} from "~/business-logic/model/events/e
 import {EventsGetMultiTaskMetricsRequest} from "~/business-logic/model/events/eventsGetMultiTaskMetricsRequest";
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiEventsService {
 
     protected basePath = HTTP.API_BASE_URL;

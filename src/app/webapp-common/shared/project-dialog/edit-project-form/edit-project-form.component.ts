@@ -43,6 +43,7 @@ export class EditProjectFormComponent {
 
   valueChanges = toSignal(this.projectForm.valueChanges.pipe(debounceTime(300),skip(1)));
   project = input<Project>();
+  isReadOnly = input<boolean>(false);
   parentProjectPath = computed(() => {
     return new ProjectLocationPipe().transform(this.project()?.name)
   });
@@ -62,7 +63,12 @@ export class EditProjectFormComponent {
       this.projectForm.controls.name.setValue(this.project()?.basename ?? '');
       this.projectForm.controls.parent.setValue(this.parentProjectPath());
       this.projectForm.controls.default_output_destination.setValue(this.project()?.default_output_destination);
-      this.projectForm.controls.parent.disable();
+      if (this.isReadOnly()) {
+        this.projectForm.disable();
+      } else {
+        this.projectForm.enable();
+        this.projectForm.controls.parent.disable();
+      }
     });
 
     effect(() => {

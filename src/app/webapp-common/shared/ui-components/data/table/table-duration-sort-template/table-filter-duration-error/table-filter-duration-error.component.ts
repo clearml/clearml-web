@@ -1,9 +1,10 @@
-import {Component, input } from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 @Component({
   selector: 'sm-table-filter-duration-error',
   templateUrl: './table-filter-duration-error.component.html',
   styleUrls: ['./table-filter-duration-error.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableFilterDurationErrorComponent {
 

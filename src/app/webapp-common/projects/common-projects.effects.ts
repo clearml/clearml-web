@@ -132,13 +132,13 @@ export class CommonProjectsEffects {
                   }),
                   stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
                   include_stats: true,
-                  shallow_search: !searchQuery?.query && mainPageTagsFilter?.length === 0,
+                  shallow_search: !searchQuery?.query && (mainPageTagsFilter === undefined || mainPageTagsFilter.length === 0),
                   ...(((projectsView || nested) && !searchQuery?.query) && {permission_roots_only: true}),
                   ...((projectsView && projectId && projectId !== '*') && {parent: [projectId]}),
                   scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
                   size: pageSize,
                   ...(mainPageUsersFilter?.length > 0 && {active_users:mainPageUsersFilter}),
-                  ...(showOnlyUserWork && {active_users: [user?.id]}),
+                  ...(showOnlyUserWork && user?.id && {active_users: [user.id]}),
                   ...((showHidden) && {search_hidden: true}),
                   ...(hideExamples && {allow_public: false}),
                   order_by: ['featured', ...(orderBy ? [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy] : [])],
@@ -183,12 +183,12 @@ export class CommonProjectsEffects {
                     stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
                     ...(showHidden && {search_hidden: true}),
                     check_own_contents: true, // in order to check if project is empty
-                    ...(showOnlyUserWork && {active_users: [user.id]}),
+                    ...(showOnlyUserWork && {active_users: [user?.id]}),
                     only_fields: ['name', 'company', 'user', 'created', 'default_output_destination'],
                     ...(!projectsView && getSelfFeatureProjectRequest(this.route.snapshot)),
                   }) : nested && showRootFolder(this.route.snapshot) && projectId === '*' && !scrollId && !searchQuery?.query ?
                     // nested reports virtual root card
-                    rootCardQuery(this.route.snapshot, this.projectsApi, user.id, showOnlyUserWork, mainPageUsersFilter,
+                    rootCardQuery(this.route.snapshot, this.projectsApi, user?.id, showOnlyUserWork, mainPageUsersFilter,
                       mainPageTagsFilter, mainPageTagsFilterMatchMode)
                     :
                     of(null),

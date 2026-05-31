@@ -4,7 +4,7 @@
     [class.has-header]="!noHeader()" dataKey="id"
     [class.card-view]="minimizedView()"
     [style.--table-row-height]="rowHeight() + 'px'"
-    [style.--card-height]="(cardsCollapsed() ? 56 : cardHeight()) + 'px'"
+    [style.--card-height]="(cardsCollapsed() ? 48 : cardHeight()) + 'px'"
     [filterDelay]="0"
     [globalFilterFields]="enableTableSearch() ? globalFilterFields() : null"
     [scrollHeight]="scrollHeight()"
@@ -42,10 +42,10 @@
             <span class="no-data">No data to show</span>
           }
         </div>
+        @if (!tableSate().loading() && noDataTemplate()) {
+          <ng-container *ngTemplateOutlet="noDataTemplate(); context: {noDataTop: this.scrollable && noDataTop, minimizedView: minimizedView()}"></ng-container>
+        }
       </tr>
-      @if (!tableSate().loading()) {
-        <ng-container *ngTemplateOutlet="noDataTemplate()"></ng-container>
-      }
     </ng-template>
     <ng-template #expandedrow let-row>
       <ng-container
@@ -97,7 +97,7 @@
               <div class="table-header" style="flex-basis:100%">
                 <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: visibleColumns()?.[0]}"></ng-container>
                 <div class="table-header-title ellipsis" data-id="tableHeader">{{ minimizedTableHeader() }}</div>
-                <div class="collapse-button al-icon al-ico-compact-view sm-md"
+                <div class="collapse-button al-icon al-ico-compact-view sm-md" data-id="collapseButton"
                      [class.active]="cardsCollapsed()"
                      (click)="cardsCollapsedToggle.emit()"></div>
                 <div class="table-actions">
@@ -126,7 +126,7 @@
           [pRowTogglerDisabled]="!expandableRows() || !expandRowOnClick()"
           [pSelectableRow]="rowData" [pContextMenuRow]="rowData"
           [pContextMenuRowDisabled]=!rowRightClick.observed
-          [style.height.px]="minimizedView() ? (cardsCollapsed() ? 56 : this.cardHeight()) : this.rowHeight()"
+          [style.height.px]="minimizedView() ? (cardsCollapsed() ? 48 : 'unset') : this.rowHeight()"
           [class.even]="(index + 1) % 2 === 0"
           [class.checked]="isRowSelected(rowData)"
           [class.simple]="simple()"
@@ -160,7 +160,7 @@
         } @else {
           <td class="pointer p-0" role="button">
             <div class="card-wrapper">
-              <div class="collapse-animation" [style.max-height.px]="cardsCollapsed()? 54 : cardHeight()">
+              <div class="collapse-animation" [style.max-height.px]="cardsCollapsed()? 48 : cardHeight()">
                 <ng-container
                   *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected: isSelected(rowData)}"></ng-container>
               </div>

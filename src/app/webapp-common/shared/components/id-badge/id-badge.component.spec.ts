@@ -8,7 +8,7 @@ describe('IdBadgeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ IdBadgeComponent ]
+      imports: [ IdBadgeComponent ]
     })
     .compileComponents();
   });

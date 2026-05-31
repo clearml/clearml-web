@@ -23,7 +23,7 @@
       <span [smTooltip]="label()" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName" [style.color]="textColor()">{{label()}}</span>
       @if (allowRemove()) {
         <button mat-icon-button class="xs" [style.color]="textColor()"
-                (click)="remove.emit($event); $event.stopPropagation()"
+                (click)="$event.preventDefault(); $event.stopPropagation(); remove.emit($event)"
         >
           <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" data-id="annotation cross button"></mat-icon>
         </button>

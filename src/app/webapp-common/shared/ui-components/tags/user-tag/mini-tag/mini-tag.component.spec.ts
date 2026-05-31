@@ -14,6 +14,7 @@ describe('MiniTagComponent', () => {
 
     fixture = TestBed.createComponent(MiniTagComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('color', { background: '#000', foreground: '#fff' });
     fixture.detectChanges();
   });
 

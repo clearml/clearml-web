@@ -27,7 +27,7 @@
                 "."
               ],
               "sass": {
-                "silenceDeprecations": ["import", "mixed-decls"]
+                "silenceDeprecations": ["import"]
               }
             },
             "assets": [
@@ -90,23 +90,27 @@
             "browser": "src/main.ts"
           },
           "configurations": {
-            "appdev": {
-              "budgets": [
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "assets": [
+                "src/assets",
+                "src/app/webapp-common/assets",
                 {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "fileReplacements": [
+                  "glob": "favicon.ico",
+                  "input": "src/app/webapp-common/assets/icons/dev-mode",
+                  "output": "/assets"
+                },
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
-                }
+                  "glob": "**/*",
+                  "input": "node_modules/ace-builds/src-min",
+                  "output": "./assets/ace-builds/"
+                },
+                "src/version.json",
+                "src/configuration.json",
+                "src/onboarding.json",
+                "src/env.js"
               ]
             },
             "production": {
@@ -134,7 +138,7 @@
               "serviceWorker": false
             }
           },
-          "defaultConfiguration": ""
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
@@ -145,8 +149,8 @@
             "buildTarget": "trains-webapp:build"
           },
           "configurations": {
-            "appdev": {
-              "buildTarget": "trains-webapp:build:appdev"
+            "development": {
+              "buildTarget": "trains-webapp:build:development"
             },
             "staging": {
               "buildTarget": "trains-webapp:build:demo"
@@ -375,6 +379,7 @@
     }
   },
   "cli": {
+    "packageManager": "pnpm",
     "analytics": false,
     "schematicCollections": [
       "@angular-eslint/schematics",

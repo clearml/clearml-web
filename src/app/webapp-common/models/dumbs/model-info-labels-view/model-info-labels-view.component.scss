@@ -1,14 +1,18 @@
 :host {
   display: block;
+  height: 100%;
 
   .body {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
     grid-gap: 12px;
-    align-items: normal;
+    align-items: start;
+
+
   }
   sm-editable-section.in-edit{
     display: flex;
+    height: 100%;
     flex-direction: column;
     padding: 12px;
   }
@@ -46,7 +50,12 @@
   }
 
   form.edit {
-    //height: calc(100% - 96px);
+    height: calc(100% - 100px);
+  }
+
+  button.icon-only {
+    position: absolute;
+    bottom: 24px;
   }
 
   .content {

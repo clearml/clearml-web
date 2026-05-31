@@ -1,6 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {Task} from '~/business-logic/model/tasks/task';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {IExperimentModelInfo, ITableExperiment} from '../shared/common-experiment-model.model';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
@@ -111,7 +111,7 @@ export const saveExperimentInputModel = createAction(
   }>());
 
 export const saveHyperParamsSection = createAction(
-  EXPERIMENTS_INFO_PREFIX + 'SAVE_HYPERPARAMS', props<{ hyperparams: ParamsItem[] }>());
+  EXPERIMENTS_INFO_PREFIX + 'SAVE_HYPERPARAMS', props<{ task?:  ISelectedExperiment; hyperparams: ParamsItem[] }>());
 
 export const saveExperimentConfigObj = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SAVE_CONFIG_OBJ', props<{ configuration: ConfigurationItem[] }>());
@@ -192,4 +192,9 @@ export const navigateToDataset = createAction(
 export const setLastTasksTab = createAction(
   EXPERIMENTS_INFO_PREFIX + 'set last tab',
   props<{ projectId: string; lastTab: string }>()
+);
+
+export const exportTaskInfo = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'EXPORT_TASK_INFO',
+  props<{ taskId: string; exportType?: 'Task' | 'Pipeline' | 'Step' }>()
 );

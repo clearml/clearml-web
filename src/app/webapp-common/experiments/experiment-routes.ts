@@ -1,25 +1,53 @@
+import {makeEnvironmentProviders} from '@angular/core';
 import {Routes} from '@angular/router';
 import {leavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
 import {selectIsExperimentInEditMode, selectLastVisitedTasksTab} from '@common/experiments/reducers';
-import {
-  COMPARE_CONFIG_TOKEN,
-  COMPARE_STORE_KEY,
-  getCompareConfig
-} from '@common/experiments-compare/experiments-compare.module';
-import {UserPreferences} from '@common/user-preferences';
-import {importProvidersFrom} from '@angular/core';
-import {StoreModule} from '@ngrx/store';
-import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
+import {experimentsCompareProviders} from '@common/experiments-compare/experiments-compare.providers';
+import {provideState} from '@ngrx/store';
+import {selectModelProviders} from '@common/select-model/select-model.providers';
 import {compareNavigationGuard} from '@common/experiments/compare-navigation.guard';
 import {compareViewStateGuard} from '@common/experiments/compare-view-state.guard';
 import {lastVisitedTabGuard} from '@common/shared/guards/last-visted-tab.guard';
 import {lastVisitedSettingTabGuard} from '@common/shared/guards/last-visted-set-tab.guard';
 import {setLastTasksTab} from '@common/experiments/actions/common-experiments-info.actions';
+import {provideEffects} from '@ngrx/effects';
+import {EXPERIMENTS_STORE_KEY} from '@common/experiments/experiment.consts';
+import {reducers} from '~/features/experiments/reducers';
+import {ExperimentsInfoEffects} from '~/features/experiments/effects/experiments-info.effects';
+import {ExperimentsMenuEffects} from '~/features/experiments/effects/experiments-menu.effects';
+import {CommonExperimentsViewEffects} from '@common/experiments/effects/common-experiments-view.effects';
+import {CommonExperimentsInfoEffects} from '@common/experiments/effects/common-experiments-info.effects';
+import {CommonExperimentOutputEffects} from '@common/experiments/effects/common-experiment-output.effects';
+import {CommonExperimentsMenuEffects} from '@common/experiments/effects/common-experiments-menu.effects';
+import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
+import {CommonExperimentConverterService} from '@common/experiments/shared/services/common-experiment-converter.service';
+import {singleGraphProviders} from '@common/shared/single-graph/single-graph.providers';
+import {selectQueueProviders} from '@common/experiments/shared/components/select-queue/select-queue.providers';
+
+export const commonExperimentsProviders = makeEnvironmentProviders([
+  provideState(EXPERIMENTS_STORE_KEY, reducers),
+  provideEffects([
+    ExperimentsInfoEffects,
+    ExperimentsMenuEffects,
+    CommonExperimentsViewEffects,
+    CommonExperimentsInfoEffects,
+    CommonExperimentOutputEffects,
+    CommonExperimentsMenuEffects
+  ]),
+  ExperimentConverterService,
+  CommonExperimentConverterService,
+  ...selectQueueProviders,
+  ...singleGraphProviders,
+  ...selectModelProviders,
+]);
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('@common/experiments/experiments.component').then(m => m.ExperimentsComponent),
+    providers: [
+      commonExperimentsProviders
+    ],
     children: [
       {
         path: 'compare',
@@ -32,10 +60,7 @@ export const routes: Routes = [
         loadComponent: () => import('@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component').then(m => m.ExperimentCompareScalarChartsComponent),
         data: {minimized: true},
         providers: [
-          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-          importProvidersFrom(
-            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-          ),
+          experimentsCompareProviders
         ],
       },
       {
@@ -44,10 +69,7 @@ export const routes: Routes = [
         loadComponent: () => import('@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component').then(m => m.ExperimentComparePlotsComponent),
         data: {minimized: true},
         providers: [
-          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-          importProvidersFrom(
-            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-          ),
+          experimentsCompareProviders
         ],
       },
       {
@@ -160,6 +182,9 @@ export const routes: Routes = [
     loadComponent: () => import('~/features/experiments/containers/experiment-ouptut/experiment-output.component').then(m => m.ExperimentOutputComponent),
     data: {search: false, lastTabAction: setLastTasksTab},
     canDeactivate: [lastVisitedSettingTabGuard],
+    providers: [
+      ...singleGraphProviders
+    ],
     children: [
       {
         path: '',
@@ -245,3 +270,4 @@ export const routes: Routes = [
     ]
   },
 ];
+

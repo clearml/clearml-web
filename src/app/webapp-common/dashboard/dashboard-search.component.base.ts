@@ -31,15 +31,14 @@ import {
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
-import {activeLinksList, ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {Component, computed, inject, OnDestroy, OnInit, output, signal} from '@angular/core';
+import {activeLinksList, activeSearchLink, ActiveSearchLink, convertToViewAllFilter} from '~/features/dashboard-search/dashboard-search.consts';
+import {Component, inject, OnDestroy, OnInit, output, signal} from '@angular/core';
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from '@angular/router';
 import {IReport} from '@common/reports/reports.consts';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {isEqual} from 'lodash-es';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {SelectedModel} from '@common/models/shared/models.model';
-import {convertToViewAllFilter} from '@common/dashboard-search/dashboard-search.consts';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {explicitEffect} from 'ngxtension/explicit-effect';
 import {encodeFilters} from '@common/shared/utils/tableParamEncode';
@@ -88,7 +87,7 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
   protected currentUser = this.store.selectSignal(selectCurrentUser);
   protected activeLink = signal<ActiveSearchLink>(null);
   private scrollIds = this.store.selectSignal(selectSearchScrollIds);
-  protected $navigationOptions = computed(() => {
+  protected $navigationOptions = (activeLink?: ActiveSearchLink) => {
     return ({
       replaceUrl: false,
       queryParamsHandling: 'replace',
@@ -98,10 +97,10 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
         tab: undefined,
         gsfilter: undefined,
         advanced: undefined,
-        filter: convertToViewAllFilter(this.qParams(), this.activeLink(), this.currentUser()?.id)?.filter
+        filter: convertToViewAllFilter(this.qParams(), activeLink ?? this.activeLink(), this.currentUser()?.id)?.filter
       }
     } as const);
-  });
+  };
   searchStarted: boolean;
 
   public setUserFilterIfNeeded(feature) {
@@ -192,7 +191,7 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
 
   pipelineRunSelected(pipelineRun: ITask) {
     this.setUserFilterIfNeeded('pipelines');
-    this.router.navigate(['pipelines', '*', 'tasks', pipelineRun.id], this.$navigationOptions());
+    this.router.navigate(['pipelines', '*', 'tasks', pipelineRun.id], this.$navigationOptions(activeSearchLink.pipelineRuns));
     this.store.dispatch(setSelectedProjectId({
       projectId: '*',
       example: isExample(pipelineRun)
@@ -221,7 +220,7 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy 
 
   public openDatasetVersionSelected(task: IRecentTask | ITask) {
     this.setUserFilterIfNeeded('datasets');
-    this.router.navigate(['datasets', 'simple', '*', 'tasks', task.id], this.$navigationOptions());
+    this.router.navigate(['datasets', 'simple', '*', 'tasks', task.id], this.$navigationOptions(activeSearchLink.openDatasetVersions));
     this.itemSelected.emit();
   }
 

@@ -14,7 +14,6 @@ import {selectRecentTasks} from '@common/dashboard/common-dashboard.reducer';
 import {initSearch} from '@common/common-search/common-search.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {selectActiveSearch} from '@common/common-search/common-search.reducer';
-import {CommonDashboardModule} from '@common/dashboard/common-dashboard.module';
 import {DashboardReportsComponent} from '@common/dashboard/containers/dashboard-reports/dashboard-reports.component';
 import {MatButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -28,7 +27,6 @@ import {DashboardExperimentsComponent} from '@common/dashboard/containers/dashbo
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonDashboardModule,
     DashboardReportsComponent,
     MatButton,
     MatIconModule,

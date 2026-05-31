@@ -56,6 +56,20 @@
           (editDescription)="editDescriptionHandler()"
         ></sm-experiment-info-edit-description>
       </mat-menu>
+
+      @if (experiment()?.id) {
+        <button
+          class="line-item"
+          mat-icon-button
+          (click)="exportTaskInfo()"
+          smTooltip="Export task information (JSON)"
+          data-id="exportTaskButton"
+          aria-label="Export task information"
+        >
+          <mat-icon fontSet="al" fontIcon="al-ico-export"></mat-icon>
+        </button>
+      }
+
       @if (minimized()) {
         <button class="line-item" mat-icon-button (click)="maximizedClicked.emit()" smTooltip="View Full Screen" data-id="fullscreenIcon">
           <mat-icon fontSet="al" fontIcon="al-ico-info-max"></mat-icon>
@@ -72,7 +86,7 @@
           class="line-item"
           [experiment]="$any(experiment())"
           [selectedExperiment]="experiment()"
-          [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+          [filterTagsByProject]="tagsFilterByProject$ | ngrxPush"
           [selectedDisableAvailable]="selectedDisableAvailable()"
           [selectedDisableAvailableIsMultiple]="false"
           [projectTags]="projectTags$ | ngrxPush"
@@ -81,6 +95,7 @@
           [isSharedNotInWorkspaces]="isSharedNotInWorkspaces()"
           [numSelected]="1"
           (tagSelected)="addTag($event)"
+          (getCompanyTags)="getCompanyTags.emit()"
         ></sm-experiment-menu-extended>
       }
       @if (minimized()) {
@@ -106,14 +121,14 @@
     }
     <span
       #tagsMenuTrigger="matMenuTrigger"
-      [matMenuTriggerFor]="tagsMenu.matMenu"
+      [matMenuTriggerFor]="tagsMenu.matMenu()"
       (menuClosed)="tagsMenuClosed()"
     ></span>
     <sm-tags-menu
       #tagsMenu
       class="light-theme"
       [tags]="experiment()?.tags"
-      [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+      [filterByProject]="tagsFilterByProject$ | ngrxPush"
       [projectTags]="projectTags$ | ngrxPush"
       [companyTags]="companyTags$ | ngrxPush"
       (tagSelected)="addTag($event)"

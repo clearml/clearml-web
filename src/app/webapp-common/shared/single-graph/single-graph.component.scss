@@ -69,18 +69,13 @@ sm-tag-list {
     transform: scale(0.7) translate(16px, 2px);
   }
 
-  .legendpoints path {
+  .legendpoints path:not(.scatterpts) {
     d: path('M8,8H-8V-8H8Z') !important;
     transform: scale(.7) translate(28px, 2px);
   }
 
-  .legendpoints path:not(.scatterpts) {
-    d: path('M8,8H-8V-8H8Z') !important;
-  }
-
   .legendpoints path.scatterpts {
-    // chrome only
-    d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
+    transform: scale(1.2) translate(18px, 1px);
   }
 }
 

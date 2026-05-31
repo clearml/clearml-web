@@ -1,10 +1,11 @@
 import {enableProdMode} from '@angular/core';
-import {AppModule} from '~/app.module';
+import {bootstrapApplication} from '@angular/platform-browser';
 import {ConfigurationService, fetchConfigOutSideAngular} from '@common/shared/services/configuration.service';
 import {updateHttpUrlBaseConstant} from '~/app.constants';
 import {Environment} from './environments/base';
-import {platformBrowser} from '@angular/platform-browser';
-import {APP_BASE_HREF} from '@angular/common';
+import {AppRootComponent} from '~/app';
+import {getAppConfig} from '~/app.config';
+
 const environment = ConfigurationService.globalEnvironment;
 
 if (environment.production) {
@@ -17,10 +18,8 @@ if (environment.production) {
     configData = await fetchConfigOutSideAngular();
     (window as any).configuration = configData;
   } finally {
-    const baseHref = (window as any).__env.subPath || '' as string;
+    const baseHref = (window as any).__env?.subPath || '' as string;
     updateHttpUrlBaseConstant({...environment, ...configData, ...(baseHref && !baseHref.startsWith('${') && {apiBaseUrl: baseHref + environment.apiBaseUrl})});
-    await platformBrowser([
-      {provide: APP_BASE_HREF, useValue: configData.baseHref ?? ''}
-    ]).bootstrapModule(AppModule);
+    bootstrapApplication(AppRootComponent, getAppConfig(configData)).catch(err => console.error(err));
   }
 })();

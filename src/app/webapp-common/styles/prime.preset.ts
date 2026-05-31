@@ -1,4 +1,4 @@
-import {definePreset} from '@primeng/themes';
+import {definePreset} from '@primeuix/themes';
 import {SliderDesignTokens} from '@primeuix/themes/types/slider';
 import {DataTableDesignTokens} from '@primeuix/themes/types/datatable';
 

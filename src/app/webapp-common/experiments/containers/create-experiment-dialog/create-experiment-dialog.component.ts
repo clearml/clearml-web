@@ -55,7 +55,7 @@ import {EXPERIMENTS_TYPE_LABELS} from '~/shared/constants/non-common-consts';
 
 const venvOptions = [
   {label: 'Discover', value: 'discover'},
-  {label: 'manual', value: 'Specify'},
+  {label: 'Manual', value: 'Specify'},
 ];
 
 type VenvOption = typeof venvOptions[number]['value'];
@@ -168,20 +168,20 @@ export class CreateExperimentDialogComponent {
   ];
 
   codeFormGroup = this.formBuilder.group({
-    name: [null, [Validators.required, minLengthTrimmed(3)]],
+    name: [null as string, [Validators.required, minLengthTrimmed(3)]],
     taskType: ['training' as TaskTypeEnum],
     repo: [null as string],
     type: ['branch'],
     branch: ['main'],
-    commit: [null],
-    tag: [null],
+    commit: [null as string],
+    tag: [null as string],
     directory: ['.', Validators.required],
     binaryType: ['python', Validators.required],
     binary: [null as string, Validators.required],
     scriptType: ['script' as ScriptType],
     script: [null as string, Validators.required],
     uncommited: [null as string],
-    module: [null],
+    module: [null as string],
     existing: [false],
     taskInit: [true],
   });
@@ -209,10 +209,9 @@ export class CreateExperimentDialogComponent {
   protected queueVal = toSignal<string>(this.queueFormGroup.controls.queue.valueChanges);
   shell = toSignal(this.codeFormGroup.controls.binaryType.valueChanges
     .pipe(
-      debounceTime(300),
       map(value => value === 'shell'),
       distinctUntilChanged(),
-    ));
+    ), {initialValue: false});
   protected scriptTypes = computed(() => this.shell() ? scriptTypes.filter((e, index) => index !== 1) : scriptTypes);
   protected editMode = signal(false);
   protected cursorPosition: Ace.Point;

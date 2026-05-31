@@ -36,7 +36,7 @@ import {OrganizationGetProjectWorkloadsResponse} from '~/business-logic/model/or
 import {ApiOptions} from '~/business-logic/api-services/api';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ApiOrganizationService {
 
     protected basePath = HTTP.API_BASE_URL;

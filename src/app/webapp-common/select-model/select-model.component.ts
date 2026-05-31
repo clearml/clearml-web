@@ -21,12 +21,12 @@ import {
   selectViewMode
 } from './select-model.reducer';
 import {Observable, of, debounceTime, distinctUntilChanged, map, tap} from 'rxjs';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {SelectedModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS} from '../models/models.consts';
-import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
+import {selectAllProjectsUsers, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
 import {Project} from '~/business-logic/model/projects/models';
 import {getAllSystemProjects, getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
@@ -60,6 +60,7 @@ export interface SelectModelData {
     DialogTemplateComponent,
     PushPipe,
     MatButton,
+    MatDialogActions,
   ]
 })
 export class SelectModelComponent {
@@ -94,7 +95,6 @@ export class SelectModelComponent {
   protected users$ = this.store.select(selectAllProjectsUsers);
   protected currentUser = this.store.selectSignal(selectCurrentUser);
   protected tags$ = this.store.select(selectTags);
-  protected systemTags$ = this.store.select(selectProjectSystemTags);
   protected models$ = this.store.select(selectAllModels);
   protected projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
   protected frameworks$ = this.store.select(selectFrameworks);
@@ -189,6 +189,11 @@ export class SelectModelComponent {
 
   clearFilters() {
     this.store.dispatch(clearTableFilter());
+  }
+
+  clearTableFiltersAndSearchHandler() {
+    this.store.dispatch(clearTableFilter());
+    this.store.dispatch(actions.globalFilterChanged({filter: ''}));
   }
 
   showArchives($event: boolean) {

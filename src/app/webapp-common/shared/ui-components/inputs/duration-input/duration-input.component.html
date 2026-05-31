@@ -3,6 +3,7 @@
     <input #hoursInput
            matInput
            formControlName="hours"
+           data-id="hoursInputField"
            (keydown)="checkChars($event)"
            (keyup)=" ($any($event.target).selectionStart === 2) && !$event.key.startsWith('Arrow') && mins.focus()"
            (keyup.enter)="onChangePartial()"
@@ -16,6 +17,7 @@
     <input #mins
            matInput
            formControlName="minutes"
+           data-id="minutesInputField"
            (keydown)="checkChars($event)"
            (keyup)="($any($event.target).selectionStart===2 ) && !$event.key.startsWith('Arrow') && secs.focus()"
            (keyup.enter)="onChangePartial()"
@@ -32,6 +34,7 @@
     <input #secs
            matInput
            formControlName="seconds"
+           data-id="secondsInputField"
            (keydown)="checkChars($event)"
            (keyup)="(($any($event.target).selectionStart === 2 ) && !$event.key.startsWith('Arrow') && mill.focus())"
            (keyup.enter)="onChangePartial()"
@@ -48,6 +51,7 @@
     <input #mill
            matInput
            formControlName="ms"
+           data-id="msInputField"
            (keydown)="checkChars($event)"
            (keyup.enter)="onChangePartial()"
            (keyup.arrowLeft)="$any($event.target).selectionEnd === 0 && secs.focus()"
@@ -59,7 +63,7 @@
            smTooltip="Milliseconds"
     >
   </div>
-  <div class="submit" [class.in-edit-mode]="inEdit()">
+  <div class="submit" data-id="submitButton" [class.in-edit-mode]="inEdit()">
        <button mat-icon-button class="sm" (click)="onChangePartial()">
               <mat-icon fontSet="al" fontIcon="al-ico-complete"></mat-icon>
        </button>

@@ -27,6 +27,7 @@ import {
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 import { selectExperimentsTags } from '@common/experiments/reducers';
+import {exportTaskInfo} from '../../actions/common-experiments-info.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {
   ExperimentTypeIconLabelComponent
@@ -92,6 +93,7 @@ export class ExperimentInfoHeaderComponent {
   minimizeClicked = output();
   closeInfoClicked = output();
   maximizedClicked = output();
+  getCompanyTags = output();
   tagMenuTrigger = viewChild<MatMenuTrigger>('tagsMenuTrigger');
   tagMenu = viewChild(TagsMenuComponent);
 
@@ -158,5 +160,12 @@ export class ExperimentInfoHeaderComponent {
 
   copyToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));
+  }
+
+  exportTaskInfo(): void {
+    const task = this.experiment();
+    if (task?.id) {
+      this.store.dispatch(exportTaskInfo({taskId: task.id}));
+    }
   }
 }

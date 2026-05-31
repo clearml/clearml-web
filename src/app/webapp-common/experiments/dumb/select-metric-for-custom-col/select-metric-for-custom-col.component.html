@@ -50,7 +50,7 @@
                      (click)="metricVariant.toggle(); !skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.checked) : toggleMetricToDisplay(variant, metricVariant.checked, 'value')">
                   <mat-checkbox #metricVariant
                                 smClickStopPropagation
-                                data-id="Select All Loaded Tasks"
+                                data-id="selectMetricCheckbox"
                                 [checked]="metricsCols[variant.metric_hash + variant.variant_hash]"
                                 (change)="!skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.checked) : toggleMetricToDisplay(variant, metricVariant.checked, 'value')">
                   </mat-checkbox>
@@ -62,21 +62,21 @@
                   <div class="value-type">
                     <mat-checkbox #last
                                   smClickStopPropagation
-                                  data-id="Select All Loaded Tasks"
+                                  data-id="selectLastMetricCheckbox"
                                   [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('value')"
                                   (change)="toggleMetricToDisplay(variant, last.checked, 'value')">
                       LAST
                     </mat-checkbox>
                     <mat-checkbox #min
                                   smClickStopPropagation
-                                  data-id="Select All Loaded Tasks"
+                                  data-id="selectMinMetricCheckbox"
                                   [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('min_value')"
                                   (change)="toggleMetricToDisplay(variant, min.checked, 'min_value')">
                       MIN
                     </mat-checkbox>
                     <mat-checkbox #max
                                   smClickStopPropagation
-                                  data-id="Select All Loaded Tasks"
+                                  data-id="selectMaxMetricCheckbox"
                                   [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('max_value')"
                                   (change)="toggleMetricToDisplay(variant, max.checked, 'max_value')">
                       MAX

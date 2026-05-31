@@ -31,15 +31,34 @@
 >
 </sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
-  <button
-    mat-flat-button
-    class="tertiary-button me-3"
-    [disabled]="inArchivedMode() || exampleProject()"
-    (click)="newRun()"
-  >
-    <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="newRunButton"></mat-icon>
-     NEW RUN
-  </button>
+  <span class="d-flex  me-3">
+    <button
+      mat-flat-button
+      class="new-run tertiary-button"
+      [disabled]="inArchivedMode() || exampleProject()"
+      (click)="newRun()"
+      >
+      <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="newRunButton"></mat-icon>
+       NEW RUN
+    </button>
+    <button
+      mat-flat-button
+      class="new-run tertiary-button arrow icon-only"
+      [disabled]="inArchivedMode() || exampleProject()"
+      [matMenuTriggerFor]="addMenu"
+      #addMenuTrigger="matMenuTrigger"
+      [class.rotated]="addMenuTrigger.menuOpen"
+        >
+        <mat-icon fontSet="al" fontIcon="al-ico-dropdown-arrow" data-id="addExperimentButton"></mat-icon>
+    </button>
+  </span>
+
+  <mat-menu #addMenu="matMenu" class="light-theme">
+    <button mat-menu-item (click)="newPipeline()" data-id="newPipelineButton" [disabled]="inArchivedMode() || exampleProject()">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      Run in New Pipeline
+    </button>
+  </mat-menu>
 </ng-template>
 <div class="experiment-body">
   <as-split
@@ -74,10 +93,10 @@
         [parents]="parents$ | ngrxPush"
         [experimentTypes]="types$ | ngrxPush"
         [tags]="tags$ | ngrxPush"
-        [systemTags]="systemTags$ | ngrxPush"
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
+        [searchQuery]="(searchQuery$ | ngrxPush)?.query"
         [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
         [selectedExperiment]="highlited()"
@@ -101,7 +120,8 @@
         (columnResized)="columnResized($event)"
         (contextMenu)="onContextMenuOpen($event)"
         (removeTag)="removeTag($event)"
-        (clearAllFilters)="clearTableFiltersHandler($event)"
+        (clearTableFilters)="clearTableFiltersHandler($event)"
+        (clearTableFiltersAndSearch)="clearTableFiltersAndSearchHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
         (closePanel)="closePanel()"
       >
@@ -124,6 +144,7 @@
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'experiments')"
+  (getCompanyTags)="getCompanyTags()"
 ></sm-entity-footer>
 
 <ng-template #contextMenuExtendedTemplate let-contextExperiment>
@@ -135,7 +156,7 @@
     [selectedDisableAvailableIsMultiple]="!singleRowContext"
     [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable(contextExperiment) : (selectedExperimentsDisableAvailable$ | ngrxPush)"
     [numSelected]="singleRowContext ? 1 : checkedExperiments.length"
-    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+    [filterTagsByProject]="tagsFilterByProject$ | ngrxPush"
     [projectTags]="tags$ | ngrxPush"
     [companyTags]="companyTags$ | ngrxPush"
     [activateFromMenuButton]="false"
@@ -145,6 +166,7 @@
     [isCompare]="getTableModeFromURL() === 'compare'"
     [backdrop]="menuBackdrop"
     (tagSelected)="onAddTag($event, contextExperiment)"
+    (getCompanyTags)="getCompanyTags()"
     (menuOpened)="setContextMenuStatus(true)"
     (menuClosed)="setContextMenuStatus(false)"
   ></sm-controller-menu>
