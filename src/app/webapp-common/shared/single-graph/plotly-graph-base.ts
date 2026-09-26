@@ -82,6 +82,7 @@ export interface ExtData extends plotly.PlotData {
 
 export interface ChartPreferences {
   log?: boolean;
+  logX?: boolean;
   hoverMode?: ChartHoverModeEnum;
   showSpike?: boolean;
 }
