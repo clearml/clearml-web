@@ -1131,7 +1131,8 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     const axis = setting === 'logX' ? 'X' : 'Y';
     // Shrink the log icon to the bottom-left and add an axis letter badge on the top-right, so both buttons can be told apart
     const getIconPath = (onOrOff: boolean) => this.getLogIcon(onOrOff).path;
-    const getIconSvg = (onOrOff: boolean) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">` +
+    // class="icon" is required - plotly's modebar color/activecolor rules and our sizing only target `svg.icon`
+    const getIconSvg = (onOrOff: boolean) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" class="icon">` +
       `<path d="${getIconPath(onOrOff)}" transform="translate(0, 270) scale(0.75) translate(0, -100)"/>` +
       `<path d="${AXIS_LETTER_PATHS[axis]}"/></svg>`;
     return {
@@ -1143,6 +1144,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         const button = ev.currentTarget as HTMLElement;
         button.setAttribute('data-title', this.getLogButtonTitle(newLogMode, axis));
         button.querySelector('path')?.setAttribute('d', getIconPath(newLogMode));
+        // A pinned range (e.g. carried into the maximized view) is in the old scale's units - drop it so plotly autoranges
+        const axisKey = setting === 'logX' ? 'xaxis' : 'yaxis';
+        if (this.originalChart.layout[axisKey]?.range) {
+          this.originalChart = {
+            ...this.originalChart,
+            layout: {...this.originalChart.layout, [axisKey]: {...this.originalChart.layout[axisKey], range: undefined, autorange: true}}
+          };
+        }
         this.smooth$.next(this.smoothWeight);
         this.chartSettings.update(settings => ({...settings, [setting]: newLogMode}));
         this.chartPreferencesChanged.emit({[setting]: newLogMode});
