@@ -56,6 +56,11 @@ import {GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-vi
 
 declare const Plotly;
 const RATIO_OFFSET_FIX = 37;
+// Letter badges (1000x1000 viewBox, top-right corner) for the log scale modebar buttons
+const AXIS_LETTER_PATHS = {
+  X: 'M690,20h80l65,95l65-95h80l-105,140l105,140h-80l-65-95l-65,95h-80l105-140z',
+  Y: 'M690,20h80l65,105l65-105h80l-110,160v120h-70v-120z'
+};
 
 export type ChartHoverModeEnum = 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
@@ -495,6 +500,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         spikedash: 'solid',
         rangeslider: {visible: false},
         fixedrange: false,
+        ...(this.chartSettings()?.logX && this.logXSupported() && {type: 'log'}),
         color: this.themeColors().tick,
         gridcolor: this.themeColors().lines,
         zerolinecolor: this.themeColors().lines,
@@ -630,31 +636,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
 
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
-      modeBarButtonsToAdd.push({
-        name: 'Log view',
-        title: this.getLogButtonTitle(this.chartSettings().log),
-        icon: this.getLogIcon(this.chartSettings().log),
-        click: (gd: plotly.PlotlyHTMLElement, ev: MouseEvent) => {
-          const newLogMode = !this.chartSettings().log;
-          const icon = this.getLogIcon(newLogMode);
-          let path: SVGPathElement;
-          let svg: HTMLElement;
-          if ((ev.target as SVGElement).tagName === 'svg') {
-            svg = ev.target as HTMLElement;
-            path = (ev.target as SVGElement).firstChild as SVGPathElement;
-          } else {
-            path = ev.target as SVGPathElement;
-            svg = path.parentElement as HTMLElement;
-          }
-          if (svg.parentElement.attributes['data-title']) {
-            svg.parentElement.attributes['data-title'].value = this.getLogButtonTitle(newLogMode);
-          }
-          path.attributes[0].value = icon.path;
-          this.smooth$.next(this.smoothWeight);
-          this.chartSettings.update(settings => ({...settings, log: newLogMode}));
-          this.chartPreferencesChanged.emit({log: newLogMode});
-        }
-      });
+      modeBarButtonsToAdd.push(this.getLogButton('log'));
+      if (this.logXSupported()) {
+        modeBarButtonsToAdd.push(this.getLogButton('logX'));
+      }
     }
     if (!['table', 'parcoords'].includes(graph?.data?.[0]?.type) && !this.moveLegendToTitle()) {
       modeBarButtonsToAdd.push({
@@ -1133,8 +1118,45 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     };
   }
 
-  getLogButtonTitle(onOrOff: boolean) {
-    return `Switch to ${onOrOff ? 'Linear' : 'Logarithmic'} scale`;
+  getLogButtonTitle(onOrOff: boolean, axis: 'X' | 'Y' = 'Y') {
+    return `Switch ${axis} axis to ${onOrOff ? 'Linear' : 'Logarithmic'} scale`;
+  }
+
+  // A log x-axis is meaningless for absolute dates (iso_time), which plotly renders as a date axis
+  logXSupported() {
+    return this.xAxisType !== ScalarKeyEnum.IsoTime;
+  }
+
+  private getLogButton(setting: 'log' | 'logX'): plotly.ModeBarButton {
+    const axis = setting === 'logX' ? 'X' : 'Y';
+    // Shrink the log icon to the bottom-left and add an axis letter badge on the top-right, so both buttons can be told apart
+    const getIconPath = (onOrOff: boolean) => this.getLogIcon(onOrOff).path;
+    // class="icon" is required - plotly's modebar color/activecolor rules and our sizing only target `svg.icon`
+    const getIconSvg = (onOrOff: boolean) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" class="icon">` +
+      `<path d="${getIconPath(onOrOff)}" transform="translate(0, 270) scale(0.75) translate(0, -100)"/>` +
+      `<path d="${AXIS_LETTER_PATHS[axis]}"/></svg>`;
+    return {
+      name: setting === 'logX' ? 'Log X view' : 'Log view',
+      title: this.getLogButtonTitle(this.chartSettings()?.[setting], axis),
+      icon: {width: 1000, height: 1000, svg: getIconSvg(this.chartSettings()?.[setting])},
+      click: (gd: plotly.PlotlyHTMLElement, ev: MouseEvent) => {
+        const newLogMode = !this.chartSettings()?.[setting];
+        const button = ev.currentTarget as HTMLElement;
+        button.setAttribute('data-title', this.getLogButtonTitle(newLogMode, axis));
+        button.querySelector('path')?.setAttribute('d', getIconPath(newLogMode));
+        // A pinned range (e.g. carried into the maximized view) is in the old scale's units - drop it so plotly autoranges
+        const axisKey = setting === 'logX' ? 'xaxis' : 'yaxis';
+        if (this.originalChart.layout[axisKey]?.range) {
+          this.originalChart = {
+            ...this.originalChart,
+            layout: {...this.originalChart.layout, [axisKey]: {...this.originalChart.layout[axisKey], range: undefined, autorange: true}}
+          };
+        }
+        this.smooth$.next(this.smoothWeight);
+        this.chartSettings.update(settings => ({...settings, [setting]: newLogMode}));
+        this.chartPreferencesChanged.emit({[setting]: newLogMode});
+      }
+    };
   }
 
   private getAxisText(timeUnit: { time: number; str: string }) {
