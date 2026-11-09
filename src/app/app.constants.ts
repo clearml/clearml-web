@@ -17,7 +17,7 @@ export const BASE_REGEX = {
   SCHEME           : '^[hH][tT][tT][pP][sS]?:\\/\\/',
   FILE_SUFFIX      : '\\/\\S*[^\\/ ]+$',
   FOLDER           : '\\/\\S*[^\\/ ]',
-  S3_BUCKET_NAME   : '(?!(xn--|.+-s3alias$|.*\\.{2}.*))[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]',
+  S3_BUCKET_NAME   : '(?!(xn--|.+-s3alias$|.*\\.{2}.*))[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]',
   GS_BUCKET_NAME   : '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w',
   AZURE_BUCKET_NAME: '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w',
   AZURE_CONTAINER: '\\/[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]'
