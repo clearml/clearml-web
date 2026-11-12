@@ -209,7 +209,7 @@ export class BaseAdminService {
 
   signGoogleCloudUrl(url: string): string {
     let result = url.slice(5);
-    if (result.search(/[ !"#$&'()*+,;<=>?@\[\\\]^]/) > -1) {
+    if (result.search(/[ !"#$%&'()*+,;<=>?@\[\\\]^]/) > -1) {
       result = result.split('/').map(part => encodeURIComponent(part)).join('/');
     }
     return 'https://storage.cloud.google.com/' + result;
