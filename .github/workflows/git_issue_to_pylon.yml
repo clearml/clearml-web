@@ -9,15 +9,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify Pylon API
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          REPO_NAME: ${{ github.event.repository.full_name }}
+          PYLON_API_KEY: ${{ secrets.PYLON_API_KEY }}
+          PYLON_ACCOUNT_ID: ${{ secrets.PYLON_ACCOUNT_ID }}
         run: |
+            payload=$(jq -n \
+              --arg title "$ISSUE_TITLE" \
+              --arg body "$ISSUE_BODY" \
+              --arg repo "$REPO_NAME" \
+              --arg author "$ISSUE_AUTHOR" \
+              --arg url "$ISSUE_URL" \
+              --arg account "$PYLON_ACCOUNT_ID" \
+              '{
+                title: $title,
+                body_html: ("<p><strong>Repo:</strong> " + $repo + "</p><p><strong>Opened by:</strong> " + $author + "</p><p>" + $body + "</p><br/><a href=\"" + $url + "\">View on GitHub</a>"),
+                account_id: $account,
+                tags: ["git issue"],
+                destination_metadata: { "destination": "internal" }
+              }')
             curl --request POST \
               --url https://api.usepylon.com/issues \
-              --header 'Authorization: Bearer ${{ secrets.PYLON_API_KEY }}' \
+              --header "Authorization: Bearer $PYLON_API_KEY" \
               --header 'Content-Type: application/json' \
-              --data '{
-                "title": "${{ github.event.issue.title }}",
-                "body_html": "<p><strong>Repo:</strong> ${{ github.event.repository.full_name }}</p><p><strong>Opened by:</strong> ${{ github.event.issue.user.login }}</p><p>${{ github.event.issue.body }}</p><br/><a href=\"${{ github.event.issue.html_url }}\">View on GitHub</a>",
-                "account_id": "${{ secrets.PYLON_ACCOUNT_ID }}",
-                "tags": ["git issue"],
-                "destination_metadata": { "destination": "internal" }
-              }'
+              --data "$payload"
